@@ -16,7 +16,7 @@ var createView = function(ui_state) {
   }
 }
 
-class BaseComponet extends Component {
+class BaseComponent extends Component {
   
   componentWillMount() {
     this.props.presenter.update = () => {
@@ -68,7 +68,7 @@ const RootViewStyle = {
   }
 };
 
-class RootView extends BaseComponet {
+class RootView extends BaseComponent {
 
   handleModule1Click = this.createListener("onModule1Clicked");
   handleModule2Click = this.createListener("onModule2Clicked");
@@ -100,7 +100,7 @@ ViewFactoryMap[ViewIds.root] = (ui_state) => {
 
 ///
 
-class Module1View extends BaseComponet {
+class Module1View extends BaseComponent {
 
   render() {
     var detailView = createView(this.props.presenter.ui_state.detail);
@@ -118,7 +118,7 @@ ViewFactoryMap[ViewIds.module1] = (ui_state) => {
     return (<Module1View presenter={ui_state.presenter} />);
 };
 
-class Module1DetailView extends BaseComponet {
+class Module1DetailView extends BaseComponent {
 
   render() {
     return (
@@ -135,7 +135,7 @@ ViewFactoryMap[ViewIds.module1Detail] = (ui_state) => {
 
 ///
 
-class Module2View extends BaseComponet {
+class Module2View extends BaseComponent {
 
   render() {
     var detailView = createView(this.props.presenter.ui_state.detail);
@@ -153,7 +153,7 @@ ViewFactoryMap[ViewIds.module2] = (ui_state) => {
     return (<Module2View presenter={ui_state.presenter} />);
 };
 
-class Module2DetailView extends BaseComponet {
+class Module2DetailView extends BaseComponent {
 
   render() {
     return (
