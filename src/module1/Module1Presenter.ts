@@ -23,6 +23,11 @@ export class Module1Presenter extends WFBasePresenter<ApplicationPresenter, Modu
         }
     }
 
+    public override release() {
+        LOG.info('Finalized')
+        super.release()
+    }
+
     public override applyParams(target: IPlace, params: IParams, initializing: boolean) {
         this.state.detail = undefined
 

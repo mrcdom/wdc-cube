@@ -16,6 +16,11 @@ export class Module1DetailPresenter extends WFBasePresenter<ApplicationPresenter
         super(app, place, ViewIds.module1Detail)
     }
 
+    public override release() {
+        LOG.info('Finalized')
+        super.release()
+    }
+
     public override applyParams(target: IPlace, params: IParams, initializing: boolean) {
         if (initializing) {
             LOG.info('Initialized')

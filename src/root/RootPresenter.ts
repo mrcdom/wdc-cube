@@ -23,6 +23,11 @@ export class RootPresenter extends WFBasePresenter<ApplicationPresenter, RootVie
         }
     }
 
+    public override release() {
+        LOG.info('Finalized')
+        super.release()
+    }
+
     public override applyParams(target: IPlace, params: IParams, initializing: boolean) {
         if (initializing) {
             LOG.info('Initialized')

@@ -1,9 +1,12 @@
+import Logger from './utils/logger'
 import { WFApplication, IPlace } from './webflow'
 import { RootPresenter } from './root/RootPresenter'
 import { Module1Presenter } from './module1/Module1Presenter'
 import { Module1DetailPresenter } from './module1/Module1DetailPresenter'
 import { Module2Presenter } from './module2/Module2Presenter'
 import { Module2DetailPresenter } from './module2/Module2DetailPresenter'
+
+const LOG = Logger.get('ApplicationPresenter')
 
 export class Router {
 
@@ -35,6 +38,11 @@ export class ApplicationPresenter extends WFApplication {
 
         this.go(this.router.root, {})
             .finally(() => this.update())
+    }
+
+    public override release() {
+        LOG.info('Finalized')
+        super.release()
     }
 
 }
