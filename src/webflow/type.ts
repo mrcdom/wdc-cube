@@ -1,5 +1,4 @@
 export interface IPresenter {
-    get state(): IViewState
     update: () => void
     release(): void
 }
@@ -8,6 +7,7 @@ export interface IPresenter {
 export type IParams = Record<string, any>
 
 export interface IBasePresenter extends IPresenter {
+    get state(): IViewState
     release(): void
 
     // eslint-disable-next-line no-unused-vars

@@ -1,19 +1,16 @@
 import Logger from '../utils/logger'
-import { IBasePresenter, IPresenter, IPlace, IParams, IViewState } from './type'
+import { IBasePresenter, IPresenter, IPlace, IParams } from './type'
 import { nullFunc } from './util'
 
 const LOG = Logger.get('WFApplication')
 
 export class WFApplication implements IPresenter {
 
-    public readonly state: IViewState
-
     public update: () => void
 
     public presenters: Record<string, IBasePresenter> = {}
 
     public constructor() {
-        this.state = {vid: 'app', presenter: this}
         this.update = nullFunc
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
