@@ -1,0 +1,23 @@
+.View {
+    display: flex;
+    flex-Direction: column;
+    margin: 10px;
+}
+
+.Title {
+    padding: 10px;
+}
+
+.Bar {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 30px;
+}
+
+.BtnFirst {
+    margin-left: 0;
+}
+
+.BtnOthers {
+    margin-left: 10px;
+}
