@@ -1,41 +1,46 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import {util, ViewIds} from './Common';
-import {router, app} from './Presentation';
+import React from 'react'
+import { PropTypes } from 'prop-types'
+import logo from './logo.svg'
+import './App.css'
+import {util, ViewIds} from './Common'
+import {router, app} from './Presentation'
 
 /// View Utils
 
-var ViewFactoryMap = {};
+var ViewFactoryMap = {}
 
 var createView = function(ui_state) {
   if(ui_state) {
-    return ViewFactoryMap[ui_state.vid](ui_state);
+    return ViewFactoryMap[ui_state.vid](ui_state)
   } else {
-    return null;
+    return null
   }
 }
 
-class BaseComponent extends Component {
+class BaseComponent extends React.Component {
+
+  static propTypes = {
+    presenter: PropTypes.object
+  }
   
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.presenter.update = () => {
-      this.setState(this.props.presenter.ui_state);
-    };
-    this.props.presenter.update();
+      this.setState(this.props.presenter.ui_state)
+    }
+    this.props.presenter.update()
   }
 
   componentWillUnmount() {
-    this.props.presenter.update = util.nullFunc;
+    this.props.presenter.update = util.nullFunc
   }
 
   createListener(methodName) {
     var presenter = this.props.presenter,
-          method = presenter[methodName];
+          method = presenter[methodName]
     return () => {
-      presenter.onChanged();
-      method.apply(presenter, arguments);
-      this.forceUpdate();
+      presenter.onChanged()
+      method.apply(presenter, arguments)
+      this.forceUpdate()
     }
   }
 
@@ -45,8 +50,8 @@ class BaseComponent extends Component {
 
 const RootViewStyle = {
   self: {
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
     margin: 10
   },
 
@@ -55,8 +60,8 @@ const RootViewStyle = {
   },
 
   bar: {
-    display: "flex",
-    flexDirection: "row",
+    display: 'flex',
+    flexDirection: 'row',
     marginBottom: 30
   },
 
@@ -66,17 +71,17 @@ const RootViewStyle = {
   btnOthers: {
     marginLeft: 10
   }
-};
+}
 
 class RootView extends BaseComponent {
 
-  handleModule1Click = this.createListener("onModule1Clicked");
-  handleModule2Click = this.createListener("onModule2Clicked");
-  handleModule1DetailClick = this.createListener("onModule1DetailClicked");
-  handleModule2DetailClick = this.createListener("onModule2DetailClicked");
+  handleModule1Click = this.createListener('onModule1Clicked')
+  handleModule2Click = this.createListener('onModule2Clicked')
+  handleModule1DetailClick = this.createListener('onModule1DetailClicked')
+  handleModule2DetailClick = this.createListener('onModule2DetailClicked')
 
   render() {
-    var moduleView = createView(this.props.presenter.ui_state.module);
+    var moduleView = createView(this.props.presenter.ui_state.module)
 
     return (
       <div style={RootViewStyle.self}>
@@ -89,97 +94,97 @@ class RootView extends BaseComponent {
           </div>
           {moduleView}
       </div>
-    );
+    )
   }
 
 }
 
 ViewFactoryMap[ViewIds.root] = (ui_state) => {
-    return (<RootView presenter={ui_state.presenter} />);
-};
+    return (<RootView presenter={ui_state.presenter} />)
+}
 
 ///
 
 class Module1View extends BaseComponent {
 
   render() {
-    var detailView = createView(this.props.presenter.ui_state.detail);
+    var detailView = createView(this.props.presenter.ui_state.detail)
 
     return (
-      <div style={{backgroundColor: "red", padding: 20}}>
+      <div style={{backgroundColor: 'red', padding: 20}}>
         {detailView}
       </div>
-    );
+    )
   }
 
 }
 
 ViewFactoryMap[ViewIds.module1] = (ui_state) => {
-    return (<Module1View presenter={ui_state.presenter} />);
-};
+    return (<Module1View presenter={ui_state.presenter} />)
+}
 
 class Module1DetailView extends BaseComponent {
 
   render() {
     return (
-      <div style={{backgroundColor: "yellow", padding: 20}}>
+      <div style={{backgroundColor: 'yellow', padding: 20}}>
       </div>
-    );
+    )
   }
 
 }
 
 ViewFactoryMap[ViewIds.module1Detail] = (ui_state) => {
-    return (<Module1DetailView presenter={ui_state.presenter} />);
-};
+    return (<Module1DetailView presenter={ui_state.presenter} />)
+}
 
 ///
 
 class Module2View extends BaseComponent {
 
   render() {
-    var detailView = createView(this.props.presenter.ui_state.detail);
+    var detailView = createView(this.props.presenter.ui_state.detail)
 
     return (
-      <div style={{backgroundColor: "blue", padding: 20}}>
+      <div style={{backgroundColor: 'blue', padding: 20}}>
         {detailView}
       </div>
-    );
+    )
   }
 
 }
 
 ViewFactoryMap[ViewIds.module2] = (ui_state) => {
-    return (<Module2View presenter={ui_state.presenter} />);
-};
+    return (<Module2View presenter={ui_state.presenter} />)
+}
 
 class Module2DetailView extends BaseComponent {
 
   render() {
     return (
-      <div style={{backgroundColor: "brown", padding: 20}}>
+      <div style={{backgroundColor: 'brown', padding: 20}}>
       </div>
-    );
+    )
   }
 
 }
 
 ViewFactoryMap[ViewIds.module2Detail] = (ui_state) => {
-    return (<Module2DetailView presenter={ui_state.presenter} />);
-};
+    return (<Module2DetailView presenter={ui_state.presenter} />)
+}
 
 // App
 
-class App extends Component {
+class App extends React.Component {
 
   constructor() {
-    super();
-    app.go(router.root, {});
-    this.rootPresenter = app.presenters.root;
+    super()
+    app.go(router.root, {})
+    this.rootPresenter = app.presenters.root
   }
 
   render() {
-    var rootView = createView(this.rootPresenter.ui_state);
+    var rootView = createView(this.rootPresenter.ui_state)
 
     return (
       <div className="App">
@@ -189,8 +194,8 @@ class App extends Component {
         </div>
         {rootView}
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App
