@@ -37,6 +37,16 @@ export class RootPresenter extends WFBasePresenter<ApplicationPresenter, RootVie
         return true
     }
 
+    public async oRootClicked() {
+        try {
+            await this.app.go(this.app.router.root, {})
+        } catch (caught) {
+            LOG.error('onRootClicked', caught)
+        } finally {
+            this.update()
+        }
+    }
+
     public async onModule1Clicked() {
         try {
             await this.app.go(this.app.router.module1, {})
