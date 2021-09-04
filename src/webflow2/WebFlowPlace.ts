@@ -3,6 +3,11 @@ import { StandardCharsets } from './StandardCharsets'
 import { QueryStringParser } from './QueryStringParser'
 import { QueryStringBuilder } from './QueryStringBuilder'
 import { WebFlowStep } from './WebFlowStep'
+import type { WebFlowScopeSlot } from './WebFlowScopeSlot'
+
+const NOOP_FN = () => {
+	// NOOP
+}
 
 export class WebFlowPlace extends Object {
 
@@ -27,14 +32,21 @@ export class WebFlowPlace extends Object {
 
 	private parameters: Map<string, unknown>
 
+	public readonly attributes: Map<string, unknown>
+
 	public constructor(step: WebFlowStep) {
 		super()
 		this.step = step
 		this.parameters = new Map()
+		this.attributes = new Map()
 	}
 
 	public getStep(): WebFlowStep {
 		return this.step
+	}
+
+	public setStep(step: WebFlowStep) {
+		this.step = step
 	}
 
 	public getParameterRawValue(name: string): unknown {
@@ -71,10 +83,10 @@ export class WebFlowPlace extends Object {
 	 *            a String specifying the name of the parameter
 	 * @return a Object representing the value of the parameter
 	 */
-	public getParameterValues(name: string): Array<unknown> | undefined {
+	public getParameterValues(name: string): Array<unknown> {
 		const value = this.parameters.get(name)
 		if (value === undefined || value === null) {
-			return undefined
+			return []
 		}
 
 		if (CastUtils.isArray(value)) {
@@ -102,12 +114,12 @@ export class WebFlowPlace extends Object {
 	 *            a default value to be returned case current value is null
 	 * @return a String representing the single value of the parameter
 	 */
-	public getParameterAsString(name: string, defaultValue?: string): string | undefined {
+	public getParameterAsString(name: string, defaultValue?: string): string {
 		const value = this.parameters.get(name)
 		if (CastUtils.isArray(value)) {
-			return CastUtils.toString((value as Array<unknown>)[0], defaultValue)
+			return CastUtils.toString((value as Array<unknown>)[0], defaultValue) as string
 		} else {
-			return CastUtils.toString(value, defaultValue)
+			return CastUtils.toString(value, defaultValue) as string
 		}
 	}
 
@@ -129,12 +141,12 @@ export class WebFlowPlace extends Object {
 	 *            a default value to be returned case current value is null or a invalid conversion
 	 * @return a String representing the single value of the parameter
 	 */
-	public getParameterAsDouble(name: string, defaultValue: number): number | undefined {
+	public getParameterAsNumber(name: string, defaultValue: number): number {
 		const value = this.parameters.get(name)
 		if (CastUtils.isArray(value)) {
-			return CastUtils.toNumber((value as Array<unknown>)[0], defaultValue)
+			return CastUtils.toNumber((value as Array<unknown>)[0], defaultValue) as number
 		} else {
-			return CastUtils.toNumber(value, defaultValue)
+			return CastUtils.toNumber(value, defaultValue) as number
 		}
 	}
 
@@ -156,12 +168,12 @@ export class WebFlowPlace extends Object {
 	 *            a default value to be returned case current value is null or a invalid conversion
 	 * @return a String representing the single value of the parameter
 	 */
-	public getParameterAsBoolean(name: string, defaultValue: boolean): boolean | undefined {
+	public getParameterAsBoolean(name: string, defaultValue: boolean): boolean {
 		const value = this.parameters.get(name)
 		if (CastUtils.isArray(value)) {
-			return CastUtils.toBoolean((value as Array<unknown>)[0], defaultValue)
+			return CastUtils.toBoolean((value as Array<unknown>)[0], defaultValue) as boolean
 		} else {
-			return CastUtils.toBoolean(value, defaultValue)
+			return CastUtils.toBoolean(value, defaultValue) as boolean
 		}
 	}
 
@@ -202,4 +214,16 @@ export class WebFlowPlace extends Object {
 		}
 	}
 
+	public setScopeSlot(slotId: string, slot: WebFlowScopeSlot) {
+		this.attributes.set(slotId, slot)
+	}
+
+	public getScopeSlot(slotId: string): WebFlowScopeSlot {
+		const slot = this.attributes.get(slotId)
+		if (slot) {
+			return slot as WebFlowScopeSlot
+		} else {
+			return NOOP_FN
+		}
+	}
 }
