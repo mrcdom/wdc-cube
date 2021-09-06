@@ -23,7 +23,7 @@ export class WebFlowPresenter<Application extends WebFlowApplication, Scope exte
         return true
     }
 
-    public commitComputedState(): void {
+    public commitComputedFields(): void {
         // NOOP
     }
 

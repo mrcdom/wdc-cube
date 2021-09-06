@@ -2,8 +2,10 @@
 
 export class WebFlowHistoryManager {
 
-    public update(token: string): void {
-        // NOOP : To be implemented at view technology level
+    public static NOOP = new WebFlowHistoryManager()
+
+    public update(): void {
+        // NOOP
     }
 
 }

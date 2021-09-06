@@ -74,10 +74,17 @@ const ATTR_IDs = {
 
 class TestHistoryManager extends WebFlowHistoryManager {
 
+    public app: TestApplication
+
     public token = ''
 
-    public override update(token: string) {
-        this.token = token
+    constructor(app: TestApplication) {
+        super()
+        this.app = app;
+    }
+
+    public override update() {
+        this.token = this.app.newPlace().toString()
     }
 
 }
@@ -104,7 +111,76 @@ class TestApplication extends WebFlowApplication {
     }
 
     constructor() {
-        super(Places.ROOT, new TestHistoryManager())
+        super()
+        this._historyManager = new TestHistoryManager(this)
+        this.catalogGoParser(Places.LOGIN, this.goLogin.bind(this))
+        this.catalogGoParser(Places.RESTRICTED, this.goRestricted.bind(this))
+        this.catalogGoParser(Places.CART, this.goCart.bind(this))
+        this.catalogGoParser(Places.PRODUCT, this.goProduct.bind(this))
+        this.catalogGoParser(Places.RECEIPT, this.goReceipt.bind(this))
+    }
+
+    async goLogin(place?: WebFlowPlace) {
+        const ctx = new NavigationContext<TestApplication>(this, place)
+        try {
+            await ctx.step(Places.ROOT, false, RootPresenter)
+            await ctx.step(Places.LOGIN, true, LoginPresenter)
+            ctx.commit()
+        } catch (caught) {
+            ctx.rollback()
+            throw caught
+        }
+    }
+
+    async goRestricted(place?: WebFlowPlace) {
+        const ctx = new NavigationContext<TestApplication>(this, place)
+        try {
+            await ctx.step(Places.ROOT, false, RootPresenter)
+            await ctx.step(Places.RESTRICTED, true, RestrictedPresenter)
+            ctx.commit()
+        } catch (caught) {
+            ctx.rollback()
+            throw caught
+        }
+    }
+
+    async goCart(place?: WebFlowPlace) {
+        const ctx = new NavigationContext<TestApplication>(this, place)
+        try {
+            await ctx.step(Places.ROOT, false, RootPresenter)
+            await ctx.step(Places.RESTRICTED, false, RestrictedPresenter)
+            await ctx.step(Places.CART, true, CartPresenter)
+            ctx.commit()
+        } catch (caught) {
+            ctx.rollback()
+            throw caught
+        }
+    }
+
+    async goProduct(place?: WebFlowPlace) {
+        const ctx = new NavigationContext<TestApplication>(this, place)
+        try {
+            await ctx.step(Places.ROOT, false, RootPresenter)
+            await ctx.step(Places.RESTRICTED, false, RestrictedPresenter)
+            await ctx.step(Places.PRODUCT, true, ProductPresenter)
+            ctx.commit()
+        } catch (caught) {
+            ctx.rollback()
+            throw caught
+        }
+    }
+
+    async goReceipt(place?: WebFlowPlace) {
+        const ctx = new NavigationContext<TestApplication>(this, place)
+        try {
+            await ctx.step(Places.ROOT, false, RootPresenter)
+            await ctx.step(Places.RESTRICTED, false, RestrictedPresenter)
+            await ctx.step(Places.RECEIPT, true, ReceiptPresenter)
+            ctx.commit()
+        } catch (caught) {
+            ctx.rollback()
+            throw caught
+        }
     }
 
 }
@@ -135,7 +211,7 @@ class RootPresenter extends WebFlowPresenter<TestApplication, RootScope> {
     }
 
     public override async applyParameters(place: WebFlowPlace, initialization: boolean, deepest: boolean): Promise<boolean> {
-        const urlSessionId = place.getParameterAsNumber(PARAM_IDs.SESSION_ID, this.app.session.id)
+        const urlSessionId = place.getParameterAsNumberOrDefault(PARAM_IDs.SESSION_ID, this.app.session.id)
         if (initialization) {
             this.initialized = true
             this.app.session = await echoService({
@@ -155,7 +231,7 @@ class RootPresenter extends WebFlowPresenter<TestApplication, RootScope> {
         return true
     }
 
-    public override commitComputedState(): void {
+    public override commitComputedFields(): void {
         this.scope.computedValue = this.app.session.id * 2
     }
 
@@ -189,8 +265,13 @@ class LoginPresenter extends WebFlowPresenter<TestApplication, LoginScope> {
         this.scope.onEnter = this.onEnter.bind(this)
     }
 
+    public override release() {
+        this.initialized = false
+        super.release()
+    }
+
     public override async applyParameters(place: WebFlowPlace, initialization: boolean, deepest: boolean): Promise<boolean> {
-        const urlUserId = place.getParameterAsNumber(PARAM_IDs.USER_ID, -1);
+        const urlUserId = place.getParameterAsNumberOrDefault(PARAM_IDs.USER_ID, -1);
 
         if (initialization) {
             this.initialized = true
@@ -209,7 +290,7 @@ class LoginPresenter extends WebFlowPresenter<TestApplication, LoginScope> {
         return true
     }
 
-    public override commitComputedState(): void {
+    public override commitComputedFields(): void {
         // NOOP
     }
 
@@ -229,8 +310,18 @@ class LoginPresenter extends WebFlowPresenter<TestApplication, LoginScope> {
 
     private async onEnter() {
         try {
-            await Routes.restricted(this.app)
             this.scope.message = undefined
+
+            if (this.scope.userName === 'test' && this.scope.password === 'test') {
+                // simulated session
+                this.app.session = await echoService({
+                    id: 1,
+                    active: true
+                })
+                await this.app.goRestricted()
+            } else {
+                this.scope.message = 'User or password invalid'
+            }
         } catch (caught) {
             this.scope.message = caught.message
         } finally {
@@ -249,6 +340,7 @@ class RestrictedScope extends WebFlowScope {
     onCart: (cartId: number) => Promise<void> = NO_ACTION
     onProduct: (productId: number) => Promise<void> = NO_ACTION
     onReceipt: (receiptId: number) => Promise<void> = NO_ACTION
+    onLogout: () => Promise<void> = NO_ACTION
 }
 
 class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedScope> {
@@ -266,9 +358,21 @@ class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedSc
         this.scope.onCart = this.onCart.bind(this)
         this.scope.onProduct = this.onProduct.bind(this)
         this.scope.onReceipt = this.onReceipt.bind(this)
+        this.scope.onLogout = this.onLogout.bind(this)
+    }
+
+    public override release() {
+        this.initialized = false
+        super.release()
     }
 
     public override async applyParameters(place: WebFlowPlace, initialization: boolean, deepest: boolean): Promise<boolean> {
+        // Safe guard agains getting into a restricted area without a session
+        if (this.app.session.id === 0) {
+            await this.app.goLogin()
+            return false
+        }
+
         if (initialization) {
             this.initialized = true
             this.parentSlot = place.getScopeSlot(ATTR_IDs.PARENT)
@@ -302,7 +406,7 @@ class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedSc
         try {
             const place = this.app.newPlace()
             place.setParameter(PARAM_IDs.CART_ID, cartId)
-            await Routes.cart(this.app, place)
+            await this.app.goCart(place)
         } catch (caught) {
             this.scope.message = caught.message
         } finally {
@@ -314,7 +418,7 @@ class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedSc
         try {
             const place = this.app.newPlace()
             place.setParameter(PARAM_IDs.PRODUCT_ID, productId)
-            await Routes.product(this.app, place)
+            await this.app.goProduct(place)
         } catch (caught) {
             this.scope.message = caught.message
         } finally {
@@ -326,7 +430,19 @@ class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedSc
         try {
             const place = this.app.newPlace()
             place.setParameter(PARAM_IDs.RECEIPT_ID, receiptId)
-            await Routes.cart(this.app, place)
+            await this.app.goCart(place)
+        } catch (caught) {
+            this.scope.message = caught.message
+        } finally {
+            this.scope.update()
+        }
+    }
+
+    private async onLogout() {
+        try {
+            this.app.session.id = 0
+            this.app.session.active = false
+            await this.app.goLogin()
         } catch (caught) {
             this.scope.message = caught.message
         } finally {
@@ -347,26 +463,27 @@ class CartPresenter extends WebFlowPresenter<TestApplication, CartScope> {
     private parentSlot: WebFlowScopeSlot
 
     public initialized = false
-    public cartId = -1
+    public cartId?: number
 
-    constructor(app: TestApplication) {
+    public constructor(app: TestApplication) {
         super(app, new CartScope('v-cart'))
         this.parentSlot = NOOP_FN
     }
 
+    public override release() {
+        this.initialized = false
+        super.release()
+    }
+
     public override async applyParameters(place: WebFlowPlace, initialization: boolean, deepest: boolean): Promise<boolean> {
-        const urlCartId = place.getParameterAsNumber(PARAM_IDs.CART_ID, this.cartId)
+        const urlCartId = place.getParameterAsNumber(PARAM_IDs.CART_ID)
 
         if (initialization) {
             this.initialized = true
             this.parentSlot = place.getScopeSlot(ATTR_IDs.PARENT)
-            // Simulate a remote service access
-            await echoService(urlCartId)
-            this.cartId = urlCartId
-        } else if (this.cartId != urlCartId) {
-            // Simulate a remote service access
-            await echoService(urlCartId)
-            this.cartId = urlCartId
+            await this.loadData(urlCartId)
+        } else if (urlCartId && this.cartId != urlCartId) {
+            await this.loadData(urlCartId)
         }
 
         this.parentSlot(this.scope)
@@ -375,9 +492,19 @@ class CartPresenter extends WebFlowPresenter<TestApplication, CartScope> {
     }
 
     public override publishParameters(place: WebFlowPlace): void {
-        if (this.cartId !== -1) {
-            place.setParameter(PARAM_IDs.CART_ID, this.cartId)
+        place.setParameter(PARAM_IDs.CART_ID, this.cartId)
+    }
+
+    private async loadData(cartId?: number) {
+        if (!cartId) {
+            throw new Error('Missing cartId')
         }
+
+        const data = await echoService({
+            cartId: cartId
+        })
+
+        this.cartId = data.cartId
     }
 
 }
@@ -385,7 +512,7 @@ class CartPresenter extends WebFlowPresenter<TestApplication, CartScope> {
 // :: Product
 
 class ProductScope extends WebFlowScope {
-
+    name?: string
 }
 
 class ProductPresenter extends WebFlowPresenter<TestApplication, ProductScope> {
@@ -393,17 +520,27 @@ class ProductPresenter extends WebFlowPresenter<TestApplication, ProductScope> {
     private parentSlot: WebFlowScopeSlot
 
     public deepest = false
-    public initialization = false
+    public initialized = false
+    public productId?: number
 
     constructor(app: TestApplication) {
         super(app, new ProductScope('v-product'))
         this.parentSlot = NOOP_FN
     }
 
+    public override release() {
+        this.initialized = false
+        super.release()
+    }
+
     public override async applyParameters(place: WebFlowPlace, initialization: boolean, deepest: boolean): Promise<boolean> {
+        const uriProductId = place.getParameterAsNumber(PARAM_IDs.PRODUCT_ID) || this.productId
         if (initialization) {
-            this.initialization = true
+            this.initialized = true
             this.parentSlot = place.getScopeSlot(ATTR_IDs.PARENT)
+            await this.loadData(uriProductId)
+        } else if (uriProductId && uriProductId != this.productId) {
+            await this.loadData(uriProductId)
         }
 
         this.deepest = deepest
@@ -413,12 +550,25 @@ class ProductPresenter extends WebFlowPresenter<TestApplication, ProductScope> {
         return true
     }
 
-    public override commitComputedState(): void {
+    public override commitComputedFields(): void {
         // NOOP
     }
 
     public override publishParameters(place: WebFlowPlace): void {
-        // NOOP
+        place.setParameter(PARAM_IDs.PRODUCT_ID, this.productId)
+    }
+
+    private async loadData(productId?: number) {
+        if (!productId) {
+            throw new Error('Missing productId')
+        }
+
+        const data = await echoService({
+            id: productId,
+            name: 'product-' + productId
+        })
+        this.productId = data.id
+        this.scope.name = data.name
     }
 
 }
@@ -434,16 +584,22 @@ class ReceiptPresenter extends WebFlowPresenter<TestApplication, ReceiptScope> {
     private parentSlot: WebFlowScopeSlot
 
     public deepest = false
-    public initialization = false
+    public initialized = false
 
-    constructor(app: TestApplication) {
+    public constructor(app: TestApplication) {
         super(app, new ReceiptScope('v-receipt'))
         this.parentSlot = NOOP_FN
     }
 
+    public override release() {
+        this.initialized = false
+        super.release()
+    }
+
     public override async applyParameters(place: WebFlowPlace, initialization: boolean, deepest: boolean): Promise<boolean> {
+
         if (initialization) {
-            this.initialization = true
+            this.initialized = true
             this.parentSlot = place.getScopeSlot(ATTR_IDs.PARENT)
         }
 
@@ -454,7 +610,7 @@ class ReceiptPresenter extends WebFlowPresenter<TestApplication, ReceiptScope> {
         return true
     }
 
-    public override commitComputedState(): void {
+    public override commitComputedFields(): void {
         // NOOP
     }
 
@@ -464,87 +620,20 @@ class ReceiptPresenter extends WebFlowPresenter<TestApplication, ReceiptScope> {
 
 }
 
-// :: Routes
-
-const Routes = {
-
-    async login(app: TestApplication, place?: WebFlowPlace) {
-        const ctx = new NavigationContext(app, place ?? app.newPlace())
-        try {
-            await ctx.step(Places.ROOT, false, RootPresenter)
-            await ctx.step(Places.LOGIN, true, LoginPresenter)
-            ctx.commit()
-        } catch (caught) {
-            ctx.rollback()
-            throw caught
-        }
-    },
-
-    async restricted(app: TestApplication, place?: WebFlowPlace) {
-        const ctx = new NavigationContext(app, place ?? app.newPlace())
-        try {
-            await ctx.step(Places.ROOT, false, RootPresenter)
-            await ctx.step(Places.RESTRICTED, true, RestrictedPresenter)
-            ctx.commit()
-        } catch (caught) {
-            ctx.rollback()
-            throw caught
-        }
-    },
-
-    async cart(app: TestApplication, place: WebFlowPlace) {
-        const ctx = new NavigationContext(app, place)
-        try {
-            await ctx.step(Places.ROOT, false, RootPresenter)
-            await ctx.step(Places.RESTRICTED, false, RestrictedPresenter)
-            await ctx.step(Places.CART, true, CartPresenter)
-            ctx.commit()
-        } catch (caught) {
-            ctx.rollback()
-            throw caught
-        }
-    },
-
-    async product(app: TestApplication, place: WebFlowPlace) {
-        const ctx = new NavigationContext(app, place)
-        try {
-            await ctx.step(Places.ROOT, false, RootPresenter)
-            await ctx.step(Places.RESTRICTED, false, RestrictedPresenter)
-            await ctx.step(Places.PRODUCT, true, CartPresenter)
-            ctx.commit()
-        } catch (caught) {
-            ctx.rollback()
-            throw caught
-        }
-    },
-
-    async receipt(app: TestApplication, place: WebFlowPlace) {
-        const ctx = new NavigationContext(app, place)
-        try {
-            await ctx.step(Places.ROOT, false, RootPresenter)
-            await ctx.step(Places.RESTRICTED, false, RestrictedPresenter)
-            await ctx.step(Places.RECEIPT, true, ReceiptPresenter)
-            ctx.commit()
-        } catch (caught) {
-            ctx.rollback()
-            throw caught
-        }
-    }
-
-}
-
-it('Application :: login', async () => {
+it('Application :: Basic Navigation', async () => {
     const app = new TestApplication()
-    await Routes.login(app);
+    await app.goLogin();
 
+    // Check if presenter state was reached
     const root = app.getPresenter(Places.ROOT) as RootPresenter
     expect(root).toBeDefined()
 
-    expect(app.session.id).toEqual(0)
     expect(root.initialized).toEqual(true)
     expect(root.deepest).toEqual(false)
+    expect(app.session.id).toEqual(0)
 
-    const login = app.getPresenter(Places.LOGIN) as LoginPresenter
+    // Check if login state was reached
+    let login = app.getPresenter(Places.LOGIN) as LoginPresenter
     expect(login).toBeDefined()
     expect(login.initialized).toEqual(true)
     expect(login.deepest).toEqual(true)
@@ -552,4 +641,109 @@ it('Application :: login', async () => {
     expect(login.scope.password).toBeUndefined()
 
     expect(root.scope.body).toBe(login.scope)
+
+    // Check wrong password
+    login.scope.userName = 'test'
+    login.scope.password = 'wrong-password'
+    await login.scope.onEnter()
+    expect(login.scope.message).toBe('User or password invalid')
+    expect(root.scope.body).toBe(login.scope)
+    expect(app.session.id).toEqual(0)
+
+    // Check safe guard trying to access restricted area without a valid session
+    await app.goRestricted()
+    expect(app.getPresenter(Places.RESTRICTED)).toBeUndefined()
+    expect(app.getPresenter(Places.LOGIN)).toBeDefined()
+    expect(login).toBe(app.getPresenter(Places.LOGIN)) // Same instance
+    expect(login.initialized).toBe(true) // Which is still initialized
+    expect(root.scope.body).toBe(login.scope) // And properly bounded to parent scope
+
+    // Check a valid login password
+    login.scope.userName = 'test'
+    login.scope.password = 'test'
+    await login.scope.onEnter()
+    expect(login.initialized).toBe(false)
+    expect(app.session.id).toEqual(1)
+
+    const restricted = app.getPresenter(Places.RESTRICTED) as RestrictedPresenter
+    expect(restricted).toBeDefined()
+    expect(root.scope.body).toBe(restricted.scope)
+    expect(login.initialized).toEqual(false)
+
+    // Check computed value
+    expect(2).toEqual(root.scope.computedValue)
+
+    // Check logout
+    await restricted.scope.onLogout()
+    expect(0).toEqual(app.session.id)
+    expect(restricted.initialized).toEqual(false)
+    login = app.getPresenter(Places.LOGIN) as LoginPresenter
+    expect(login.initialized).toEqual(true)
+
+    // Check computed value
+    expect(0).toEqual(root.scope.computedValue)
+})
+
+it('Application :: Token Accuracity', async () => {
+    const app = new TestApplication()
+    const history = app.historyManager as TestHistoryManager
+
+    app.session.id = 1
+    app.session.active = true
+
+    await app.goRestricted()
+    const restricted = app.getPresenter(Places.RESTRICTED) as RestrictedPresenter
+    expect(restricted.initialized).toEqual(true)
+    expect('restricted?s=1').toEqual(history.token)
+
+    const productPlace = app.newPlace()
+    productPlace.setParameter(PARAM_IDs.PRODUCT_ID, 9999)
+    await app.goProduct(productPlace)
+    const product = app.getPresenter(Places.PRODUCT) as ProductPresenter
+    expect(product).toBeDefined()
+    expect(product.initialized).toEqual(true)
+    expect(9999).toEqual(product.productId)
+    expect('product-' + 9999).toEqual(product.scope.name)
+    expect('product?s=1&p=9999').toEqual(history.token)
+
+    const cartPlace = app.newPlace()
+    cartPlace.setParameter(PARAM_IDs.CART_ID, 1234)
+    await app.goCart(cartPlace)
+    expect(product.initialized).toEqual(false)
+    const cart = app.getPresenter(Places.CART) as CartPresenter
+    expect(cart.initialized).toEqual(true)
+    expect(1234).toEqual(cart.cartId)
+    expect('cart?s=1&c=1234').toEqual(history.token)
+
+    await app.goRestricted()
+    expect(restricted.initialized).toEqual(true)
+    expect(cart.initialized).toEqual(false)
+    expect(product.initialized).toEqual(false)
+});
+
+it('Application :: token Navigation', async () => {
+    const app = new TestApplication()
+    const history = app.historyManager as TestHistoryManager
+
+    app.session.id = 1
+    app.session.active = true
+
+    await app.go('cart?s=1&c=1234')
+    const cart = app.getPresenter(Places.CART) as CartPresenter
+    expect(cart.initialized).toEqual(true)
+    expect(1234).toEqual(cart.cartId)
+    expect('cart?s=1&c=1234').toEqual(history.token)
+
+    await app.go('product?s=1&p=9999')
+    const product = app.getPresenter(Places.PRODUCT) as ProductPresenter
+    expect(product).toBeDefined()
+    expect(product.initialized).toEqual(true)
+    expect(9999).toEqual(product.productId)
+    expect('product-' + 9999).toEqual(product.scope.name)
+    expect('product?s=1&p=9999').toEqual(history.token)
+
+    await app.go('restricted')
+    const restricted = app.getPresenter(Places.RESTRICTED) as RestrictedPresenter
+    expect(restricted.initialized).toEqual(true)
+    expect('restricted?s=1').toEqual(history.token)
 })

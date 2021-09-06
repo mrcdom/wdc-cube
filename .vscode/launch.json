@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "ts-node",
+            "name": "tests",
             "type": "node",
             "request": "launch",
             "args": [
