@@ -1,6 +1,7 @@
 import Logger from '../utils/logger'
-import { WebFlowStep } from './WebFlowStep'
+import { Comparators } from './Comparators'
 import { WebFlowPlace } from './WebFlowPlace'
+import { WebFlowURI } from './WebFlowURI'
 import { WebFlowPresenter } from './WebFlowPresenter'
 import { WebFlowHistoryManager } from './WebFlowHistoryManager'
 import type { WebFlowScope } from './WebFlowScope'
@@ -8,44 +9,32 @@ import { CastUtils } from './CastUtils'
 
 const LOG = Logger.get('WebFlowApplication')
 
-class Comparator {
-
-    public static naturalOrderForNumber(a: number, b: number): number {
-        return a - b
-    }
-
-    public static reverseOrderForNumber(a: number, b: number): number {
-        return b - a
-    }
-
-}
-
 type PresenterType = WebFlowPresenter<WebFlowApplication, WebFlowScope>
 type PresenterMapType = Map<number, PresenterType>
 type PresenterNode = {
-    step: WebFlowStep
+    place: WebFlowPlace
     instance: PresenterType
 }
 
-let CURRENT_NAVIGATION_CONTEXT: NavigationContext<WebFlowApplication> | undefined = undefined
+let CURRENT_NAVIGATION_CONTEXT: NavigationContext | undefined = undefined
 
-export class NavigationContext<A extends WebFlowApplication> {
+export class NavigationContext {
 
-    private app: A
+    private app: WebFlowApplication
 
     private curPresenterMap: PresenterMapType
     private newPresenterMap: PresenterMapType
-    private sourcePlace: WebFlowPlace
-    private targetPlace: WebFlowPlace
+    private sourceUri: WebFlowURI
+    private targetUri: WebFlowURI
     private overlappedLevel: number
     private path: PresenterNode[]
 
-    public constructor(app: A, targetPlace?: WebFlowPlace) {
+    public constructor(app: WebFlowApplication, targetUri: WebFlowURI) {
         this.app = app
-        this.targetPlace = targetPlace || app.newPlace()
+        this.targetUri = targetUri
 
         if (CURRENT_NAVIGATION_CONTEXT) {
-            this.sourcePlace = CURRENT_NAVIGATION_CONTEXT.sourcePlace
+            this.sourceUri = CURRENT_NAVIGATION_CONTEXT.sourceUri
             this.newPresenterMap = CURRENT_NAVIGATION_CONTEXT.newPresenterMap
             this.curPresenterMap = CURRENT_NAVIGATION_CONTEXT.curPresenterMap
             this.overlappedLevel = CURRENT_NAVIGATION_CONTEXT.overlappedLevel + 1
@@ -53,7 +42,7 @@ export class NavigationContext<A extends WebFlowApplication> {
             this.path.length = 0
         } else {
             this.overlappedLevel = 0
-            this.sourcePlace = app.newPlace()
+            this.sourceUri = app.newUri(app.lastPlace)
             this.path = []
             this.newPresenterMap = new Map()
             this.curPresenterMap = this.app.__exportPresenters()
@@ -62,29 +51,24 @@ export class NavigationContext<A extends WebFlowApplication> {
         CURRENT_NAVIGATION_CONTEXT = this
     }
 
-    public async step<P extends WebFlowPresenter<A, WebFlowScope>>
-        (
-            step: WebFlowStep,
-            deepest: boolean,
-            factory: new (app: A) => P
-        ) {
-        if (this.overlappedLevel !== (CURRENT_NAVIGATION_CONTEXT?.overlappedLevel ?? 0)) {
+    public async build(place: WebFlowPlace, deepest: boolean) {
+        // Only runs if this context is the last context
+        if (this !== CURRENT_NAVIGATION_CONTEXT) {
             return
         }
 
-        this.targetPlace.setStep(step)
         let result: boolean
 
-        const presenter = this.curPresenterMap.get(step.id)
+        const presenter = this.curPresenterMap.get(place.id)
         if (presenter) {
-            this.path.push({ step, instance: presenter })
-            this.newPresenterMap.set(step.id, presenter)
-            result = await presenter.applyParameters(this.targetPlace, false, deepest)
+            this.path.push({ place: place, instance: presenter })
+            this.newPresenterMap.set(place.id, presenter)
+            result = await presenter.applyParameters(this.targetUri, false, deepest)
         } else {
-            const presenter = new factory(this.app)
-            this.newPresenterMap.set(step.id, presenter)
-            this.path.push({ step, instance: presenter })
-            result = await presenter.applyParameters(this.targetPlace, true, deepest)
+            const presenter = place.factory(this.app)
+            this.newPresenterMap.set(place.id, presenter)
+            this.path.push({ place: place, instance: presenter })
+            result = await presenter.applyParameters(this.targetUri, true, deepest)
         }
 
         return result
@@ -101,7 +85,7 @@ export class NavigationContext<A extends WebFlowApplication> {
                 }
 
                 // Sort according to ID to preserve composition order
-                presenterIds.sort(Comparator.naturalOrderForNumber)
+                presenterIds.sort(Comparators.naturalOrderForNumber)
 
                 for (let i = 0, iLast = presenterIds.length - 1; i <= iLast; i++) {
                     const presenterId = presenterIds[i]
@@ -110,7 +94,7 @@ export class NavigationContext<A extends WebFlowApplication> {
 
                         const presenter = this.curPresenterMap.get(presenterId)
                         if (presenter != null) {
-                            presenter.applyParameters(this.sourcePlace, false, i == iLast)
+                            presenter.applyParameters(this.sourceUri, false, i == iLast)
                         } else {
                             LOG.warn(`Missing presenter for ID=${presenterId}`)
                         }
@@ -137,9 +121,9 @@ export class NavigationContext<A extends WebFlowApplication> {
                 const validPresenterMap = new Map() as PresenterMapType
                 // Only presenters of last valid path must be kept
                 for (const node of this.path) {
-                    const presenter = this.newPresenterMap.get(node.step.id)
+                    const presenter = this.newPresenterMap.get(node.place.id)
                     if (presenter) {
-                        validPresenterMap.set(node.step.id, presenter)
+                        validPresenterMap.set(node.place.id, presenter)
                     }
                 }
 
@@ -178,7 +162,7 @@ export class NavigationContext<A extends WebFlowApplication> {
         }
 
         // release on reverse order (deepest level first)
-        presenterIds.sort(Comparator.reverseOrderForNumber)
+        presenterIds.sort(Comparators.reverseOrderForNumber)
 
         for (const presenterId of presenterIds) {
             const presenter = presenterInstanceMap.get(presenterId)
@@ -197,7 +181,7 @@ export class NavigationContext<A extends WebFlowApplication> {
 
 export class WebFlowApplication {
 
-    protected goMap: Map<string, (place?: WebFlowPlace) => Promise<void>>
+    protected placeMap: Map<string, WebFlowPlace>
 
     protected presenterMap: PresenterMapType
 
@@ -207,11 +191,16 @@ export class WebFlowApplication {
 
     protected _historyManager: WebFlowHistoryManager
 
+    private placeProvider = (name: string) => {
+        const place = this.placeMap.get(name)
+        return place ?? WebFlowPlace.createUnbunded(name)
+    }
+
     public constructor() {
         this.path = []
         this._historyManager = WebFlowHistoryManager.NOOP
         this.presenterMap = new Map()
-        this.goMap = new Map()
+        this.placeMap = new Map()
     }
 
     public release(): void {
@@ -223,7 +212,7 @@ export class WebFlowApplication {
         }
 
         // Release must be made in reverse order
-        presenterIds.sort(Comparator.reverseOrderForNumber)
+        presenterIds.sort(Comparators.reverseOrderForNumber)
 
         // Release all presenters
         for (const presenterId of presenterIds) {
@@ -245,12 +234,12 @@ export class WebFlowApplication {
         return this._historyManager
     }
 
-    public get lastStep(): WebFlowStep {
+    public get lastPlace(): WebFlowPlace {
         if (this.path.length > 0) {
             const presenter = this.path[this.path.length - 1]
-            return presenter.step
+            return presenter.place
         } else {
-            return WebFlowStep.UNKNOWN
+            return WebFlowPlace.UNKNOWN
         }
     }
 
@@ -258,9 +247,9 @@ export class WebFlowApplication {
         return this._fragment
     }
 
-    public publishParameters(place: WebFlowPlace): void {
+    public publishParameters(uri: WebFlowURI): void {
         for (const presenter of this.presenterMap.values()) {
-            presenter.publishParameters(place)
+            presenter.publishParameters(uri)
         }
     }
 
@@ -274,10 +263,10 @@ export class WebFlowApplication {
         }
     }
 
-    public newPlace(step?: WebFlowStep): WebFlowPlace {
-        const place = new WebFlowPlace(step ?? this.lastStep)
-        this.publishParameters(place)
-        return place
+    public newUri(place: WebFlowPlace): WebFlowURI {
+        const uri = new WebFlowURI(place)
+        this.publishParameters(uri)
+        return uri
     }
 
     public updateHistory(): void {
@@ -288,7 +277,7 @@ export class WebFlowApplication {
         this.presenterMap.clear()
         this.path = path
         for (const node of path) {
-            this.presenterMap.set(node.step.id, node.instance)
+            this.presenterMap.set(node.place.id, node.instance)
         }
     }
 
@@ -300,21 +289,39 @@ export class WebFlowApplication {
         return result
     }
 
-    public getPresenter(step: WebFlowStep) {
-        return this.presenterMap.get(step.id)
+    public getPresenter(place: WebFlowPlace) {
+        return this.presenterMap.get(place.id)
     }
 
-    public catalogGoParser(step: WebFlowStep, goAction: (place?: WebFlowPlace) => Promise<void>) {
-        this.goMap.set(step.name, goAction)
+    public catalogPlaces(places: Record<string, WebFlowPlace>) {
+        for (const place of Object.values(places)) {
+            this.placeMap.set(place.name, place)
+        }
     }
 
-    public async go(placeStr: string) {
-        const place = WebFlowPlace.parse(placeStr)
-        const action = this.goMap.get(place.getStep().name)
-        if (action) {
-            await action(place)
+    public async navigate(uri: WebFlowURI | string) {
+        if (CastUtils.isInstanceOf(uri, String)) {
+            uri = WebFlowURI.parse(uri as string, this.placeProvider)
+            if (uri.place.id == -1) {
+                throw new Error(`No place found under name=${uri.place.name}`)
+            }
+            await this.doNavigate(uri)
         } else {
-            throw new Error(`No place found under name=${place.getStep().name}`)
+            await this.doNavigate(uri as WebFlowURI)
+        }
+    }
+
+    protected async doNavigate(uri: WebFlowURI) {
+        const context = new NavigationContext(this, uri)
+        try {
+            for (let i = 0, ilast = uri.place.path.length - 1; i <= ilast; i++) {
+                await context.build(uri.place.path[i], i === ilast)
+            }
+
+            context.commit()
+        } catch (caught) {
+            context.rollback()
+            throw caught
         }
     }
 

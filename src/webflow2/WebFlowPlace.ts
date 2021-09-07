@@ -1,280 +1,70 @@
-import { CastUtils } from './CastUtils'
-import { StandardCharsets } from './StandardCharsets'
-import { QueryStringParser } from './QueryStringParser'
-import { QueryStringBuilder } from './QueryStringBuilder'
-import { WebFlowStep } from './WebFlowStep'
-import type { WebFlowScopeSlot } from './WebFlowScopeSlot'
+import { WebFlowApplication } from './WebFlowApplication'
+import { WebFlowPresenter } from './WebFlowPresenter'
+import { WebFlowScope } from './WebFlowScope'
 
-const NOOP_FN = () => {
-	// NOOP
+const indexGenMap: Map<number, number> = new Map()
+
+type PresenterType = WebFlowPresenter<WebFlowApplication, WebFlowScope>
+type PresenterContructor<A extends WebFlowApplication> = { new(app: A): PresenterType }
+export type PresenterFactory = (app: WebFlowApplication) => PresenterType
+
+function newPresenterFactory<A extends WebFlowApplication>(ctor: PresenterContructor<A>): PresenterFactory {
+    return (app) => {
+        return new ctor((app as unknown) as A)
+    }
 }
 
-export class WebFlowPlace extends Object {
+const noPresenterFactory: PresenterFactory = () => {
+    throw new Error('No presenter factory was provided')
+}
 
-	public static parse(placeStr: string): WebFlowPlace {
-		// If we have a not blank URI, then we will proceed with URI parsing
-		if (placeStr && placeStr.length > 0) {
-			// First, we are going to brake the URI into two parts
-			const parts = placeStr.split(/\?/)
-			const place = new WebFlowPlace(new WebFlowStep(-1, parts[0]))
-			if (parts.length > 1) {
-				QueryStringParser.parse(place, parts[1], StandardCharsets.UTF_8)
-			}
-			return place
-		} else {
-			return new WebFlowPlace(new WebFlowStep(-1, 'unknown'))
-		}
-	}
+export class WebFlowPlace {
 
-	// :: Instance
+    public static createUnbunded(name: string) {
+        return new WebFlowPlace(name, undefined, () => {
+            throw new Error('Unbounded place can not create a presenter')
+        }, -1)
+    }
 
-	private step: WebFlowStep
+    public static UNKNOWN = WebFlowPlace.createUnbunded('unknown')
 
-	private parameters: Map<string, unknown>
+    public static create<A extends WebFlowApplication>(name: string, ctor: PresenterContructor<A>, parent?: WebFlowPlace) {
+        return new WebFlowPlace(name, parent, newPresenterFactory(ctor))
+    }
 
-	public readonly attributes: Map<string, unknown>
+    public readonly id: number
 
-	public constructor(step: WebFlowStep) {
-		super()
-		this.step = step
-		this.parameters = new Map()
-		this.attributes = new Map()
-	}
+    public readonly path: WebFlowPlace[] = []
 
-	public getStep(): WebFlowStep {
-		return this.step
-	}
+    public constructor(
+        public readonly name: string,
+        public readonly parent?: WebFlowPlace,
+        public readonly factory: PresenterFactory = noPresenterFactory,
+        id?: number
+    ) {
+        this.buildPath(this)
+        this.id = typeof id === 'number' ? id : this.nextId()
+    }
 
-	public setStep(step: WebFlowStep) {
-		this.step = step
-	}
+    private buildPath(step: WebFlowPlace) {
+        if (step.parent) {
+            this.buildPath(step.parent)
+        }
 
-	public getParameterRawValue(name: string): unknown {
-		return this.parameters.get(name)
-	}
+        if (step && step.id != -1) {
+            this.path.push(step)
+        }
+    }
 
-	/**
-	 * <p>
-	 * Returns the value of a request parameter, or null if the parameter does not exist.
-	 * </p>
-	 * <p>
-	 * If you use this method with a multivalued parameter, the value returned is equal to the first value in the array.
-	 * </p>
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @return a Object representing the value of the parameter
-	 */
-	public getParameterValue(name: string): unknown {
-		const value = this.parameters.get(name)
-		if (CastUtils.isArray(value)) {
-			return (value as Array<unknown>)[0]
-		} else {
-			return value
-		}
-	}
+    private nextId() {
+        let idxLevelGen = indexGenMap.get(this.path.length)
+        if (idxLevelGen === undefined) {
+            idxLevelGen = this.path.length * 1000
+        } else {
+            idxLevelGen++
+        }
+        indexGenMap.set(this.path.length, idxLevelGen)
+        return idxLevelGen
+    }
 
-	/**
-	 * <p>
-	 * Returns the value array of a request parameter, or undefined if the parameter does not exist.
-	 * </p>
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @return a Object representing the value of the parameter
-	 */
-	public getParameterValues(name: string): Array<unknown> {
-		const value = this.parameters.get(name)
-		if (value === undefined || value === null) {
-			return []
-		}
-
-		if (CastUtils.isArray(value)) {
-			return value as Array<unknown>
-		}
-
-		return [value]
-	}
-
-	/**
-	 * <p>
-	 * Returns the value of a request parameter as String, or undefined if the parameter does not exist.
-	 * </p>
-	 * <p>
-	 * You should only use this method when you are sure the parameter has only one value. If the parameter might have more than one value, use
-	 * getParameterValues(name: string).
-	 * </p>
-	 * <p>
-	 * If you use this method with a multivalued parameter, the value returned is equal to the first value in the array.
-	 * </p>
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @return a String representing the single value of the parameter
-	 */
-	public getParameterAsString(name: string): string | undefined {
-		const value = this.getParameterValue(name)
-		return CastUtils.toString(value)
-	}
-
-	/**
-	 * <p>
-	 * Returns the value of a request parameter as String, or undefined if the parameter does not exist.
-	 * </p>
-	 * <p>
-	 * You should only use this method when you are sure the parameter has only one value. If the parameter might have more than one value, use
-	 * getParameterValues(name: string).
-	 * </p>
-	 * <p>
-	 * If you use this method with a multivalued parameter, the value returned is equal to the first value in the array.
-	 * </p>
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @param defaultValue
-	 *            a default value to be returned case current value is null
-	 * @return a String representing the single value of the parameter
-	 */
-	public getParameterAsStringOrDefault(name: string, defaultValue: string): string {
-		const value = this.getParameterValue(name)
-		return CastUtils.toString(value, defaultValue) as string
-	}
-
-	/**
-	 * <p>
-	 * Returns the value of a request parameter as a Number, or null if the parameter does not exist.
-	 * </p>
-	 * <p>
-	 * You should only use this method when you are sure the parameter has only one value. If the parameter might have more than one value, use
-	 * getParameterValues(name: string).
-	 * </p>
-	 * <p>
-	 * If you use this method with a multivalued parameter, the value returned is equal to the first value in the array.
-	 * </p>
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @return a String representing the single value of the parameter
-	 */
-	public getParameterAsNumber(name: string): number | undefined {
-		const value = this.getParameterValue(name)
-		return CastUtils.toNumber(value)
-	}
-
-	/**
-	 * <p>
-	 * Returns the value of a request parameter as a Number, or null if the parameter does not exist.
-	 * </p>
-	 * <p>
-	 * You should only use this method when you are sure the parameter has only one value. If the parameter might have more than one value, use
-	 * getParameterValues(name: string).
-	 * </p>
-	 * <p>
-	 * If you use this method with a multivalued parameter, the value returned is equal to the first value in the array.
-	 * </p>
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @param defaultValue
-	 *            a default value to be returned case current value is null or a invalid conversion
-	 * @return a String representing the single value of the parameter
-	 */
-	public getParameterAsNumberOrDefault(name: string, defaultValue: number): number {
-		const value = this.getParameterValue(name)
-		return CastUtils.toNumber(value, defaultValue) as number
-	}
-
-	/**
-	 * <p>
-	 * Returns the value of a request parameter as a Boolean, or null if the parameter does not exist.
-	 * </p>
-	 * <p>
-	 * You should only use this method when you are sure the parameter has only one value. If the parameter might have more than one value, use
-	 * getParameterValues(name: string).
-	 * </p>
-	 * <p>
-	 * If you use this method with a multivalued parameter, the value returned is equal to the first value in the array.
-	 * </p>
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @return a String representing the single value of the parameter
-	 */
-	public getParameterAsBoolean(name: string): boolean|undefined {
-		const value = this.getParameterValue(name)
-		return CastUtils.toBoolean(value)
-	}
-
-	/**
-	 * <p>
-	 * Returns the value of a request parameter as a Boolean, or null if the parameter does not exist.
-	 * </p>
-	 * <p>
-	 * You should only use this method when you are sure the parameter has only one value. If the parameter might have more than one value, use
-	 * getParameterValues(name: string).
-	 * </p>
-	 * <p>
-	 * If you use this method with a multivalued parameter, the value returned is equal to the first value in the array.
-	 * </p>
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @param defaultValue
-	 *            a default value to be returned case current value is null or a invalid conversion
-	 * @return a String representing the single value of the parameter
-	 */
-	public getParameterAsBooleanOrDefault(name: string, defaultValue: boolean): boolean {
-		const value = this.getParameterValue(name)
-		return CastUtils.toBoolean(value, defaultValue) as boolean
-	}
-
-	/**
-	 * Sets or replace a parameter value. Parameters will became part of the hash token in the history. Be careful and choose short form for names and values.
-	 *
-	 * @param name
-	 *            a String specifying the name of the parameter
-	 * @param value
-	 *            a a value of this parameter
-	 */
-	public setParameter(name: string, value?: null | string | number | boolean | string[] | number[] | boolean[]): void {
-		if (value === undefined || value === null) {
-			this.parameters.delete(name)
-		} else {
-			this.parameters.set(name, value)
-		}
-	}
-
-	/**
-	 * Returns the query string that is contained in the request path after the path walking.
-	 *
-	 * @return a String containing the query string.
-	 */
-	public getQueryString(): string {
-		if (this.parameters.size === 0) {
-			return ''
-		}
-		return new QueryStringBuilder().append(this.parameters).toString()
-	}
-
-	public override toString(): string {
-		const queryString = this.getQueryString()
-		if (queryString && queryString.length > 0) {
-			return this.step.name + '?' + queryString
-		} else {
-			return this.step.name
-		}
-	}
-
-	public setScopeSlot(slotId: string, slot: WebFlowScopeSlot) {
-		this.attributes.set(slotId, slot)
-	}
-
-	public getScopeSlot(slotId: string): WebFlowScopeSlot {
-		const slot = this.attributes.get(slotId)
-		if (slot) {
-			return slot as WebFlowScopeSlot
-		} else {
-			return NOOP_FN
-		}
-	}
 }

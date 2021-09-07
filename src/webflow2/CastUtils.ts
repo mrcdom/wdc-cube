@@ -2,7 +2,8 @@ export type PossibleParameterTypes = NumberConstructor | StringConstructor | Boo
 
 export class CastUtils {
 
-    public static isInstanceOf(instance: unknown, ctor: Function): boolean {
+    public static isInstanceOf(instance: unknown, ctor: (...args: unknown[]) => unknown): boolean {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (instance && (instance as any).constructor === ctor) {
             return true
         }

@@ -1,5 +1,6 @@
+import { NOOP_VOID } from './Constants'
 import { WebFlowApplication } from './WebFlowApplication'
-import { WebFlowPlace } from './WebFlowPlace'
+import { WebFlowURI } from './WebFlowURI'
 import type { WebFlowScope } from './WebFlowScope'
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -16,10 +17,10 @@ export class WebFlowPresenter<Application extends WebFlowApplication, Scope exte
     }
 
     public release(): void {
-        // NOOP
+        this.scope.update = NOOP_VOID
     }
 
-    public async applyParameters(place: WebFlowPlace, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public async applyParameters(uri: WebFlowURI, initialization: boolean, deepest: boolean): Promise<boolean> {
         return true
     }
 
@@ -27,7 +28,7 @@ export class WebFlowPresenter<Application extends WebFlowApplication, Scope exte
         // NOOP
     }
 
-    public publishParameters(place: WebFlowPlace): void {
+    public publishParameters(uri: WebFlowURI): void {
         // NOOP
     }
 
