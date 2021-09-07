@@ -1,34 +1,36 @@
 export type PossibleParameterTypes = NumberConstructor | StringConstructor | BooleanConstructor
 
+type ClassConstructor = new (...args: unknown[]) => unknown
+
+type InstanceLike = {
+    constructor: ClassConstructor
+}
+
 export class CastUtils {
 
-    public static isInstanceOf(instance: unknown, ctor: (...args: unknown[]) => unknown): boolean {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (instance && (instance as any).constructor === ctor) {
-            return true
+    public static isInstanceOf(instance: unknown, ctor: ClassConstructor): boolean {
+        if (instance === undefined || instance === null) {
+            return false
         }
-        return false
+
+        return (instance as InstanceLike).constructor === ctor
     }
 
     public static isArray(value: unknown): boolean {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (value && (value as any).constructor === Array) {
-            return true
-        }
-        return false
+        return CastUtils.isInstanceOf(value, Array)
     }
 
     public static getType(item: unknown): PossibleParameterTypes | undefined {
         if (item !== undefined && item !== null) {
-            if (item instanceof String) {
+            if (CastUtils.isInstanceOf(item, String)) {
                 return String
             }
 
-            if (item instanceof Number) {
+            if (CastUtils.isInstanceOf(item, Number)) {
                 return Number
             }
 
-            if (item instanceof Boolean) {
+            if (CastUtils.isInstanceOf(item, Boolean)) {
                 return Boolean
             }
         }
@@ -46,19 +48,12 @@ export class CastUtils {
         return undefined
     }
 
-    public static toUnknown(value: unknown, clazz: PossibleParameterTypes | undefined): unknown {
+    public static toUnknown(value: unknown, clazz: PossibleParameterTypes): unknown {
         if (value === undefined && value === null) {
             return undefined
         }
 
-        if (!clazz) {
-            return value
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const v = value as any
-
-        if (v.constructor === Number) {
+        if (CastUtils.isInstanceOf(value, Number)) {
             if (clazz === Number) {
                 return value
             }
@@ -74,7 +69,7 @@ export class CastUtils {
             return value
         }
 
-        if (v.constructor === String) {
+        if (CastUtils.isInstanceOf(value, String)) {
             if (clazz === String) {
                 return value
             }
@@ -92,7 +87,7 @@ export class CastUtils {
             return s
         }
 
-        if (v.constructor === Boolean) {
+        if (CastUtils.isInstanceOf(value, Boolean)) {
             if (clazz === Boolean) {
                 return value
             }
