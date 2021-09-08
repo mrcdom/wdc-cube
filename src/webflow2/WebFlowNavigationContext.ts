@@ -87,8 +87,10 @@ export class WebFlowNavigationContext {
     public rollback(): void {
         for (const place of this.__sourceUri.place.path) {
             const presenter = this.__presenterMap.get(place.id)
+
+            this.__presenterMap.delete(place.id)
+
             if (presenter != null) {
-                this.__presenterMap.delete(place.id)
                 presenter.applyParameters(this.__sourceUri, false, place === this.__sourceUri.place)
             } else {
                 LOG.warn(`Missing presenter for ID=${place.id}`)
