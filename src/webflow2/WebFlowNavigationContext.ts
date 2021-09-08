@@ -5,7 +5,7 @@ import { WebFlowURI } from './WebFlowURI'
 import { WebFlowApplication } from './WebFlowApplication'
 import type { WebFlowPresenterMapType } from './WebFlowPresenter'
 
-const LOG = Logger.get('WebFlowApplication')
+const LOG = Logger.get('WebFlowNavigationContext')
 
 export class WebFlowNavigationContext {
 
