@@ -9,21 +9,38 @@ const LOG = Logger.get('WebFlowApplication')
 
 export class WebFlowNavigationContext {
 
-    public targetUri: WebFlowURI
-
     private __app: WebFlowApplication
     private __presenterMap: WebFlowPresenterMapType
     private __sourceUri: WebFlowURI
+    private __targetUri: WebFlowURI
     private __level: number
+    private __cycleDetectionMap: Map<string, boolean>
 
     public constructor(app: WebFlowApplication, targetUri: WebFlowURI) {
         this.__app = app
         this.__level = 0
         this.__sourceUri = app.newUri(app.lastPlace)
+        this.__cycleDetectionMap = new Map()
         this.__presenterMap = new Map()
-        this.targetUri = targetUri
+        this.__targetUri = targetUri
+        this.__cycleDetectionMap.set(this.targetUri.place.pathName, true)
+        this.extractPresenters(this.__presenterMap, this.__sourceUri.place.path)
+    }
 
-        this.extractPresenters(this.__presenterMap, app.lastPlace.path)
+    public get targetUri(): WebFlowURI {
+        return this.__targetUri
+    }
+
+    public set targetUri(uri: WebFlowURI) {
+        if (this.__cycleDetectionMap.has(uri.place.pathName)) {
+            throw new Error(
+                'Dectected a navigation cycle between '
+                + `source(${this.__sourceUri})=>target(${this.__targetUri}). `
+                + `The intermediate target was "${uri}"`
+            )
+        }
+        this.__targetUri = uri
+        this.__cycleDetectionMap.set(uri.place.pathName, true)
     }
 
     public get level(): number {
@@ -35,30 +52,36 @@ export class WebFlowNavigationContext {
     }
 
     private extractPresenters(map: WebFlowPresenterMapType, path: WebFlowPlace[]) {
-        for(const place of path) {
+        for (const place of path) {
             const presenter = this.__app.getPresenter(place)
             if (presenter) {
                 map.set(place.id, presenter)
             }
         }
-        
     }
 
     public async build(place: WebFlowPlace, atLevel: number) {
+        let result = false
+
         // Only runs if this context is the last context
         if (this.__level === atLevel) {
-            const deepest = this.targetUri.place === place
+            const deepest = this.__targetUri.place === place
             const presenter = this.__presenterMap.get(place.id)
+
             if (presenter) {
-                return await presenter.applyParameters(this.targetUri, false, deepest)
+                result = await presenter.applyParameters(this.__targetUri, false, deepest)
             } else {
                 const presenter = place.factory(this.__app)
                 this.__presenterMap.set(place.id, presenter)
-                return await presenter.applyParameters(this.targetUri, true, deepest)
+                result = await presenter.applyParameters(this.__targetUri, true, deepest)
+            }
+
+            if (this.__level !== atLevel) {
+                result = false
             }
         }
 
-        return false
+        return result
     }
 
     public rollback(): void {
@@ -82,7 +105,7 @@ export class WebFlowNavigationContext {
         newPresenterMap.clear()
 
         // Keep only presenters belonging to 
-        for (const place of this.targetUri.place.path) {
+        for (const place of this.__targetUri.place.path) {
             let presenter = this.__presenterMap.get(place.id)
             if (presenter) {
                 // Remove presenters that will be kept
@@ -115,9 +138,11 @@ export class WebFlowNavigationContext {
 
         for (const presenterId of presenterIds) {
             const presenter = presenterInstanceMap.get(presenterId)
+
+            presenterInstanceMap.delete(presenterId)
+
             if (presenter != null) {
                 try {
-                    presenterInstanceMap.delete(presenterId)
                     presenter.release()
                 } catch (caught) {
                     LOG.error('Releasing presenter', caught)

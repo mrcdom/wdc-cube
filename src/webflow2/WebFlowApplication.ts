@@ -132,9 +132,9 @@ export class WebFlowApplication {
 
             context.targetUri = uri
 
+
             for (const place of uri.place.path) {
-                const shouldContinue = await context.build(place, level)
-                if (!shouldContinue || context.level !== level) {
+                if (!(await context.build(place, level))) {
                     break
                 }
             }
@@ -144,8 +144,7 @@ export class WebFlowApplication {
                 this.__navigationContext = context
 
                 for (const place of uri.place.path) {
-                    const shouldContinue = await context.build(place, 0)
-                    if (!shouldContinue || context.level != 0) {
+                    if (!(await context.build(place, 0))) {
                         break
                     }
                 }
