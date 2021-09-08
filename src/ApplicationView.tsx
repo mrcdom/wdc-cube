@@ -1,5 +1,5 @@
 import React from 'react'
-import { ReactComponent, WebFlowViewFactory, WebFlowURLHistoryManager } from './webflow2-react'
+import { ReactComponent, WebFlowViewFactory, WebFlowURLHistoryManager } from './webflow-react'
 import logo from './logo.svg'
 import style from './Application.module.css'
 

@@ -1,5 +1,5 @@
 import Logger from '../utils/logger'
-import { WebFlowPresenter, WebFlowScope, WebFlowScopeSlot, WebFlowURI, NOOP_VOID } from '../webflow2'
+import { WebFlowPresenter, WebFlowScope, WebFlowScopeSlot, WebFlowURI, NOOP_VOID } from '../webflow'
 import { ApplicationPresenter } from '../ApplicationPresenter'
 import { ViewIds, AttrsIds } from '../Common'
 

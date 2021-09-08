@@ -1,6 +1,6 @@
 import React, { ClassAttributes, HTMLAttributes } from 'react'
 import Logger from '../utils/logger'
-import { WebFlowScope } from '../webflow2'
+import { WebFlowScope } from '../webflow'
 import { WebFlowComponentProps } from './WebFlowComponent'
 
 const LOG = Logger.get('WebFlowViewFactory')

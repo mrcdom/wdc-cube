@@ -1,5 +1,5 @@
 import Logger from './utils/logger'
-import { WebFlowApplication, WebFlowHistoryManager, WebFlowPlace, WebFlowURI, WebFlowScope, WebFlowScopeSlot, NOOP_VOID } from './webflow2'
+import { WebFlowApplication, WebFlowHistoryManager, WebFlowPlace, WebFlowURI, WebFlowScope, WebFlowScopeSlot, NOOP_VOID } from './webflow'
 import { Places } from './Places'
 import { AttrsIds } from './Common'
 import { RootPresenter } from './root/RootPresenter'

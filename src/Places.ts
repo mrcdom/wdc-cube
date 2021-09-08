@@ -1,4 +1,4 @@
-import { WebFlowPlace } from './webflow2'
+import { WebFlowPlace } from './webflow'
 
 export const Places = {
 

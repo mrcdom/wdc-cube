@@ -1,5 +1,5 @@
 import React from 'react'
-import { WebFlowComponent, WebFlowViewFactory } from '../webflow2-react'
+import { WebFlowComponent, WebFlowViewFactory } from '../webflow-react'
 import { RootScope } from './RootPresenter'
 import style from './RootView.module.css'
 

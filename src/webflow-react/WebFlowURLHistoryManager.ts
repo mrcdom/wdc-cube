@@ -1,6 +1,6 @@
 import { BrowserHistory, createBrowserHistory} from 'history'
 import Logger from '../utils/logger'
-import { WebFlowHistoryManager } from '../webflow2'
+import { WebFlowHistoryManager } from '../webflow'
 
 const LOG = Logger.get('WebFlowURLHistoryManager')
 

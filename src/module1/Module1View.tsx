@@ -1,5 +1,5 @@
 import React from 'react'
-import { WebFlowComponent, WebFlowViewFactory } from '../webflow2-react'
+import { WebFlowComponent, WebFlowViewFactory } from '../webflow-react'
 import { Module1Scope } from './Module1Presenter'
 
 export class Module1View extends WebFlowComponent<Module1Scope> {

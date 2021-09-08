@@ -1,5 +1,5 @@
 import React, { ClassAttributes, HTMLAttributes } from 'react'
-import { WebFlowScope, NOOP_VOID } from '../webflow2'
+import { WebFlowScope, NOOP_VOID } from '../webflow'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class ReactComponent<P = unknown, S = unknown, SS = any> extends React.Component<P, S, SS> {
