@@ -18,17 +18,15 @@ export class RootScope extends WebFlowScope {
 
 export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootScope> {
 
-    private readonly moduleSlot: WebFlowScopeSlot
-
     private parentSlot: WebFlowScopeSlot = NOOP_VOID
+
+    private readonly moduleSlot: WebFlowScopeSlot = scope => {
+        this.scope.module = scope
+        this.scope.update()
+    }
 
     public constructor(app: ApplicationPresenter) {
         super(app, new RootScope(ViewIds.root))
-
-        this.moduleSlot = scope => {
-            this.scope.module = scope
-            this.scope.update()
-        }
     }
 
     public override release() {
