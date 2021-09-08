@@ -4,7 +4,7 @@ import { ApplicationPresenter } from '../ApplicationPresenter'
 import { ViewIds, AttrsIds } from '../Common'
 
 
-const LOG = Logger.get('Module2')
+const LOG = Logger.get('Module2Presenter')
 
 export class Module2Scope extends WebFlowScope {
     detail?: WebFlowScope
@@ -12,17 +12,15 @@ export class Module2Scope extends WebFlowScope {
 
 export class Module2Presenter extends WebFlowPresenter<ApplicationPresenter, Module2Scope> {
 
-    private readonly detailSlot: WebFlowScopeSlot
-
     private parentSlot: WebFlowScopeSlot = NOOP_VOID
+
+    private readonly detailSlot: WebFlowScopeSlot = scope => {
+        this.scope.detail = scope
+        this.scope.update()
+    }
 
     public constructor(app: ApplicationPresenter) {
         super(app, new Module2Scope(ViewIds.module2))
-
-        this.detailSlot = scope => {
-            this.scope.detail = scope
-            this.scope.update()
-        }
     }
 
     public override release() {

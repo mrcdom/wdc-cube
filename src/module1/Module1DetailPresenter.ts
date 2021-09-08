@@ -3,7 +3,7 @@ import { WebFlowPresenter, WebFlowScope, WebFlowScopeSlot, WebFlowURI, NOOP_VOID
 import { ApplicationPresenter } from '../ApplicationPresenter'
 import { ViewIds, AttrsIds } from '../Common'
 
-const LOG = Logger.get('Module1Detail')
+const LOG = Logger.get('Module1DetailPresenter')
 
 export class Module1DetailScope extends WebFlowScope {
 
