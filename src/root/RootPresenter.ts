@@ -38,7 +38,7 @@ export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootSc
 
     public override async applyParameters(uri: WebFlowURI, initialization: boolean, deepest: boolean): Promise<boolean> {
         if (initialization) {
-            this.scope.onRoot = this.RootClicked.bind(this)
+            this.scope.onRoot = this.onRootClicked.bind(this)
             this.scope.onModule1 = this.onModule1Clicked.bind(this)
             this.scope.onModule2 = this.onModule2Clicked.bind(this)
             this.scope.onModule1Detail = this.onModule1DetailClicked.bind(this)
@@ -58,7 +58,7 @@ export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootSc
         return true
     }
 
-    public async RootClicked() {
+    private async onRootClicked() {
         try {
             const uri = this.app.newUri(Places.root)
             await this.app.navigate(uri)
@@ -69,7 +69,7 @@ export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootSc
         }
     }
 
-    public async onModule1Clicked() {
+    private async onModule1Clicked() {
         try {
             const uri = this.app.newUri(Places.module1)
             await this.app.navigate(uri)
@@ -80,7 +80,7 @@ export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootSc
         }
     }
 
-    public async onModule1DetailClicked() {
+    private async onModule1DetailClicked() {
         try {
             const uri = this.app.newUri(Places.module1Detail)
             await this.app.navigate(uri)
@@ -91,7 +91,7 @@ export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootSc
         }
     }
 
-    public async onModule2Clicked() {
+    private async onModule2Clicked() {
         try {
             const uri = this.app.newUri(Places.module2)
             await this.app.navigate(uri)
@@ -102,7 +102,7 @@ export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootSc
         }
     }
 
-    public async onModule2DetailClicked() {
+    private async onModule2DetailClicked() {
         try {
             const uri = this.app.newUri(Places.module2Detail)
             await this.app.navigate(uri)
