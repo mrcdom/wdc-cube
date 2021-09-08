@@ -11,27 +11,32 @@ export class WebFlowNavigationContext {
 
     public targetUri: WebFlowURI
 
-    private app: WebFlowApplication
-    private presenterMap: WebFlowPresenterMapType
-    private sourceUri: WebFlowURI
-    private overlappedLevel: number
+    private __app: WebFlowApplication
+    private __presenterMap: WebFlowPresenterMapType
+    private __sourceUri: WebFlowURI
+    private __level: number
 
     public constructor(app: WebFlowApplication, targetUri: WebFlowURI) {
-        this.app = app
+        this.__app = app
+        this.__level = 0
+        this.__sourceUri = app.newUri(app.lastPlace)
+        this.__presenterMap = new Map()
         this.targetUri = targetUri
-        this.overlappedLevel = 0
-        this.sourceUri = app.newUri(app.lastPlace)
-        this.presenterMap = new Map()
-        this.extractPresenters(this.presenterMap, app.lastPlace.path)
+
+        this.extractPresenters(this.__presenterMap, app.lastPlace.path)
+    }
+
+    public get level(): number {
+        return this.__level
     }
 
     public incrementAndGetLevel(): number {
-        return ++this.overlappedLevel
+        return ++this.__level
     }
 
     private extractPresenters(map: WebFlowPresenterMapType, path: WebFlowPlace[]) {
         for(const place of path) {
-            const presenter = this.app.getPresenter(place)
+            const presenter = this.__app.getPresenter(place)
             if (presenter) {
                 map.set(place.id, presenter)
             }
@@ -41,13 +46,13 @@ export class WebFlowNavigationContext {
 
     public async build(level: number, place: WebFlowPlace, deepest: boolean) {
         // Only runs if this context is the last context
-        if (this.overlappedLevel === level) {
-            const presenter = this.presenterMap.get(place.id)
+        if (this.__level === level) {
+            const presenter = this.__presenterMap.get(place.id)
             if (presenter) {
                 return await presenter.applyParameters(this.targetUri, false, deepest)
             } else {
-                const presenter = place.factory(this.app)
-                this.presenterMap.set(place.id, presenter)
+                const presenter = place.factory(this.__app)
+                this.__presenterMap.set(place.id, presenter)
                 return await presenter.applyParameters(this.targetUri, true, deepest)
             }
         }
@@ -56,19 +61,19 @@ export class WebFlowNavigationContext {
     }
 
     public rollback(): void {
-        for (const place of this.sourceUri.place.path) {
-            const presenter = this.presenterMap.get(place.id)
+        for (const place of this.__sourceUri.place.path) {
+            const presenter = this.__presenterMap.get(place.id)
             if (presenter != null) {
-                this.presenterMap.delete(place.id)
-                presenter.applyParameters(this.sourceUri, false, place === this.sourceUri.place)
+                this.__presenterMap.delete(place.id)
+                presenter.applyParameters(this.__sourceUri, false, place === this.__sourceUri.place)
             } else {
                 LOG.warn(`Missing presenter for ID=${place.id}`)
             }
         }
 
-        if (this.presenterMap.size > 0) {
-            this.releasePresenters(this.presenterMap)
-            this.presenterMap.clear()
+        if (this.__presenterMap.size > 0) {
+            this.releasePresenters(this.__presenterMap)
+            this.__presenterMap.clear()
         }
     }
 
@@ -77,10 +82,10 @@ export class WebFlowNavigationContext {
 
         // Keep only presenters belonging to 
         for (const place of this.targetUri.place.path) {
-            let presenter = this.presenterMap.get(place.id)
+            let presenter = this.__presenterMap.get(place.id)
             if (presenter) {
                 // Remove presenters that will be kept
-                this.presenterMap.delete(place.id)
+                this.__presenterMap.delete(place.id)
 
                 newPresenterMap.set(place.id, presenter)
                 continue
@@ -90,8 +95,8 @@ export class WebFlowNavigationContext {
         }
 
         // Non participating paresenter on new state must be released
-        if (this.presenterMap.size > 0) {
-            this.releasePresenters(this.presenterMap)
+        if (this.__presenterMap.size > 0) {
+            this.releasePresenters(this.__presenterMap)
         }
 
         return newPresenterMap

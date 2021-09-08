@@ -134,7 +134,7 @@ export class WebFlowApplication {
 
             for (let i = 0, ilast = uri.place.path.length - 1; i <= ilast; i++) {
                 const shouldContinue = await context.build(level, uri.place.path[i], i === ilast)
-                if (!shouldContinue) {
+                if (!shouldContinue || context.level !== level) {
                     break
                 }
             }
@@ -145,7 +145,7 @@ export class WebFlowApplication {
 
                 for (let i = 0, ilast = uri.place.path.length - 1; i <= ilast; i++) {
                     const shouldContinue = await context.build(0, uri.place.path[i], i === ilast)
-                    if (!shouldContinue) {
+                    if (!shouldContinue || context.level != 0) {
                         break
                     }
                 }
