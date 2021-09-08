@@ -12,12 +12,13 @@ import { Module2View } from './module2/Module2View'
 import { Module2DetailView } from './module2/Module2DetailView'
 
 { // View Registration
-  const wff = WebFlowViewFactory
-  wff.register(ViewIds.root, RootView)
-  wff.register(ViewIds.module1, Module1View)
-  wff.register(ViewIds.module1Detail, Module1DetailView)
-  wff.register(ViewIds.module2, Module2View)
-  wff.register(ViewIds.module2Detail, Module2DetailView)
+  const register = WebFlowViewFactory.register
+
+  register(ViewIds.root, RootView)
+  register(ViewIds.module1, Module1View)
+  register(ViewIds.module1Detail, Module1DetailView)
+  register(ViewIds.module2, Module2View)
+  register(ViewIds.module2Detail, Module2DetailView)
 }
 
 export class ApplicationView extends ReactComponent {
