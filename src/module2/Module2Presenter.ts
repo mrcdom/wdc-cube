@@ -15,8 +15,10 @@ export class Module2Presenter extends WebFlowPresenter<ApplicationPresenter, Mod
     private parentSlot: WebFlowScopeSlot = NOOP_VOID
 
     private readonly detailSlot: WebFlowScopeSlot = scope => {
-        this.scope.detail = scope
-        this.scope.update()
+        if (this.scope.detail !== scope) {
+            this.scope.detail = scope
+            this.scope.update()
+        }
     }
 
     public constructor(app: ApplicationPresenter) {
