@@ -108,7 +108,7 @@ export class WebFlowNavigationContext {
 
         // Keep only presenters belonging to 
         for (const place of this.__targetUri.place.path) {
-            let presenter = this.__presenterMap.get(place.id)
+            const presenter = this.__presenterMap.get(place.id)
             if (presenter) {
                 // Remove presenters that will be kept
                 this.__presenterMap.delete(place.id)

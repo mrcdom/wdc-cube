@@ -24,13 +24,14 @@ export class WebFlowApplication {
 
     private __navigationContext?: WebFlowNavigationContext
 
-    private __tokenProvider = () => this.newUri(this.__lastPlace).toString()
-
     public constructor(historyManager: WebFlowHistoryManager) {
         this.__lastPlace = WebFlowPlace.UNKNOWN
         this.__historyManager = historyManager
         this.__presenterMap = new Map()
         this.__placeMap = new Map()
+
+        historyManager.tokenProvider = () => this.newUri(this.__lastPlace).toString()
+        historyManager.onChangeListener = this.onHistoryChanged.bind(this)
     }
 
     public release(): void {
@@ -95,7 +96,7 @@ export class WebFlowApplication {
     }
 
     public updateHistory(): void {
-        this.historyManager.update(this.__tokenProvider)
+        this.historyManager.update()
     }
 
     public getPresenter(place: WebFlowPlace) {
@@ -108,14 +109,19 @@ export class WebFlowApplication {
         }
     }
 
-    public async navigate(uri: WebFlowURI | string) {
+    public async navigate(uri: WebFlowURI | string, fallbackPlace: WebFlowPlace = WebFlowPlace.UNKNOWN) {
         if (CastUtils.isInstanceOf(uri, String)) {
+            let suri = uri as string
+            if (!suri) {
+                suri = fallbackPlace.name
+            }
+
             const placeProvider = (name: string) => {
                 const place = this.__placeMap.get(name)
                 return place ?? WebFlowPlace.createUnbunded(name)
             }
 
-            uri = WebFlowURI.parse(uri as string, placeProvider)
+            uri = WebFlowURI.parse(suri, placeProvider)
             if (uri.place.id == -1) {
                 throw new Error(`No place found under name=${uri.place.name}`)
             }
@@ -126,6 +132,8 @@ export class WebFlowApplication {
     }
 
     protected async doNavigate(uri: WebFlowURI) {
+        this.onBeforeNavigation(uri)
+
         if (this.__navigationContext) {
             const context = this.__navigationContext
             const level = context.incrementAndGetLevel()
@@ -160,6 +168,17 @@ export class WebFlowApplication {
                 this.updateHistory()
             }
         }
+    }
+
+    protected onHistoryChanged(sender: WebFlowHistoryManager) {
+        if (!this.__navigationContext) {
+            this.navigate(sender.location, this.lastPlace)
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    protected onBeforeNavigation(uri: WebFlowURI) {
+        // NOOP
     }
 
 }

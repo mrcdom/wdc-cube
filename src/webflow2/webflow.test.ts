@@ -72,8 +72,8 @@ class TestHistoryManager extends WebFlowHistoryManager {
         super()
     }
 
-    public override update(tokenProvider: () => string): void {
-        this.token = tokenProvider()
+    public override update(): void {
+        this.token = this.tokenProvider()
     }
 
 }

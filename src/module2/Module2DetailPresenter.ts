@@ -1,18 +1,20 @@
 import Logger from '../utils/logger'
-import { IViewState, WFBasePresenter, IParams, IPlace } from '../webflow'
-import { ViewIds } from '../Common'
+import { WebFlowPresenter, WebFlowScope, WebFlowScopeSlot, WebFlowURI, NOOP_VOID } from '../webflow2'
 import { ApplicationPresenter } from '../ApplicationPresenter'
+import { ViewIds, AttrsIds } from '../Common'
 
 const LOG = Logger.get('Module2Detail')
 
-export interface Module2DetailViewState extends IViewState {
-    presenter: Module2DetailPresenter
+export class Module2DetailScope extends WebFlowScope {
+
 }
 
-export class Module2DetailPresenter extends WFBasePresenter<ApplicationPresenter, Module2DetailViewState> {
+export class Module2DetailPresenter extends WebFlowPresenter<ApplicationPresenter, Module2DetailScope> {
 
-    public constructor(app: ApplicationPresenter, place: IPlace) {
-        super(app, place, ViewIds.module2Detail)
+    private parentSlot: WebFlowScopeSlot = NOOP_VOID
+
+    public constructor(app: ApplicationPresenter) {
+        super(app, new Module2DetailScope(ViewIds.module2Detail))
     }
 
     public override release() {
@@ -20,18 +22,19 @@ export class Module2DetailPresenter extends WFBasePresenter<ApplicationPresenter
         super.release()
     }
 
-    applyParams(target: IPlace, params: IParams, initializing: boolean) {
-        if (initializing) {
+    public override async applyParameters(uri: WebFlowURI, initialization: boolean, deepest: boolean): Promise<boolean> {
+        if (initialization) {
+            this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             LOG.info('Initialized')
         }
 
-        if (this.place === target) {
+        if (deepest) {
             // NOOP
         }
 
-        params.ownerSlot(this.state)
+        this.parentSlot(this.scope)
+
         return true
     }
 
 }
-

@@ -1,25 +1,26 @@
 import Logger from '../utils/logger'
-import { IViewState, IViewStateSlot, WFBasePresenter, IPlace, IParams } from '../webflow'
-import { ViewIds } from '../Common'
+import { WebFlowPresenter, WebFlowScope, WebFlowScopeSlot, WebFlowURI, NOOP_VOID } from '../webflow2'
 import { ApplicationPresenter } from '../ApplicationPresenter'
+import { ViewIds, AttrsIds } from '../Common'
 
 const LOG = Logger.get('Module1')
 
-export interface Module1ViewState extends IViewState {
-    presenter: Module1Presenter
-    detail?: IViewState
+export class Module1Scope extends WebFlowScope {
+    detail?: WebFlowScope
 }
 
-export class Module1Presenter extends WFBasePresenter<ApplicationPresenter, Module1ViewState> {
+export class Module1Presenter extends WebFlowPresenter<ApplicationPresenter, Module1Scope> {
 
-    private readonly ownerSlot: IViewStateSlot
+    private readonly detailSlot: WebFlowScopeSlot
 
-    public constructor(app: ApplicationPresenter, place: IPlace) {
-        super(app, place, ViewIds.module1)
+    private parentSlot: WebFlowScopeSlot = NOOP_VOID
 
-        this.ownerSlot = state => {
-            this.state.detail = state
-            this.update()
+    public constructor(app: ApplicationPresenter) {
+        super(app, new WebFlowScope(ViewIds.module1))
+
+        this.detailSlot = scope => {
+            this.scope.detail = scope
+            this.scope.update()
         }
     }
 
@@ -28,19 +29,19 @@ export class Module1Presenter extends WFBasePresenter<ApplicationPresenter, Modu
         super.release()
     }
 
-    public override applyParams(target: IPlace, params: IParams, initializing: boolean) {
-        this.state.detail = undefined
-
-        if (initializing) {
+    public override async applyParameters(uri: WebFlowURI, initialization: boolean, deepest: boolean): Promise<boolean> {
+        if (initialization) {
+            this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             LOG.info('Initialized')
         }
 
-        if (this.place === target) {
-            this.state.detail = undefined
+        if (deepest) {
+            this.detailSlot(undefined)
+        } else {
+            uri.setScopeSlot(AttrsIds.parentSlot, this.detailSlot)
         }
 
-        params.ownerSlot(this.state)
-        params.ownerSlot = this.ownerSlot
+        this.parentSlot(this.scope)
 
         return true
     }

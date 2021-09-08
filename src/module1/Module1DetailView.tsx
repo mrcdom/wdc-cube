@@ -1,16 +1,13 @@
 import React from 'react'
-import { WFComponent } from '../webflow-react'
-import { Module1DetailPresenter } from './Module1DetailPresenter'
+import { WebFlowComponent } from '../webflow2-react'
+import { Module1DetailScope } from './Module1DetailPresenter'
 
-export class Module1DetailView extends WFComponent<Module1DetailPresenter> {
+export class Module1DetailView extends WebFlowComponent<Module1DetailScope> {
 
-  public static readonly factory = (presenter: Module1DetailPresenter) => (
-    <Module1DetailView presenter={presenter} />
-  )
-
-  render() {
+  public override render() {
     return <>
       <div style={{ backgroundColor: 'yellow', padding: 20 }}>
+        Module1Detail
       </div>
     </>
   }

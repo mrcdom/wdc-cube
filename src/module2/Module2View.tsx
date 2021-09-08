@@ -1,16 +1,12 @@
 import React from 'react'
-import { WFComponent, WFViewFactory } from '../webflow-react'
-import { Module2Presenter } from './Module2Presenter'
+import { WebFlowComponent, WebFlowViewFactory } from '../webflow2-react'
+import { Module2Scope } from './Module2Presenter'
 
-export class Module2View extends WFComponent<Module2Presenter> {
+export class Module2View extends WebFlowComponent<Module2Scope> {
 
-    public static readonly factory = (presenter: Module2Presenter) => (
-        <Module2View presenter={presenter} />
-    )
-
-    render() {
-        const presenter = this.props.presenter
-        const detailView = WFViewFactory.createView(presenter?.state.detail)
+    public override render() {
+        const scope = this.props.scope
+        const detailView = WebFlowViewFactory.createView(scope.detail)
 
         return <>
             <div style={{ backgroundColor: 'blue', padding: 20 }}>

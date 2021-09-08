@@ -48,9 +48,13 @@ export class CastUtils {
         return undefined
     }
 
-    public static toUnknown(value: unknown, clazz: PossibleParameterTypes): unknown {
+    public static toUnknown(value: unknown, clazz?: PossibleParameterTypes): unknown {
         if (value === undefined && value === null) {
             return undefined
+        }
+
+        if (!clazz) {
+            return value
         }
 
         if (CastUtils.isInstanceOf(value, Number)) {
