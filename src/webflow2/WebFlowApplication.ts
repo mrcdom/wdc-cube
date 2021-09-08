@@ -139,12 +139,7 @@ export class WebFlowApplication {
                 }
             }
         } else {
-            const curPresenterMap = new Map() as WebFlowPresenterMapType
-            for (const [presenterId, presenter] of this.__presenterMap.entries()) {
-                curPresenterMap.set(presenterId, presenter)
-            }
-
-            const context = new WebFlowNavigationContext(this, curPresenterMap, uri)
+            const context = new WebFlowNavigationContext(this, uri)
             try {
                 this.__navigationContext = context
 

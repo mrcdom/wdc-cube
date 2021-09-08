@@ -16,16 +16,27 @@ export class WebFlowNavigationContext {
     private sourceUri: WebFlowURI
     private overlappedLevel: number
 
-    public constructor(app: WebFlowApplication, curPresenterMap: WebFlowPresenterMapType, targetUri: WebFlowURI) {
+    public constructor(app: WebFlowApplication, targetUri: WebFlowURI) {
         this.app = app
         this.targetUri = targetUri
         this.overlappedLevel = 0
         this.sourceUri = app.newUri(app.lastPlace)
-        this.presenterMap = curPresenterMap
+        this.presenterMap = new Map()
+        this.extractPresenters(this.presenterMap, app.lastPlace.path)
     }
 
     public incrementAndGetLevel(): number {
         return ++this.overlappedLevel
+    }
+
+    private extractPresenters(map: WebFlowPresenterMapType, path: WebFlowPlace[]) {
+        for(const place of path) {
+            const presenter = this.app.getPresenter(place)
+            if (presenter) {
+                map.set(place.id, presenter)
+            }
+        }
+        
     }
 
     public async build(level: number, place: WebFlowPlace, deepest: boolean) {
