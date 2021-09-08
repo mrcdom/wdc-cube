@@ -44,9 +44,10 @@ export class WebFlowNavigationContext {
         
     }
 
-    public async build(level: number, place: WebFlowPlace, deepest: boolean) {
+    public async build(place: WebFlowPlace, atLevel: number) {
         // Only runs if this context is the last context
-        if (this.__level === level) {
+        if (this.__level === atLevel) {
+            const deepest = this.targetUri.place === place
             const presenter = this.__presenterMap.get(place.id)
             if (presenter) {
                 return await presenter.applyParameters(this.targetUri, false, deepest)
