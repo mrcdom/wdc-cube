@@ -54,8 +54,12 @@ export class ApplicationPresenter extends WebFlowApplication {
     }
 
     public async initialize() {
-        await this.navigate(this.historyManager.location, Places.root)
-        LOG.info('Initialized')
+        try {
+            await this.navigate(this.historyManager.location, Places.root)
+            LOG.info('Initialized')
+        } catch(caught) {
+            LOG.error('Failed to initialize', caught)
+        }
     }
 
 }
