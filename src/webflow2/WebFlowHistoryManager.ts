@@ -4,7 +4,7 @@ export class WebFlowHistoryManager {
 
     public static NOOP = new WebFlowHistoryManager()
 
-    public update(): void {
+    public update(tokenProvider: () => string): void {
         // NOOP
     }
 

@@ -66,17 +66,14 @@ const ATTR_IDs = {
 
 class TestHistoryManager extends WebFlowHistoryManager {
 
-    public app: TestApplication
-
     public token = ''
 
-    constructor(app: TestApplication) {
+    constructor() {
         super()
-        this.app = app
     }
 
-    public override update() {
-        this.token = this.app.newUri(this.app.lastPlace).toString()
+    public override update(tokenProvider: () => string): void {
+        this.token = tokenProvider()
     }
 
 }
@@ -99,8 +96,7 @@ class TestApplication extends WebFlowApplication {
     }
 
     constructor() {
-        super()
-        this._historyManager = new TestHistoryManager(this)
+        super(new TestHistoryManager())
         this.catalogPlaces(Places)
     }
 
@@ -152,7 +148,7 @@ class RootPresenter extends WebFlowPresenter<TestApplication, RootScope> {
         return true
     }
 
-    public override commitComputedFields(): void {
+    public override computeDerivatedFields(): void {
         this.scope.computedValue = this.app.session.id * 2
     }
 
@@ -219,7 +215,7 @@ class LoginPresenter extends WebFlowPresenter<TestApplication, LoginScope> {
                 this.scope.message = 'User or password invalid'
             }
         } catch (caught) {
-            this.scope.message = caught.message
+            this.scope.message = (caught as Error).message
         } finally {
             this.scope.update()
         }
@@ -300,7 +296,7 @@ class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedSc
             uri.setParameter(PARAM_IDs.CART_ID, cartId)
             await this.app.navigate(uri)
         } catch (caught) {
-            this.scope.message = caught.message
+            this.scope.message = (caught as Error).message
         } finally {
             this.scope.update()
         }
@@ -312,7 +308,7 @@ class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedSc
             uri.setParameter(PARAM_IDs.PRODUCT_ID, productId)
             await this.app.navigate(uri)
         } catch (caught) {
-            this.scope.message = caught.message
+            this.scope.message = (caught as Error).message
         } finally {
             this.scope.update()
         }
@@ -324,7 +320,7 @@ class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedSc
             uri.setParameter(PARAM_IDs.RECEIPT_ID, receiptId)
             await this.app.navigate(uri)
         } catch (caught) {
-            this.scope.message = caught.message
+            this.scope.message = (caught as Error).message
         } finally {
             this.scope.update()
         }
@@ -337,7 +333,7 @@ class RestrictedPresenter extends WebFlowPresenter<TestApplication, RestrictedSc
             const uri = this.app.newUri(Places.LOGIN)
             await this.app.navigate(uri)
         } catch (caught) {
-            this.scope.message = caught.message
+            this.scope.message = (caught as Error).message
         } finally {
             this.scope.update()
         }
@@ -597,6 +593,8 @@ it('Application :: Token Accuracity', async () => {
     const productUri = app.newUri(Places.PRODUCT)
     productUri.setParameter(PARAM_IDs.PRODUCT_ID, 9999)
     await app.navigate(productUri)
+    expect(restricted.initialized).toEqual(true)
+
     const product = app.getPresenter(Places.PRODUCT) as ProductPresenter
     expect(product).toBeDefined()
     expect(product.initialized).toEqual(true)
@@ -607,6 +605,7 @@ it('Application :: Token Accuracity', async () => {
     const cartUri = app.newUri(Places.CART)
     cartUri.setParameter(PARAM_IDs.CART_ID, 1234)
     await app.navigate(cartUri)
+    expect(restricted.initialized).toEqual(true)
     expect(product.initialized).toEqual(false)
     const cart = app.getPresenter(Places.CART) as CartPresenter
     expect(cart.initialized).toEqual(true)

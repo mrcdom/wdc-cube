@@ -5,6 +5,11 @@ import type { WebFlowScope } from './WebFlowScope'
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+export type WebFlowPresenterType = WebFlowPresenter<WebFlowApplication, WebFlowScope>
+export type WebFlowPresenterMapType = Map<number, WebFlowPresenterType>
+export type WebFlowPresenterContructor<A extends WebFlowApplication> = { new(app: A): WebFlowPresenterType }
+export type WebFlowPresenterFactory = (app: WebFlowApplication) => WebFlowPresenterType
+
 export class WebFlowPresenter<Application extends WebFlowApplication, Scope extends WebFlowScope> {
 
     protected readonly app: Application
@@ -24,7 +29,7 @@ export class WebFlowPresenter<Application extends WebFlowApplication, Scope exte
         return true
     }
 
-    public commitComputedFields(): void {
+    public computeDerivatedFields(): void {
         // NOOP
     }
 
@@ -32,4 +37,10 @@ export class WebFlowPresenter<Application extends WebFlowApplication, Scope exte
         // NOOP
     }
 
+}
+
+export function newPresenterFactory<A extends WebFlowApplication>(ctor: WebFlowPresenterContructor<A>): WebFlowPresenterFactory {
+    return (app) => {
+        return new ctor((app as unknown) as A)
+    }
 }

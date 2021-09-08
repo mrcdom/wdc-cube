@@ -1,20 +1,11 @@
-import { WebFlowApplication } from './WebFlowApplication'
-import { WebFlowPresenter } from './WebFlowPresenter'
-import { WebFlowScope } from './WebFlowScope'
+import { WebFlowApplication, } from './WebFlowApplication'
+import { newPresenterFactory } from './WebFlowPresenter'
+
+import type { WebFlowPresenterContructor, WebFlowPresenterFactory } from './WebFlowPresenter'
 
 const indexGenMap: Map<number, number> = new Map()
 
-type PresenterType = WebFlowPresenter<WebFlowApplication, WebFlowScope>
-type PresenterContructor<A extends WebFlowApplication> = { new(app: A): PresenterType }
-export type PresenterFactory = (app: WebFlowApplication) => PresenterType
-
-function newPresenterFactory<A extends WebFlowApplication>(ctor: PresenterContructor<A>): PresenterFactory {
-    return (app) => {
-        return new ctor((app as unknown) as A)
-    }
-}
-
-const noPresenterFactory: PresenterFactory = () => {
+const noPresenterFactory: WebFlowPresenterFactory = () => {
     throw new Error('No presenter factory was provided')
 }
 
@@ -28,30 +19,38 @@ export class WebFlowPlace {
 
     public static UNKNOWN = WebFlowPlace.createUnbunded('unknown')
 
-    public static create<A extends WebFlowApplication>(name: string, ctor: PresenterContructor<A>, parent?: WebFlowPlace) {
+    public static create<A extends WebFlowApplication>(name: string, ctor: WebFlowPresenterContructor<A>, parent?: WebFlowPlace) {
         return new WebFlowPlace(name, parent, newPresenterFactory(ctor))
     }
 
     public readonly id: number
 
+    public readonly pathName: string
     public readonly path: WebFlowPlace[] = []
 
     public constructor(
         public readonly name: string,
         public readonly parent?: WebFlowPlace,
-        public readonly factory: PresenterFactory = noPresenterFactory,
+        public readonly factory: WebFlowPresenterFactory = noPresenterFactory,
         id?: number
     ) {
-        this.buildPath(this)
+        const pathNameBuilder = [] as string[]
+        this.buildPath(pathNameBuilder, this)
         this.id = typeof id === 'number' ? id : this.nextId()
+        this.pathName = pathNameBuilder.join('/')
     }
 
-    private buildPath(step: WebFlowPlace) {
+    public toString(): string {
+        return this.pathName
+    }
+
+    private buildPath(pathNameBuilder: string[], step: WebFlowPlace) {
         if (step.parent) {
-            this.buildPath(step.parent)
+            this.buildPath(pathNameBuilder, step.parent)
         }
 
         if (step && step.id != -1) {
+            pathNameBuilder.push(step.name)
             this.path.push(step)
         }
     }
