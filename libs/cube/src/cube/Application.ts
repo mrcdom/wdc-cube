@@ -140,7 +140,6 @@ export class Application {
 
             context.targetUri = uri
 
-
             for (const place of uri.place.path) {
                 if (!(await context.build(place, level))) {
                     break

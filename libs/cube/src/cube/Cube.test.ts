@@ -497,7 +497,7 @@ class ReceiptPresenter extends Presenter<TestApplication, ReceiptScope> {
 }
 
 // Prepare places
-(function () {
+{
     const place = Place.create
 
     Places.ROOT = place('root', RootPresenter)
@@ -510,7 +510,7 @@ class ReceiptPresenter extends Presenter<TestApplication, ReceiptScope> {
             Places.RECEIPT = place('receipt', ReceiptPresenter, Places.RESTRICTED)
         }
     }
-})()
+}
 
 // Use Case Scenarios
 
@@ -556,13 +556,12 @@ it('Application :: Basic Navigation', async () => {
     login.scope.userName = 'test'
     login.scope.password = 'test'
     await login.scope.onEnter()
-    expect(login.initialized).toBe(false)
+    expect(login.initialized).toEqual(false)
     expect(app.session.id).toEqual(1)
 
     const restricted = app.getPresenter(Places.RESTRICTED) as RestrictedPresenter
     expect(restricted).toBeDefined()
     expect(root.scope.body).toBe(restricted.scope)
-    expect(login.initialized).toEqual(false)
 
     // Check computed value
     expect(2).toEqual(root.scope.computedValue)

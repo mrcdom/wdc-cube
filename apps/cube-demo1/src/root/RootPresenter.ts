@@ -1,12 +1,4 @@
-import {
-    Logger,
-    Presenter,
-    Scope,
-    ScopeSlot,
-    PlaceUri,
-    NOOP_VOID,
-    NOOP_PROMISE_VOID
-} from 'wdc-cube'
+import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID, NOOP_PROMISE_VOID } from 'wdc-cube'
 import { Places } from '../Places'
 import { MainPresenter } from '../MainPresenter'
 import { ViewIds, AttrsIds } from '../Constants'

@@ -3,23 +3,7 @@ import { ReactComponent, ViewFactory, PageHistoryManager } from 'wdc-cube-react'
 import logo from './logo.svg'
 import style from './Main.module.css'
 
-import { ViewIds } from './Constants'
 import { MainPresenter } from './MainPresenter'
-import { RootView } from './root/RootView'
-import { Module1View } from './module1/Module1View'
-import { Module1DetailView } from './module1/Module1DetailView'
-import { Module2View } from './module2/Module2View'
-import { Module2DetailView } from './module2/Module2DetailView'
-
-{ // View Registration
-  const register = ViewFactory.register
-
-  register(ViewIds.root, RootView)
-  register(ViewIds.module1, Module1View)
-  register(ViewIds.module1Detail, Module1DetailView)
-  register(ViewIds.module2, Module2View)
-  register(ViewIds.module2Detail, Module2DetailView)
-}
 
 export class MainView extends ReactComponent {
 
