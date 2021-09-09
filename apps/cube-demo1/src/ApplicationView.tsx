@@ -1,5 +1,5 @@
 import React from 'react'
-import { ReactComponent, ViewFactory, URLHistoryManager } from 'wdc-cube-react'
+import { ReactComponent, ViewFactory, PageHistoryManager } from 'wdc-cube-react'
 import logo from './logo.svg'
 import style from './Application.module.css'
 
@@ -26,7 +26,7 @@ export class ApplicationView extends ReactComponent {
   private app?: ApplicationPresenter
 
   protected override attached() {
-    this.app = new ApplicationPresenter(new URLHistoryManager())
+    this.app = new ApplicationPresenter(new PageHistoryManager())
     this.app.scope.update = this.newUpdateCallback()
     this.app.initialize()
   }

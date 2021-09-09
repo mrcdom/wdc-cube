@@ -8,7 +8,7 @@ import { NavigationContext } from './NavigationContext'
 
 import type { PresenterMapType } from './Presenter'
 
-const LOG = Logger.get('WebFlowApplication')
+const LOG = Logger.get('Application')
 
 export class Application {
 

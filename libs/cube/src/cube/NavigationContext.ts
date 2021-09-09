@@ -5,7 +5,7 @@ import { PlaceUri } from './PlaceUri'
 import { Application } from './Application'
 import type { PresenterMapType } from './Presenter'
 
-const LOG = Logger.get('WebFlowNavigationContext')
+const LOG = Logger.get('NavigationContext')
 
 export class NavigationContext {
 

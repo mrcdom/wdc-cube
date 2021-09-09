@@ -3,7 +3,7 @@ import { Logger, HistoryManager } from 'wdc-cube'
 
 const LOG = Logger.get('URLHistoryManager')
 
-export class URLHistoryManager extends HistoryManager {
+export class PageHistoryManager extends HistoryManager {
 
     private __debounceHandler?: NodeJS.Timeout
 
