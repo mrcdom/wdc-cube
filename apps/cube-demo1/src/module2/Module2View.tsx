@@ -1,18 +1,15 @@
 import React from 'react'
-import { CubeComponent, ViewFactory } from 'wdc-cube-react'
+import { bindUpdate, ViewFactory } from 'wdc-cube-react'
 import { Module2Scope } from './Module2Presenter'
 
-export class Module2View extends CubeComponent<Module2Scope> {
+export function Module2View({ scope }: { scope: Module2Scope }) {
+    bindUpdate(React, scope)
 
-    public override render() {
-        const scope = this.props.scope
-        const detailView = ViewFactory.createView(scope.detail)
+    const detailView = ViewFactory.createView(scope.detail)
 
-        return <>
-            <div style={{ backgroundColor: 'blue', padding: 20 }}>
-                {detailView}
-            </div>
-        </>
-    }
-
+    return <>
+        <div style={{ backgroundColor: 'blue', padding: 20 }}>
+            {detailView}
+        </div>
+    </>
 }

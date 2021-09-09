@@ -2,7 +2,7 @@ import { ClassAttributes, HTMLAttributes } from 'react'
 import { Scope, NOOP_VOID } from 'wdc-cube'
 import { ReactComponent } from './ReactComponent'
 
-export type CubeComponentProps<S extends Scope, T> = ClassAttributes<T> & HTMLAttributes<T> & {
+export type CubeComponentProps<S extends Scope, T = unknown> = ClassAttributes<T> & HTMLAttributes<T> & {
     scope: S
 }
 

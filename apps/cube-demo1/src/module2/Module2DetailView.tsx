@@ -1,15 +1,13 @@
 import React from 'react'
-import { CubeComponent } from 'wdc-cube-react'
+import { bindUpdate } from 'wdc-cube-react'
 import { Module2DetailScope } from './Module2DetailPresenter'
 
-export class Module2DetailView extends CubeComponent<Module2DetailScope> {
+export function Module2DetailView({ scope }: { scope: Module2DetailScope }) {
+    bindUpdate(React, scope)
 
-    public override render() {
-        return <>
-            <div style={{ backgroundColor: 'brown', padding: 20 }}>
-                Module2Detail
-            </div>
-        </>
-    }
-
+    return <>
+        <div style={{ backgroundColor: 'brown', padding: 20 }}>
+            Module2Detail
+        </div>
+    </>
 }

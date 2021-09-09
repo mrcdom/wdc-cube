@@ -5,7 +5,7 @@ import { CubeComponentProps } from './CubeComponent'
 const LOG = Logger.get('ViewFactory')
 
 export type IViewProps<T> = ClassAttributes<T> & HTMLAttributes<T> & Attributes
-export type IViewConstructor<S extends Scope, T, P extends CubeComponentProps<S, T>> = React.ComponentClass<P>
+export type IViewConstructor<S extends Scope, T, P extends CubeComponentProps<S, T>> = React.ComponentClass<P> | React.FunctionComponent<P>
 
 type IViewFactory<S extends Scope, T, P extends CubeComponentProps<S, T>> = (scope?: Scope, props?: IViewProps<T>) => ReactElement<P>
 
