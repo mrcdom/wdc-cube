@@ -1,4 +1,4 @@
-export { Logger } from './utils/logger'
+export { Logger } from './utils/Logger'
 export { NOOP_VOID, NOOP_PROMISE_VOID } from './cube/Constants'
 export { CastUtils } from './utils/CastUtils'
 export { Place } from './cube/Place'

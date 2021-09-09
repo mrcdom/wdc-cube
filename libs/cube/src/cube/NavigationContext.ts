@@ -1,4 +1,4 @@
-import { Logger } from '../utils/logger'
+import { Logger } from '../utils/Logger'
 import { Comparators } from '../utils/Comparators'
 import { Place } from './Place'
 import { PlaceUri } from './PlaceUri'

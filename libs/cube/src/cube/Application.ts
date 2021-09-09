@@ -1,4 +1,4 @@
-import { Logger } from '../utils/logger'
+import { Logger } from '../utils/Logger'
 import { Comparators } from '../utils/Comparators'
 import { CastUtils } from '../utils/CastUtils'
 import { Place } from './Place'
