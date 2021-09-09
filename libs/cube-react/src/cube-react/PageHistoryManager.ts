@@ -1,5 +1,5 @@
 import { History, createBrowserHistory, createHashHistory, Path } from 'history'
-import { Logger, Application, Place, HistoryManager } from 'wdc-cube'
+import { Application, Place, HistoryManager } from 'wdc-cube'
 
 export class PageHistoryManager extends HistoryManager {
 
@@ -7,7 +7,7 @@ export class PageHistoryManager extends HistoryManager {
 
     private __history: History
 
-    public constructor(useHash: boolean = false) {
+    public constructor(useHash = false) {
         super()
         this.__history = useHash ? createHashHistory() : createBrowserHistory()
         this.__history.listen(this.emitOnChanged.bind(this))

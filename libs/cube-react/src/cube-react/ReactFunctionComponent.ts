@@ -35,7 +35,7 @@ export function getOrCreateApplication<S extends Scope, A extends ApplicationPre
                 app.scope.update = NOOP_VOID
                 setApp(undefined)
             }
-            LOG.debug(`app.detached`)
+            LOG.debug('app.detached')
         }
     }, [])
 
@@ -49,7 +49,7 @@ export function getOrCreateApplication<S extends Scope, A extends ApplicationPre
         instance.scope.update = () => setValue(value => value + 1)
         instance.initialize()
         setApp(instance)
-        LOG.debug(`app.attached`)
+        LOG.debug('app.attached')
         return instance
     }
 }
