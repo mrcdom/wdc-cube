@@ -9,15 +9,11 @@ export class MainScope extends ApplicationScope {
 export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     public constructor(historyManager: HistoryManager) {
-        super(historyManager, new MainScope(''))
+        super(Places.root, historyManager, new MainScope(''))
     }
 
     public get parentSlotId(): string {
         return AttrsIds.parentSlot
-    }
-
-    public get rootPlace(): Place {
-        return Places.root
     }
 
     public get places(): Record<string, Place> {

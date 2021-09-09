@@ -16,6 +16,8 @@ export class Application {
 
     private __presenterMap: PresenterMapType
 
+    private __rootPlace: Place
+
     private __lastPlace: Place
 
     private __fragment?: string
@@ -24,13 +26,13 @@ export class Application {
 
     private __navigationContext?: NavigationContext
 
-    public constructor(historyManager: HistoryManager) {
-        this.__lastPlace = Place.UNKNOWN
+    public constructor(rootPlace: Place, historyManager: HistoryManager) {
+        this.__rootPlace = rootPlace
+        this.__lastPlace = rootPlace
         this.__historyManager = historyManager
         this.__presenterMap = new Map()
         this.__placeMap = new Map()
 
-        historyManager.tokenProvider = () => this.newUri(this.__lastPlace).toString()
         historyManager.onChangeListener = this.onHistoryChanged.bind(this)
     }
 
@@ -65,6 +67,10 @@ export class Application {
         return this.__historyManager
     }
 
+    public get rootPlace(): Place {
+        return this.__rootPlace
+    }
+
     public get lastPlace(): Place {
         return this.__lastPlace
     }
@@ -96,7 +102,7 @@ export class Application {
     }
 
     public updateHistory(): void {
-        this.historyManager.update()
+        this.historyManager.update(this, this.lastPlace)
     }
 
     public getPresenter(place: Place) {
@@ -109,26 +115,24 @@ export class Application {
         }
     }
 
-    public async navigate(uri: PlaceUri | string, fallbackPlace: Place = Place.UNKNOWN) {
-        if (CastUtils.isInstanceOf(uri, String)) {
-            let suri = uri as string
-            if (!suri) {
-                suri = fallbackPlace.name
+    public async navigate(uri: PlaceUri | string) {
+        const defaultPlace = this.__lastPlace ?? this.rootPlace
+
+        if (uri) {
+            if (CastUtils.isInstanceOf(uri, String)) {
+                const suri = uri as string
+                const place = this.__placeMap.get(suri) || defaultPlace
+                await this.doNavigate(PlaceUri.parse(suri, () => place))
+                return
             }
 
-            const placeProvider = (name: string) => {
-                const place = this.__placeMap.get(name)
-                return place ?? Place.createUnbunded(name)
+            if (uri instanceof PlaceUri) {
+                await this.doNavigate(uri)
+                return
             }
-
-            uri = PlaceUri.parse(suri, placeProvider)
-            if (uri.place.id == -1) {
-                throw new Error(`No place found under name=${uri.place.name}`)
-            }
-            await this.doNavigate(uri)
-        } else {
-            await this.doNavigate(uri as PlaceUri)
         }
+
+        await this.doNavigate(this.newUri(defaultPlace))
     }
 
     protected async doNavigate(uri: PlaceUri) {
@@ -171,7 +175,7 @@ export class Application {
 
     protected onHistoryChanged(sender: HistoryManager) {
         if (!this.__navigationContext) {
-            this.navigate(sender.location, this.lastPlace)
+            this.navigate(sender.location)
         }
     }
 

@@ -26,11 +26,10 @@ export abstract class ApplicationPresenter<S extends ApplicationScope> extends A
     }
 
     public abstract get parentSlotId(): string
-    public abstract get rootPlace(): Place
     public abstract get places(): Record<string, Place>
 
-    public constructor(historyManager: HistoryManager, scope: S) {
-        super(historyManager)
+    public constructor(rootPlace: Place, historyManager: HistoryManager, scope: S) {
+        super(rootPlace, historyManager)
         this.scope = scope
 
     }
@@ -48,7 +47,7 @@ export abstract class ApplicationPresenter<S extends ApplicationScope> extends A
     public async initialize() {
         try {
             this.catalogPlaces(this.places)
-            await this.navigate(this.historyManager.location, this.rootPlace)
+            await this.navigate(this.historyManager.location)
             LOG.info('Initialized')
         } catch (caught) {
             LOG.error('Failed to initialize', caught)

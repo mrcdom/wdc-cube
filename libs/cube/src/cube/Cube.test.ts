@@ -72,8 +72,8 @@ class TestHistoryManager extends HistoryManager {
         super()
     }
 
-    public override update(): void {
-        this.token = this.tokenProvider()
+    public override update(app: Application, place: Place): void {
+        this.token = app.newUri(place).toString()
     }
 
 }
@@ -96,7 +96,7 @@ class TestApplication extends Application {
     }
 
     constructor() {
-        super(new TestHistoryManager())
+        super(Places.ROOT, new TestHistoryManager())
         this.catalogPlaces(Places)
     }
 

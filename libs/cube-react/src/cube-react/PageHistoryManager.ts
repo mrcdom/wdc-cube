@@ -1,55 +1,52 @@
-import { BrowserHistory, createBrowserHistory} from 'history'
-import { Logger, HistoryManager } from 'wdc-cube'
-
-const LOG = Logger.get('URLHistoryManager')
+import { History, createBrowserHistory, createHashHistory, Path } from 'history'
+import { Logger, Application, Place, HistoryManager } from 'wdc-cube'
 
 export class PageHistoryManager extends HistoryManager {
 
     private __debounceHandler?: NodeJS.Timeout
 
-    private __doUpdateCallback = this.doUpdate.bind(this)
+    private __history: History
 
-    private __browserHistory: BrowserHistory
-
-    public constructor() {
+    public constructor(useHash: boolean = false) {
         super()
-        this.__browserHistory = createBrowserHistory()
-        this.__browserHistory.listen(this.emitOnChanged.bind(this))
+        this.__history = useHash ? createHashHistory() : createBrowserHistory()
+        this.__history.listen(this.emitOnChanged.bind(this))
     }
 
-    public override get location() {
-        const location = this.__browserHistory.location
-        if (location) {
-            if(location.search) {
-                return location.pathname.substring(1) + '?' + location.search
-            } else {
-                return location.pathname.substring(1)
-            }
-        }
-        return ''
+    public get location() {
+        const location = this.__history.location
+        return location.pathname + location.search
     }
-    
-    public override update(): void {
+
+    public override update(app: Application, place: Place): void {
+        this.clearDebounceHandler()
+        this.__debounceHandler = setTimeout(this.doUpdate.bind(this, app, place), 16)
+    }
+
+    private clearDebounceHandler() {
         if (this.__debounceHandler) {
             clearTimeout(this.__debounceHandler)
             this.__debounceHandler = undefined
         }
-        this.__debounceHandler = setTimeout(this.__doUpdateCallback, 16)
     }
 
-    private doUpdate(): void {
-        const newLocation = this.tokenProvider()
-        if(newLocation !== this.location) {
-            this.__browserHistory.push(newLocation)
-            LOG.info(this.location)
+    private doUpdate(app: Application, place: Place): void {
+        const currentUri = app.newUri(place)
+
+        const oldLocation = this.__history.location
+        const newLocation: Partial<Path> = {
+            pathname: place.name,
+            search: currentUri.getQueryString(),
+            hash: ''
+        }
+
+        if (newLocation.pathname !== oldLocation.pathname || newLocation.search !== oldLocation.search) {
+            this.__history.push(newLocation)
         }
     }
 
     private emitOnChanged() {
-        const newLocation = this.tokenProvider()
-        if(newLocation !== this.location) {
-            this.onChangeListener(this)
-        }
+        this.onChangeListener(this)
     }
 
 }
