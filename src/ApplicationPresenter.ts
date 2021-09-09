@@ -34,8 +34,10 @@ export class ApplicationPresenter extends WebFlowApplication {
     public readonly scope = new ApplicationScope('')
 
     private readonly rootSlot: WebFlowScopeSlot = scope => {
-        this.scope.root = scope
-        this.scope.update()
+        if(this.scope.root !== scope) {
+            this.scope.root = scope
+            this.scope.update()
+        }
     }
 
     public constructor(historyManager: WebFlowHistoryManager) {
