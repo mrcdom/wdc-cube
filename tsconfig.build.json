@@ -1,0 +1,7 @@
+{
+    "files": [],
+    "references": [
+		{ "path": "libs/cube" },
+		{ "path": "libs/cube-react" }
+    ]
+}

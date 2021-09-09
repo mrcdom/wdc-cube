@@ -1,0 +1,25 @@
+{
+  "name": "wdc-cube-react",
+  "version": "1.0.0",
+  "author": "Marcelo Domingos <mrcdom@gmail.com>",
+  "types": "lib/index.d.ts",
+  "main": "lib/index.js",
+  "dependencies": {
+    "history": "^5.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/react": "17.0.19",
+    "@types/react-dom": "17.0.9",
+    "@typescript-eslint/eslint-plugin": "^4.31.0",
+    "@typescript-eslint/typescript-estree": "^4.29.3",
+    "eslint-plugin-react": "^7.25.1"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "lint": "eslint . --ext .tsx --ext .ts",
+    "lint:fix": "eslint . --ext .tsx --ext .ts --fix"
+  }
+}

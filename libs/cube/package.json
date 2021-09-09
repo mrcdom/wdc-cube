@@ -1,0 +1,23 @@
+{
+  "name": "wdc-cube",
+  "version": "1.0.0",
+  "author": "Marcelo Domingos <mrcdom@gmail.com>",
+  "types": "lib/index.d.ts",
+  "main": "lib/index.js",
+  "dependencies": {
+    "@aws-sdk/util-utf8-browser": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.31.0",
+    "@typescript-eslint/typescript-estree": "^4.29.3",
+    "eslint": "^7.32.0",
+    "ts-jest": "^27.0.5"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "lint": "eslint . --ext .tsx --ext .ts",
+    "lint:fix": "eslint . --ext .tsx --ext .ts --fix",
+    "test": "jest"
+  }
+}
