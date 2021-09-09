@@ -1,19 +1,19 @@
-import { Logger, WebFlowPresenter, WebFlowScope, WebFlowScopeSlot, WebFlowURI, NOOP_VOID } from 'wdc-cube'
+import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { ApplicationPresenter } from '../ApplicationPresenter'
 import { ViewIds, AttrsIds } from '../Constants'
 
 
 const LOG = Logger.get('Module2Presenter')
 
-export class Module2Scope extends WebFlowScope {
-    detail?: WebFlowScope
+export class Module2Scope extends Scope {
+    detail?: Scope
 }
 
-export class Module2Presenter extends WebFlowPresenter<ApplicationPresenter, Module2Scope> {
+export class Module2Presenter extends Presenter<ApplicationPresenter, Module2Scope> {
 
-    private parentSlot: WebFlowScopeSlot = NOOP_VOID
+    private parentSlot: ScopeSlot = NOOP_VOID
 
-    private readonly detailSlot: WebFlowScopeSlot = scope => {
+    private readonly detailSlot: ScopeSlot = scope => {
         if (this.scope.detail !== scope) {
             this.scope.detail = scope
             this.scope.update()
@@ -29,7 +29,7 @@ export class Module2Presenter extends WebFlowPresenter<ApplicationPresenter, Mod
         super.release()
     }
 
-    public override async applyParameters(uri: WebFlowURI, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
         if (initialization) {
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             LOG.info('Initialized')

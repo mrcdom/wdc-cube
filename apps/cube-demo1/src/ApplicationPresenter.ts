@@ -1,11 +1,11 @@
 import {
     Logger,
-    WebFlowApplication,
-    WebFlowHistoryManager,
-    WebFlowPlace,
-    WebFlowURI,
-    WebFlowScope,
-    WebFlowScopeSlot,
+    Application,
+    HistoryManager,
+    Place,
+    PlaceUri,
+    Scope,
+    ScopeSlot,
     NOOP_VOID
 } from 'wdc-cube'
 import { Places } from './Places'
@@ -19,7 +19,7 @@ import { Module2DetailPresenter } from './module2/Module2DetailPresenter'
 const LOG = Logger.get('ApplicationPresenter')
 
 { // Initialize Places
-    const place = WebFlowPlace.create
+    const place = Place.create
 
     // Level 0
     Places.root = place('root', RootPresenter)
@@ -33,22 +33,22 @@ const LOG = Logger.get('ApplicationPresenter')
     Places.module2Detail = place('module2-detail', Module2DetailPresenter, Places.module2)
 }
 
-export class ApplicationScope extends WebFlowScope {
-    root?: WebFlowScope
+export class ApplicationScope extends Scope {
+    root?: Scope
 }
 
-export class ApplicationPresenter extends WebFlowApplication {
+export class ApplicationPresenter extends Application {
 
     public readonly scope = new ApplicationScope('')
 
-    private readonly rootSlot: WebFlowScopeSlot = scope => {
+    private readonly rootSlot: ScopeSlot = scope => {
         if(this.scope.root !== scope) {
             this.scope.root = scope
             this.scope.update()
         }
     }
 
-    public constructor(historyManager: WebFlowHistoryManager) {
+    public constructor(historyManager: HistoryManager) {
         super(historyManager)
         this.catalogPlaces(Places)
     }
@@ -59,7 +59,7 @@ export class ApplicationPresenter extends WebFlowApplication {
         LOG.info('Finalized')
     }
 
-    protected override onBeforeNavigation(uri: WebFlowURI) {
+    protected override onBeforeNavigation(uri: PlaceUri) {
         uri.setScopeSlot(AttrsIds.parentSlot, this.rootSlot)
     }
 

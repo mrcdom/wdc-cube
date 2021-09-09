@@ -1,4 +1,4 @@
-import { CastUtils } from './CastUtils'
+import { CastUtils } from '../utils/CastUtils'
 
 export class QueryStringBuilder extends Object {
 

@@ -1,6 +1,6 @@
 import { NOOP_VOID } from './Constants'
 
-export class WebFlowScope {
+export class Scope {
 
     public readonly id: string
 

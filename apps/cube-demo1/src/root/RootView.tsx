@@ -1,14 +1,14 @@
 import React from 'react'
-import { WebFlowComponent, WebFlowViewFactory } from 'wdc-cube-react'
+import { CubeComponent, ViewFactory } from 'wdc-cube-react'
 import { RootScope } from './RootPresenter'
 import style from './RootView.module.css'
 
-export class RootView extends WebFlowComponent<RootScope> {
+export class RootView extends CubeComponent<RootScope> {
 
     public override render() {
         const scope = this.props.scope
 
-        let moduleView = WebFlowViewFactory.createView(scope.module)
+        let moduleView = ViewFactory.createView(scope.module)
         if (!moduleView) {
             moduleView = <>
                 <div style={{ backgroundColor: 'green', padding: 20 }}>

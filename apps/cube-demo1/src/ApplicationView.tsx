@@ -1,5 +1,5 @@
 import React from 'react'
-import { ReactComponent, WebFlowViewFactory, WebFlowURLHistoryManager } from 'wdc-cube-react'
+import { ReactComponent, ViewFactory, URLHistoryManager } from 'wdc-cube-react'
 import logo from './logo.svg'
 import style from './Application.module.css'
 
@@ -12,7 +12,7 @@ import { Module2View } from './module2/Module2View'
 import { Module2DetailView } from './module2/Module2DetailView'
 
 { // View Registration
-  const register = WebFlowViewFactory.register
+  const register = ViewFactory.register
 
   register(ViewIds.root, RootView)
   register(ViewIds.module1, Module1View)
@@ -26,7 +26,7 @@ export class ApplicationView extends ReactComponent {
   private app?: ApplicationPresenter
 
   protected override attached() {
-    this.app = new ApplicationPresenter(new WebFlowURLHistoryManager())
+    this.app = new ApplicationPresenter(new URLHistoryManager())
     this.app.scope.update = this.newUpdateCallback()
     this.app.initialize()
   }
@@ -41,7 +41,7 @@ export class ApplicationView extends ReactComponent {
   public override render() {
     if (this.app) {
       const scope = this.app.scope
-      const rootView = WebFlowViewFactory.createView(scope.root)
+      const rootView = ViewFactory.createView(scope.root)
 
       return <>
         <div className={style.App}>

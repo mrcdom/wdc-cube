@@ -1,6 +1,5 @@
 import { CastUtils } from './CastUtils'
 import { StandardCharsets, Charset } from './StandardCharsets'
-import { WebFlowURI } from './WebFlowURI'
 
 export class QueryStringParser {
 
@@ -11,7 +10,7 @@ export class QueryStringParser {
      * <strong>IMPLEMENTATION NOTE</strong>: URL decoding is performed individually on the parsed name and value elements, rather than on the entire query string ahead of time, to
      * properly deal with the case where the name or value includes an encoded "=" or "&" character that would otherwise be interpreted as a delimiter.
      *
-     * @param uri
+     * @param params
      *            Map that accumulates the resulting parameters
      * @param data
      *            Input string containing request parameters
@@ -19,13 +18,13 @@ export class QueryStringParser {
      * @exception IllegalArgumentException
      *                if the data is bad-formed
      */
-    public static parse(uri: WebFlowURI, data: string, encoding: Charset): void {
+    public static parse(params: Map<string, unknown>, data: string, encoding: Charset): void {
         if (data != null && data.length > 0) {
             // use the specified encoding to extract bytes out of the
             // given string so that the encoding is not lost. If an
             // encoding is not specified, let it use platform default
             const bytes = encoding != null ? encoding.encode(data) : StandardCharsets.ASCII.encode(data)
-            this.parseParameters(uri, bytes, encoding)
+            this.parseParameters(params, bytes, encoding)
         }
     }
 
@@ -53,16 +52,16 @@ export class QueryStringParser {
      *
      * @param uri
      *            The map to populate
-     * @param name
-     *            The parameter name
+     * @param params
+     *            The parameter map
      * @param value
      *            The parameter value
      */
-    private static putMapEntry(uri: WebFlowURI, name: string, value: string): void {
-        const oldValue = uri.getParameterRawValue(name)
+    private static putMapEntry(params: Map<string, unknown>, name: string, value: string): void {
+        const oldValue = params.get(name)
 
         if (oldValue === undefined || oldValue === null) {
-            uri.setParameter(name, value)
+            params.set(name, value)
         } else if (CastUtils.isArray(oldValue)) {
             const array = oldValue as Array<unknown>
             array.push(CastUtils.toUnknown(value, CastUtils.getArrayType(array)))
@@ -71,7 +70,7 @@ export class QueryStringParser {
             array[0] = oldValue
             array[1] = CastUtils.toUnknown(value, CastUtils.getType(oldValue))
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            uri.setParameter(name, array as any)
+            params.set(name, array as any)
         }
     }
 
@@ -94,7 +93,7 @@ export class QueryStringParser {
      * @exception UnsupportedEncodingException
      *                if the data is malformed
      */
-    public static parseParameters(uri: WebFlowURI, data: Uint8Array, encoding: Charset): void {
+    public static parseParameters(params: Map<string, unknown>, data: Uint8Array, encoding: Charset): void {
         if (data != null && data.length > 0) {
             let ix = 0
             let ox = 0
@@ -106,7 +105,7 @@ export class QueryStringParser {
                     case '&':
                         value = encoding.decode(data.subarray(0, ox))
                         if (key != null) {
-                            this.putMapEntry(uri, key, value)
+                            this.putMapEntry(params, key, value)
                             key = null
                         }
                         ox = 0
@@ -132,7 +131,7 @@ export class QueryStringParser {
             // The last value does not end in '&'. So save it now.
             if (key != null) {
                 value = encoding.decode(data.subarray(0, ox))
-                this.putMapEntry(uri, key, value)
+                this.putMapEntry(params, key, value)
             }
         }
 

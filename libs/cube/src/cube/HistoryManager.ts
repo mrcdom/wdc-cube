@@ -2,13 +2,13 @@ import { NOOP_STRING } from './Constants'
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-const NOPP_ONCHANGE_LISTENER = (sender: WebFlowHistoryManager) => {
+const NOPP_ONCHANGE_LISTENER = (sender: HistoryManager) => {
     // NOOP
 }
 
-export class WebFlowHistoryManager {
+export class HistoryManager {
 
-    public static NOOP = new WebFlowHistoryManager()
+    public static NOOP = new HistoryManager()
 
     public onChangeListener = NOPP_ONCHANGE_LISTENER
 

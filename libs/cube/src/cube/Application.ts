@@ -1,31 +1,31 @@
 import { Logger } from '../utils/logger'
-import { Comparators } from './Comparators'
-import { CastUtils } from './CastUtils'
-import { WebFlowPlace } from './WebFlowPlace'
-import { WebFlowURI } from './WebFlowURI'
-import { WebFlowHistoryManager } from './WebFlowHistoryManager'
-import { WebFlowNavigationContext } from './WebFlowNavigationContext'
+import { Comparators } from '../utils/Comparators'
+import { CastUtils } from '../utils/CastUtils'
+import { Place } from './Place'
+import { PlaceUri } from './PlaceUri'
+import { HistoryManager } from './HistoryManager'
+import { NavigationContext } from './NavigationContext'
 
-import type { WebFlowPresenterMapType } from './WebFlowPresenter'
+import type { PresenterMapType } from './Presenter'
 
 const LOG = Logger.get('WebFlowApplication')
 
-export class WebFlowApplication {
+export class Application {
 
-    private __placeMap: Map<string, WebFlowPlace>
+    private __placeMap: Map<string, Place>
 
-    private __presenterMap: WebFlowPresenterMapType
+    private __presenterMap: PresenterMapType
 
-    private __lastPlace: WebFlowPlace
+    private __lastPlace: Place
 
     private __fragment?: string
 
-    private __historyManager: WebFlowHistoryManager
+    private __historyManager: HistoryManager
 
-    private __navigationContext?: WebFlowNavigationContext
+    private __navigationContext?: NavigationContext
 
-    public constructor(historyManager: WebFlowHistoryManager) {
-        this.__lastPlace = WebFlowPlace.UNKNOWN
+    public constructor(historyManager: HistoryManager) {
+        this.__lastPlace = Place.UNKNOWN
         this.__historyManager = historyManager
         this.__presenterMap = new Map()
         this.__placeMap = new Map()
@@ -65,7 +65,7 @@ export class WebFlowApplication {
         return this.__historyManager
     }
 
-    public get lastPlace(): WebFlowPlace {
+    public get lastPlace(): Place {
         return this.__lastPlace
     }
 
@@ -73,7 +73,7 @@ export class WebFlowApplication {
         return this.__fragment
     }
 
-    public publishParameters(uri: WebFlowURI): void {
+    public publishParameters(uri: PlaceUri): void {
         for (const presenter of this.__presenterMap.values()) {
             presenter.publishParameters(uri)
         }
@@ -89,8 +89,8 @@ export class WebFlowApplication {
         }
     }
 
-    public newUri(place: WebFlowPlace): WebFlowURI {
-        const uri = new WebFlowURI(place)
+    public newUri(place: Place): PlaceUri {
+        const uri = new PlaceUri(place)
         this.publishParameters(uri)
         return uri
     }
@@ -99,17 +99,17 @@ export class WebFlowApplication {
         this.historyManager.update()
     }
 
-    public getPresenter(place: WebFlowPlace) {
+    public getPresenter(place: Place) {
         return this.__presenterMap.get(place.id)
     }
 
-    protected catalogPlaces(places: Record<string, WebFlowPlace>) {
+    protected catalogPlaces(places: Record<string, Place>) {
         for (const place of Object.values(places)) {
             this.__placeMap.set(place.name, place)
         }
     }
 
-    public async navigate(uri: WebFlowURI | string, fallbackPlace: WebFlowPlace = WebFlowPlace.UNKNOWN) {
+    public async navigate(uri: PlaceUri | string, fallbackPlace: Place = Place.UNKNOWN) {
         if (CastUtils.isInstanceOf(uri, String)) {
             let suri = uri as string
             if (!suri) {
@@ -118,20 +118,20 @@ export class WebFlowApplication {
 
             const placeProvider = (name: string) => {
                 const place = this.__placeMap.get(name)
-                return place ?? WebFlowPlace.createUnbunded(name)
+                return place ?? Place.createUnbunded(name)
             }
 
-            uri = WebFlowURI.parse(suri, placeProvider)
+            uri = PlaceUri.parse(suri, placeProvider)
             if (uri.place.id == -1) {
                 throw new Error(`No place found under name=${uri.place.name}`)
             }
             await this.doNavigate(uri)
         } else {
-            await this.doNavigate(uri as WebFlowURI)
+            await this.doNavigate(uri as PlaceUri)
         }
     }
 
-    protected async doNavigate(uri: WebFlowURI) {
+    protected async doNavigate(uri: PlaceUri) {
         this.onBeforeNavigation(uri)
 
         if (this.__navigationContext) {
@@ -147,7 +147,7 @@ export class WebFlowApplication {
                 }
             }
         } else {
-            const context = new WebFlowNavigationContext(this, uri)
+            const context = new NavigationContext(this, uri)
             try {
                 this.__navigationContext = context
 
@@ -170,14 +170,14 @@ export class WebFlowApplication {
         }
     }
 
-    protected onHistoryChanged(sender: WebFlowHistoryManager) {
+    protected onHistoryChanged(sender: HistoryManager) {
         if (!this.__navigationContext) {
             this.navigate(sender.location, this.lastPlace)
         }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected onBeforeNavigation(uri: WebFlowURI) {
+    protected onBeforeNavigation(uri: PlaceUri) {
         // NOOP
     }
 

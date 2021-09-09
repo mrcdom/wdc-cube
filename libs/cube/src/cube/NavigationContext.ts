@@ -1,22 +1,22 @@
 import { Logger } from '../utils/logger'
-import { Comparators } from './Comparators'
-import { WebFlowPlace } from './WebFlowPlace'
-import { WebFlowURI } from './WebFlowURI'
-import { WebFlowApplication } from './WebFlowApplication'
-import type { WebFlowPresenterMapType } from './WebFlowPresenter'
+import { Comparators } from '../utils/Comparators'
+import { Place } from './Place'
+import { PlaceUri } from './PlaceUri'
+import { Application } from './Application'
+import type { PresenterMapType } from './Presenter'
 
 const LOG = Logger.get('WebFlowNavigationContext')
 
-export class WebFlowNavigationContext {
+export class NavigationContext {
 
-    private __app: WebFlowApplication
-    private __presenterMap: WebFlowPresenterMapType
-    private __sourceUri: WebFlowURI
-    private __targetUri: WebFlowURI
+    private __app: Application
+    private __presenterMap: PresenterMapType
+    private __sourceUri: PlaceUri
+    private __targetUri: PlaceUri
     private __level: number
     private __cycleDetectionMap: Map<string, boolean>
 
-    public constructor(app: WebFlowApplication, targetUri: WebFlowURI) {
+    public constructor(app: Application, targetUri: PlaceUri) {
         this.__app = app
         this.__level = 0
         this.__sourceUri = app.newUri(app.lastPlace)
@@ -27,11 +27,11 @@ export class WebFlowNavigationContext {
         this.extractPresenters(this.__presenterMap, this.__sourceUri.place.path)
     }
 
-    public get targetUri(): WebFlowURI {
+    public get targetUri(): PlaceUri {
         return this.__targetUri
     }
 
-    public set targetUri(uri: WebFlowURI) {
+    public set targetUri(uri: PlaceUri) {
         if (this.__cycleDetectionMap.has(uri.place.pathName)) {
             throw new Error(
                 'Dectected a navigation cycle between '
@@ -51,7 +51,7 @@ export class WebFlowNavigationContext {
         return ++this.__level
     }
 
-    private extractPresenters(map: WebFlowPresenterMapType, path: WebFlowPlace[]) {
+    private extractPresenters(map: PresenterMapType, path: Place[]) {
         for (const place of path) {
             const presenter = this.__app.getPresenter(place)
             if (presenter) {
@@ -60,7 +60,7 @@ export class WebFlowNavigationContext {
         }
     }
 
-    public async build(place: WebFlowPlace, atLevel: number) {
+    public async build(place: Place, atLevel: number) {
         let result = false
 
         // Only runs if this context is the last context
@@ -103,7 +103,7 @@ export class WebFlowNavigationContext {
         }
     }
 
-    public commit(newPresenterMap: WebFlowPresenterMapType) {
+    public commit(newPresenterMap: PresenterMapType) {
         newPresenterMap.clear()
 
         // Keep only presenters belonging to 
@@ -128,7 +128,7 @@ export class WebFlowNavigationContext {
         return newPresenterMap
     }
 
-    private releasePresenters(presenterInstanceMap: WebFlowPresenterMapType): void {
+    private releasePresenters(presenterInstanceMap: PresenterMapType): void {
         const presenterIds = [] as number[]
 
         for (const presenterId of presenterInstanceMap.keys()) {

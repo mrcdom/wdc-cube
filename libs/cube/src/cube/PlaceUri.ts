@@ -1,38 +1,38 @@
 import { NOOP_VOID } from './Constants'
-import { CastUtils } from './CastUtils'
-import { StandardCharsets } from './StandardCharsets'
-import { QueryStringParser } from './QueryStringParser'
-import { QueryStringBuilder } from './QueryStringBuilder'
-import { WebFlowPlace } from './WebFlowPlace'
-import type { WebFlowScopeSlot } from './WebFlowScopeSlot'
+import { CastUtils } from '../utils/CastUtils'
+import { StandardCharsets } from '../utils/StandardCharsets'
+import { QueryStringParser } from '../utils/QueryStringParser'
+import { QueryStringBuilder } from '../utils/QueryStringBuilder'
+import { Place } from './Place'
+import type { ScopeSlot } from './ScopeSlot'
 
-export class WebFlowURI extends Object {
+export class PlaceUri extends Object {
 
-	public static parse(placeStr: string, stepProvider: (name: string) => WebFlowPlace = WebFlowPlace.createUnbunded): WebFlowURI {
+	public static parse(placeStr: string, stepProvider: (name: string) => Place = Place.createUnbunded): PlaceUri {
 		// If we have a not blank URI, then we will proceed with URI parsing
 		if (placeStr && placeStr.length > 0) {
 			// First, we are going to brake the URI into two parts
 			const parts = placeStr.split(/\?/)
 			const step = stepProvider(parts[0])
-			const uri = new WebFlowURI(step)
+			const uri = new PlaceUri(step)
 			if (parts.length > 1) {
-				QueryStringParser.parse(uri, parts[1], StandardCharsets.UTF_8)
+				QueryStringParser.parse(uri.parameters, parts[1], StandardCharsets.UTF_8)
 			}
 			return uri
 		} else {
-			return new WebFlowURI(WebFlowPlace.UNKNOWN)
+			return new PlaceUri(Place.UNKNOWN)
 		}
 	}
 
 	// :: Instance
 
-	public readonly place: WebFlowPlace
+	public readonly place: Place
 
 	private parameters: Map<string, unknown>
 
 	public readonly attributes: Map<string, unknown>
 
-	public constructor(step: WebFlowPlace) {
+	public constructor(step: Place) {
 		super()
 		this.place = step
 		this.parameters = new Map()
@@ -255,14 +255,14 @@ export class WebFlowURI extends Object {
 		}
 	}
 
-	public setScopeSlot(slotId: string, slot: WebFlowScopeSlot) {
+	public setScopeSlot(slotId: string, slot: ScopeSlot) {
 		this.attributes.set(slotId, slot)
 	}
 
-	public getScopeSlot(slotId: string): WebFlowScopeSlot {
+	public getScopeSlot(slotId: string): ScopeSlot {
 		const slot = this.attributes.get(slotId)
 		if (slot) {
-			return slot as WebFlowScopeSlot
+			return slot as ScopeSlot
 		} else {
 			return NOOP_VOID
 		}

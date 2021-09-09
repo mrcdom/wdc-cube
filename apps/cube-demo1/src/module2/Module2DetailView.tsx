@@ -1,8 +1,8 @@
 import React from 'react'
-import { WebFlowComponent } from 'wdc-cube-react'
+import { CubeComponent } from 'wdc-cube-react'
 import { Module2DetailScope } from './Module2DetailPresenter'
 
-export class Module2DetailView extends WebFlowComponent<Module2DetailScope> {
+export class Module2DetailView extends CubeComponent<Module2DetailScope> {
 
     public override render() {
         return <>

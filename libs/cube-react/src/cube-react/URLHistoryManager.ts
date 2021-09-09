@@ -1,9 +1,9 @@
 import { BrowserHistory, createBrowserHistory} from 'history'
-import { Logger, WebFlowHistoryManager } from 'wdc-cube'
+import { Logger, HistoryManager } from 'wdc-cube'
 
-const LOG = Logger.get('WebFlowURLHistoryManager')
+const LOG = Logger.get('URLHistoryManager')
 
-export class WebFlowURLHistoryManager extends WebFlowHistoryManager {
+export class URLHistoryManager extends HistoryManager {
 
     private __debounceHandler?: NodeJS.Timeout
 

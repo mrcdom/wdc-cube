@@ -1,37 +1,37 @@
-import { WebFlowApplication, } from './WebFlowApplication'
-import { newPresenterFactory } from './WebFlowPresenter'
+import { Application, } from './Application'
+import { newPresenterFactory } from './Presenter'
 
-import type { WebFlowPresenterContructor, WebFlowPresenterFactory } from './WebFlowPresenter'
+import type { PresenterContructor, PresenterFactory } from './Presenter'
 
 const indexGenMap: Map<number, number> = new Map()
 
-const noPresenterFactory: WebFlowPresenterFactory = () => {
+const noPresenterFactory: PresenterFactory = () => {
     throw new Error('No presenter factory was provided')
 }
 
-export class WebFlowPlace {
+export class Place {
 
     public static createUnbunded(name: string) {
-        return new WebFlowPlace(name, undefined, () => {
+        return new Place(name, undefined, () => {
             throw new Error('Unbounded place can not create a presenter')
         }, -1)
     }
 
-    public static UNKNOWN = WebFlowPlace.createUnbunded('unknown')
+    public static UNKNOWN = Place.createUnbunded('unknown')
 
-    public static create<A extends WebFlowApplication>(name: string, ctor: WebFlowPresenterContructor<A>, parent?: WebFlowPlace) {
-        return new WebFlowPlace(name, parent, newPresenterFactory(ctor))
+    public static create<A extends Application>(name: string, ctor: PresenterContructor<A>, parent?: Place) {
+        return new Place(name, parent, newPresenterFactory(ctor))
     }
 
     public readonly id: number
 
     public readonly pathName: string
-    public readonly path: WebFlowPlace[] = []
+    public readonly path: Place[] = []
 
     public constructor(
         public readonly name: string,
-        public readonly parent?: WebFlowPlace,
-        public readonly factory: WebFlowPresenterFactory = noPresenterFactory,
+        public readonly parent?: Place,
+        public readonly factory: PresenterFactory = noPresenterFactory,
         id?: number
     ) {
         const pathNameBuilder = [] as string[]
@@ -44,7 +44,7 @@ export class WebFlowPlace {
         return this.pathName
     }
 
-    private buildPath(pathNameBuilder: string[], step: WebFlowPlace) {
+    private buildPath(pathNameBuilder: string[], step: Place) {
         if (step.parent) {
             this.buildPath(pathNameBuilder, step.parent)
         }

@@ -5,27 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "tests",
-            "type": "node",
+            "name": "Test :: Cube",
             "request": "launch",
-            "args": [
-                "${workspaceFolder}/node_modules/react-scripts/bin/react-scripts.js",
-                "test",
-                "--runInBand",
-                "--no-cache",
-                "--env=jsdom"
-            ],
             "runtimeArgs": [
-                "-r",
-                "ts-node/register"
+                "run-script",
+                "test"
             ],
-            "cwd": "${workspaceFolder}",
-            "env": {
-                "CI": "true"
-            },
-            "protocol": "inspector",
-            "internalConsoleOptions": "openOnSessionStart",
-            "console": "integratedTerminal",
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node",
+            "cwd": "${workspaceFolder}/libs/cube"
         }
     ]
 }

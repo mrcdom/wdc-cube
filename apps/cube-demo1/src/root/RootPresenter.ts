@@ -1,9 +1,9 @@
 import {
     Logger,
-    WebFlowPresenter,
-    WebFlowScope,
-    WebFlowScopeSlot,
-    WebFlowURI,
+    Presenter,
+    Scope,
+    ScopeSlot,
+    PlaceUri,
     NOOP_VOID,
     NOOP_PROMISE_VOID
 } from 'wdc-cube'
@@ -13,8 +13,8 @@ import { ViewIds, AttrsIds } from '../Constants'
 
 const LOG = Logger.get('RootPresenter')
 
-export class RootScope extends WebFlowScope {
-    module?: WebFlowScope
+export class RootScope extends Scope {
+    module?: Scope
 
     onRoot: () => Promise<void> = NOOP_PROMISE_VOID
     onModule1: () => Promise<void> = NOOP_PROMISE_VOID
@@ -23,11 +23,11 @@ export class RootScope extends WebFlowScope {
     onModule2Detail: () => Promise<void> = NOOP_PROMISE_VOID
 }
 
-export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootScope> {
+export class RootPresenter extends Presenter<ApplicationPresenter, RootScope> {
 
-    private parentSlot: WebFlowScopeSlot = NOOP_VOID
+    private parentSlot: ScopeSlot = NOOP_VOID
 
-    private readonly moduleSlot: WebFlowScopeSlot = scope => {
+    private readonly moduleSlot: ScopeSlot = scope => {
         if (scope !== this.scope.module) {
             this.scope.module = scope
             this.scope.update()
@@ -43,7 +43,7 @@ export class RootPresenter extends WebFlowPresenter<ApplicationPresenter, RootSc
         super.release()
     }
 
-    public override async applyParameters(uri: WebFlowURI, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
         if (initialization) {
             this.scope.onRoot = this.onRootClicked.bind(this)
             this.scope.onModule1 = this.onModule1Clicked.bind(this)
