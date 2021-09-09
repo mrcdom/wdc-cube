@@ -1,20 +1,15 @@
-import {
-    ApplicationPresenter as CubeApplicationPresenter,
-    ApplicationScope as CubeApplicationScope,
-    HistoryManager,
-    Place
-} from 'wdc-cube'
+import { ApplicationPresenter, ApplicationScope, HistoryManager, Place } from 'wdc-cube'
 import { Places } from './Places'
 import { AttrsIds } from './Constants'
 
-export class ApplicationScope extends CubeApplicationScope {
+export class MainScope extends ApplicationScope {
 
 }
 
-export class ApplicationPresenter extends CubeApplicationPresenter<ApplicationScope> {
+export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     public constructor(historyManager: HistoryManager) {
-        super(historyManager, new ApplicationScope(''))
+        super(historyManager, new MainScope(''))
     }
 
     public get parentSlotId(): string {

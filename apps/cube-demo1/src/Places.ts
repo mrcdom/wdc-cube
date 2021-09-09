@@ -6,27 +6,17 @@ import { Module1DetailPresenter } from './module1/Module1DetailPresenter'
 import { Module2Presenter } from './module2/Module2Presenter'
 import { Module2DetailPresenter } from './module2/Module2DetailPresenter'
 
+// Level 0
+const root = Place.create('root', RootPresenter)
+
+// Level 1
+const module1 = Place.create('module1', Module1Presenter, root)
+const module2 = Place.create('module2', Module2Presenter, root)
+
+// Level 2
+const module1Detail = Place.create('module1-detail', Module1DetailPresenter, module1)
+const module2Detail = Place.create('module2-detail', Module2DetailPresenter, module2)
+
 export const Places = {
-
-    root: Place.UNKNOWN,
-    module1: Place.UNKNOWN,
-    module1Detail: Place.UNKNOWN,
-    module2: Place.UNKNOWN,
-    module2Detail: Place.UNKNOWN,
-
-}
-
-{ // Initialize Places
-    const place = Place.create
-
-    // Level 0
-    Places.root = place('root', RootPresenter)
-
-    // Level 1
-    Places.module1 = place('module1', Module1Presenter, Places.root)
-    Places.module2 = place('module2', Module2Presenter, Places.root)
-
-    // Level 2
-    Places.module1Detail = place('module1-detail', Module1DetailPresenter, Places.module1)
-    Places.module2Detail = place('module2-detail', Module2DetailPresenter, Places.module2)
+    root, module1, module2, module1Detail, module2Detail
 }

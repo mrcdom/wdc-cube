@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { ApplicationView } from './ApplicationView'
+import { MainView } from './MainView'
 import './index.css'
 
-ReactDOM.render(<ApplicationView />, document.getElementById('root'))
+ReactDOM.render(<MainView />, document.getElementById('root'))

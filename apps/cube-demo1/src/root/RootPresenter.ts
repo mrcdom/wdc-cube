@@ -8,7 +8,7 @@ import {
     NOOP_PROMISE_VOID
 } from 'wdc-cube'
 import { Places } from '../Places'
-import { ApplicationPresenter } from '../ApplicationPresenter'
+import { MainPresenter } from '../MainPresenter'
 import { ViewIds, AttrsIds } from '../Constants'
 
 const LOG = Logger.get('RootPresenter')
@@ -23,7 +23,7 @@ export class RootScope extends Scope {
     onModule2Detail: () => Promise<void> = NOOP_PROMISE_VOID
 }
 
-export class RootPresenter extends Presenter<ApplicationPresenter, RootScope> {
+export class RootPresenter extends Presenter<MainPresenter, RootScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
@@ -34,7 +34,7 @@ export class RootPresenter extends Presenter<ApplicationPresenter, RootScope> {
         }
     }
 
-    public constructor(app: ApplicationPresenter) {
+    public constructor(app: MainPresenter) {
         super(app, new RootScope(ViewIds.root))
     }
 

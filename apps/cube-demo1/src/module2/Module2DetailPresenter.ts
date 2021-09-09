@@ -1,5 +1,5 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
-import { ApplicationPresenter } from '../ApplicationPresenter'
+import { MainPresenter } from '../MainPresenter'
 import { ViewIds, AttrsIds } from '../Constants'
 
 const LOG = Logger.get('Module2DetailPresenter')
@@ -8,11 +8,11 @@ export class Module2DetailScope extends Scope {
 
 }
 
-export class Module2DetailPresenter extends Presenter<ApplicationPresenter, Module2DetailScope> {
+export class Module2DetailPresenter extends Presenter<MainPresenter, Module2DetailScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
-    public constructor(app: ApplicationPresenter) {
+    public constructor(app: MainPresenter) {
         super(app, new Module2DetailScope(ViewIds.module2Detail))
     }
 

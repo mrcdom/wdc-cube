@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { ApplicationView } from './ApplicationView'
+import { MainView } from './MainView'
 
 it('renders without crashing', () => {
   const div = document.createElement('div')
-  ReactDOM.render(<ApplicationView />, div)
+  ReactDOM.render(<MainView />, div)
 })

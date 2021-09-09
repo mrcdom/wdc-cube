@@ -1,10 +1,10 @@
 import React from 'react'
 import { ReactComponent, ViewFactory, PageHistoryManager } from 'wdc-cube-react'
 import logo from './logo.svg'
-import style from './Application.module.css'
+import style from './Main.module.css'
 
 import { ViewIds } from './Constants'
-import { ApplicationPresenter } from './ApplicationPresenter'
+import { MainPresenter } from './MainPresenter'
 import { RootView } from './root/RootView'
 import { Module1View } from './module1/Module1View'
 import { Module1DetailView } from './module1/Module1DetailView'
@@ -21,12 +21,12 @@ import { Module2DetailView } from './module2/Module2DetailView'
   register(ViewIds.module2Detail, Module2DetailView)
 }
 
-export class ApplicationView extends ReactComponent {
+export class MainView extends ReactComponent {
 
-  private app?: ApplicationPresenter
+  private app?: MainPresenter
 
   protected override attached() {
-    this.app = new ApplicationPresenter(new PageHistoryManager())
+    this.app = new MainPresenter(new PageHistoryManager())
     this.app.scope.update = this.newUpdateCallback()
     this.app.initialize()
   }
