@@ -1,5 +1,5 @@
 import React from 'react'
-import { ReactComponent, getOrCreateApplication, ViewFactory, PageHistoryManager } from 'wdc-cube-react'
+import { getOrCreateApplication, ViewFactory, PageHistoryManager } from 'wdc-cube-react'
 import logo from './logo.svg'
 import style from './Main.module.css'
 

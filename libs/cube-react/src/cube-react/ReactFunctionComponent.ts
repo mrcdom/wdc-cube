@@ -1,15 +1,14 @@
 import React from 'react'
-import { Scope, ApplicationPresenter, ApplicationScope, NOOP_VOID } from 'wdc-cube'
+import { Scope, ApplicationPresenter, NOOP_VOID } from 'wdc-cube'
 
 type ReactType = typeof React
 
 export function bindUpdate<S extends Scope>(react: ReactType, scope: S) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [__, setValue] = react.useState(0)
-    const forceUpdate = () => setValue(value => value + 1)
 
     if (scope.update == NOOP_VOID) {
-        scope.update = forceUpdate
+        scope.update = () => setValue(value => value + 1)
     }
 
     react.useCallback(() => {
@@ -24,7 +23,6 @@ export function getOrCreateApplication<S extends Scope, A extends ApplicationPre
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [__, setValue] = react.useState(0)
-    const forceUpdate = () => setValue(value => value + 1)
 
     react.useCallback(() => {
         return () => {
@@ -37,7 +35,7 @@ export function getOrCreateApplication<S extends Scope, A extends ApplicationPre
 
     if (!app) {
         const instance = factory()
-        instance.scope.update = forceUpdate
+        instance.scope.update = () => setValue(value => value + 1)
         instance.initialize()
         setApp(instance)
         return instance
