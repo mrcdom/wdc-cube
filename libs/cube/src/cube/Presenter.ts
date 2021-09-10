@@ -1,16 +1,18 @@
 import { NOOP_VOID } from './Constants'
 import { Application } from './Application'
 import { PlaceUri } from './PlaceUri'
-import type { Scope } from './Scope'
+import { Scope, ScopeUtils } from './Scope'
+import type { IPresenter } from './IPresenter'
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-export type PresenterType = Presenter<Application, Scope>
-export type PresenterMapType = Map<number, PresenterType>
-export type PresenterContructor<A extends Application> = { new(app: A): PresenterType }
-export type PresenterFactory = (app: Application) => PresenterType
+export type PresenterMapType = Map<number, IPresenter>
+export type PresenterFactory = (app: Application) => IPresenter
 
-export class Presenter<A extends Application, S extends Scope> {
+export type PresenterType = Presenter<Application, Scope>
+export type PresenterContructor<A extends Application> = { new(app: A): PresenterType }
+
+export class Presenter<A extends Application, S extends Scope> implements IPresenter {
 
     protected readonly app: A
 

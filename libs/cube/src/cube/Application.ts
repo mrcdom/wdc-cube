@@ -5,12 +5,13 @@ import { Place } from './Place'
 import { PlaceUri } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
 import { NavigationContext } from './NavigationContext'
+import type { IPresenter } from './IPresenter'
 
 import type { PresenterMapType } from './Presenter'
 
 const LOG = Logger.get('Application')
 
-export class Application {
+export class Application implements IPresenter{
 
     private __placeMap: Map<string, Place>
 
@@ -79,13 +80,13 @@ export class Application {
         return this.__fragment
     }
 
-    public publishParameters(uri: PlaceUri): void {
-        for (const presenter of this.__presenterMap.values()) {
-            presenter.publishParameters(uri)
-        }
-    }
-
     public commitComputedFields(): void {
+        try {
+            this.computeDerivatedFields()
+        } catch (caught) {
+            LOG.error(`Processing ${this.constructor.name}.commitComputedState()`, caught)
+        }
+
         for (const presenter of this.__presenterMap.values()) {
             try {
                 presenter.computeDerivatedFields()
@@ -97,7 +98,13 @@ export class Application {
 
     public newUri(place: Place): PlaceUri {
         const uri = new PlaceUri(place)
+
         this.publishParameters(uri)
+
+        for (const presenter of this.__presenterMap.values()) {
+            presenter.publishParameters(uri)
+        }
+
         return uri
     }
 
@@ -121,8 +128,9 @@ export class Application {
         if (uri) {
             if (CastUtils.isInstanceOf(uri, String)) {
                 const suri = uri as string
-                const place = this.__placeMap.get(suri) || defaultPlace
-                await this.doNavigate(PlaceUri.parse(suri, () => place))
+                await this.doNavigate(PlaceUri.parse(suri, (name) => {
+                    return this.__placeMap.get(name) || defaultPlace
+                }))
                 return
             }
 
@@ -136,17 +144,17 @@ export class Application {
     }
 
     protected async doNavigate(uri: PlaceUri) {
-        this.onBeforeNavigation(uri)
-
         if (this.__navigationContext) {
             const context = this.__navigationContext
             const level = context.incrementAndGetLevel()
 
             context.targetUri = uri
 
-            for (const place of uri.place.path) {
-                if (!(await context.build(place, level))) {
-                    break
+            if (await this.applyParameters(uri, false, uri.place.id === -1)) {
+                for (const place of uri.place.path) {
+                    if (!(await context.build(place, level))) {
+                        break
+                    }
                 }
             }
         } else {
@@ -154,9 +162,11 @@ export class Application {
             try {
                 this.__navigationContext = context
 
-                for (const place of uri.place.path) {
-                    if (!(await context.build(place, 0))) {
-                        break
+                if (await this.applyParameters(uri, false, uri.place.id === -1)) {
+                    for (const place of uri.place.path) {
+                        if (!(await context.build(place, 0))) {
+                            break
+                        }
                     }
                 }
 
@@ -179,8 +189,19 @@ export class Application {
         }
     }
 
+    // :: State Management
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected onBeforeNavigation(uri: PlaceUri) {
+    public async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+        return true
+    }
+
+    public computeDerivatedFields(): void {
+        // NOOP
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public publishParameters(uri: PlaceUri): void {
         // NOOP
     }
 

@@ -70,10 +70,12 @@ export class NavigationContext {
 
             if (presenter) {
                 result = await presenter.applyParameters(this.__targetUri, false, deepest)
-            } else {
+            } else if (place.factory) {
                 const presenter = place.factory(this.__app)
                 this.__presenterMap.set(place.id, presenter)
                 result = await presenter.applyParameters(this.__targetUri, true, deepest)
+            } else {
+                result = true
             }
 
             if (this.__level !== atLevel) {
@@ -107,17 +109,22 @@ export class NavigationContext {
         newPresenterMap.clear()
 
         // Keep only presenters belonging to 
-        for (const place of this.__targetUri.place.path) {
-            const presenter = this.__presenterMap.get(place.id)
-            if (presenter) {
-                // Remove presenters that will be kept
-                this.__presenterMap.delete(place.id)
+        const targetPlace = this.__targetUri.place
 
-                newPresenterMap.set(place.id, presenter)
-                continue
+        // Avoid processing detached places
+        if (targetPlace.id !== -1) {
+            for (const place of targetPlace.path) {
+                const presenter = this.__presenterMap.get(place.id)
+                if (presenter) {
+                    // Remove presenters that will be kept
+                    this.__presenterMap.delete(place.id)
+
+                    newPresenterMap.set(place.id, presenter)
+                    continue
+                }
+
+                LOG.error(`No presenter for place=${place.toString()}`)
             }
-
-            LOG.error(`No presenter for place=${place.toString()}`)
         }
 
         // Non participating paresenter on new state must be released

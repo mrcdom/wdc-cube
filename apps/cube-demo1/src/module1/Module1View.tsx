@@ -1,15 +1,20 @@
-import React from 'react'
+import React, { HTMLAttributes } from 'react'
 import { CubeComponent, ViewFactory } from 'wdc-cube-react'
 import { Module1Scope } from './Module1Presenter'
+import Css from './Module1View.module.css'
 
-export class Module1View extends CubeComponent<Module1Scope> {
+type Module1ViewProps = HTMLAttributes<HTMLDivElement> & { scope: Module1Scope }
+
+export class Module1View extends CubeComponent<Module1Scope, HTMLDivElement, Module1ViewProps> {
 
   public override render() {
-    const scope = this.props.scope
+    const { className, style, scope } = this.props
+
     const detailView = ViewFactory.createView(scope.detail)
 
     return <>
-      <div style={{ backgroundColor: 'red', padding: 20 }}>
+      <div className={(className || '') + ' ' + Css.View} style={style}>
+        <h1>Module1</h1>
         {detailView}
       </div>
     </>

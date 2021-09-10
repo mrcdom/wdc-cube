@@ -1,4 +1,4 @@
-interface ILogger {
+export interface ILogger {
     // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
     info(...data: any[]): void
     // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any

@@ -2,6 +2,8 @@
     display: flex;
     flex-Direction: column;
     margin: 10px;
+    align-self: stretch;
+    flex-grow: 1;
 }
 
 .Title {
@@ -14,10 +16,23 @@
     margin-bottom: 30px;
 }
 
+.Body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-self: stretch;
+}
+
 .BtnFirst {
     margin-left: 0;
 }
 
 .BtnOthers {
     margin-left: 10px;
+}
+
+.BodyView {
+    border: dashed;
+    padding: 10px;
+    border-radius: 5px;
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Scope, ApplicationPresenter, NOOP_VOID, Logger } from 'wdc-cube'
+import { Scope, Application, NOOP_VOID, Logger } from 'wdc-cube'
 
 const LOG = Logger.get('React.FC')
 
@@ -23,7 +23,11 @@ export function bindUpdate<S extends Scope>(react: ReactType, scope: S) {
     }, [])
 }
 
-export function getOrCreateApplication<S extends Scope, A extends ApplicationPresenter<S>>(react: ReactType, factory: () => A) {
+type IApplication<S extends Scope> = Application & {
+    scope: S
+}
+
+export function getOrCreateApplication<S extends Scope, A extends IApplication<S>>(react: ReactType, factory: () => A) {
     const [app, setApp] = react.useState<A>()
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -47,7 +51,7 @@ export function getOrCreateApplication<S extends Scope, A extends ApplicationPre
     } else {
         const instance = factory()
         instance.scope.update = () => setValue(value => value + 1)
-        instance.initialize()
+        instance.applyParameters(instance.newUri(instance.rootPlace), true, true)
         setApp(instance)
         LOG.debug('app.attached')
         return instance

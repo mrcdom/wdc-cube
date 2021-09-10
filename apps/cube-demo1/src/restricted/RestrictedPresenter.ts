@@ -3,13 +3,18 @@ import { MainPresenter } from '../main/MainPresenter'
 import { ViewIds, AttrsIds } from '../Constants'
 
 
-const LOG = Logger.get('Module2Presenter')
+const LOG = Logger.get('RestrictedPresenter')
 
-export class Module2Scope extends Scope {
+export class MenuScope extends Scope {
+
+}
+
+export class RestrictedScope extends Scope {
+    menu?: Scope
     detail?: Scope
 }
 
-export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
+export class RestrictedPresenter extends Presenter<MainPresenter, RestrictedScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
@@ -21,12 +26,12 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
     }
 
     public constructor(app: MainPresenter) {
-        super(app, new Module2Scope(ViewIds.module2))
+        super(app, new RestrictedScope(ViewIds.restricted))
     }
 
     public override release() {
-        LOG.info('Finalized')
         super.release()
+        LOG.info('Finalized')
     }
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {

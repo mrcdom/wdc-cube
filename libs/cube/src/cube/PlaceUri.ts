@@ -8,7 +8,7 @@ import type { ScopeSlot } from './ScopeSlot'
 
 export class PlaceUri extends Object {
 
-	public static parse(placeStr: string, stepProvider: (name: string) => Place = Place.createUnbunded): PlaceUri {
+	public static parse(placeStr: string, stepProvider: (name: string) => Place = Place.createDetached): PlaceUri {
 		// If we have a not blank URI, then we will proceed with URI parsing
 		if (placeStr && placeStr.length > 0) {
 			// First, we are going to brake the URI into two parts

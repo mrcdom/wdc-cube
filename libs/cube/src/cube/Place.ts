@@ -5,23 +5,17 @@ import type { PresenterContructor, PresenterFactory } from './Presenter'
 
 const indexGenMap: Map<number, number> = new Map()
 
-const noPresenterFactory: PresenterFactory = () => {
-    throw new Error('No presenter factory was provided')
-}
-
 export class Place {
 
-    public static createUnbunded(name: string) {
-        return new Place(name, undefined, () => {
-            throw new Error('Unbounded place can not create a presenter')
-        }, -1)
+    public static createDetached(name: string) {
+        return new Place(name, undefined, undefined, -1)
     }
-
-    public static UNKNOWN = Place.createUnbunded('unknown')
 
     public static create<A extends Application>(name: string, ctor: PresenterContructor<A>, parent?: Place) {
         return new Place(name, parent, newPresenterFactory(ctor))
     }
+
+    public static UNKNOWN = Place.createDetached('unknown')
 
     public readonly id: number
 
@@ -31,13 +25,18 @@ export class Place {
     public constructor(
         public readonly name: string,
         public readonly parent?: Place,
-        public readonly factory: PresenterFactory = noPresenterFactory,
-        id?: number
+        public readonly factory?: PresenterFactory,
+        id?: number,
     ) {
-        const pathNameBuilder = [] as string[]
-        this.buildPath(pathNameBuilder, this)
         this.id = typeof id === 'number' ? id : this.nextId()
-        this.pathName = pathNameBuilder.join('/')
+        if (parent) {
+            const pathNameBuilder = [] as string[]
+            this.buildPath(pathNameBuilder, this)
+            this.pathName = pathNameBuilder.join('/')
+        } else {
+            this.pathName = name
+            this.path.push(this)
+        }
     }
 
     public toString(): string {

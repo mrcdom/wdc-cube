@@ -1,5 +1,5 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
-import { MainPresenter } from '../MainPresenter'
+import { MainPresenter } from '../main/MainPresenter'
 import { ViewIds, AttrsIds } from '../Constants'
 
 const LOG = Logger.get('Module1Presenter')
@@ -30,6 +30,7 @@ export class Module1Presenter extends Presenter<MainPresenter, Module1Scope> {
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
         if (initialization) {
+            this.scope.bind(this)
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             LOG.info('Initialized')
         }

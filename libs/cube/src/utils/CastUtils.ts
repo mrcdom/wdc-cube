@@ -4,6 +4,11 @@ type ClassConstructor = new (...args: unknown[]) => unknown
 
 type InstanceLike = {
     constructor: ClassConstructor
+    prototype: Record<string, unknown>
+}
+
+type NameLike = {
+    name?: string
 }
 
 export class CastUtils {
@@ -16,8 +21,38 @@ export class CastUtils {
         return (instance as InstanceLike).constructor === ctor
     }
 
+    public static getName(value: unknown) {
+        if(value) {
+            const name = (value as NameLike).name
+            if(name) {
+                return name
+            }
+
+            const ctor = (value as InstanceLike).constructor
+            if (ctor) {
+                return ctor.name
+            }
+        }
+        return undefined
+    }
+
     public static isArray(value: unknown): boolean {
         return CastUtils.isInstanceOf(value, Array)
+    }
+
+    public static isFunction(value: unknown): boolean {
+        const ctor = value ? (value as InstanceLike).constructor : undefined
+        return ctor ? (ctor.name === 'Function' || ctor.name === 'AsyncFunction') : false
+    }
+
+    public static isSyncFunction(value: unknown): boolean {
+        const ctor = value ? (value as InstanceLike).constructor : undefined
+        return ctor ? ctor.name === 'Function' : false
+    }
+
+    public static isAsyncFunction(value: unknown): boolean {
+        const ctor = value ? (value as InstanceLike).constructor : undefined
+        return ctor ? ctor.name === 'AsyncFunction' : false
     }
 
     public static getType(item: unknown): PossibleParameterTypes | undefined {
