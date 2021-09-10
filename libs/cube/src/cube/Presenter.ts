@@ -1,7 +1,8 @@
 import { NOOP_VOID } from './Constants'
 import { Application } from './Application'
-import { PlaceUri } from './PlaceUri'
-import { Scope, ScopeUtils } from './Scope'
+import { Place } from './Place'
+import { PlaceUri, ValidParamTypes } from './PlaceUri'
+import { Scope } from './Scope'
 import type { IPresenter } from './IPresenter'
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -27,7 +28,11 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         this.scope.update = NOOP_VOID
     }
 
-    public async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public async go(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }) {
+        return this.app.go(place, args)
+    }
+
+    public async applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean> {
         return true
     }
 

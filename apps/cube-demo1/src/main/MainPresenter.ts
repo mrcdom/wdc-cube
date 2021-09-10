@@ -86,7 +86,7 @@ export class MainPresenter extends Application {
             this.scope.body = this.bodyScope
 
             try {
-                this.navigate(this.historyManager.location)
+                await this.navigate(this.historyManager.location)
             } catch(caught) {
                 this.unexpected(LOG, 'Navigation from history', caught)
             }
@@ -137,8 +137,7 @@ export class MainPresenter extends Application {
 
     protected async onRoot() {
         try {
-            const uri = this.newUri(Places.root)
-            await this.navigate(uri)
+            await this.go(Places.root)
         } catch (caught) {
             this.unexpected(LOG, 'Opening to root', caught)
         } finally {
@@ -148,8 +147,7 @@ export class MainPresenter extends Application {
 
     protected async onModule1() {
         try {
-            const uri = this.newUri(Places.module1)
-            await this.navigate(uri)
+            await this.go(Places.module1)
         } catch (caught) {
             this.unexpected(LOG, 'Opening to module-1', caught)
         } finally {
@@ -159,8 +157,7 @@ export class MainPresenter extends Application {
 
     protected async onModule1Detail() {
         try {
-            const uri = this.newUri(Places.module1Detail)
-            await this.navigate(uri)
+            await this.go(Places.module1Detail)
         } catch (caught) {
             this.unexpected(LOG, 'Opening to module-1/detail', caught)
         } finally {
@@ -170,8 +167,7 @@ export class MainPresenter extends Application {
 
     protected async onModule2() {
         try {
-            const uri = this.newUri(Places.module2)
-            await this.navigate(uri)
+            await this.go(Places.module2)
         } catch (caught) {
             this.unexpected(LOG, 'Opening to module-2', caught)
         } finally {

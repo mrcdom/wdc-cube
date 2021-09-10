@@ -10,7 +10,6 @@ const LOG = Logger.get('Module2Presenter')
 const tutorialService = TutorialService.INSTANCE
 
 export class Module2Scope extends Scope {
-    detail?: Scope
     sites = [] as SiteItemType[]
 
     // Actions
@@ -21,13 +20,6 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
-    private readonly detailSlot: ScopeSlot = scope => {
-        if (this.scope.detail !== scope) {
-            this.scope.detail = scope
-            this.scope.update()
-        }
-    }
-
     public constructor(app: MainPresenter) {
         super(app, new Module2Scope(ViewIds.module2))
     }
@@ -37,18 +29,12 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
         super.release()
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         if (initialization) {
             this.scope.bind(this)
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             this.scope.sites = await tutorialService.fetchSubscribleSites()
             LOG.info('Initialized')
-        }
-
-        if (deepest) {
-            this.detailSlot(undefined)
-        } else {
-            uri.setScopeSlot(AttrsIds.parentSlot, this.detailSlot)
         }
 
         this.parentSlot(this.scope)
@@ -58,10 +44,15 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
 
     protected async onItemClicked(item: SiteItemType) {
         try {
-            const uri = this.app.newUri(Places.module2Detail)
-            uri.setParameter(ParamsIds.SiteId, item.id)
-            uri.attributes.set(AttrsIds.module2Detail_item, item)
-            await this.app.navigate(uri)
+            await this.go(Places.module2Detail, {
+                params: {
+                    [ParamsIds.SiteId]: item.id
+                },
+                attrs: {
+                    // Helping performance (avoid a unneeded service fetch)
+                    [AttrsIds.module2Detail_item]: item
+                }
+            })
         } catch (caught) {
             this.app.unexpected(LOG, `Opening item ${JSON.stringify(item)}`, caught)
         } finally {

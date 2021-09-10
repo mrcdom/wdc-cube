@@ -6,6 +6,8 @@ import { QueryStringBuilder } from '../utils/QueryStringBuilder'
 import { Place } from './Place'
 import type { ScopeSlot } from './ScopeSlot'
 
+export type ValidParamTypes = string|string[]|number|number[]|boolean|boolean[]|null
+
 export class PlaceUri extends Object {
 
 	public static parse(placeStr: string, stepProvider: (name: string) => Place = Place.createDetached): PlaceUri {
@@ -226,7 +228,7 @@ export class PlaceUri extends Object {
 	 * @param value
 	 *            a a value of this parameter
 	 */
-	public setParameter(name: string, value?: null | string | number | boolean | string[] | number[] | boolean[]): void {
+	public setParameter(name: string, value?: ValidParamTypes): void {
 		if (value === undefined || value === null) {
 			this.parameters.delete(name)
 		} else {

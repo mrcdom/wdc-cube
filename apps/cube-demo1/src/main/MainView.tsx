@@ -6,8 +6,9 @@ import Dialog from '@material-ui/core/Dialog'
 import { Button } from '@material-ui/core'
 import Css from './MainView.module.css'
 
-const createApp = MainPresenter.create.bind(undefined, new PageHistoryManager())
+// HistoryManager
 
+const createApp = MainPresenter.create.bind(undefined, new PageHistoryManager(true))
 
 export function MainView() {
   const { scope } = getOrCreateApplication(React, createApp)

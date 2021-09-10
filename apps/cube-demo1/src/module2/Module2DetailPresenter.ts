@@ -1,5 +1,4 @@
-import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID, NOOP_PROMISE_VOID } from 'wdc-cube'
-import { Places } from '../Places'
+import { Logger, Presenter, Scope, ScopeSlot, Place, PlaceUri, NOOP_VOID, NOOP_PROMISE_VOID } from 'wdc-cube'
 import { MainPresenter } from '../main/MainPresenter'
 import { ViewIds, AttrsIds, ParamsIds } from '../Constants'
 import { TutorialService, SiteItemType } from '../services/TutorialService'
@@ -26,10 +25,13 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
 
     private item?: SiteItemType
 
-    private eMail?: string
+    private email?: string
+
+    private backPlace: Place
 
     public constructor(app: MainPresenter) {
         super(app, new Module2DetailScope(ViewIds.module2Detail))
+        this.backPlace = app.lastPlace
     }
 
     public override release() {
@@ -38,10 +40,12 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
         LOG.info('Finalized')
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         const paramSiteId = uri.getParameterAsNumberOrDefault(ParamsIds.SiteId, this.item?.id ?? -1)
 
         if (initialization) {
+            this.backPlace = this.app.lastPlace
+
             if (paramSiteId <= 0) {
                 throw new Error('No site id provided')
             }
@@ -66,10 +70,6 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
             this.app.updateHistory()
         }
 
-        if (deepest) {
-            // NOOP
-        }
-
         this.parentSlot(this.scope)
 
         return true
@@ -80,8 +80,7 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
     }
 
     private async asyncClose() {
-        const uri = this.app.newUri(Places.module2)
-        await this.app.navigate(uri)
+        await this.go(this.backPlace)
     }
 
     protected async onClose() {
@@ -102,7 +101,7 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
                 throw new Error('Invalid case. SiteId must always be available here')
             }
 
-            const email = (this.eMail || '').trim()
+            const email = (this.email || '').trim()
             if (email === '') {
                 app.alert('warning', 'Field required', 'An e-mail is required in order to request a subscription')
                 return
@@ -113,7 +112,7 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
                 return
             }
 
-            this.eMail = email
+            this.email = email
 
             await tutorialService.updateOrAddSiteSubscription(siteId, email)
 
@@ -126,7 +125,7 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
     }
 
     protected async onEmailChanged(eMail: string) {
-        this.eMail = eMail
+        this.email = eMail
     }
 
 }

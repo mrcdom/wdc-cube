@@ -88,14 +88,16 @@ export class NavigationContext {
 
     public rollback(): void {
         for (const place of this.__sourceUri.place.path) {
-            const presenter = this.__presenterMap.get(place.id)
+            if (place.id !== -1) {
+                const presenter = this.__presenterMap.get(place.id)
 
-            this.__presenterMap.delete(place.id)
+                this.__presenterMap.delete(place.id)
 
-            if (presenter != null) {
-                presenter.applyParameters(this.__sourceUri, false, place === this.__sourceUri.place)
-            } else {
-                LOG.warn(`Missing presenter for ID=${place.id}`)
+                if (presenter != null) {
+                    presenter.applyParameters(this.__sourceUri, false, place === this.__sourceUri.place)
+                } else {
+                    LOG.warn(`Missing presenter for ID=${place.id}`)
+                }
             }
         }
 

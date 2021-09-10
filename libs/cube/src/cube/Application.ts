@@ -2,7 +2,7 @@ import { Logger } from '../utils/Logger'
 import { Comparators } from '../utils/Comparators'
 import { CastUtils } from '../utils/CastUtils'
 import { Place } from './Place'
-import { PlaceUri } from './PlaceUri'
+import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
 import { NavigationContext } from './NavigationContext'
 import type { IPresenter } from './IPresenter'
@@ -11,7 +11,7 @@ import type { PresenterMapType } from './Presenter'
 
 const LOG = Logger.get('Application')
 
-export class Application implements IPresenter{
+export class Application implements IPresenter {
 
     private __placeMap: Map<string, Place>
 
@@ -80,6 +80,10 @@ export class Application implements IPresenter{
         return this.__fragment
     }
 
+    public get fallbackPlace(): Place {
+        return this.__rootPlace
+    }
+
     public commitComputedFields(): void {
         try {
             this.computeDerivatedFields()
@@ -122,6 +126,24 @@ export class Application implements IPresenter{
         }
     }
 
+    public async go(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }) {
+        const uri = this.newUri(place)
+
+        if (args?.params) {
+            for (const [name, value] of Object.entries(args.params)) {
+                uri.setParameter(name, value)
+            }
+        }
+
+        if (args?.attrs) {
+            for (const [name, value] of Object.entries(args.attrs)) {
+                uri.attributes.set(name, value)
+            }
+        }
+
+        await this.navigate(uri)
+    }
+
     public async navigate(uri: PlaceUri | string) {
         const defaultPlace = this.__lastPlace ?? this.rootPlace
 
@@ -143,32 +165,43 @@ export class Application implements IPresenter{
         await this.doNavigate(this.newUri(defaultPlace))
     }
 
-    protected async doNavigate(uri: PlaceUri) {
-        if (this.__navigationContext) {
-            const context = this.__navigationContext
-            const level = context.incrementAndGetLevel()
+    private async applyPathParameters(context: NavigationContext, atLevel: number) {
+        const uri = context.targetUri
 
-            context.targetUri = uri
-
-            if (await this.applyParameters(uri, false, uri.place.id === -1)) {
-                for (const place of uri.place.path) {
-                    if (!(await context.build(place, level))) {
-                        break
-                    }
-                }
+        try {
+            const ok = await this.applyParameters(uri, false, uri.place.id === -1)
+            if (!ok) {
+                return
             }
+        } catch (caught) {
+            if (this.fallbackPlace !== this.rootPlace) {
+                LOG.error('Failed navigating just on root presenter. Going to fallback place', caught)
+                this.go(this.fallbackPlace)
+            } else {
+                LOG.error('Failed navigating just on root presenter. Nothing can be done!', caught)
+            }
+            return
+        }
+
+        for (const place of uri.place.path) {
+            if (place.id != -1 && !(await context.build(place, atLevel))) {
+                break
+            }
+        }
+    }
+
+    protected async doNavigate(uri: PlaceUri) {
+        let context = this.__navigationContext
+        if (context) {
+            context.targetUri = uri
+            const level = context.incrementAndGetLevel()
+            await this.applyPathParameters(context, level)
         } else {
-            const context = new NavigationContext(this, uri)
+            context = new NavigationContext(this, uri)
             try {
                 this.__navigationContext = context
 
-                if (await this.applyParameters(uri, false, uri.place.id === -1)) {
-                    for (const place of uri.place.path) {
-                        if (!(await context.build(place, 0))) {
-                            break
-                        }
-                    }
-                }
+                await this.applyPathParameters(context, 0)
 
                 context.commit(this.__presenterMap)
                 this.__lastPlace = context.targetUri.place
@@ -184,8 +217,25 @@ export class Application implements IPresenter{
     }
 
     protected onHistoryChanged(sender: HistoryManager) {
-        if (!this.__navigationContext) {
-            this.navigate(sender.location)
+        if (!this.__navigationContext && sender.location) {
+            const action = async () => {
+                try {
+                    await this.navigate(sender.location)
+                } catch (caught) {
+                    LOG.error(`Invalid history location uri=${sender.location}`, caught)
+
+                    if (this.fallbackPlace !== this.rootPlace) {
+                        try {
+                            await this.go(this.fallbackPlace)
+                        } catch (caught) {
+                            LOG.error('Invalid fallback place', caught)
+                        }
+                    }
+                }
+            }
+
+            // Run it
+            action().catch(() => void 0)
         }
     }
 
