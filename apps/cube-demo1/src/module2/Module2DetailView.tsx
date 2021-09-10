@@ -15,7 +15,7 @@ export function Module2DetailView({ scope }: { scope: Module2DetailScope }) {
     <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
     <DialogContent>
       <DialogContentText>
-        To subscribe to this website, please enter your email address here. We will send updates
+        To subscribe to this website({scope.name}), please enter your email address here. We will send updates
         occasionally.
       </DialogContentText>
       <TextField
@@ -25,6 +25,7 @@ export function Module2DetailView({ scope }: { scope: Module2DetailScope }) {
         label="Email Address"
         type="email"
         fullWidth
+        onChange={event => {scope.onEmailChanged(event.target.value)}}
       />
     </DialogContent>
     <DialogActions>

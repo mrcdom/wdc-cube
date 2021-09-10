@@ -1,12 +1,20 @@
-import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID, NOOP_PROMISE_VOID } from 'wdc-cube'
 import { MainPresenter } from '../main/MainPresenter'
-import { ViewIds, AttrsIds } from '../Constants'
-
+import { ViewIds, AttrsIds, ParamsIds } from '../Constants'
+import { Places } from '../Places'
+import { TutorialService, SiteItemType } from '../services/TutorialService'
 
 const LOG = Logger.get('Module2Presenter')
 
+// @Inject
+const tutorialService = TutorialService.INSTANCE
+
 export class Module2Scope extends Scope {
     detail?: Scope
+    sites = [] as SiteItemType[]
+
+    // Actions
+    onItemClicked: (item: SiteItemType) => Promise<void> = NOOP_PROMISE_VOID
 }
 
 export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
@@ -33,6 +41,7 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
         if (initialization) {
             this.scope.bind(this)
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
+            this.scope.sites = await tutorialService.fetchSubscribleSites()
             LOG.info('Initialized')
         }
 
@@ -45,6 +54,19 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
         this.parentSlot(this.scope)
 
         return true
+    }
+
+    protected async onItemClicked(item: SiteItemType) {
+        try {
+            const uri = this.app.newUri(Places.module2Detail)
+            uri.setParameter(ParamsIds.SiteId, item.id)
+            uri.attributes.set(AttrsIds.module2Detail_item, item)
+            await this.app.navigate(uri)
+        } catch (caught) {
+            this.app.unexpected(LOG, `Opening item ${JSON.stringify(item)}`, caught)
+        } finally {
+            this.scope.update()
+        }
     }
 
 }

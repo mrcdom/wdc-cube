@@ -26,11 +26,10 @@ export function MainView() {
   return <>
     <div className={Css.View}>
       <div className={Css.Bar}>
+        <Button color="primary" className={Css.BtnFirst} onClick={scope.onRoot}>Home</Button>
         <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule1}>Module1</Button>
         <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule1Detail}>Module1-Detail</Button>
-        <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule2}>Module2</Button>
-        <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule2Detail}>Module2-Detail</Button>
-        <Button color="primary" className={Css.BtnFirst} onClick={scope.onRoot}>Home</Button>
+        <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule2}>Subscriptions</Button>
       </div>
 
       {bodyView}

@@ -9,7 +9,13 @@ export const ViewIds = {
     alert: 'alert'
 }
 
+export const ParamsIds = {
+    SiteId: 'site-id'
+}
+
 export const AttrsIds = {
     parentSlot: 'parent-slot',
-    dialogSlot: 'sialog-slot'
+    dialogSlot: 'sialog-slot',
+
+    module2Detail_item: '0001'
 }

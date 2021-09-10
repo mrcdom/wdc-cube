@@ -34,9 +34,11 @@ export class PageHistoryManager extends HistoryManager {
         const currentUri = app.newUri(place)
 
         const oldLocation = this.__history.location
+
+        const qs = currentUri.getQueryString()
         const newLocation: Partial<Path> = {
             pathname: place.name,
-            search: currentUri.getQueryString(),
+            search: qs ? '?' + currentUri.getQueryString() : '',
             hash: ''
         }
 

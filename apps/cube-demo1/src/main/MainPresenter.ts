@@ -9,6 +9,7 @@ import {
 } from 'wdc-cube'
 import { Places } from '../Places'
 import { ViewIds, AttrsIds } from '../Constants'
+import { startServices } from '../services'
 
 const LOG = Logger.get('MainPresenter')
 
@@ -37,7 +38,6 @@ export class MainScope extends Scope {
     onModule1: () => Promise<void> = NOOP_PROMISE_VOID
     onModule2: () => Promise<void> = NOOP_PROMISE_VOID
     onModule1Detail: () => Promise<void> = NOOP_PROMISE_VOID
-    onModule2Detail: () => Promise<void> = NOOP_PROMISE_VOID
 }
 
 export class MainPresenter extends Application {
@@ -75,11 +75,22 @@ export class MainPresenter extends Application {
         }
     }
 
+
+
     public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
         if (initialization) {
+            await startServices()
+
             this.scope.bind(this)
             this.bodyScope.bind(this)
             this.scope.body = this.bodyScope
+
+            try {
+                this.navigate(this.historyManager.location)
+            } catch(caught) {
+                this.unexpected(LOG, 'Navigation from history', caught)
+            }
+
             LOG.info('Initialized')
         }
 
@@ -163,17 +174,6 @@ export class MainPresenter extends Application {
             await this.navigate(uri)
         } catch (caught) {
             this.unexpected(LOG, 'Opening to module-2', caught)
-        } finally {
-            this.scope.update()
-        }
-    }
-
-    protected async onModule2Detail() {
-        try {
-            const uri = this.newUri(Places.module2Detail)
-            await this.navigate(uri)
-        } catch (caught) {
-            this.unexpected(LOG, 'Opening to module-2/detail', caught)
         } finally {
             this.scope.update()
         }

@@ -1,4 +1,5 @@
 import React, { HTMLAttributes } from 'react'
+import clsx from 'clsx'
 import { bindUpdate, ViewFactory } from 'wdc-cube-react'
 import { RestrictedScope } from './RestrictedPresenter'
 import Css from './RestrictedView.module.css'
@@ -11,7 +12,7 @@ export function RestrictedView({ className, style, scope }: RestrictedViewProps)
     const detailView = ViewFactory.createView(scope.detail)
 
     return <>
-        <div className={(className || '') + ' ' + Css.View} style={style}>
+        <div className={clsx(className, Css.View)} style={style}>
             {detailView}
         </div>
     </>

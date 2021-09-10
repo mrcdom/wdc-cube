@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { stopServices } from './services'
 import { ViewFactory } from 'wdc-cube-react'
 import { ViewIds } from './Constants'
 import { AlertView } from './main/AlertView'
@@ -10,6 +11,10 @@ import { Module1DetailView } from './module1/Module1DetailView'
 import { Module2View } from './module2/Module2View'
 import { Module2DetailView } from './module2/Module2DetailView'
 import './index.css'
+
+window.addEventListener('beforeunload', async () => {
+    await stopServices()
+}, {passive: false})
 
 { // View Registration
     const register = ViewFactory.register
