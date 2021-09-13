@@ -11,7 +11,16 @@ const siteArray = [
 
 const subscriptionMap: Map<number, Map<string, boolean>> = new Map()
 
-export type SiteItemType = { id: number; site: string }
+export type SiteItemType = {
+    id: number
+    site: string
+}
+
+export type TodoType = {
+    uid: number
+    text: string
+    complete: boolean
+}
 
 export class TutorialService implements ServiceLike {
 
@@ -56,6 +65,36 @@ export class TutorialService implements ServiceLike {
         subscriberMap.set(email, true)
 
         LOG.info('updateOrAddSiteSubscription: ', subscriberMap)
+    }
+
+    public async fetchTodos(): Promise<TodoType[]> {
+        return [
+            {
+                uid: 1,
+                text: 'Walk the dog',
+                complete: false,
+            },
+            {
+                uid: 2,
+                text: 'Write an app',
+                complete: true,
+            },
+            {
+                uid: 3,
+                text: 'Go to school',
+                complete: false,
+            },
+            {
+                uid: 4,
+                text: 'Watch Michael Reeves',
+                complete: true,
+            },
+            {
+                uid: 5,
+                text: 'Add automatic deployment',
+                complete: true,
+            }
+        ]
     }
 
 }

@@ -1,6 +1,6 @@
 import { Logger } from '../utils/Logger'
 import { Comparators } from '../utils/Comparators'
-import { CastUtils } from '../utils/CastUtils'
+import { Scope } from './Scope'
 import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
@@ -10,6 +10,8 @@ import type { IPresenter } from './IPresenter'
 import type { PresenterMapType } from './Presenter'
 
 const LOG = Logger.get('Application')
+
+export type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
 
 export class Application implements IPresenter {
 
@@ -27,17 +29,27 @@ export class Application implements IPresenter {
 
     private __navigationContext?: NavigationContext
 
+    private readonly __dirtyScopes: Map<string, Scope>
+
+    private __dirtyHandler?: NodeJS.Timeout
+
+    private __runningOnBeforeScopeUpdate = false
+
     public constructor(rootPlace: Place, historyManager: HistoryManager) {
         this.__rootPlace = rootPlace
         this.__lastPlace = rootPlace
         this.__historyManager = historyManager
         this.__presenterMap = new Map()
         this.__placeMap = new Map()
+        this.__dirtyScopes = new Map()
 
         historyManager.onChangeListener = this.onHistoryChanged.bind(this)
     }
 
     public release(): void {
+        this.cancelDirtyScopesUpdate()
+        this.__dirtyScopes.clear()
+
         const presenterIds = [] as number[]
 
         // Collect current presenters IDs
@@ -84,19 +96,54 @@ export class Application implements IPresenter {
         return this.__rootPlace
     }
 
-    public commitComputedFields(): void {
-        try {
-            this.computeDerivatedFields()
-        } catch (caught) {
-            LOG.error(`Processing ${this.constructor.name}.commitComputedState()`, caught)
+    protected update<T extends Scope>(scope: T) {
+        if (this.__runningOnBeforeScopeUpdate) {
+            this.__dirtyScopes.set(scope.id, scope)
+        } else {
+            this.cancelDirtyScopesUpdate()
+            this.__dirtyScopes.set(scope.id, scope)
+            this.__dirtyHandler = setTimeout(this.__doEmitBeforeScopeUpdate, 16)
         }
+    }
+
+    private cancelDirtyScopesUpdate() {
+        if (this.__dirtyHandler) {
+            clearTimeout(this.__dirtyHandler)
+            this.__dirtyHandler = undefined
+        }
+    }
+
+    private __doEmitBeforeScopeUpdate = () => {
+        this.emitBeforeScopeUpdate()
+    }
+
+    public emitBeforeScopeUpdate(): void {
+        try {
+            this.cancelDirtyScopesUpdate()
+
+            try {
+                this.__runningOnBeforeScopeUpdate = true
+                this.onBeforeScopeUpdate()
+            } catch (caught) {
+                LOG.error(`Processing ${this.constructor.name}.emitBeforeScopeUpdate()`, caught)
+            } finally {
+                this.__runningOnBeforeScopeUpdate = false
+            }
+
+            for (const scope of this.__dirtyScopes.values()) {
+                scope.update()
+            }
+            this.__dirtyScopes.clear()
+        } catch (caught) {
+            LOG.error('Unexpected exception', caught)
+        }
+    }
+
+    public emitAllBeforeScopeUpdate(): void {
+        this.emitBeforeScopeUpdate()
 
         for (const presenter of this.__presenterMap.values()) {
-            try {
-                presenter.computeDerivatedFields()
-            } catch (caught) {
-                LOG.error(`Processing ${presenter.constructor.name}.commitComputedState()`, caught)
-            }
+            presenter.emitBeforeScopeUpdate()
         }
     }
 
@@ -110,6 +157,16 @@ export class Application implements IPresenter {
         }
 
         return uri
+    }
+
+    public newUriFromString(suri: string): PlaceUri {
+        const defaultPlace = this.__lastPlace ?? this.rootPlace
+        if (suri) {
+            const uri = PlaceUri.parse(suri, name => this.__placeMap.get(name) || defaultPlace)
+            return uri
+        } else {
+            return new PlaceUri(defaultPlace)
+        }
     }
 
     public updateHistory(): void {
@@ -126,7 +183,7 @@ export class Application implements IPresenter {
         }
     }
 
-    public async go(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }) {
+    public async flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }) {
         const uri = this.newUri(place)
 
         if (args?.params) {
@@ -141,56 +198,23 @@ export class Application implements IPresenter {
             }
         }
 
-        await this.navigate(uri)
+        await this.doFlipToNewPlace(uri)
     }
 
-    public async navigate(uri: PlaceUri | string) {
-        const defaultPlace = this.__lastPlace ?? this.rootPlace
+    public async flipToUriString(suri: string) {
+        await this.doFlipToNewPlace(this.newUriFromString(suri))
+    }
 
+    public async flipToUri(uri: PlaceUri) {
         if (uri) {
-            if (CastUtils.isInstanceOf(uri, String)) {
-                const suri = uri as string
-                await this.doNavigate(PlaceUri.parse(suri, (name) => {
-                    return this.__placeMap.get(name) || defaultPlace
-                }))
-                return
-            }
-
-            if (uri instanceof PlaceUri) {
-                await this.doNavigate(uri)
-                return
-            }
-        }
-
-        await this.doNavigate(this.newUri(defaultPlace))
-    }
-
-    private async applyPathParameters(context: NavigationContext, atLevel: number) {
-        const uri = context.targetUri
-
-        try {
-            const ok = await this.applyParameters(uri, false, uri.place.id === -1)
-            if (!ok) {
-                return
-            }
-        } catch (caught) {
-            if (this.fallbackPlace !== this.rootPlace) {
-                LOG.error('Failed navigating just on root presenter. Going to fallback place', caught)
-                this.go(this.fallbackPlace)
-            } else {
-                LOG.error('Failed navigating just on root presenter. Nothing can be done!', caught)
-            }
-            return
-        }
-
-        for (const place of uri.place.path) {
-            if (place.id != -1 && !(await context.build(place, atLevel))) {
-                break
-            }
+            await this.doFlipToNewPlace(uri)
+        } else {
+            const defaultPlace = this.__lastPlace ?? this.rootPlace
+            await this.doFlipToNewPlace(this.newUri(defaultPlace))
         }
     }
 
-    protected async doNavigate(uri: PlaceUri) {
+    protected async doFlipToNewPlace(uri: PlaceUri) {
         let context = this.__navigationContext
         if (context) {
             context.targetUri = uri
@@ -205,7 +229,8 @@ export class Application implements IPresenter {
 
                 context.commit(this.__presenterMap)
                 this.__lastPlace = context.targetUri.place
-                this.commitComputedFields()
+
+                this.emitAllBeforeScopeUpdate()
             } catch (caught) {
                 context.rollback()
                 throw caught
@@ -216,17 +241,42 @@ export class Application implements IPresenter {
         }
     }
 
+    private async applyPathParameters(context: NavigationContext, atLevel: number) {
+        const uri = context.targetUri
+
+        try {
+            const ok = await this.applyParameters(uri, false, uri.place.id === -1)
+            if (!ok) {
+                return
+            }
+        } catch (caught) {
+            if (this.fallbackPlace !== this.rootPlace) {
+                LOG.error('Failed navigating just on root presenter. Going to fallback place', caught)
+                this.flip(this.fallbackPlace)
+            } else {
+                LOG.error('Failed navigating just on root presenter. Nothing can be done!', caught)
+            }
+            return
+        }
+
+        for (const place of uri.place.path) {
+            if (place.id != -1 && !(await context.build(place, atLevel))) {
+                break
+            }
+        }
+    }
+
     protected onHistoryChanged(sender: HistoryManager) {
         if (!this.__navigationContext && sender.location) {
             const action = async () => {
                 try {
-                    await this.navigate(sender.location)
+                    await this.flipToUriString(sender.location)
                 } catch (caught) {
                     LOG.error(`Invalid history location uri=${sender.location}`, caught)
 
                     if (this.fallbackPlace !== this.rootPlace) {
                         try {
-                            await this.go(this.fallbackPlace)
+                            await this.flip(this.fallbackPlace)
                         } catch (caught) {
                             LOG.error('Invalid fallback place', caught)
                         }
@@ -246,13 +296,39 @@ export class Application implements IPresenter {
         return true
     }
 
-    public computeDerivatedFields(): void {
+    public onBeforeScopeUpdate(): void {
         // NOOP
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public publishParameters(uri: PlaceUri): void {
         // NOOP
+    }
+
+    public unexpected(message: string, error: unknown) {
+        LOG.error(message, error)
+    }
+
+    public alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
+        switch (severity) {
+            case 'error':
+                LOG.error(`${title}: ${message}`)
+                break
+            case 'warning':
+                LOG.warn(`${title}: ${message}`)
+                break
+            case 'success':
+                LOG.info(`${title}: ${message}`)
+                break
+            default:
+                LOG.debug(`${title}: ${message}`)
+        }
+
+        if (onClose) {
+            onClose().catch(caught => {
+                LOG.error('Closing alert', caught)
+            })
+        }
     }
 
 }

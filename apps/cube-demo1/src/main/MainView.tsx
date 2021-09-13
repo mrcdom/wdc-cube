@@ -28,8 +28,7 @@ export function MainView() {
     <div className={Css.View}>
       <div className={Css.Bar}>
         <Button color="primary" className={Css.BtnFirst} onClick={scope.onRoot}>Home</Button>
-        <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule1}>Module1</Button>
-        <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule1Detail}>Module1-Detail</Button>
+        <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule1}>Todos</Button>
         <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule2}>Subscriptions</Button>
       </div>
 

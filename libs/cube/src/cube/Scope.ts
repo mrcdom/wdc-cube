@@ -40,6 +40,14 @@ export const ScopeUtils = {
 
 export class Scope {
 
+    public static ACTION(): () => Promise<void> {
+        return NOOP_PROMISE_VOID
+    }
+
+    public static ACTION1<T>(): (p0: T) => Promise<void> {
+        return NOOP_PROMISE_VOID
+    }
+
     public readonly id: string
 
     public update: () => void = NOOP_VOID

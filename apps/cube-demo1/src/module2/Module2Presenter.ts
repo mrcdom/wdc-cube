@@ -44,7 +44,7 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
 
     protected async onItemClicked(item: SiteItemType) {
         try {
-            await this.go(Places.module2Detail, {
+            await this.flip(Places.module2Detail, {
                 params: {
                     [ParamsIds.SiteId]: item.id
                 },
@@ -54,7 +54,7 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
                 }
             })
         } catch (caught) {
-            this.app.unexpected(LOG, `Opening item ${JSON.stringify(item)}`, caught)
+            this.unexpected(`Opening item ${JSON.stringify(item)}`, caught)
         } finally {
             this.scope.update()
         }

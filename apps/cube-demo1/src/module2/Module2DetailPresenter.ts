@@ -80,14 +80,14 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
     }
 
     private async asyncClose() {
-        await this.go(this.backPlace)
+        await this.flip(this.backPlace)
     }
 
     protected async onClose() {
         try {
             await this.asyncClose()
         } catch (caught) {
-            this.app.unexpected(LOG, 'Trying to close', caught)
+            this.unexpected('Trying to close', caught)
         } finally {
             this.scope.update()
         }
@@ -118,7 +118,7 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
 
             await this.asyncClose()
         } catch (caught) {
-            app.unexpected(LOG, 'Trying to save', caught)
+            app.unexpected('Trying to save', caught)
         } finally {
             this.scope.update()
         }

@@ -3,10 +3,13 @@ export const ViewIds = {
     mainBody: 'main-body',
     module1: 'module1',
     module2: 'module2',
-    module1Detail: 'module1-detail',
     module2Detail: 'module2-detail',
     restricted: 'restricted',
-    alert: 'alert'
+    alert: 'alert',
+
+    todoMain: 'todo-main',
+    todoItem: 'todo-item',
+    todoFooter: 'todo-footer'
 }
 
 export const ParamsIds = {

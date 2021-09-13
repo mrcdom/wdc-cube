@@ -1,11 +1,11 @@
 import {
-    Logger, ILogger,
+    Logger,
     Application,
     HistoryManager,
     PlaceUri,
     Scope,
     ScopeSlot,
-    NOOP_PROMISE_VOID
+    AlertSeverity
 } from 'wdc-cube'
 import { Places } from '../Places'
 import { ViewIds, AttrsIds } from '../Constants'
@@ -15,18 +15,16 @@ const LOG = Logger.get('MainPresenter')
 
 type IDialogScope = Scope & { onClose: () => Promise<void> }
 
-type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
-
 export class AlertScope extends Scope {
     severity: AlertSeverity = 'info'
     title?: string
     message?: string
 
-    onClose: () => Promise<void> = NOOP_PROMISE_VOID
+    onClose = Scope.ACTION()
 }
 
 export class BodyScope extends Scope {
-    onAlert: (severity: AlertSeverity) => Promise<void> = NOOP_PROMISE_VOID
+    onAlert = Scope.ACTION1<AlertSeverity>()
 }
 
 export class MainScope extends Scope {
@@ -34,10 +32,9 @@ export class MainScope extends Scope {
     dialog?: IDialogScope
     alert?: AlertScope
 
-    onRoot: () => Promise<void> = NOOP_PROMISE_VOID
-    onModule1: () => Promise<void> = NOOP_PROMISE_VOID
-    onModule2: () => Promise<void> = NOOP_PROMISE_VOID
-    onModule1Detail: () => Promise<void> = NOOP_PROMISE_VOID
+    onRoot = Scope.ACTION()
+    onModule1 = Scope.ACTION()
+    onModule2 = Scope.ACTION()
 }
 
 export class MainPresenter extends Application {
@@ -75,9 +72,7 @@ export class MainPresenter extends Application {
         }
     }
 
-
-
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean, depeest?: boolean): Promise<boolean> {
         if (initialization) {
             await startServices()
 
@@ -86,15 +81,19 @@ export class MainPresenter extends Application {
             this.scope.body = this.bodyScope
 
             try {
-                await this.navigate(this.historyManager.location)
-            } catch(caught) {
-                this.unexpected(LOG, 'Navigation from history', caught)
+                const targetUri = this.newUriFromString(this.historyManager.location)
+                if (targetUri.toString() !== uri.toString()) {
+                    await this.flipToUri(targetUri)
+                    return false
+                }
+            } catch (caught) {
+                this.unexpected('Navigation from history', caught)
             }
 
             LOG.info('Initialized')
         }
 
-        if (deepest) {
+        if (depeest) {
             this.bodySlot(undefined)
         } else {
             uri.setScopeSlot(AttrsIds.parentSlot, this.bodySlot)
@@ -111,12 +110,12 @@ export class MainPresenter extends Application {
 
     // :: Helper API
 
-    public unexpected(log: ILogger, message: string, error: unknown) {
-        log.error(message, error)
+    public override unexpected(message: string, error: unknown) {
+        super.unexpected(message, error)
         this.alert('error', 'Unexpected error', message)
     }
 
-    public alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
+    public override alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
         const alertScope = new AlertScope(ViewIds.alert)
         alertScope.severity = severity
         alertScope.title = title
@@ -137,9 +136,9 @@ export class MainPresenter extends Application {
 
     protected async onRoot() {
         try {
-            await this.go(Places.root)
+            await this.flip(Places.root)
         } catch (caught) {
-            this.unexpected(LOG, 'Opening to root', caught)
+            this.unexpected('Opening to root', caught)
         } finally {
             this.scope.update()
         }
@@ -147,19 +146,9 @@ export class MainPresenter extends Application {
 
     protected async onModule1() {
         try {
-            await this.go(Places.module1)
+            await this.flip(Places.module1)
         } catch (caught) {
-            this.unexpected(LOG, 'Opening to module-1', caught)
-        } finally {
-            this.scope.update()
-        }
-    }
-
-    protected async onModule1Detail() {
-        try {
-            await this.go(Places.module1Detail)
-        } catch (caught) {
-            this.unexpected(LOG, 'Opening to module-1/detail', caught)
+            this.unexpected('Opening to module-1', caught)
         } finally {
             this.scope.update()
         }
@@ -167,9 +156,9 @@ export class MainPresenter extends Application {
 
     protected async onModule2() {
         try {
-            await this.go(Places.module2)
+            await this.flip(Places.module2)
         } catch (caught) {
-            this.unexpected(LOG, 'Opening to module-2', caught)
+            this.unexpected('Opening to module-2', caught)
         } finally {
             this.scope.update()
         }

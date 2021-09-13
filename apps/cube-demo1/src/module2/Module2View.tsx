@@ -20,8 +20,6 @@ export function Module2View({ className, style, scope }: Module2ViewProps) {
         </ListItem>)
     }
 
-    
-
     return (
         <div className={clsx(className, Css.View)} style={style}>
             <h1>Sites that you can subscribe to...</h1>

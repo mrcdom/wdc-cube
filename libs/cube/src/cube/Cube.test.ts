@@ -123,7 +123,7 @@ class RootPresenter extends Presenter<TestApplication, RootScope> {
     private setBody(scope?: Scope) {
         if (this.scope.body !== scope) {
             this.scope.body = scope
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -148,8 +148,9 @@ class RootPresenter extends Presenter<TestApplication, RootScope> {
         return true
     }
 
-    public override computeDerivatedFields(): void {
+    public override onBeforeScopeUpdate(): void {
         this.scope.computedValue = this.app.session.id * 2
+        this.update(this.scope)
     }
 
     public override publishParameters(uri: PlaceUri): void {
@@ -210,14 +211,14 @@ class LoginPresenter extends Presenter<TestApplication, LoginScope> {
                 })
 
                 const uri = this.app.newUri(Places.RESTRICTED)
-                await this.app.navigate(uri)
+                await this.app.flipToUri(uri)
             } else {
                 this.scope.message = 'User or password invalid'
             }
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 }
@@ -261,7 +262,7 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
         // Safe guard agains getting into a restricted area without a valid session
         if (this.app.session.id === 0) {
             const uri = this.app.newUri(Places.LOGIN)
-            await this.app.navigate(uri)
+            await this.app.flipToUri(uri)
             return false
         }
 
@@ -286,7 +287,7 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
     private setContent(contentScope?: Scope) {
         if (contentScope !== this.scope.content) {
             this.scope.content = contentScope
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -294,11 +295,11 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
         try {
             const uri = this.app.newUri(Places.CART)
             uri.setParameter(PARAM_IDs.CART_ID, cartId)
-            await this.app.navigate(uri)
+            await this.app.flipToUri(uri)
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -306,11 +307,11 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
         try {
             const uri = this.app.newUri(Places.PRODUCT)
             uri.setParameter(PARAM_IDs.PRODUCT_ID, productId)
-            await this.app.navigate(uri)
+            await this.app.flipToUri(uri)
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -318,11 +319,11 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
         try {
             const uri = this.app.newUri(Places.RECEIPT)
             uri.setParameter(PARAM_IDs.RECEIPT_ID, receiptId)
-            await this.app.navigate(uri)
+            await this.app.flipToUri(uri)
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -331,11 +332,11 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
             this.app.session.id = 0
             this.app.session.active = false
             const uri = this.app.newUri(Places.LOGIN)
-            await this.app.navigate(uri)
+            await this.app.flipToUri(uri)
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -516,7 +517,7 @@ class ReceiptPresenter extends Presenter<TestApplication, ReceiptScope> {
 
 it('Application :: Basic Navigation', async () => {
     const app = new TestApplication()
-    await app.navigate(app.newUri(Places.LOGIN))
+    await app.flipToUri(app.newUri(Places.LOGIN))
 
     // Check if presenter state was reached
     const root = app.getPresenter(Places.ROOT) as RootPresenter
@@ -545,7 +546,7 @@ it('Application :: Basic Navigation', async () => {
     expect(app.session.id).toEqual(0)
 
     // Check safe guard trying to access restricted area without a valid session
-    await app.navigate(app.newUri(Places.RESTRICTED))
+    await app.flipToUri(app.newUri(Places.RESTRICTED))
     expect(app.getPresenter(Places.RESTRICTED)).toBeUndefined()
     expect(app.getPresenter(Places.LOGIN)).toBeDefined()
     expect(login).toBe(app.getPresenter(Places.LOGIN)) // Same instance
@@ -584,14 +585,14 @@ it('Application :: Token Accuracity', async () => {
     app.session.id = 1
     app.session.active = true
 
-    await app.navigate(app.newUri(Places.RESTRICTED))
+    await app.flipToUri(app.newUri(Places.RESTRICTED))
     const restricted = app.getPresenter(Places.RESTRICTED) as RestrictedPresenter
     expect(restricted.initialized).toEqual(true)
     expect('restricted?s=1').toEqual(history.token)
 
     const productUri = app.newUri(Places.PRODUCT)
     productUri.setParameter(PARAM_IDs.PRODUCT_ID, 9999)
-    await app.navigate(productUri)
+    await app.flipToUri(productUri)
     expect(restricted.initialized).toEqual(true)
 
     const product = app.getPresenter(Places.PRODUCT) as ProductPresenter
@@ -603,7 +604,7 @@ it('Application :: Token Accuracity', async () => {
 
     const cartUri = app.newUri(Places.CART)
     cartUri.setParameter(PARAM_IDs.CART_ID, 1234)
-    await app.navigate(cartUri)
+    await app.flipToUri(cartUri)
     expect(restricted.initialized).toEqual(true)
     expect(product.initialized).toEqual(false)
     const cart = app.getPresenter(Places.CART) as CartPresenter
@@ -611,7 +612,7 @@ it('Application :: Token Accuracity', async () => {
     expect(1234).toEqual(cart.cartId)
     expect('cart?s=1&c=1234').toEqual(history.token)
 
-    await app.navigate(app.newUri(Places.RESTRICTED))
+    await app.flipToUri(app.newUri(Places.RESTRICTED))
     expect(restricted.initialized).toEqual(true)
     expect(cart.initialized).toEqual(false)
     expect(product.initialized).toEqual(false)
@@ -624,7 +625,7 @@ it('Application :: token Navigation', async () => {
     app.session.id = 1
     app.session.active = true
 
-    await app.navigate('cart?s=1&c=1234')
+    await app.flipToUriString('cart?s=1&c=1234')
 
     const root = app.getPresenter(Places.ROOT) as RootPresenter
     expect(root).toBeDefined()
@@ -637,7 +638,7 @@ it('Application :: token Navigation', async () => {
     expect(1234).toEqual(cart.cartId)
     expect('cart?s=1&c=1234').toEqual(history.token)
 
-    await app.navigate('product?s=1&p=9999')
+    await app.flipToUriString('product?s=1&p=9999')
     const product = app.getPresenter(Places.PRODUCT) as ProductPresenter
     expect(product).toBeDefined()
     expect(product.initialized).toEqual(true)
@@ -646,7 +647,7 @@ it('Application :: token Navigation', async () => {
     expect('product-' + 9999).toEqual(product.scope.name)
     expect('product?s=1&p=9999').toEqual(history.token)
 
-    await app.navigate('restricted')
+    await app.flipToUriString('restricted')
     const restricted = app.getPresenter(Places.RESTRICTED) as RestrictedPresenter
     expect(restricted).toBeDefined()
     expect(restricted.initialized).toEqual(true)

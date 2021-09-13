@@ -6,9 +6,9 @@ export interface IPresenter {
 
     release(): void
 
-    applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean>
+    emitBeforeScopeUpdate(): void
 
-    computeDerivatedFields(): void
+    applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean>
 
     publishParameters(uri: PlaceUri): void
 
