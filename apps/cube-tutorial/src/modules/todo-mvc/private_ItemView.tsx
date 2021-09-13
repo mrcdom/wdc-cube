@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import { bindUpdate } from 'wdc-cube-react'
 import Css from './TodoMvc.module.css'
-import { ItemScope } from './TodoMvcPresenter'
+import { ItemScope } from './TodoMvc.presenter'
 
 type ItemViewProps = {
     className?: string

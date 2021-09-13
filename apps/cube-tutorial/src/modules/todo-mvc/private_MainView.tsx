@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import { bindUpdate, ViewFactory } from 'wdc-cube-react'
 import Css from './TodoMvc.module.css'
-import { MainScope } from './TodoMvcPresenter'
+import { MainScope } from './TodoMvc.presenter'
 
 type MainViewProps = {
     className?: string

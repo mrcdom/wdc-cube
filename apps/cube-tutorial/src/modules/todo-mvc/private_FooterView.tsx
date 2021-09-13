@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import Css from './TodoMvc.module.css'
 import { bindUpdate } from 'wdc-cube-react'
-import { FooterScope, ShowingTodos } from './TodoMvcPresenter'
+import { FooterScope, ShowingTodos } from './TodoMvc.presenter'
 
 type FooterViewProps = {
     className?: string

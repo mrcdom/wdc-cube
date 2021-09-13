@@ -12,7 +12,7 @@ type SubscriptionsViewProps = { scope: SubscriptionsScope } & IViewProps<HTMLDiv
 export function SubscriptionsView({ scope, className, ...props }: SubscriptionsViewProps) {
     bindUpdate(React, scope)
 
-    const itemArray: JSX.Element[] = []
+    const itemArray = [] as JSX.Element[]
 
     for (const item of scope.sites) {
         itemArray.push(<ListItem key={item.id} button>

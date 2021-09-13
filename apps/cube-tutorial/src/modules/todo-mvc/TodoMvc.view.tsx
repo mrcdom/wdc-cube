@@ -1,7 +1,7 @@
 import React from 'react'
 import clsx from 'clsx'
 import { bindUpdate, ViewFactory, IViewProps } from 'wdc-cube-react'
-import { TodoMvcScope } from './TodoMvcPresenter'
+import { TodoMvcScope } from './TodoMvc.presenter'
 import Css from './TodoMvc.module.css'
 
 type TodoMvcViewProps = { scope: TodoMvcScope } & IViewProps<HTMLDivElement>

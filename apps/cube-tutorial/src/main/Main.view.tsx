@@ -30,9 +30,9 @@ export function MainView({ className, ...props }: MainViewProps) {
   return <>
     <div className={clsx(className, Css.MainView)} {...props}>
       <div className={Css.Bar}>
-        <Button color="primary" className={Css.BtnFirst} onClick={scope.onRoot}>Home</Button>
-        <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule1}>Todos</Button>
-        <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule2}>Subscriptions</Button>
+        <Button color="primary" className={Css.BtnFirst} onClick={scope.onHome}>Home</Button>
+        <Button color="primary" className={Css.BtnOthers} onClick={scope.onOpenTodos}>Todos</Button>
+        <Button color="primary" className={Css.BtnOthers} onClick={scope.onOpenSuscriptions}>Subscriptions</Button>
       </div>
 
       {bodyView}

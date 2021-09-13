@@ -25,8 +25,8 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
     }
 
     public override release() {
-        LOG.info('Finalized')
         super.release()
+        LOG.info('Finalized')
     }
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
@@ -56,7 +56,7 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
         } catch (caught) {
             this.unexpected(`Opening item ${JSON.stringify(item)}`, caught)
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 

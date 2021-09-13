@@ -12,7 +12,7 @@ export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailS
   bindUpdate(React, scope)
 
   return <>
-    <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+    <DialogTitle>Subscribe</DialogTitle>
     <DialogContent>
       <DialogContentText>
         To subscribe to this website({scope.name}), please enter your email address here. We will send updates

@@ -1,8 +1,8 @@
 import { Place } from 'wdc-cube'
 
-import { TodoMvcPresenter } from './modules/todo-mvc/TodoMvcPresenter'
+import { TodoMvcPresenter } from './modules/todo-mvc/TodoMvc.presenter'
 import { SubscriptionsPresenter } from './modules/subscriptions/Subscriptions.presenter'
-import { SubscriptionsDetailPresenter } from './modules/subscriptions/SubscriptionsDetail.presenter'
+import { SubscriptionsDetailPresenter } from './modules/subscriptions/detail/SubscriptionsDetail.presenter'
 import { RestrictedPresenter } from './modules/restricted/Restricted.presenter'
 
 const root = Place.createDetached('/')

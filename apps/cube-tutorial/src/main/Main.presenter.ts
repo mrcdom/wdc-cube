@@ -24,7 +24,7 @@ export class AlertScope extends Scope {
 }
 
 export class BodyScope extends Scope {
-    onAlert = Scope.ACTION1<AlertSeverity>()
+    onOpenAlert = Scope.ACTION1<AlertSeverity>()
 }
 
 export class MainScope extends Scope {
@@ -32,9 +32,9 @@ export class MainScope extends Scope {
     dialog?: IDialogScope
     alert?: AlertScope
 
-    onRoot = Scope.ACTION()
-    onModule1 = Scope.ACTION()
-    onModule2 = Scope.ACTION()
+    onHome = Scope.ACTION()
+    onOpenTodos = Scope.ACTION()
+    onOpenSuscriptions = Scope.ACTION()
 }
 
 export class MainPresenter extends Application {
@@ -56,7 +56,7 @@ export class MainPresenter extends Application {
     protected readonly bodySlot: ScopeSlot = scope => {
         if (this.scope.body !== scope) {
             this.scope.body = scope || this.bodyScope
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -68,7 +68,7 @@ export class MainPresenter extends Application {
                 LOG.error(`Missing onClose action on scope ${this.scope.dialog.vid}`)
             }
 
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -76,8 +76,12 @@ export class MainPresenter extends Application {
         if (initialization) {
             await startServices()
 
-            this.scope.bind(this)
-            this.bodyScope.bind(this)
+            this.scope.onHome = this.onHome.bind(this)
+            this.scope.onOpenTodos = this.onOpenTodos.bind(this)
+            this.scope.onOpenSuscriptions = this.onOpenSuscriptions.bind(this)
+
+            this.bodyScope.onOpenAlert = this.onOpenAlert.bind(this)
+
             this.scope.body = this.bodyScope
 
             try {
@@ -103,6 +107,7 @@ export class MainPresenter extends Application {
         if (this.scope.alert) {
             await this.scope.alert.onClose()
             this.scope.alert = undefined
+            this.update(this.scope)
         }
 
         return true
@@ -122,49 +127,49 @@ export class MainPresenter extends Application {
         alertScope.message = message
         alertScope.onClose = async () => {
             this.scope.alert = undefined
-            this.scope.update()
+            this.update(this.scope)
             if (onClose) {
                 await onClose()
             }
         }
 
         this.scope.alert = alertScope
-        this.scope.update()
+        this.update(this.scope)
     }
 
     // :: View Actions
 
-    protected async onRoot() {
+    protected async onHome() {
         try {
             await this.flip(Places.root)
         } catch (caught) {
             this.unexpected('Opening to root', caught)
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
-    protected async onModule1() {
+    protected async onOpenTodos() {
         try {
             await this.flip(Places.todos)
         } catch (caught) {
             this.unexpected('Opening to module-1', caught)
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
-    protected async onModule2() {
+    protected async onOpenSuscriptions() {
         try {
             await this.flip(Places.subscriptions)
         } catch (caught) {
             this.unexpected('Opening to module-2', caught)
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
-    protected async onAlert(severity: AlertSeverity) {
+    protected async onOpenAlert(severity: AlertSeverity) {
         try {
             LOG.info('onAlert clicked')
             this.alert(severity, 'Some title', 'Some message', async () => {
@@ -173,7 +178,7 @@ export class MainPresenter extends Application {
         } catch (caught) {
             LOG.error('onAlert', caught)
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 }

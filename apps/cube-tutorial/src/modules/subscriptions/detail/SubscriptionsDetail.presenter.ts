@@ -1,7 +1,7 @@
 import { Logger, Presenter, Scope, ScopeSlot, Place, PlaceUri, NOOP_VOID } from 'wdc-cube'
-import { MainPresenter } from '../../main/Main.presenter'
-import { ViewIds, AttrsIds, ParamsIds } from '../../Constants'
-import { TutorialService, SiteItemType } from '../../services/TutorialService'
+import { MainPresenter } from '../../../main/Main.presenter'
+import { ViewIds, AttrsIds, ParamsIds } from '../../../Constants'
+import { TutorialService, SiteItemType } from '../../../services/TutorialService'
 
 const LOG = Logger.get('SubscriptionsDetailPresenter')
 
@@ -60,13 +60,13 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
 
             this.item = siteItem
             this.scope.name = this.item?.site
-            this.scope.update()
+            this.update(this.scope)
 
             LOG.info('Initialized')
         } else if (this.item?.id !== paramSiteId) {
             this.item = await tutorialService.fetchSiteItem(paramSiteId)
             this.scope.name = this.item?.site
-            this.scope.update()
+            this.update(this.scope)
             this.app.updateHistory()
         }
 
@@ -89,7 +89,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
         } catch (caught) {
             this.unexpected('Trying to close', caught)
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
@@ -120,7 +120,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
         } catch (caught) {
             app.unexpected('Trying to save', caught)
         } finally {
-            this.scope.update()
+            this.update(this.scope)
         }
     }
 
