@@ -244,6 +244,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     protected async onShowAll() {
         if (this.footerScope.showing !== ShowingTodos.ALL) {
             this.footerScope.showing = ShowingTodos.ALL
+            this.update(this.mainScope)
             this.update(this.footerScope)
         }
     }
@@ -251,6 +252,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     protected async onShowActives() {
         if (this.footerScope.showing !== ShowingTodos.ACTIVE) {
             this.footerScope.showing = ShowingTodos.ACTIVE
+            this.update(this.mainScope)
             this.update(this.footerScope)
         }
     }
@@ -258,6 +260,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     protected async onShowCompleteds() {
         if (this.footerScope.showing !== ShowingTodos.COMPLETED) {
             this.footerScope.showing = ShowingTodos.COMPLETED
+            this.update(this.mainScope)
             this.update(this.footerScope)
         }
     }
