@@ -1,16 +1,16 @@
 import { Logger, Presenter, Scope, ScopeSlot, Place, PlaceUri, NOOP_VOID } from 'wdc-cube'
-import { MainPresenter } from '../../main/MainPresenter'
+import { MainPresenter } from '../../main/Main.presenter'
 import { ViewIds, AttrsIds, ParamsIds } from '../../Constants'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
 
-const LOG = Logger.get('Module2DetailPresenter')
+const LOG = Logger.get('SubscriptionsDetailPresenter')
 
 // @Inject
 const tutorialService = TutorialService.INSTANCE
 
 const eMailRegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-export class Module2DetailScope extends Scope {
+export class SubscriptionsDetailScope extends Scope {
     name?: string
 
     // Actions
@@ -19,7 +19,7 @@ export class Module2DetailScope extends Scope {
     onSubscribe = Scope.ACTION()
 }
 
-export class Module2DetailPresenter extends Presenter<MainPresenter, Module2DetailScope> {
+export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, SubscriptionsDetailScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
@@ -30,7 +30,7 @@ export class Module2DetailPresenter extends Presenter<MainPresenter, Module2Deta
     private backPlace: Place
 
     public constructor(app: MainPresenter) {
-        super(app, new Module2DetailScope(ViewIds.module2Detail))
+        super(app, new SubscriptionsDetailScope(ViewIds.module2Detail))
         this.backPlace = app.lastPlace
     }
 

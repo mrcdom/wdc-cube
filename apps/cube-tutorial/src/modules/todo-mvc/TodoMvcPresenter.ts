@@ -5,10 +5,10 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { v4 as uuidv4 } from 'uuid'
 import { TutorialService } from '../../services/TutorialService'
-import { MainPresenter } from '../../main/MainPresenter'
+import { MainPresenter } from '../../main/Main.presenter'
 import { ViewIds, AttrsIds } from '../../Constants'
 
-const LOG = Logger.get('Module1Presenter')
+const LOG = Logger.get('TodoMvcPresenter')
 
 // @Inject
 const tutorialService = TutorialService.INSTANCE

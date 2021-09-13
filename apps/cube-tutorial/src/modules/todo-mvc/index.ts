@@ -5,7 +5,7 @@ import { MainView } from './private_MainView'
 import { ItemView } from './private_ItemView'
 import { FooterView } from './private_FooterView'
 
-export function registerModule1Views() {
+export function registerTodoMvcViews() {
     const rv = ViewFactory.register
 
     rv(ViewIds.module1, TodoMvcView)

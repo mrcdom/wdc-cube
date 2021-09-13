@@ -1,5 +1,5 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
-import { MainPresenter } from '../../main/MainPresenter'
+import { MainPresenter } from '../../main/Main.presenter'
 import { ViewIds, AttrsIds } from '../../Constants'
 
 

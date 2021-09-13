@@ -146,7 +146,7 @@ export class MainPresenter extends Application {
 
     protected async onModule1() {
         try {
-            await this.flip(Places.module1)
+            await this.flip(Places.todos)
         } catch (caught) {
             this.unexpected('Opening to module-1', caught)
         } finally {
@@ -156,7 +156,7 @@ export class MainPresenter extends Application {
 
     protected async onModule2() {
         try {
-            await this.flip(Places.module2)
+            await this.flip(Places.subscriptions)
         } catch (caught) {
             this.unexpected('Opening to module-2', caught)
         } finally {

@@ -1,16 +1,19 @@
 import React from 'react'
+import clsx from 'clsx'
 import { NOOP_PROMISE_VOID } from 'wdc-cube'
-import { getOrCreateApplication, ViewFactory, PageHistoryManager } from 'wdc-cube-react'
-import { MainPresenter } from './MainPresenter'
+import { getOrCreateApplication, ViewFactory, PageHistoryManager, IViewProps } from 'wdc-cube-react'
+import { MainPresenter } from './Main.presenter'
 import Dialog from '@material-ui/core/Dialog'
 import { Button } from '@material-ui/core'
-import Css from './MainView.module.css'
+import Css from './Main.module.css'
 
 // HistoryManager
 
 const createApp = MainPresenter.create.bind(undefined, new PageHistoryManager(true))
 
-export function MainView() {
+export type MainViewProps = IViewProps<HTMLDivElement>
+
+export function MainView({ className, ...props }: MainViewProps) {
   const { scope } = getOrCreateApplication(React, createApp)
 
   let bodyView = ViewFactory.createView(scope.body, { className: Css.Body })
@@ -25,7 +28,7 @@ export function MainView() {
   const alertView = ViewFactory.createView(scope.alert)
 
   return <>
-    <div className={Css.View}>
+    <div className={clsx(className, Css.MainView)} {...props}>
       <div className={Css.Bar}>
         <Button color="primary" className={Css.BtnFirst} onClick={scope.onRoot}>Home</Button>
         <Button color="primary" className={Css.BtnOthers} onClick={scope.onModule1}>Todos</Button>

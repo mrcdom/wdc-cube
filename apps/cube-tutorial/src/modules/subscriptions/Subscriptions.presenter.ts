@@ -1,27 +1,27 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
-import { MainPresenter } from '../../main/MainPresenter'
+import { MainPresenter } from '../../main/Main.presenter'
 import { ViewIds, AttrsIds, ParamsIds } from '../../Constants'
 import { Places } from '../../Places'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
 
-const LOG = Logger.get('Module2Presenter')
+const LOG = Logger.get('SubscriptionsPresenter')
 
 // @Inject
 const tutorialService = TutorialService.INSTANCE
 
-export class Module2Scope extends Scope {
+export class SubscriptionsScope extends Scope {
     sites = [] as SiteItemType[]
 
     // Actions
     onItemClicked = Scope.ACTION1<SiteItemType>()
 }
 
-export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
+export class SubscriptionsPresenter extends Presenter<MainPresenter, SubscriptionsScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
     public constructor(app: MainPresenter) {
-        super(app, new Module2Scope(ViewIds.module2))
+        super(app, new SubscriptionsScope(ViewIds.module2))
     }
 
     public override release() {
@@ -44,7 +44,7 @@ export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {
 
     protected async onItemClicked(item: SiteItemType) {
         try {
-            await this.flip(Places.module2Detail, {
+            await this.flip(Places.subscriptionsDetail, {
                 params: {
                     [ParamsIds.SiteId]: item.id
                 },

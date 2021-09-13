@@ -1,13 +1,12 @@
 import React from 'react'
 import clsx from 'clsx'
-import { bindUpdate, ViewFactory } from 'wdc-cube-react'
-import type { HTMLDivProps } from '../../utils/ReactPropertyTypes'
+import { bindUpdate, ViewFactory, IViewProps } from 'wdc-cube-react'
 import { TodoMvcScope } from './TodoMvcPresenter'
 import Css from './TodoMvc.module.css'
 
-type Module1ViewProps = { scope: TodoMvcScope } & HTMLDivProps
+type TodoMvcViewProps = { scope: TodoMvcScope } & IViewProps<HTMLDivElement>
 
-export function TodoMvcView({ scope, className, ...otherProps }: Module1ViewProps) {
+export function TodoMvcView({ scope, className, ...otherProps }: TodoMvcViewProps) {
   bindUpdate(React, scope)
 
   const newField = React.useRef<HTMLInputElement>(null)

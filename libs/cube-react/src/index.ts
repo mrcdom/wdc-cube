@@ -5,3 +5,4 @@ export { ViewFactory } from './cube-react/ViewFactory'
 export { PageHistoryManager } from './cube-react/PageHistoryManager'
 
 export type { CubeComponentProps } from './cube-react/CubeComponent'
+export type { IViewProps } from './cube-react/ViewFactory'

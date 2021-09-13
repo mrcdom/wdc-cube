@@ -6,9 +6,9 @@ import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import { bindUpdate } from 'wdc-cube-react'
-import { Module2DetailScope } from './Module2DetailPresenter'
+import { SubscriptionsDetailScope } from './SubscriptionsDetail.presenter'
 
-export function Module2DetailView({ scope }: { scope: Module2DetailScope }) {
+export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailScope }) {
   bindUpdate(React, scope)
 
   return <>

@@ -1,16 +1,15 @@
 import React from 'react'
 import clsx from 'clsx'
-import { bindUpdate } from 'wdc-cube-react'
+import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
-import { Module2Scope } from './Module2Presenter'
-import type { HTMLDivProps } from '../../utils/ReactPropertyTypes'
-import Css from './Module2View.module.css'
+import { SubscriptionsScope } from './Subscriptions.presenter'
+import Css from './Subscriptions.module.css'
 
-type Module2ViewProps = { scope: Module2Scope } & HTMLDivProps
+type SubscriptionsViewProps = { scope: SubscriptionsScope } & IViewProps<HTMLDivElement>
 
-export function Module2View({ scope, className, ...props }: Module2ViewProps) {
+export function SubscriptionsView({ scope, className, ...props }: SubscriptionsViewProps) {
     bindUpdate(React, scope)
 
     const itemArray: JSX.Element[] = []
