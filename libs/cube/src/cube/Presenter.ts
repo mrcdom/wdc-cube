@@ -101,7 +101,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
                 scope.update()
             }
         } catch (caught) {
-            LOG.error('Updating dirty scopes');
+            LOG.error('Updating dirty scopes')
         } finally {
             this.__dirtyScopes.clear()
         }
