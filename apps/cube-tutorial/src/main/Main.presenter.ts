@@ -121,7 +121,7 @@ export class MainPresenter extends Application {
     }
 
     public override alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
-        const alertScope = new AlertScope(ViewIds.alert)
+        const alertScope = new AlertScope(ViewIds.mainAlert)
         alertScope.severity = severity
         alertScope.title = title
         alertScope.message = message

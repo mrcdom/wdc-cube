@@ -71,14 +71,14 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
-    private mainScope = new MainScope(ViewIds.todoMain)
+    private mainScope = new MainScope(ViewIds.todosMain)
 
-    private footerScope = new FooterScope(ViewIds.todoFooter)
+    private footerScope = new FooterScope(ViewIds.todosFooter)
 
     private itemScopes = [] as ItemScope[]
 
     public constructor(app: MainPresenter) {
-        super(app, new TodoMvcScope(ViewIds.module1))
+        super(app, new TodoMvcScope(ViewIds.todos))
     }
 
     public override release() {
@@ -191,7 +191,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         try {
             const todos = await tutorialService.fetchTodos()
             for (const todo of todos) {
-                const todoScope = new ItemScope(ViewIds.todoItem)
+                const todoScope = new ItemScope(ViewIds.todosItem)
                 todoScope.id = todo.uid
                 todoScope.title = todo.text
                 todoScope.editText = todo.text
@@ -207,7 +207,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     protected async onAddTodo(val: string) {
         const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
 
-        const todoScope = new ItemScope(ViewIds.todoItem)
+        const todoScope = new ItemScope(ViewIds.todosItem)
         todoScope.id = lastUid + 1
         todoScope.title = val
         todoScope.editText = val

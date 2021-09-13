@@ -1,15 +1,17 @@
 export const ViewIds = {
     main: 'main',
     mainBody: 'main-body',
-    module1: 'module1',
-    module2: 'module2',
-    module2Detail: 'module2-detail',
-    restricted: 'restricted',
-    alert: 'alert',
+    mainAlert: 'main-alert',
 
-    todoMain: 'todo-main',
-    todoItem: 'todo-item',
-    todoFooter: 'todo-footer'
+    todos: 'todos',
+    todosMain: 'todos-main',
+    todosItem: 'todos-item',
+    todosFooter: 'todos-footer',
+
+    subscriptions: 'subscriptions',
+    subscriptionsDetail: 'subscriptions-detail',
+
+    restricted: 'restricted'
 }
 
 export const ParamsIds = {
@@ -20,5 +22,5 @@ export const AttrsIds = {
     parentSlot: 'parent-slot',
     dialogSlot: 'sialog-slot',
 
-    module2Detail_item: '0001'
+    subscriptionsDetail_item: '0001'
 }

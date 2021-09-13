@@ -30,7 +30,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
     private backPlace: Place
 
     public constructor(app: MainPresenter) {
-        super(app, new SubscriptionsDetailScope(ViewIds.module2Detail))
+        super(app, new SubscriptionsDetailScope(ViewIds.subscriptionsDetail))
         this.backPlace = app.lastPlace
     }
 
@@ -53,7 +53,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
             this.scope.bind(this)
             this.parentSlot = uri.getScopeSlot(AttrsIds.dialogSlot)
 
-            let siteItem = uri.attributes.get(AttrsIds.module2Detail_item) as SiteItemType | undefined
+            let siteItem = uri.attributes.get(AttrsIds.subscriptionsDetail_item) as SiteItemType | undefined
             if (!siteItem) {
                 siteItem = await tutorialService.fetchSiteItem(paramSiteId)
             }

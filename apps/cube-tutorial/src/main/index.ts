@@ -7,5 +7,5 @@ export { MainView } from './Main.view'
 export function registerMainViews() {
     const rv = ViewFactory.register
     rv(ViewIds.mainBody, BodyView)
-    rv(ViewIds.alert, AlertView)
+    rv(ViewIds.mainAlert, AlertView)
 }

@@ -5,6 +5,6 @@ import { SubscriptionsDetailView } from './detail/SubscriptionsDetail.view'
 
 export function registerSubscriptionsViews() {
     const rv = ViewFactory.register
-    rv(ViewIds.module2, SubscriptionsView)
-    rv(ViewIds.module2Detail, SubscriptionsDetailView)
+    rv(ViewIds.subscriptions, SubscriptionsView)
+    rv(ViewIds.subscriptionsDetail, SubscriptionsDetailView)
 }

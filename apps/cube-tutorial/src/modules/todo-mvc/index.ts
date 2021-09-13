@@ -8,8 +8,8 @@ import { FooterView } from './private_FooterView'
 export function registerTodoMvcViews() {
     const rv = ViewFactory.register
 
-    rv(ViewIds.module1, TodoMvcView)
-    rv(ViewIds.todoMain, MainView)
-    rv(ViewIds.todoItem, ItemView)
-    rv(ViewIds.todoFooter, FooterView)
+    rv(ViewIds.todos, TodoMvcView)
+    rv(ViewIds.todosMain, MainView)
+    rv(ViewIds.todosItem, ItemView)
+    rv(ViewIds.todosFooter, FooterView)
 }

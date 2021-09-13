@@ -21,7 +21,7 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
     private parentSlot: ScopeSlot = NOOP_VOID
 
     public constructor(app: MainPresenter) {
-        super(app, new SubscriptionsScope(ViewIds.module2))
+        super(app, new SubscriptionsScope(ViewIds.subscriptions))
     }
 
     public override release() {
@@ -50,7 +50,7 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
                 },
                 attrs: {
                     // Helping performance (avoid a unneeded service fetch)
-                    [AttrsIds.module2Detail_item]: item
+                    [AttrsIds.subscriptionsDetail_item]: item
                 }
             })
         } catch (caught) {
