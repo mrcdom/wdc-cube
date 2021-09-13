@@ -1,5 +1,5 @@
 import { ViewFactory } from 'wdc-cube-react'
-import { ViewIds } from '../Constants'
+import { ViewIds } from '../../Constants'
 import { TodoMvcView } from './TodoMvcView'
 import { MainView } from './private_MainView'
 import { ItemView } from './private_ItemView'

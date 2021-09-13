@@ -65,7 +65,7 @@ export class MainPresenter extends Application {
             this.scope.dialog = scope as IDialogScope
 
             if (this.scope.dialog && !this.scope.dialog.onClose) {
-                LOG.error(`Missing onClose action on scope ${this.scope.dialog.id}`)
+                LOG.error(`Missing onClose action on scope ${this.scope.dialog.vid}`)
             }
 
             this.scope.update()

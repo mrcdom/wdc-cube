@@ -23,11 +23,11 @@ export class ViewFactory {
 
     public static createView<T = unknown>(scope?: Scope, props?: IViewProps<T>) {
         if (scope) {
-            const factory = ViewFactory.elementFactoryMap.get(scope.id)
+            const factory = ViewFactory.elementFactoryMap.get(scope.vid)
             if (factory) {
                 return factory(scope, props)
             } else {
-                LOG.warn(`No view factory found for scope.id=${scope.id}`)
+                LOG.warn(`No view factory found for scope.id=${scope.vid}`)
             }
         }
         return undefined

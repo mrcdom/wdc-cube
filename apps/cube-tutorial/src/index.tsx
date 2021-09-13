@@ -6,9 +6,9 @@ import { ViewIds } from './Constants'
 import { AlertView } from './main/AlertView'
 import { MainView } from './main/MainView'
 import { MainBodyView } from './main/MainBodyView'
-import { registerModule1Views } from './module1'
-import { Module2View } from './module2/Module2View'
-import { Module2DetailView } from './module2/Module2DetailView'
+import { registerModule1Views } from './modules/todo-mvc'
+import { Module2View } from './modules/subscriptions/Module2View'
+import { Module2DetailView } from './modules/subscriptions/Module2DetailView'
 import './index.css'
 
 window.addEventListener('beforeunload', async () => {

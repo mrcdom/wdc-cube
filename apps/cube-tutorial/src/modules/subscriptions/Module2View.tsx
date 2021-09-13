@@ -1,15 +1,16 @@
-import React, { HTMLAttributes } from 'react'
+import React from 'react'
 import clsx from 'clsx'
 import { bindUpdate } from 'wdc-cube-react'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import { Module2Scope } from './Module2Presenter'
+import type { HTMLDivProps } from '../../utils/ReactPropertyTypes'
 import Css from './Module2View.module.css'
 
-type Module2ViewProps = { scope: Module2Scope } & HTMLAttributes<HTMLDivElement>
+type Module2ViewProps = { scope: Module2Scope } & HTMLDivProps
 
-export function Module2View({ className, style, scope }: Module2ViewProps) {
+export function Module2View({ scope, className, ...props }: Module2ViewProps) {
     bindUpdate(React, scope)
 
     const itemArray: JSX.Element[] = []
@@ -21,7 +22,7 @@ export function Module2View({ className, style, scope }: Module2ViewProps) {
     }
 
     return (
-        <div className={clsx(className, Css.View)} style={style}>
+        <div className={clsx(className, Css.SubscriptionView)} {...props}>
             <h1>Sites that you can subscribe to...</h1>
             <List component="nav" aria-label="main mailbox folders">
                 {itemArray}

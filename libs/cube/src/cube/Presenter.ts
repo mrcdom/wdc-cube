@@ -78,10 +78,10 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
     protected update<T extends Scope>(scope: T) {
         if (this.__runningOnBeforeScopeUpdate) {
-            this.__dirtyScopes.set(scope.id, scope)
+            this.__dirtyScopes.set(scope.vid, scope)
         } else {
             this.cancelDirtyScopesUpdate()
-            this.__dirtyScopes.set(scope.id, scope)
+            this.__dirtyScopes.set(scope.vid, scope)
             this.__dirtyHandler = setTimeout(this.__doUpdateDirtyScopes, 16)
         }
     }

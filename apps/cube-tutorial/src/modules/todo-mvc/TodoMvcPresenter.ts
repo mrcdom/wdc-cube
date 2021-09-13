@@ -4,9 +4,9 @@
 
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { v4 as uuidv4 } from 'uuid'
-import { TutorialService } from '../services/TutorialService'
-import { MainPresenter } from '../main/MainPresenter'
-import { ViewIds, AttrsIds } from '../Constants'
+import { TutorialService } from '../../services/TutorialService'
+import { MainPresenter } from '../../main/MainPresenter'
+import { ViewIds, AttrsIds } from '../../Constants'
 
 const LOG = Logger.get('Module1Presenter')
 
@@ -22,7 +22,7 @@ export enum ShowingTodos {
 }
 
 export class ItemScope extends Scope {
-    uid = 0
+    id = 0
     completed = false
     editing = false
     title = ''
@@ -82,8 +82,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     public override release() {
-        LOG.info('Finalized')
         super.release()
+        LOG.info('Finalized')
     }
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
@@ -146,6 +146,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
             this.mainScope.allItemsCompleted = completeCount !== this.mainScope.items.length
             this.mainScope.toggleButtonVisible = this.mainScope.items.length !== 0
+            this.update(this.mainScope)
         }
 
         if (this.mainScope.items.length > 0) {
@@ -191,7 +192,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             const todos = await tutorialService.fetchTodos()
             for (const todo of todos) {
                 const todoScope = new ItemScope(ViewIds.todoItem)
-                todoScope.uid = todo.uid
+                todoScope.id = todo.uid
                 todoScope.title = todo.text
                 todoScope.editText = todo.text
                 todoScope.completed = todo.complete
@@ -204,10 +205,10 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     protected async onAddTodo(val: string) {
-        const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.uid, accum), 0)
+        const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
 
         const todoScope = new ItemScope(ViewIds.todoItem)
-        todoScope.uid = lastUid + 1
+        todoScope.id = lastUid + 1
         todoScope.title = val
         todoScope.editText = val
         todoScope.completed = false
@@ -321,7 +322,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     protected async onItemDestroy(item: ItemScope) {
-        const itemIdx = this.itemScopes.findIndex(i => i.uid === item.uid)
+        const itemIdx = this.itemScopes.findIndex(i => i.id === item.id)
         if (itemIdx !== -1) {
             this.itemScopes.splice(itemIdx, 1)
             this.update(this.mainScope)

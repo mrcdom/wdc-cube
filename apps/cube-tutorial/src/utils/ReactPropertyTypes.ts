@@ -1,6 +1,6 @@
-import { TextField } from '@material-ui/core'
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
+import type { TextField } from '@material-ui/core'
+import type List from '@material-ui/core/List'
+import type ListItem from '@material-ui/core/ListItem'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ReturnType<T extends (props: any) => any> = T extends (props: infer P) => any ? P : never

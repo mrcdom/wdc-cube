@@ -1,8 +1,8 @@
-import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID, NOOP_PROMISE_VOID } from 'wdc-cube'
-import { MainPresenter } from '../main/MainPresenter'
-import { ViewIds, AttrsIds, ParamsIds } from '../Constants'
-import { Places } from '../Places'
-import { TutorialService, SiteItemType } from '../services/TutorialService'
+import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { MainPresenter } from '../../main/MainPresenter'
+import { ViewIds, AttrsIds, ParamsIds } from '../../Constants'
+import { Places } from '../../Places'
+import { TutorialService, SiteItemType } from '../../services/TutorialService'
 
 const LOG = Logger.get('Module2Presenter')
 
@@ -13,7 +13,7 @@ export class Module2Scope extends Scope {
     sites = [] as SiteItemType[]
 
     // Actions
-    onItemClicked: (item: SiteItemType) => Promise<void> = NOOP_PROMISE_VOID
+    onItemClicked = Scope.ACTION1<SiteItemType>()
 }
 
 export class Module2Presenter extends Presenter<MainPresenter, Module2Scope> {

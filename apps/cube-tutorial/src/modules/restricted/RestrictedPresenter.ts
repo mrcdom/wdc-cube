@@ -1,6 +1,6 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
-import { MainPresenter } from '../main/MainPresenter'
-import { ViewIds, AttrsIds } from '../Constants'
+import { MainPresenter } from '../../main/MainPresenter'
+import { ViewIds, AttrsIds } from '../../Constants'
 
 
 const LOG = Logger.get('RestrictedPresenter')

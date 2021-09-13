@@ -14,11 +14,11 @@ export function bindUpdate<S extends Scope>(react: ReactType, scope: S) {
     }
 
     react.useEffect(() => {
-        LOG.debug(`scope(${scope.id}).attached`)
+        LOG.debug(`scope(${scope.vid}).attached`)
 
         return () => {
             scope.update = NOOP_VOID
-            LOG.debug(`scope(${scope.id}).detached`)
+            LOG.debug(`scope(${scope.vid}).detached`)
         }
     }, [])
 }

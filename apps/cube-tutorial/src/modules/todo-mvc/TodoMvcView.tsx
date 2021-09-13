@@ -1,19 +1,16 @@
 import React from 'react'
 import clsx from 'clsx'
 import { bindUpdate, ViewFactory } from 'wdc-cube-react'
-import type { HTMLDivProps } from './types'
+import type { HTMLDivProps } from '../../utils/ReactPropertyTypes'
 import { TodoMvcScope } from './TodoMvcPresenter'
 import Css from './TodoMvc.module.css'
 
-type Module1ViewProps = HTMLDivProps & { scope: TodoMvcScope }
+type Module1ViewProps = { scope: TodoMvcScope } & HTMLDivProps
 
-export function TodoMvcView({ className, scope, ...otherProps }: Module1ViewProps) {
+export function TodoMvcView({ scope, className, ...otherProps }: Module1ViewProps) {
   bindUpdate(React, scope)
 
   const newField = React.useRef<HTMLInputElement>(null)
-
-  const mainView = ViewFactory.createView(scope.main)
-  const footerView = ViewFactory.createView(scope.footer)
 
   return <div className={clsx(className, Css.TodoMvcView)} {...otherProps}>
     <div className={Css.todoapp}>
@@ -27,8 +24,8 @@ export function TodoMvcView({ className, scope, ...otherProps }: Module1ViewProp
           autoFocus={true}
         />
       </header>
-      {mainView}
-      {footerView}
+      {ViewFactory.createView(scope.main)}
+      {ViewFactory.createView(scope.footer)}
     </div>
   </div>
 }

@@ -48,12 +48,12 @@ export class Scope {
         return NOOP_PROMISE_VOID
     }
 
-    public readonly id: string
+    public readonly vid: string
 
     public update: () => void = NOOP_VOID
 
-    public constructor(id: string) {
-        this.id = id
+    public constructor(vid: string) {
+        this.vid = vid
     }
 
     public bind(source: unknown) {

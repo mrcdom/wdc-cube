@@ -25,7 +25,7 @@ export function MainView({ scope, className, style }: MainViewProps) {
             Mark all as complete
         </label>
         <ul className={Css['todo-list']}>
-            {scope.items.map(item => ViewFactory.createView(item, {key: item.uid}))}
+            {scope.items.map(item => ViewFactory.createView(item, {key: item.id}))}
         </ul>
     </section>
 }
