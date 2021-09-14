@@ -1,11 +1,9 @@
 import { Logger } from '../utils/Logger'
 import { Comparators } from '../utils/Comparators'
-import { Scope } from './Scope'
 import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
 import { NavigationContext } from './NavigationContext'
-import type { IPresenter } from './IPresenter'
 
 import type { PresenterMapType } from './Presenter'
 
@@ -13,7 +11,7 @@ const LOG = Logger.get('Application')
 
 export type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
 
-export class Application implements IPresenter {
+export class Application {
 
     private __placeMap: Map<string, Place>
 
@@ -29,27 +27,16 @@ export class Application implements IPresenter {
 
     private __navigationContext?: NavigationContext
 
-    private readonly __dirtyScopes: Map<string, Scope>
-
-    private __dirtyHandler?: NodeJS.Timeout
-
-    private __runningOnBeforeScopeUpdate = false
-
     public constructor(rootPlace: Place, historyManager: HistoryManager) {
         this.__rootPlace = rootPlace
         this.__lastPlace = rootPlace
         this.__historyManager = historyManager
         this.__presenterMap = new Map()
         this.__placeMap = new Map()
-        this.__dirtyScopes = new Map()
-
         historyManager.onChangeListener = this.onHistoryChanged.bind(this)
     }
 
     public release(): void {
-        this.cancelDirtyScopesUpdate()
-        this.__dirtyScopes.clear()
-
         const presenterIds = [] as number[]
 
         // Collect current presenters IDs
@@ -96,66 +83,22 @@ export class Application implements IPresenter {
         return this.__rootPlace
     }
 
-    protected update<T extends Scope>(scope: T) {
-        if (this.__runningOnBeforeScopeUpdate) {
-            this.__dirtyScopes.set(scope.vid, scope)
-        } else {
-            this.cancelDirtyScopesUpdate()
-            this.__dirtyScopes.set(scope.vid, scope)
-            this.__dirtyHandler = setTimeout(this.__doEmitBeforeScopeUpdate, 16)
-        }
-    }
-
-    private cancelDirtyScopesUpdate() {
-        if (this.__dirtyHandler) {
-            clearTimeout(this.__dirtyHandler)
-            this.__dirtyHandler = undefined
-        }
-    }
-
-    private __doEmitBeforeScopeUpdate = () => {
-        this.emitBeforeScopeUpdate()
-    }
-
-    public emitBeforeScopeUpdate(): void {
-        try {
-            this.cancelDirtyScopesUpdate()
-
-            try {
-                this.__runningOnBeforeScopeUpdate = true
-                this.onBeforeScopeUpdate()
-            } catch (caught) {
-                LOG.error(`Processing ${this.constructor.name}.emitBeforeScopeUpdate()`, caught)
-            } finally {
-                this.__runningOnBeforeScopeUpdate = false
-            }
-
-            for (const scope of this.__dirtyScopes.values()) {
-                scope.update()
-            }
-            this.__dirtyScopes.clear()
-        } catch (caught) {
-            LOG.error('Unexpected exception', caught)
-        }
-    }
 
     public emitAllBeforeScopeUpdate(): void {
-        this.emitBeforeScopeUpdate()
-
         for (const presenter of this.__presenterMap.values()) {
             presenter.emitBeforeScopeUpdate()
         }
     }
 
-    public newUri(place: Place): PlaceUri {
-        const uri = new PlaceUri(place)
-
-        this.publishParameters(uri)
-
+    protected publishAllParameters(uri: PlaceUri) {
         for (const presenter of this.__presenterMap.values()) {
             presenter.publishParameters(uri)
         }
+    }
 
+    public newUri(place: Place): PlaceUri {
+        const uri = new PlaceUri(place)
+        this.publishAllParameters(uri)
         return uri
     }
 
@@ -241,26 +184,11 @@ export class Application implements IPresenter {
         }
     }
 
-    private async applyPathParameters(context: NavigationContext, atLevel: number) {
+    protected async applyPathParameters(context: NavigationContext, atLevel: number) {
         const uri = context.targetUri
 
-        try {
-            const ok = await this.applyParameters(uri, false, uri.place.id === -1)
-            if (!ok) {
-                return
-            }
-        } catch (caught) {
-            if (this.fallbackPlace !== this.rootPlace) {
-                LOG.error('Failed navigating just on root presenter. Going to fallback place', caught)
-                this.flip(this.fallbackPlace)
-            } else {
-                LOG.error('Failed navigating just on root presenter. Nothing can be done!', caught)
-            }
-            return
-        }
-
         for (const place of uri.place.path) {
-            if (place.id != -1 && !(await context.build(place, atLevel))) {
+            if (place.id != -1 && !(await context.step(place, atLevel))) {
                 break
             }
         }
@@ -289,21 +217,7 @@ export class Application implements IPresenter {
         }
     }
 
-    // :: State Management
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
-        return true
-    }
-
-    public onBeforeScopeUpdate(): void {
-        // NOOP
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public publishParameters(uri: PlaceUri): void {
-        // NOOP
-    }
+    // :: Application helpers
 
     public unexpected(message: string, error: unknown) {
         LOG.error(message, error)

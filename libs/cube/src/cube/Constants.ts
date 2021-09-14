@@ -1,11 +1,15 @@
-export const NOOP_VOID = () => {
+export function NOOP_VOID() {
     // NOOP
 }
 
-export const NOOP_STRING = () => {
+export function NOOP_STRING() {
     return ''
 }
 
-export const NOOP_PROMISE_VOID = () => {
-    return Promise.resolve<void>(void 0)
+export function NOOP_FALSE() {
+    return false
+}
+
+export async function NOOP_PROMISE_VOID() {
+    // NOOP
 }

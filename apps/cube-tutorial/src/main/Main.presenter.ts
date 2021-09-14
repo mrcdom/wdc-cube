@@ -1,6 +1,6 @@
 import {
     Logger,
-    Application,
+    ApplicationPresenter,
     HistoryManager,
     PlaceUri,
     Scope,
@@ -37,19 +37,17 @@ export class MainScope extends Scope {
     onOpenSuscriptions = Scope.ACTION()
 }
 
-export class MainPresenter extends Application {
+export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     // :: Class Methods
 
     public static create(historyManager: HistoryManager) {
-        const app = new MainPresenter(Places.root, historyManager)
+        const app = new MainPresenter(Places.root, historyManager, new MainScope(ViewIds.main))
         app.catalogPlaces(Places)
         return app
     }
 
     // :: Instance
-
-    public readonly scope = new MainScope(ViewIds.main);
 
     private readonly bodyScope = new BodyScope(ViewIds.mainBody)
 

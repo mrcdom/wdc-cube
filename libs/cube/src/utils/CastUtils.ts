@@ -1,8 +1,10 @@
+import lodash from 'lodash'
+
 export type PossibleParameterTypes = NumberConstructor | StringConstructor | BooleanConstructor
 
 type ClassConstructor = new (...args: unknown[]) => unknown
 
-type InstanceLike = {
+export type InstanceLike = {
     constructor: ClassConstructor
     prototype: Record<string, unknown>
 }
@@ -10,6 +12,12 @@ type InstanceLike = {
 type NameLike = {
     name?: string
 }
+
+async function asyncFunction() {
+    // NOOP
+}
+
+export const AsyncFunction = asyncFunction.constructor as { new(): Promise<unknown> }
 
 export class CastUtils {
 
@@ -22,9 +30,9 @@ export class CastUtils {
     }
 
     public static getName(value: unknown) {
-        if(value) {
+        if (value) {
             const name = (value as NameLike).name
-            if(name) {
+            if (name) {
                 return name
             }
 
@@ -37,35 +45,42 @@ export class CastUtils {
     }
 
     public static isArray(value: unknown): boolean {
-        return CastUtils.isInstanceOf(value, Array)
+        return lodash.isArray(value)
     }
 
     public static isFunction(value: unknown): boolean {
-        const ctor = value ? (value as InstanceLike).constructor : undefined
-        return ctor ? (ctor.name === 'Function' || ctor.name === 'AsyncFunction') : false
+        if (value) {
+            const ctor = (value as InstanceLike).constructor
+            return ctor === Function || ctor === AsyncFunction
+        }
+        return false
     }
 
     public static isSyncFunction(value: unknown): boolean {
-        const ctor = value ? (value as InstanceLike).constructor : undefined
-        return ctor ? ctor.name === 'Function' : false
+        if (value) {
+            return (value as InstanceLike).constructor === Function
+        }
+        return false
     }
 
     public static isAsyncFunction(value: unknown): boolean {
-        const ctor = value ? (value as InstanceLike).constructor : undefined
-        return ctor ? ctor.name === 'AsyncFunction' : false
+        if (value) {
+            return (value as InstanceLike).constructor === AsyncFunction
+        }
+        return false
     }
 
     public static getType(item: unknown): PossibleParameterTypes | undefined {
         if (item !== undefined && item !== null) {
-            if (CastUtils.isInstanceOf(item, String)) {
+            if (lodash.isString(item)) {
                 return String
             }
 
-            if (CastUtils.isInstanceOf(item, Number)) {
+            if (lodash.isNumber(item)) {
                 return Number
             }
 
-            if (CastUtils.isInstanceOf(item, Boolean)) {
+            if (lodash.isBoolean(item)) {
                 return Boolean
             }
         }
@@ -92,7 +107,7 @@ export class CastUtils {
             return value
         }
 
-        if (CastUtils.isInstanceOf(value, Number)) {
+        if (lodash.isNumber(value)) {
             if (clazz === Number) {
                 return value
             }
@@ -108,7 +123,7 @@ export class CastUtils {
             return value
         }
 
-        if (CastUtils.isInstanceOf(value, String)) {
+        if (lodash.isString(value)) {
             if (clazz === String) {
                 return value
             }
@@ -126,7 +141,7 @@ export class CastUtils {
             return s
         }
 
-        if (CastUtils.isInstanceOf(value, Boolean)) {
+        if (lodash.isBoolean(value)) {
             if (clazz === Boolean) {
                 return value
             }

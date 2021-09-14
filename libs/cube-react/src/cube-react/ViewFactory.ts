@@ -1,10 +1,13 @@
-import React, { Attributes, ClassAttributes, HTMLAttributes, ReactElement } from 'react'
+import React, { Attributes, ClassAttributes, ReactElement } from 'react'
 import { Logger, Scope } from 'wdc-cube'
 import { CubeComponentProps } from './CubeComponent'
 
 const LOG = Logger.get('ViewFactory')
 
-export type IViewProps<T> = ClassAttributes<T> & HTMLAttributes<T> & Attributes
+export type IViewProps<T> = ClassAttributes<T> & {
+    className?: string
+    style?: React.CSSProperties
+}
 export type IViewConstructor<S extends Scope, T, P extends CubeComponentProps<S, T>> = React.ComponentClass<P> | React.FunctionComponent<P>
 
 type IViewFactory<S extends Scope, T, P extends CubeComponentProps<S, T>> = (scope?: Scope, props?: IViewProps<T>) => ReactElement<P>

@@ -6,7 +6,7 @@ import { QueryStringBuilder } from '../utils/QueryStringBuilder'
 import { Place } from './Place'
 import type { ScopeSlot } from './ScopeSlot'
 
-export type ValidParamTypes = string|string[]|number|number[]|boolean|boolean[]|null
+export type ValidParamTypes = string | string[] | number | number[] | boolean | boolean[] | null
 
 export class PlaceUri extends Object {
 

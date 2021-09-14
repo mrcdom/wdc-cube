@@ -60,7 +60,7 @@ export class NavigationContext {
         }
     }
 
-    public async build(place: Place, atLevel: number) {
+    public async step(place: Place, atLevel: number) {
         let result = false
 
         // Only runs if this context is the last context

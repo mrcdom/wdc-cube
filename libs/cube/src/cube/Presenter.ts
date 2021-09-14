@@ -76,7 +76,8 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         // NOOP
     }
 
-    protected update<T extends Scope>(scope: T) {
+    public update<T extends Scope>(optionalScope?: T) {
+        const scope = optionalScope ?? this.scope
         if (this.__runningOnBeforeScopeUpdate) {
             this.__dirtyScopes.set(scope.vid, scope)
         } else {

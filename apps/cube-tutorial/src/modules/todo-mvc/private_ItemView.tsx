@@ -14,6 +14,7 @@ export function ItemView({ scope, className, style }: ItemViewProps) {
     bindUpdate(React, scope)
 
     const editField = React.useRef<HTMLInputElement>(null)
+    const [ editText, setEditText] = React.useState<string>(scope.title)
 
     React.useEffect(() => {
         scope.focus = false
@@ -28,10 +29,10 @@ export function ItemView({ scope, className, style }: ItemViewProps) {
             <input
                 ref={editField}
                 className={Css.edit}
-                value={scope.editText}
-                onBlur={scope.onBlur}
-                onChange={e => scope.onChange(e.target.value)}
-                onKeyDown={e => scope.onKeyDown(e.code)}
+                value={editText}
+                onBlur={() => scope.onBlur(editText)}
+                onChange={e => setEditText(e.target.value)}
+                onKeyDown={e => scope.onKeyDown(e.code, editText)}
             />
         </>
     } else {
