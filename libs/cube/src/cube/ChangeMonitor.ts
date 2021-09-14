@@ -50,7 +50,7 @@ export class ChangeMonitor {
         }
     }
 
-    public bind(presenter: IPresenter, debug: boolean = false): boolean {
+    public bind(presenter: IPresenter, debug = false): boolean {
         const presenterLike = presenter as PresenterLike
         if (presenterLike.scope && presenterLike.update && presenterLike.enableApply) {
             const realPresenter = presenter as PresenterType

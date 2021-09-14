@@ -3,7 +3,7 @@ import { Comparators } from '../utils/Comparators'
 import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
-import { NavigationContext } from './NavigationContext'
+import { FlipContext } from './FlipContext'
 
 import type { PresenterMapType } from './Presenter'
 
@@ -25,7 +25,7 @@ export class Application {
 
     private __historyManager: HistoryManager
 
-    private __navigationContext?: NavigationContext
+    private __flipContext?: FlipContext
 
     public constructor(rootPlace: Place, historyManager: HistoryManager) {
         this.__rootPlace = rootPlace
@@ -159,15 +159,15 @@ export class Application {
     }
 
     protected async doFlipToNewPlace(uri: PlaceUri) {
-        let context = this.__navigationContext
+        let context = this.__flipContext
         if (context) {
             context.targetUri = uri
             const level = context.incrementAndGetLevel()
             await this.applyPathParameters(context, level)
         } else {
-            context = new NavigationContext(this, uri)
+            context = new FlipContext(this, uri)
             try {
-                this.__navigationContext = context
+                this.__flipContext = context
 
                 await this.applyPathParameters(context, 0)
 
@@ -179,13 +179,13 @@ export class Application {
                 context.rollback()
                 throw caught
             } finally {
-                this.__navigationContext = undefined
+                this.__flipContext = undefined
                 this.updateHistory()
             }
         }
     }
 
-    protected async applyPathParameters(context: NavigationContext, atLevel: number) {
+    protected async applyPathParameters(context: FlipContext, atLevel: number) {
         const uri = context.targetUri
 
         for (const place of uri.place.path) {
@@ -198,7 +198,7 @@ export class Application {
     protected onHistoryChanged(sender: HistoryManager) {
         const currentLocation = this.newUri(this.lastPlace).toString()
 
-        if (!this.__navigationContext && sender.location !== currentLocation) {
+        if (!this.__flipContext && sender.location !== currentLocation) {
             const action = async () => {
                 try {
                     await this.flipToUriString(sender.location)

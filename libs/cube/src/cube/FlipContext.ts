@@ -5,9 +5,9 @@ import { PlaceUri } from './PlaceUri'
 import { Application } from './Application'
 import type { PresenterMapType } from './Presenter'
 
-const LOG = Logger.get('NavigationContext')
+const LOG = Logger.get('FlipContext')
 
-export class NavigationContext {
+export class FlipContext {
 
     private __app: Application
     private __presenterMap: PresenterMapType

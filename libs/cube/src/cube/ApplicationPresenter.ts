@@ -3,7 +3,7 @@ import { Place } from './Place'
 import { PlaceUri } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
-import { NavigationContext } from './NavigationContext'
+import { FlipContext } from './FlipContext'
 import { Scope } from './Scope'
 import { Presenter } from './Presenter'
 import type { IPresenter } from './IPresenter'
@@ -33,7 +33,7 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         super.publishAllParameters(uri)
     }
 
-    protected override async applyPathParameters(context: NavigationContext, atLevel: number) {
+    protected override async applyPathParameters(context: FlipContext, atLevel: number) {
         try {
             const uri = context.targetUri
             const ok = await this.applyParameters(uri, false, uri.place.id === -1)

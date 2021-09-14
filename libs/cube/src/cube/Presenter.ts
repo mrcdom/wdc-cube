@@ -100,7 +100,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         }
     }
 
-    public apply(debug: boolean = false) {
+    public apply(debug = false) {
         this.__debugApply = debug
         this.update(this.scope)
     }
