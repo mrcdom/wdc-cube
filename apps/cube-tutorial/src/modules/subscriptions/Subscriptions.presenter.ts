@@ -31,7 +31,7 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         if (initialization) {
-            this.scope.bind(this)
+            this.scope.onItemClicked = this.onItemClicked.bind(this)
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             this.scope.sites = await tutorialService.fetchSubscribleSites()
             LOG.info('Initialized')

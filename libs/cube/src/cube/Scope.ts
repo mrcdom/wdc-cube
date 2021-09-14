@@ -56,8 +56,4 @@ export class Scope {
         this.vid = vid
     }
 
-    public bind(source: unknown) {
-        ScopeUtils.bind(this, source)
-    }
-
 }

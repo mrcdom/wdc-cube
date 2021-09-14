@@ -50,7 +50,10 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
                 throw new Error('No site id provided')
             }
 
-            this.scope.bind(this)
+            this.scope.onClose = this.onClose.bind(this)
+            this.scope.onEmailChanged = this.onEmailChanged.bind(this)
+            this.scope.onSubscribe = this.onSubscribe.bind(this)
+
             this.parentSlot = uri.getScopeSlot(AttrsIds.dialogSlot)
 
             let siteItem = uri.attributes.get(AttrsIds.subscriptionsDetail_item) as SiteItemType | undefined

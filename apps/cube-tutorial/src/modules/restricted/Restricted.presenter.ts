@@ -36,7 +36,6 @@ export class RestrictedPresenter extends Presenter<MainPresenter, RestrictedScop
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
         if (initialization) {
-            this.scope.bind(this)
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             LOG.info('Initialized')
         }
