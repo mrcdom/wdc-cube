@@ -34,13 +34,14 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
     }
 
     protected override async applyPathParameters(context: NavigationContext, atLevel: number) {
-        const uri = context.targetUri
-
         try {
+            const uri = context.targetUri
             const ok = await this.applyParameters(uri, false, uri.place.id === -1)
             if (!ok) {
                 return
             }
+
+            await super.applyPathParameters(context, atLevel)
         } catch (caught) {
             if (this.fallbackPlace !== this.rootPlace) {
                 LOG.error('Failed navigating just on root presenter. Going to fallback place', caught)
@@ -50,7 +51,6 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
             }
             return
         }
-        super.applyPathParameters(context, atLevel)
     }
 
     public update<T extends Scope>(optionalScope?: T) {

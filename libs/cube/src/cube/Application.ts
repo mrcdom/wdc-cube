@@ -145,7 +145,8 @@ export class Application {
     }
 
     public async flipToUriString(suri: string) {
-        await this.doFlipToNewPlace(this.newUriFromString(suri))
+        const uri = this.newUriFromString(suri)
+        await this.doFlipToNewPlace(uri)
     }
 
     public async flipToUri(uri: PlaceUri) {
@@ -195,7 +196,9 @@ export class Application {
     }
 
     protected onHistoryChanged(sender: HistoryManager) {
-        if (!this.__navigationContext && sender.location) {
+        const currentLocation = this.newUri(this.lastPlace).toString()
+
+        if (!this.__navigationContext && sender.location !== currentLocation) {
             const action = async () => {
                 try {
                     await this.flipToUriString(sender.location)

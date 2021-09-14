@@ -106,7 +106,11 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             // Load and prepare data
             await this.loadData()
 
-            //this.usingMonitor = changeMonitor.bind(this, true)
+            this.usingMonitor = changeMonitor.bind(this, true)
+            if(!this.usingMonitor) {
+                this.enableApply()
+            }
+
             LOG.info('Initialized')
         }
 
@@ -344,7 +348,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private $apply<T extends Scope>(optionalScope?: T): void {
         if (!this.usingMonitor) {
-            super.update(optionalScope)
+            //super.update(optionalScope)
+            super.apply(true)
         }
     }
 }

@@ -1,6 +1,5 @@
 import { Logger } from '../utils/Logger'
 import { Scope } from './Scope'
-import { ScopeUtils } from './ScopeUtils'
 import type { PresenterType } from './Presenter'
 import type { IPresenter } from './IPresenter'
 
@@ -9,11 +8,11 @@ const LOG = Logger.get('ChangeMonitor')
 type PresenterLike = IPresenter & {
     scope?: Scope
     update?(scope: Scope): void
+    enableApply?(): void
 }
 
 type PrensenterHolder = {
     presenter: PresenterType
-    state: Map<string, Record<string, unknown>>
     debug: boolean
 }
 
@@ -53,12 +52,11 @@ export class ChangeMonitor {
 
     public bind(presenter: IPresenter, debug: boolean = false): boolean {
         const presenterLike = presenter as PresenterLike
-        if (presenterLike.scope && presenterLike.update) {
-            this.__pendingMap.set(presenterLike as PresenterType, {
-                presenter: presenterLike as PresenterType,
-                state: ScopeUtils.exportState(presenterLike.scope),
-                debug
-            })
+        if (presenterLike.scope && presenterLike.update && presenterLike.enableApply) {
+            const realPresenter = presenter as PresenterType
+            this.__pendingMap.set(realPresenter, { presenter: realPresenter, debug })
+
+            realPresenter.enableApply()
 
             if (!this.__animationFrameHandler) {
                 this.onAnimationFrame()
@@ -91,20 +89,7 @@ export class ChangeMonitor {
 
         try {
             for (const holder of this.__pendingMap.values()) {
-                const scope = holder.presenter.scope
-
-                const oldState = holder.state
-                const dirtyScopes = ScopeUtils.exportDirties(scope, oldState)
-                holder.state = ScopeUtils.exportState(scope)
-                if (dirtyScopes.size > 0) {
-                    if (holder.debug) {
-                        LOG.debug('SCOPE Dirties:', JSON.stringify(Object.keys(Object.fromEntries(dirtyScopes)), null, '  '))
-                    }
-
-                    for (const dirtyScope of dirtyScopes.values()) {
-                        holder.presenter.update(dirtyScope)
-                    }
-                }
+                holder.presenter.apply(holder.debug)
             }
         } finally {
             this.__animationFrameHandler = setTimeout(this.onAnimationFrame.bind(this), 16)
