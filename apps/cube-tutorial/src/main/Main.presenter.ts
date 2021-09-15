@@ -41,6 +41,7 @@ export class MainScope extends Scope {
     onHome = Scope.ACTION()
     onOpenTodos = Scope.ACTION()
     onOpenSuscriptions = Scope.ACTION()
+    onLogin = Scope.ACTION()
 }
 
 export class MainPresenter extends ApplicationPresenter<MainScope> {
@@ -83,6 +84,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
             this.scope.onHome = this.onHome.bind(this)
             this.scope.onOpenTodos = this.onOpenTodos.bind(this)
             this.scope.onOpenSuscriptions = this.onOpenSuscriptions.bind(this)
+            this.scope.onLogin = this.onOpenLogin.bind(this)
 
             this.bodyScope.onOpenAlert = this.onOpenAlert.bind(this)
 
@@ -166,6 +168,16 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     protected async onOpenSuscriptions() {
         try {
             await this.flip(Places.subscriptions)
+        } catch (caught) {
+            this.unexpected('Opening to module-2', caught)
+        } finally {
+            this.update(this.scope)
+        }
+    }
+
+    protected async onOpenLogin() {
+        try {
+            this.alert('info', 'Working in progress...', 'No implementation to this action, yet.')
         } catch (caught) {
             this.unexpected('Opening to module-2', caught)
         } finally {

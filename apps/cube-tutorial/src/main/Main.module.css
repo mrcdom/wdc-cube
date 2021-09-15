@@ -10,10 +10,12 @@
     padding: 10px;
 }
 
-.Bar {
-    display: flex;
-    flex-direction: row;
-    margin-bottom: 30px;
+.appBarMenuButton {
+    margin-right: 2;
+}
+
+.appBarTitle {
+    flex-grow: 1
 }
 
 .Body {
@@ -21,14 +23,7 @@
     flex-direction: column;
     flex-grow: 1;
     align-self: stretch;
-}
-
-.BtnFirst {
-    margin-left: 0;
-}
-
-.BtnOthers {
-    margin-left: 10px;
+    margin-top: 10px
 }
 
 .BodyView {
