@@ -7,12 +7,12 @@ import { RestrictedPresenter } from './modules/restricted/Restricted.presenter'
 
 const root = Place.createDetached('/')
 
-const todos = Place.create('/todos', TodoMvcPresenter)
+const todos = Place.create('/todos', TodoMvcPresenter, root)
 
-const subscriptions = Place.create('/subscriptions', SubscriptionsPresenter)
+const subscriptions = Place.create('/subscriptions', SubscriptionsPresenter, root)
 const subscriptionsDetail = Place.create('/subscriptions/detail', SubscriptionsDetailPresenter, subscriptions)
 
-const restricted = Place.create('/restricted', RestrictedPresenter)
+const restricted = Place.create('/restricted', RestrictedPresenter, root)
 
 export const Places = {
     root, todos, subscriptions, subscriptionsDetail,

@@ -10,6 +10,8 @@ const LOG = Logger.get('SubscriptionsPresenter')
 const tutorialService = TutorialService.INSTANCE
 
 export class SubscriptionsScope extends Scope {
+    vid = ViewIds.subscriptions
+
     sites = [] as SiteItemType[]
 
     // Actions
@@ -21,7 +23,7 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
     private parentSlot: ScopeSlot = NOOP_VOID
 
     public constructor(app: MainPresenter) {
-        super(app, new SubscriptionsScope(ViewIds.subscriptions))
+        super(app, new SubscriptionsScope())
     }
 
     public override release() {

@@ -1,16 +1,10 @@
 import React from 'react'
 import clsx from 'clsx'
 import Css from './TodoMvc.module.css'
-import { bindUpdate } from 'wdc-cube-react'
+import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { FooterScope, ShowingTodos } from './TodoMvc.presenter'
 
-type FooterViewProps = {
-    className?: string
-    style?: React.CSSProperties
-    scope: FooterScope
-}
-
-export function FooterView({ scope, className, style }: FooterViewProps) {
+export const FooterView = function ({ className, style, scope }: IViewProps & { scope: FooterScope }) {
     bindUpdate(React, scope)
 
     let clearButton = <></>
@@ -23,6 +17,8 @@ export function FooterView({ scope, className, style }: FooterViewProps) {
         </button>
     }
 
+    console.log('v-footer')
+
     return <footer className={clsx(className, Css.footer)} style={style}>
         <span className={Css['todo-count']}>
             <strong>{scope.count}</strong> {scope.activeTodoWord} left
@@ -32,7 +28,7 @@ export function FooterView({ scope, className, style }: FooterViewProps) {
                 <a
                     className={clsx(scope.showing == ShowingTodos.ALL ? Css.selected : undefined)}
                     onClick={scope.onShowAll}
-                    >
+                >
                     All
                 </a>
             </li>

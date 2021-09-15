@@ -4,14 +4,12 @@ import Button from '@material-ui/core/Button'
 import { Alert, AlertTitle } from '@material-ui/lab'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContentText from '@material-ui/core/DialogContentText'
-import { bindUpdate } from 'wdc-cube-react'
+import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { AlertScope } from './Main.presenter'
 import Css from './Main.module.css'
 
-export type AlertViewProps = {
+export type AlertViewProps = IViewProps & {
     scope: AlertScope
-    className?: string
-    style?: React.CSSProperties
 }
 
 export function AlertView({ scope, className, ...props }: AlertViewProps) {

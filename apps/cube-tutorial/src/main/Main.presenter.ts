@@ -16,6 +16,8 @@ const LOG = Logger.get('MainPresenter')
 type IDialogScope = Scope & { onClose: () => Promise<void> }
 
 export class AlertScope extends Scope {
+    vid = ViewIds.mainAlert
+
     severity: AlertSeverity = 'info'
     title?: string
     message?: string
@@ -24,10 +26,14 @@ export class AlertScope extends Scope {
 }
 
 export class BodyScope extends Scope {
+    vid = ViewIds.mainBody
+
     onOpenAlert = Scope.ACTION1<AlertSeverity>()
 }
 
 export class MainScope extends Scope {
+    vid = ViewIds.main
+
     body?: Scope
     dialog?: IDialogScope
     alert?: AlertScope
@@ -42,14 +48,14 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     // :: Class Methods
 
     public static create(historyManager: HistoryManager) {
-        const app = new MainPresenter(Places.root, historyManager, new MainScope(ViewIds.main))
+        const app = new MainPresenter(Places.root, historyManager, new MainScope())
         app.catalogPlaces(Places)
         return app
     }
 
     // :: Instance
 
-    private readonly bodyScope = new BodyScope(ViewIds.mainBody)
+    private readonly bodyScope = new BodyScope()
 
     protected readonly bodySlot: ScopeSlot = scope => {
         if (this.scope.body !== scope) {
@@ -119,7 +125,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     }
 
     public override alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
-        const alertScope = new AlertScope(ViewIds.mainAlert)
+        const alertScope = new AlertScope()
         alertScope.severity = severity
         alertScope.title = title
         alertScope.message = message

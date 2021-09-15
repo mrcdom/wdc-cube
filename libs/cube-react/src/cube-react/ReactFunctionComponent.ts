@@ -1,30 +1,31 @@
 import React from 'react'
-import { Scope, Application, NOOP_VOID, Logger } from 'wdc-cube'
+import { Scope, Application, PlaceUri, NOOP_VOID, Logger } from 'wdc-cube'
 
 const LOG = Logger.get('React.FC')
 
 type ReactType = typeof React
 
-export function bindUpdate<S extends Scope>(react: ReactType, scope: S) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [__, setValue] = react.useState(0)
+export function bindUpdate<S extends Scope>(react: ReactType, scope: Partial<S>) {
+    const [value, setValue] = react.useState(0)
 
-    if (scope.update === NOOP_VOID) {
-        scope.update = () => setValue(value => value + 1)
+    scope.update = () => {
+        setValue(value + 1)
+        //LOG.debug(`${scope.vid}.update()`)
     }
-
+    
     react.useEffect(() => {
-        LOG.debug(`scope(${scope.vid}).attached`)
+        //LOG.debug(`scope(${scope.vid}).attached`)
 
         return () => {
             scope.update = NOOP_VOID
-            LOG.debug(`scope(${scope.vid}).detached`)
+            //LOG.debug(`scope(${scope.vid}).detached`)
         }
     }, [])
 }
 
 type IApplication<S extends Scope> = Application & {
     scope: S
+    applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean>
 }
 
 export function getOrCreateApplication<S extends Scope, A extends IApplication<S>>(react: ReactType, factory: () => A) {

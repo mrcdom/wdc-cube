@@ -25,29 +25,42 @@ export enum ShowingTodos {
 }
 
 export class ItemScope extends Scope {
+    vid = ViewIds.todosItem
+
     id = 0
     completed = false
     editing = false
     title = ''
-    focus = false
 
-    onToggle = Scope.ACTION()
-    onEdit = Scope.ACTION()
-    onKeyDown = Scope.ACTION2<string, string>()
-    onBlur = Scope.ACTION1<string>()
-    onDestroy = Scope.ACTION()
+    readonly actions = {
+        onToggle: Scope.ACTION(),
+        onEdit: Scope.ACTION(),
+        onKeyDown: Scope.ACTION2<string, string>(),
+        onBlur: Scope.ACTION1<string>(),
+        onDestroy: Scope.ACTION()
+    }
 }
 
-export class MainScope extends Scope {
+export class HeaderScope extends Scope {
+    vid = ViewIds.todosHeader
+
     uuid = uuidv4()
-    items = [] as ItemScope[]
     allItemsCompleted = false
     toggleButtonVisible = false
 
     onToggleAll = Scope.ACTION()
+    onAddTodo = Scope.ACTION1<string>()
+}
+
+export class MainScope extends Scope {
+    vid = ViewIds.todosMain
+
+    items = [] as ItemScope[]
 }
 
 export class FooterScope extends Scope {
+    vid = ViewIds.todosFooter
+
     count = 0
     activeTodoWord = 'item'
     clearButtonVisible = false
@@ -60,10 +73,11 @@ export class FooterScope extends Scope {
 }
 
 export class TodoMvcScope extends Scope {
+    vid = ViewIds.todos
+
+    header?: HeaderScope
     main?: MainScope
     footer?: FooterScope
-
-    onAddTodo = Scope.ACTION1<string>()
 }
 
 // :: Presentation
@@ -72,16 +86,19 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
-    private mainScope = new MainScope(ViewIds.todosMain)
+    private headerScope = new HeaderScope()
 
-    private footerScope = new FooterScope(ViewIds.todosFooter)
+    private mainScope = new MainScope()
+
+    private footerScope = new FooterScope()
 
     private itemScopes = [] as ItemScope[]
 
     private usingMonitor = false
 
     public constructor(app: MainPresenter) {
-        super(app, new TodoMvcScope(ViewIds.todos))
+        super(app, new TodoMvcScope())
+        this.scope.header = this.headerScope
     }
 
     public override release() {
@@ -93,8 +110,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         if (initialization) {
             // Bind Events
-            this.scope.onAddTodo = this.onAddTodo.bind(this)
-            this.mainScope.onToggleAll = this.onToggleAll.bind(this)
+            this.headerScope.onAddTodo = this.onAddTodo.bind(this)
+            this.headerScope.onToggleAll = this.onToggleAll.bind(this)
             this.footerScope.onClearCompleted = this.onClearCompleted.bind(this)
             this.footerScope.onShowAll = this.onShowAll.bind(this)
             this.footerScope.onShowActives = this.onShowActives.bind(this)
@@ -106,10 +123,10 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             // Load and prepare data
             await this.loadData()
 
-            this.usingMonitor = changeMonitor.bind(this, true)
-            if(!this.usingMonitor) {
-                this.enableApply()
-            }
+            //this.usingMonitor = changeMonitor.bind(this, true)
+            //if(!this.usingMonitor) {
+            //    this.enableApply()
+            //}
 
             LOG.info('Initialized')
         }
@@ -120,13 +137,27 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     public override onBeforeScopeUpdate() {
-        this.mainScope.items.length = 0
-        this.mainScope.allItemsCompleted = false
-        this.mainScope.toggleButtonVisible = false
+        let baseChanged = false
+        let headerChanged = false
+        let mainChanged = false
+        let footerChanged = false
+
+        let allItemsCompleted = false
+        let toggleButtonVisible = false
 
         let totalNumOfCompletedTask = 0
 
         if (this.itemScopes.length > 0) {
+            let itemCount = 0
+            const updateOrAddItem = (itemScope: ItemScope) => {
+                const oldItemScope = this.mainScope.items[itemCount]
+                if (oldItemScope !== itemScope) {
+                    this.mainScope.items[itemCount] = itemScope
+                    mainChanged = true
+                }
+                itemCount++
+            }
+
             let completeCount = 0
             for (const itemScope of this.itemScopes) {
                 if (itemScope.completed) {
@@ -136,12 +167,12 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
                 switch (this.footerScope.showing) {
                     case ShowingTodos.ACTIVE:
                         if (!itemScope.completed) {
-                            this.mainScope.items.push(itemScope)
+                            updateOrAddItem(itemScope)
                         }
                         break
                     case ShowingTodos.COMPLETED:
                         if (itemScope.completed) {
-                            this.mainScope.items.push(itemScope)
+                            updateOrAddItem(itemScope)
                             completeCount++
                         }
                         break
@@ -149,30 +180,52 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
                         if (itemScope.completed) {
                             completeCount++
                         }
-                        this.mainScope.items.push(itemScope)
+                        updateOrAddItem(itemScope)
                 }
             }
 
-            this.mainScope.allItemsCompleted = completeCount !== this.mainScope.items.length
-            this.mainScope.toggleButtonVisible = this.mainScope.items.length !== 0
-            this.$apply(this.mainScope)
+            if (this.mainScope.items.length !== itemCount) {
+                this.mainScope.items.length = itemCount
+                mainChanged = true
+            }
+
+            allItemsCompleted = completeCount === this.mainScope.items.length
+            toggleButtonVisible = this.mainScope.items.length !== 0
+        } else {
+            allItemsCompleted = false
+            toggleButtonVisible = false
+
+            if (this.mainScope.items.length !== 0) {
+                this.mainScope.items.length = 0
+                mainChanged = true
+            }
+        }
+
+        if (allItemsCompleted !== this.headerScope.allItemsCompleted) {
+            this.headerScope.allItemsCompleted = allItemsCompleted
+            headerChanged = true
+        }
+
+        if (this.headerScope.toggleButtonVisible !== toggleButtonVisible) {
+            this.headerScope.toggleButtonVisible = toggleButtonVisible
+            headerChanged = true
         }
 
         if (this.mainScope.items.length > 0) {
-            this.$apply(this.mainScope)
-
-            this.scope.main = this.mainScope
-            this.$apply()
+            if (this.scope.main !== this.mainScope) {
+                this.scope.main = this.mainScope
+                baseChanged = true
+            }
         } else if (this.scope.main) {
             this.scope.main = undefined
-            this.$apply(this.scope)
+            baseChanged = true
         }
 
         if (this.itemScopes.length > 0) {
             const showClearButton = totalNumOfCompletedTask > 0
             if (this.footerScope.clearButtonVisible !== showClearButton) {
                 this.footerScope.clearButtonVisible = showClearButton
-                this.$apply(this.footerScope)
+                footerChanged = true
             }
 
             if (this.footerScope.count !== this.mainScope.items.length) {
@@ -182,16 +235,34 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
                 } else {
                     this.footerScope.activeTodoWord = 'item'
                 }
-                this.$apply(this.footerScope)
+                footerChanged = true
             }
 
             if (this.scope.footer != this.footerScope) {
                 this.scope.footer = this.footerScope
-                this.$apply()
+                baseChanged = true
             }
         } else if (this.scope.footer) {
             this.scope.footer = undefined
-            this.$apply()
+            baseChanged = true
+        }
+
+        // Apply view changes
+
+        if (baseChanged) {
+            this.$apply(this.scope)
+        } else {
+            if (headerChanged) {
+                this.$apply(this.headerScope)
+            }
+
+            if (mainChanged) {
+                this.$apply(this.mainScope)
+            }
+
+            if (footerChanged) {
+                this.$apply(this.footerScope)
+            }
         }
     }
 
@@ -200,7 +271,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         try {
             const todos = await tutorialService.fetchTodos()
             for (const todo of todos) {
-                const todoScope = new ItemScope(ViewIds.todosItem)
+                const todoScope = new ItemScope()
                 todoScope.id = todo.uid
                 todoScope.title = todo.text
                 todoScope.completed = todo.complete
@@ -215,7 +286,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     protected async onAddTodo(val: string) {
         const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
 
-        const todoScope = new ItemScope(ViewIds.todosItem)
+        const todoScope = new ItemScope()
         todoScope.id = lastUid + 1
         todoScope.title = val
         todoScope.completed = false
@@ -224,9 +295,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         if (this.footerScope.showing !== ShowingTodos.COMPLETED) {
             this.mainScope.items.push(todoScope)
+            this.$apply()
         }
-
-        this.$apply(this.mainScope)
     }
 
     protected async onToggleAll() {
@@ -239,24 +309,27 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         const checked = numOfCompletedTasks !== this.mainScope.items.length
 
+        let numChanges = 0
         for (const itemScope of this.itemScopes) {
             if (itemScope.completed !== checked) {
                 itemScope.completed = checked
-                this.$apply(itemScope)
+                numChanges++
             }
+        }
+
+        if (numChanges > 0) {
+            this.$apply(this.mainScope)
         }
     }
 
     protected async onClearCompleted() {
         this.itemScopes = this.itemScopes.filter(item => !item.completed)
-        this.mainScope.items = this.mainScope.items.filter(item => !item.completed)
         this.$apply(this.mainScope)
     }
 
     protected async onShowAll() {
         if (this.footerScope.showing !== ShowingTodos.ALL) {
             this.footerScope.showing = ShowingTodos.ALL
-            this.$apply(this.mainScope)
             this.$apply(this.footerScope)
         }
     }
@@ -264,7 +337,6 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     protected async onShowActives() {
         if (this.footerScope.showing !== ShowingTodos.ACTIVE) {
             this.footerScope.showing = ShowingTodos.ACTIVE
-            this.$apply(this.mainScope)
             this.$apply(this.footerScope)
         }
     }
@@ -272,22 +344,26 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     protected async onShowCompleteds() {
         if (this.footerScope.showing !== ShowingTodos.COMPLETED) {
             this.footerScope.showing = ShowingTodos.COMPLETED
-            this.$apply(this.mainScope)
             this.$apply(this.footerScope)
         }
     }
 
     private bindItemScope(item: ItemScope) {
-        item.onToggle = this.onItemToggle.bind(this, item)
-        item.onEdit = this.onItemEdit.bind(this, item)
-        item.onKeyDown = this.onItemKeyDown.bind(this, item)
-        item.onBlur = this.onItemBlur.bind(this, item)
-        item.onDestroy = this.onItemDestroy.bind(this, item)
+        item.actions.onToggle = this.onItemToggle.bind(this, item)
+        item.actions.onEdit = this.onItemEdit.bind(this, item)
+        item.actions.onKeyDown = this.onItemKeyDown.bind(this, item)
+        item.actions.onBlur = this.onItemBlur.bind(this, item)
+        item.actions.onDestroy = this.onItemDestroy.bind(this, item)
     }
 
     protected async onItemToggle(item: ItemScope) {
         item.completed = !item.completed
-        this.$apply(item)
+
+        if (this.footerScope.showing !== ShowingTodos.ALL) {
+            this.$apply(this.mainScope)
+        } else {
+            this.$apply(item)
+        }
     }
 
     protected async onItemEdit(item: ItemScope) {
@@ -300,7 +376,6 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         if (!item.editing) {
             item.editing = true
-            item.focus = true
             this.$apply(item)
         }
     }
@@ -323,16 +398,12 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     protected async onItemDestroy(item: ItemScope) {
-        let itemIdx = this.itemScopes.findIndex(i => i.id === item.id)
+        const itemIdx = this.itemScopes.findIndex(i => i.id === item.id)
         if (itemIdx !== -1) {
             this.itemScopes.splice(itemIdx, 1)
         }
 
-        itemIdx = this.mainScope.items.findIndex(i => i.id === item.id)
-        if (itemIdx !== -1) {
-            this.mainScope.items.splice(itemIdx, 1)
-            this.$apply(this.mainScope)
-        }
+        this.$apply(this.mainScope)
     }
 
     protected cancelItem(item: ItemScope) {
@@ -348,8 +419,10 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private $apply<T extends Scope>(optionalScope?: T): void {
         if (!this.usingMonitor) {
-            //super.update(optionalScope)
-            super.apply(true)
+            //const scope = optionalScope ?? this.scope
+            //console.log(scope.vid)
+            super.update(optionalScope)
+            //super.apply(true)
         }
     }
 }

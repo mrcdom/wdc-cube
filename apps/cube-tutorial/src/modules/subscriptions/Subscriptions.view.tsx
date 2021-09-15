@@ -7,7 +7,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import { SubscriptionsScope } from './Subscriptions.presenter'
 import Css from './Subscriptions.module.css'
 
-type SubscriptionsViewProps = { scope: SubscriptionsScope } & IViewProps<HTMLDivElement>
+type SubscriptionsViewProps = IViewProps & { scope: SubscriptionsScope }
 
 export function SubscriptionsView({ scope, className, ...props }: SubscriptionsViewProps) {
     bindUpdate(React, scope)

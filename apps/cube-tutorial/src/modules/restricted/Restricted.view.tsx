@@ -4,7 +4,7 @@ import { bindUpdate, ViewFactory, IViewProps } from 'wdc-cube-react'
 import { RestrictedScope } from './Restricted.presenter'
 import Css from './Restricted.module.css'
 
-type RestrictedViewProps = { scope: RestrictedScope } & IViewProps<HTMLDivElement>
+type RestrictedViewProps = IViewProps & { scope: RestrictedScope }
 
 export function RestrictedView({ scope, className, ...props }: RestrictedViewProps) {
     bindUpdate(React, scope)

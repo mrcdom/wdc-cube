@@ -4,6 +4,7 @@ export const ViewIds = {
     mainAlert: 'main-alert',
 
     todos: 'todos',
+    todosHeader: 'todos-header',
     todosMain: 'todos-main',
     todosItem: 'todos-item',
     todosFooter: 'todos-footer',

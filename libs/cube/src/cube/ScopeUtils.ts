@@ -134,14 +134,13 @@ function exportScopes(scopeArray: Map<string, ScopeHolder>, source: unknown, pat
     }
 }
 
-
-function isArrayEquals(a: unknown[], b: unknown[], level: number): boolean {
+function isArrayEquals(a: unknown[], b: unknown[], maxLevel: number): boolean {
     if (a.length !== b.length) {
         return false
     }
 
     for (let i = 0; i < a.length; i++) {
-        if (!isEquals(a[i], b[i], level)) {
+        if (!isEquals(a[i], b[i], maxLevel)) {
             return false
         }
     }
@@ -149,8 +148,8 @@ function isArrayEquals(a: unknown[], b: unknown[], level: number): boolean {
     return true
 }
 
-function isEquals(thisValue: unknown, otherValue: unknown, level: number): boolean {
-    if (Object.is(thisValue, otherValue)) {
+function isEquals(thisValue: unknown, otherValue: unknown, maxLevel: number): boolean {
+    if (thisValue === otherValue) {
         return true
     }
 
@@ -162,20 +161,13 @@ function isEquals(thisValue: unknown, otherValue: unknown, level: number): boole
         return false
     }
 
-    const other_equals: AnyEquals | undefined = (otherValue as Record<string, AnyEquals>)['equals']
-    if (other_equals) {
-        return other_equals.call(otherValue, thisValue)
+    if (maxLevel <= 0) {
+        LOG.warn('Too many levels to compare scopes')
+        return false
     }
 
-    if (level > 0) {
-        if (level > 20) {
-            LOG.error('Too deep comparation')
-            return false
-        }
-        const this_equals: AnyEquals | undefined = (thisValue as Record<string, AnyEquals>)['equals']
-        if (this_equals) {
-            return this_equals.call(thisValue, otherValue)
-        }
+    if (thisValue instanceof Scope) {
+        return false
     }
 
     if (lodash.isArray(thisValue)) {
@@ -183,7 +175,7 @@ function isEquals(thisValue: unknown, otherValue: unknown, level: number): boole
             return false
         }
 
-        if (!isArrayEquals(thisValue as unknown[], otherValue as unknown[], level)) {
+        if (!isArrayEquals(thisValue as unknown[], otherValue as unknown[], maxLevel)) {
             return false
         }
     }
@@ -210,11 +202,11 @@ function isEquals(thisValue: unknown, otherValue: unknown, level: number): boole
         return true
     }
 
-    const nextLevel = level + 1
+    const previousLevel = maxLevel - 1
     for (const [key, thisValue] of thisProps.entries()) {
         const otherValue = otherProps.get(key)
 
-        if (!isEquals(thisValue, otherValue, nextLevel)) {
+        if (!isEquals(thisValue, otherValue, previousLevel)) {
             return false
         }
 
@@ -288,8 +280,8 @@ export const ScopeUtils = {
         return map
     },
 
-    equals(one: Scope, other: Scope): boolean {
-        return isEquals(one, other, 0)
+    isEquals(thisValue: unknown, otherValue: unknown): boolean {
+        return isEquals(thisValue, otherValue, 5)
     }
 
 }

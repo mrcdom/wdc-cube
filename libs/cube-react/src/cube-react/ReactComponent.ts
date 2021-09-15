@@ -19,20 +19,4 @@ export class ReactComponent<P = unknown, S = unknown, SS = any> extends React.Co
         // NOOP
     }
 
-    protected newUpdateCallback(): () => void {
-        const doUpdate = () => {
-            this.forceUpdate()
-        }
-
-        let debounceHandler: NodeJS.Timeout | undefined = undefined
-        return () => {
-            if (debounceHandler) {
-                clearTimeout(debounceHandler)
-                debounceHandler = undefined
-            }
-
-            debounceHandler = setTimeout(doUpdate, 16)
-        }
-    }
-
 }

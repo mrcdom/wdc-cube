@@ -6,7 +6,7 @@ import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { BodyScope } from './Main.presenter'
 import Css from './Main.module.css'
 
-type BodyViewProps = { scope: BodyScope } & IViewProps<HTMLDivElement>
+type BodyViewProps = IViewProps & { scope: BodyScope }
 
 export function BodyView({ scope, className, ...props }: BodyViewProps) {
     bindUpdate(React, scope)

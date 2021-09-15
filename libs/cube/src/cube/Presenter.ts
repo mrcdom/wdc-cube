@@ -53,6 +53,10 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
     public enableApply() {
         this.__enableApply = true
         this.__oldState = ScopeUtils.exportState(this.scope)
+
+        //for(const a of Object.keys(this.constructor.prototype)) {
+        //    LOG.info(a)
+        //}
     }
 
     private cancelDirtyScopesUpdate() {
@@ -127,9 +131,12 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
                         this.__dirtyScopes.set(dirtyScope, dirtyScope)
                     }
                 }
+                this.__debugApply = false
             }
 
-            for (const scope of this.__dirtyScopes.values()) {
+            if(this.__dirtyScopes.has(this.scope)) {
+                this.scope.update()
+            } else for (const scope of this.__dirtyScopes.values()) {
                 scope.update()
             }
         } catch (caught) {

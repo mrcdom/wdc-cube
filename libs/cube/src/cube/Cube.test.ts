@@ -105,6 +105,7 @@ class TestApplication extends Application {
 // :: Root
 
 class RootScope extends Scope {
+    vid = 'root'
     computedValue = 0
     body?: Scope
 }
@@ -117,7 +118,7 @@ class RootPresenter extends Presenter<TestApplication, RootScope> {
     private bodySlot: ScopeSlot = this.setBody.bind(this)
 
     constructor(app: TestApplication) {
-        super(app, new RootScope('v-root'))
+        super(app, new RootScope())
     }
 
     private setBody(scope?: Scope) {
@@ -162,6 +163,7 @@ class RootPresenter extends Presenter<TestApplication, RootScope> {
 // :: Login
 
 class LoginScope extends Scope {
+    vid = 'login'
     userName?: string
     password?: string
     message?: string
@@ -177,7 +179,7 @@ class LoginPresenter extends Presenter<TestApplication, LoginScope> {
     initialized = false
 
     constructor(app: TestApplication) {
-        super(app, new LoginScope('v-login'))
+        super(app, new LoginScope())
         this.scope.onEnter = this.onEnter.bind(this)
     }
 
@@ -226,8 +228,9 @@ class LoginPresenter extends Presenter<TestApplication, LoginScope> {
 // :: Restricted
 
 class RestrictedScope extends Scope {
-    message?: string
+    vid = 'restricted'
 
+    message?: string
     content?: Scope
 
     onCart: (cartId: number) => Promise<void> = NOOP_PROMISE_VOID
@@ -246,7 +249,7 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
     private contentSlot: ScopeSlot = this.setContent.bind(this)
 
     constructor(app: TestApplication) {
-        super(app, new RestrictedScope('v-restricted'))
+        super(app, new RestrictedScope())
         this.scope.onCart = this.onCart.bind(this)
         this.scope.onProduct = this.onProduct.bind(this)
         this.scope.onReceipt = this.onReceipt.bind(this)
@@ -345,6 +348,7 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
 // :: Cart
 
 class CartScope extends Scope {
+    vid = 'card'
 
 }
 
@@ -357,7 +361,7 @@ class CartPresenter extends Presenter<TestApplication, CartScope> {
     public cartId?: number
 
     public constructor(app: TestApplication) {
-        super(app, new CartScope('v-cart'))
+        super(app, new CartScope())
     }
 
     public override release() {
@@ -403,6 +407,7 @@ class CartPresenter extends Presenter<TestApplication, CartScope> {
 // :: Product
 
 class ProductScope extends Scope {
+    vid = 'product'
     name?: string
 }
 
@@ -415,7 +420,7 @@ class ProductPresenter extends Presenter<TestApplication, ProductScope> {
     public productId?: number
 
     constructor(app: TestApplication) {
-        super(app, new ProductScope('v-product'))
+        super(app, new ProductScope())
     }
 
     public override release() {
@@ -462,7 +467,7 @@ class ProductPresenter extends Presenter<TestApplication, ProductScope> {
 // :: Receipt
 
 class ReceiptScope extends Scope {
-
+    vid = 'receipt'
 }
 
 class ReceiptPresenter extends Presenter<TestApplication, ReceiptScope> {
@@ -473,7 +478,7 @@ class ReceiptPresenter extends Presenter<TestApplication, ReceiptScope> {
     public initialized = false
 
     public constructor(app: TestApplication) {
-        super(app, new ReceiptScope('v-receipt'))
+        super(app, new ReceiptScope())
     }
 
     public override release() {

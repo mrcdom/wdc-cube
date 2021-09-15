@@ -1,6 +1,8 @@
 import { NOOP_VOID, NOOP_PROMISE_VOID } from './Constants'
 
-export class Scope {
+export abstract class Scope {
+
+    // Class
 
     public static ACTION(): () => Promise<void> {
         return NOOP_PROMISE_VOID
@@ -14,12 +16,10 @@ export class Scope {
         return NOOP_PROMISE_VOID
     }
 
-    public readonly vid: string
+    // API
+
+    public abstract get vid(): string
 
     public update: () => void = NOOP_VOID
-
-    public constructor(vid: string) {
-        this.vid = vid
-    }
 
 }

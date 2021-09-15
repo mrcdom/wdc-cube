@@ -1,27 +1,30 @@
 import React from 'react'
 import clsx from 'clsx'
-import { bindUpdate } from 'wdc-cube-react'
+import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import Css from './TodoMvc.module.css'
 import { ItemScope } from './TodoMvc.presenter'
 
-type ItemViewProps = {
-    className?: string
-    style?: React.CSSProperties
-    scope: ItemScope
-}
+export const ItemViewMemo = React.memo(ItemView, (prevProps, nextProps) => {
+    return prevProps.scope.editing === nextProps.scope.editing
+        && prevProps.scope.title === nextProps.scope.title
+        && prevProps.scope.completed === nextProps.scope.completed
+})
 
-export function ItemView({ scope, className, style }: ItemViewProps) {
+export function ItemView({ className, style, scope }: IViewProps & { scope: ItemScope }) {
     bindUpdate(React, scope)
 
+    const { actions } = scope
+
     const editField = React.useRef<HTMLInputElement>(null)
-    const [ editText, setEditText] = React.useState<string>(scope.title)
+    const [editText, setEditText] = React.useState(scope.title)
 
     React.useEffect(() => {
-        scope.focus = false
-        if (editField.current) {
-            editField.current.focus()
+        const node = editField.current
+        if (node) {
+            node.focus()
+            node.setSelectionRange(node.value.length, node.value.length)
         }
-    }, [scope.focus])
+    }, [scope.editing])
 
     let bodyElm = <></>
     if (scope.editing) {
@@ -30,9 +33,9 @@ export function ItemView({ scope, className, style }: ItemViewProps) {
                 ref={editField}
                 className={Css.edit}
                 value={editText}
-                onBlur={() => scope.onBlur(editText)}
+                onBlur={() => actions.onBlur(editText)}
                 onChange={e => setEditText(e.target.value)}
-                onKeyDown={e => scope.onKeyDown(e.code, editText)}
+                onKeyDown={e => actions.onKeyDown(e.code, editText)}
             />
         </>
     } else {
@@ -41,15 +44,17 @@ export function ItemView({ scope, className, style }: ItemViewProps) {
                 className={Css.toggle}
                 type="checkbox"
                 checked={scope.completed}
-                onChange={scope.onToggle}
+                onChange={() => actions.onToggle()}
             />
-            <label onDoubleClick={scope.onEdit}>{scope.title}</label>
-            <button className={Css.destroy} onClick={scope.onDestroy} />
+            <label onDoubleClick={() => actions && actions.onEdit()}>{scope.title}</label>
+            <button className={Css.destroy} onClick={() => actions && actions.onDestroy()} />
         </>
     }
 
+    //console.log('v-item')
+
     return <li
-        className={clsx(className, Css.view, scope.completed ? Css.complete : '', scope.editing ? Css.editing : '')}
+        className={clsx(className, Css.view, scope.completed ? Css.completed : '', scope.editing ? Css.editing : '')}
         style={style}
     >
         {bodyElm}

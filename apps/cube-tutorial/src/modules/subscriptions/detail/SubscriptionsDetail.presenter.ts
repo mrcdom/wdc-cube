@@ -11,6 +11,8 @@ const tutorialService = TutorialService.INSTANCE
 const eMailRegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
 export class SubscriptionsDetailScope extends Scope {
+    vid = ViewIds.subscriptionsDetail
+
     name?: string
 
     // Actions
@@ -30,7 +32,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
     private backPlace: Place
 
     public constructor(app: MainPresenter) {
-        super(app, new SubscriptionsDetailScope(ViewIds.subscriptionsDetail))
+        super(app, new SubscriptionsDetailScope())
         this.backPlace = app.lastPlace
     }
 

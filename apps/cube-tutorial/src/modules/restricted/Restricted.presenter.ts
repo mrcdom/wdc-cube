@@ -5,11 +5,9 @@ import { ViewIds, AttrsIds } from '../../Constants'
 
 const LOG = Logger.get('RestrictedPresenter')
 
-export class MenuScope extends Scope {
-
-}
-
 export class RestrictedScope extends Scope {
+    vid = ViewIds.restricted
+
     menu?: Scope
     detail?: Scope
 }
@@ -26,7 +24,7 @@ export class RestrictedPresenter extends Presenter<MainPresenter, RestrictedScop
     }
 
     public constructor(app: MainPresenter) {
-        super(app, new RestrictedScope(ViewIds.restricted))
+        super(app, new RestrictedScope())
     }
 
     public override release() {
