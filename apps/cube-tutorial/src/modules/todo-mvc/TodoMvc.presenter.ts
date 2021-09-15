@@ -48,8 +48,10 @@ export class HeaderScope extends Scope {
     allItemsCompleted = false
     toggleButtonVisible = false
 
-    onToggleAll = Scope.ACTION()
-    onAddTodo = Scope.ACTION1<string>()
+    readonly actions = {
+        onToggleAll: Scope.ACTION(),
+        onAddTodo: Scope.ACTION1<string>()
+    }
 }
 
 export class MainScope extends Scope {
@@ -66,10 +68,12 @@ export class FooterScope extends Scope {
     clearButtonVisible = false
     showing = ShowingOptions.ALL
 
-    onClearCompleted = Scope.ACTION()
-    onShowAll = Scope.ACTION()
-    onShowActives = Scope.ACTION()
-    onShowCompleteds = Scope.ACTION()
+    actions = {
+        onClearCompleted: Scope.ACTION(),
+        onShowAll: Scope.ACTION(),
+        onShowActives: Scope.ACTION(),
+        onShowCompleteds: Scope.ACTION()
+    }
 }
 
 export class TodoMvcScope extends Scope {
@@ -112,12 +116,13 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         if (initialization) {
             // Bind Events
-            this.headerScope.onAddTodo = this.onAddTodo.bind(this)
-            this.headerScope.onToggleAll = this.onToggleAll.bind(this)
-            this.footerScope.onClearCompleted = this.onClearCompleted.bind(this)
-            this.footerScope.onShowAll = this.onShowAll.bind(this)
-            this.footerScope.onShowActives = this.onShowActives.bind(this)
-            this.footerScope.onShowCompleteds = this.onShowCompleteds.bind(this)
+            this.headerScope.actions.onAddTodo = this.onAddTodo.bind(this)
+            this.headerScope.actions.onToggleAll = this.onToggleAll.bind(this)
+
+            this.footerScope.actions.onClearCompleted = this.onClearCompleted.bind(this)
+            this.footerScope.actions.onShowAll = this.onShowAll.bind(this)
+            this.footerScope.actions.onShowActives = this.onShowActives.bind(this)
+            this.footerScope.actions.onShowCompleteds = this.onShowCompleteds.bind(this)
 
             // Get slots
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
@@ -132,7 +137,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             //}
 
             LOG.info('Initialized')
-        } else if(uriShowing !== this.footerScope.showing) {
+        } else if (uriShowing !== this.footerScope.showing) {
             this.footerScope.showing = uriShowing
             this.$apply(this.footerScope)
         }
@@ -287,7 +292,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
                 todoScope.id = todo.uid
                 todoScope.title = todo.text
                 todoScope.completed = todo.complete
-                this.bindItemScope(todoScope)
+                this.bindItemScopeActions(todoScope)
                 this.itemScopes.push(todoScope)
             }
         } finally {
@@ -302,7 +307,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         todoScope.id = lastUid + 1
         todoScope.title = val
         todoScope.completed = false
-        this.bindItemScope(todoScope)
+        this.bindItemScopeActions(todoScope)
         this.itemScopes.push(todoScope)
 
         if (this.footerScope.showing !== ShowingOptions.COMPLETED) {
@@ -363,7 +368,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         }
     }
 
-    private bindItemScope(item: ItemScope) {
+    private bindItemScopeActions(item: ItemScope) {
         item.actions.onToggle = this.onItemToggle.bind(this, item)
         item.actions.onEdit = this.onItemEdit.bind(this, item)
         item.actions.onKeyDown = this.onItemKeyDown.bind(this, item)

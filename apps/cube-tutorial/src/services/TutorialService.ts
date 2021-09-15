@@ -68,6 +68,7 @@ export class TutorialService implements ServiceLike {
     }
 
     public async fetchTodos(): Promise<TodoType[]> {
+        /*
         const todos = [] as TodoType[]
         for(let i = 0; i < 1000; i++) {
             todos.push({
@@ -77,7 +78,8 @@ export class TutorialService implements ServiceLike {
             })
         }
         return todos
-        /*
+        */
+
         return [
             {
                 uid: 1,
@@ -105,7 +107,6 @@ export class TutorialService implements ServiceLike {
                 complete: true,
             }
         ]
-        */
     }
 
 }

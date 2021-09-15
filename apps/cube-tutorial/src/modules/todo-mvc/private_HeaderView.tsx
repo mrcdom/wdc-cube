@@ -4,7 +4,10 @@ import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import Css from './TodoMvc.module.css'
 import { HeaderScope } from './TodoMvc.presenter'
 
+type HeaderActions = typeof HeaderScope.prototype.actions
+
 export const HeaderView = function ({ className, style, scope }: IViewProps & { scope: HeaderScope }) {
+    const { actions } = scope
     bindUpdate(React, scope)
 
     const newField = React.useRef<HTMLInputElement>(null)
@@ -18,7 +21,7 @@ export const HeaderView = function ({ className, style, scope }: IViewProps & { 
                     id={scope.uuid}
                     className={Css['toggle-all']}
                     type="checkbox"
-                    onChange={scope.onToggleAll}
+                    onChange={actions.onToggleAll}
                     checked={!scope.allItemsCompleted}
                 />
                 <label htmlFor={scope.uuid} style={{ opacity: scope.toggleButtonVisible ? 1 : 0 }}>
@@ -29,14 +32,14 @@ export const HeaderView = function ({ className, style, scope }: IViewProps & { 
                 ref={newField}
                 className={Css['new-todo']}
                 placeholder="What needs to be done?"
-                onKeyDown={e => handleNewTodoKeyDown(scope, e, newField)}
+                onKeyDown={e => handleNewTodoKeyDown(actions, e, newField)}
                 autoFocus={true}
             />
         </div>
     </header>
 }
 
-function handleNewTodoKeyDown(scope: Partial<HeaderScope>, event: React.KeyboardEvent<HTMLInputElement>, newField: React.RefObject<HTMLInputElement>) {
+function handleNewTodoKeyDown(actions: HeaderActions, event: React.KeyboardEvent<HTMLInputElement>, newField: React.RefObject<HTMLInputElement>) {
     if (event.code !== 'Enter') {
         return
     }
@@ -47,8 +50,8 @@ function handleNewTodoKeyDown(scope: Partial<HeaderScope>, event: React.Keyboard
         const val = newField.current.value.trim()
 
         if (val) {
-            if (scope.onAddTodo) {
-                scope.onAddTodo(val)
+            if (actions.onAddTodo) {
+                actions.onAddTodo(val)
             }
             newField.current.value = ''
         }

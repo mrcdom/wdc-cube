@@ -5,6 +5,7 @@ import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { FooterScope, ShowingOptions } from './TodoMvc.presenter'
 
 export const FooterView = function ({ className, style, scope }: IViewProps & { scope: FooterScope }) {
+    const { actions } = scope
     bindUpdate(React, scope)
 
     let clearButton = <></>
@@ -12,7 +13,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
     if (scope.clearButtonVisible) {
         clearButton = <button
             className={Css['clear-completed']}
-            onClick={scope.onClearCompleted}>
+            onClick={actions.onClearCompleted}>
             Clear completed
         </button>
     }
@@ -27,7 +28,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
             <li>
                 <a
                     className={clsx(scope.showing == ShowingOptions.ALL ? Css.selected : undefined)}
-                    onClick={scope.onShowAll}
+                    onClick={actions.onShowAll}
                 >
                     All
                 </a>
@@ -36,7 +37,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
             <li>
                 <a
                     className={clsx(scope.showing == ShowingOptions.ACTIVE ? Css.selected : undefined)}
-                    onClick={scope.onShowActives}>
+                    onClick={actions.onShowActives}>
                     Active
                 </a>
             </li>
@@ -44,7 +45,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
             <li>
                 <a
                     className={clsx(scope.showing == ShowingOptions.COMPLETED ? Css.selected : undefined)}
-                    onClick={scope.onShowCompleteds}>
+                    onClick={actions.onShowCompleteds}>
                     Completed
                 </a>
             </li>
