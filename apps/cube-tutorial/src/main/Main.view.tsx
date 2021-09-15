@@ -20,14 +20,11 @@ export type MainViewProps = IViewProps
 export function MainView({ className, ...props }: MainViewProps) {
   const { scope } = getOrCreateApplication(React, createApp)
 
-  const [drawerOpened, setDrawerOpened] = React.useState(false)
-
   return <>
     <div className={clsx(className, Css.MainView)} {...props}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton edge="start" className={Css.appBarMenuButton} color="inherit" aria-label="menu"
-            onClick={() => setDrawerOpened(true)}>
+          <IconButton edge="start" className={Css.appBarMenuButton} color="inherit" aria-label="menu">
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={Css.appBarTitle}>

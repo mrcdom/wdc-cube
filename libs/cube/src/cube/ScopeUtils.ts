@@ -17,10 +17,6 @@ type FunctionLike = {
     bind(instance: unknown): void
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyEquals = (other: any) => boolean
-
-
 // :: Private static functions
 
 function isAnActionName(s: string) {
