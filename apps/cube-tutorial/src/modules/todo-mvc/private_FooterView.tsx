@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import Css from './TodoMvc.module.css'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
-import { FooterScope, ShowingTodos } from './TodoMvc.presenter'
+import { FooterScope, ShowingOptions } from './TodoMvc.presenter'
 
 export const FooterView = function ({ className, style, scope }: IViewProps & { scope: FooterScope }) {
     bindUpdate(React, scope)
@@ -26,7 +26,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
         <ul className={Css.filters}>
             <li>
                 <a
-                    className={clsx(scope.showing == ShowingTodos.ALL ? Css.selected : undefined)}
+                    className={clsx(scope.showing == ShowingOptions.ALL ? Css.selected : undefined)}
                     onClick={scope.onShowAll}
                 >
                     All
@@ -35,7 +35,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
             {' '}
             <li>
                 <a
-                    className={clsx(scope.showing == ShowingTodos.ACTIVE ? Css.selected : undefined)}
+                    className={clsx(scope.showing == ShowingOptions.ACTIVE ? Css.selected : undefined)}
                     onClick={scope.onShowActives}>
                     Active
                 </a>
@@ -43,7 +43,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
             {' '}
             <li>
                 <a
-                    className={clsx(scope.showing == ShowingTodos.COMPLETED ? Css.selected : undefined)}
+                    className={clsx(scope.showing == ShowingOptions.COMPLETED ? Css.selected : undefined)}
                     onClick={scope.onShowCompleteds}>
                     Completed
                 </a>

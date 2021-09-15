@@ -6,7 +6,7 @@ import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, ChangeMonitor, NOOP_VOID
 import { v4 as uuidv4 } from 'uuid'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
-import { ViewIds, AttrsIds } from '../../Constants'
+import { ViewIds, ParamsIds, AttrsIds } from '../../Constants'
 
 const LOG = Logger.get('TodoMvcPresenter')
 
@@ -18,7 +18,7 @@ const tutorialService = TutorialService.INSTANCE
 
 // :: Scopes
 
-export enum ShowingTodos {
+export enum ShowingOptions {
     ALL,
     ACTIVE,
     COMPLETED
@@ -64,7 +64,7 @@ export class FooterScope extends Scope {
     count = 0
     activeTodoWord = 'item'
     clearButtonVisible = false
-    showing = ShowingTodos.ALL
+    showing = ShowingOptions.ALL
 
     onClearCompleted = Scope.ACTION()
     onShowAll = Scope.ACTION()
@@ -108,6 +108,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
+        const uriShowing = uri.getParameterAsNumberOrDefault(ParamsIds.TodoShowing, this.footerScope.showing) as ShowingOptions
+
         if (initialization) {
             // Bind Events
             this.headerScope.onAddTodo = this.onAddTodo.bind(this)
@@ -120,6 +122,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             // Get slots
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
 
+            this.footerScope.showing = uriShowing
             // Load and prepare data
             await this.loadData()
 
@@ -129,11 +132,20 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             //}
 
             LOG.info('Initialized')
+        } else if(uriShowing !== this.footerScope.showing) {
+            this.footerScope.showing = uriShowing
+            this.$apply(this.footerScope)
         }
 
         this.parentSlot(this.scope)
 
         return true
+    }
+
+    public publishParameters(uri: PlaceUri): void {
+        if (this.footerScope.showing !== ShowingOptions.ALL) {
+            uri.setParameter(ParamsIds.TodoShowing, this.footerScope.showing)
+        }
     }
 
     public override onBeforeScopeUpdate() {
@@ -165,12 +177,12 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
                 }
 
                 switch (this.footerScope.showing) {
-                    case ShowingTodos.ACTIVE:
+                    case ShowingOptions.ACTIVE:
                         if (!itemScope.completed) {
                             updateOrAddItem(itemScope)
                         }
                         break
-                    case ShowingTodos.COMPLETED:
+                    case ShowingOptions.COMPLETED:
                         if (itemScope.completed) {
                             updateOrAddItem(itemScope)
                             completeCount++
@@ -293,7 +305,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         this.bindItemScope(todoScope)
         this.itemScopes.push(todoScope)
 
-        if (this.footerScope.showing !== ShowingTodos.COMPLETED) {
+        if (this.footerScope.showing !== ShowingOptions.COMPLETED) {
             this.mainScope.items.push(todoScope)
             this.$apply()
         }
@@ -328,23 +340,26 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     protected async onShowAll() {
-        if (this.footerScope.showing !== ShowingTodos.ALL) {
-            this.footerScope.showing = ShowingTodos.ALL
+        if (this.footerScope.showing !== ShowingOptions.ALL) {
+            this.footerScope.showing = ShowingOptions.ALL
             this.$apply(this.footerScope)
+            this.app.updateHistory()
         }
     }
 
     protected async onShowActives() {
-        if (this.footerScope.showing !== ShowingTodos.ACTIVE) {
-            this.footerScope.showing = ShowingTodos.ACTIVE
+        if (this.footerScope.showing !== ShowingOptions.ACTIVE) {
+            this.footerScope.showing = ShowingOptions.ACTIVE
             this.$apply(this.footerScope)
+            this.app.updateHistory()
         }
     }
 
     protected async onShowCompleteds() {
-        if (this.footerScope.showing !== ShowingTodos.COMPLETED) {
-            this.footerScope.showing = ShowingTodos.COMPLETED
+        if (this.footerScope.showing !== ShowingOptions.COMPLETED) {
+            this.footerScope.showing = ShowingOptions.COMPLETED
             this.$apply(this.footerScope)
+            this.app.updateHistory()
         }
     }
 
@@ -359,7 +374,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     protected async onItemToggle(item: ItemScope) {
         item.completed = !item.completed
 
-        if (this.footerScope.showing !== ShowingTodos.ALL) {
+        if (this.footerScope.showing !== ShowingOptions.ALL) {
             this.$apply(this.mainScope)
         } else {
             this.$apply(item)
