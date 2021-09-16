@@ -2,14 +2,19 @@ import React from 'react'
 import clsx from 'clsx'
 import Button from '@material-ui/core/Button'
 import ButtonGroup from '@material-ui/core/ButtonGroup'
+import { Logger} from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { BodyScope } from './Main.presenter'
 import Css from './Main.module.css'
+
+const LOG = Logger.get('Main.BodyView')
 
 type BodyViewProps = IViewProps & { scope: BodyScope }
 
 export function BodyView({ scope, className, ...props }: BodyViewProps) {
     bindUpdate(React, scope)
+
+    LOG.debug('update')
 
     return <>
         <div className={clsx(className, Css.BodyView)} {...props}>

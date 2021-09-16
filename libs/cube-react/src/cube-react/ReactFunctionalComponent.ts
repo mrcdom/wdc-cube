@@ -5,12 +5,15 @@ const LOG = Logger.get('React.FC')
 
 type ReactType = typeof React
 
+function doUpdate(this: Scope, setValue: React.Dispatch<React.SetStateAction<number>>, value: number) {
+    console.log(`${this.vid}.update()`)
+    setValue(value + 1)
+}
+
 export function bindUpdate<S extends Scope>(react: ReactType, scope: Partial<S>) {
     const [value, setValue] = react.useState(0)
 
-    scope.update = function () {
-        setValue(value + 1)
-    }
+    scope.update = doUpdate.bind(scope as Scope, setValue, value)
 
     react.useEffect(() => {
         //LOG.debug(`scope(${scope.vid}).attached`)
@@ -27,6 +30,8 @@ type IApplication<S extends Scope> = Application & {
     applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean>
 }
 
+
+
 export function getOrCreateApplication<S extends Scope, A extends IApplication<S>>(react: ReactType, factory: () => A) {
     const [app, setApp] = react.useState<A>()
     const [value, setValue] = react.useState(0)
@@ -42,15 +47,11 @@ export function getOrCreateApplication<S extends Scope, A extends IApplication<S
     }, [])
 
     if (app) {
-        app.scope.update = function () {
-            setValue(value + 1)
-        }
+        app.scope.update = doUpdate.bind(app.scope, setValue, value)
         return app
     } else {
         const instance = factory()
-        instance.scope.update = function () {
-            setValue(value + 1)
-        }
+        instance.scope.update = doUpdate.bind(instance.scope, setValue, value)
         instance.applyParameters(instance.newUri(instance.rootPlace), true, true)
         setApp(instance)
         LOG.debug('app.attached')

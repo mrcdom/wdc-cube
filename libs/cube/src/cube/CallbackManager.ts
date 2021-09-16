@@ -2,11 +2,9 @@ import { Logger } from '../utils/Logger'
 
 const LOG = Logger.get('ChangeMonitor')
 
-export class ChangeMonitor {
+export class CallbackManager {
 
-    public static readonly INSTANCE = new ChangeMonitor()
-
-    private __initialized: boolean
+    public static readonly INSTANCE = new CallbackManager()
 
     private __animationFrameHandler?: NodeJS.Timeout
 
@@ -17,30 +15,8 @@ export class ChangeMonitor {
     private __errorCount = 0
 
     private constructor() {
-        this.__initialized = false
         this.__callbackMap = new Map()
         this.__onceCallbackMap = new Map()
-    }
-
-    public get initialized(): boolean {
-        return this.__initialized
-    }
-
-    public async postConstruct() {
-        if (!this.__initialized) {
-            this.__errorCount = 0
-            this.__initialized = true
-            LOG.debug('Initialized')
-        }
-    }
-
-    public async preDestroy() {
-        if (this.__initialized) {
-            this.clearAnimationFrame()
-            this.__callbackMap.clear()
-            this.__errorCount = 0
-            LOG.debug('Finalized')
-        }
     }
 
     public bind(callback: () => void) {
@@ -67,7 +43,7 @@ export class ChangeMonitor {
     private launchAnimationFrame() {
         if (!this.__animationFrameHandler
             && (this.__callbackMap.size > 0 || this.__onceCallbackMap.size > 0)) {
-            this.__animationFrameHandler = setTimeout(this.onAnimationFrame.bind(this), 16)
+            this.__animationFrameHandler = setTimeout(this.onFlush.bind(this), 16)
         }
     }
 
@@ -78,12 +54,7 @@ export class ChangeMonitor {
         }
     }
 
-    private onAnimationFrame() {
-        if (!this.initialized) {
-            this.clearAnimationFrame()
-            return
-        }
-
+    private onFlush() {
         try {
             for (const callback of this.__callbackMap.keys()) {
                 try {

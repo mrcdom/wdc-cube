@@ -68,7 +68,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
                 LOG.error(`Missing onClose action on scope ${this.scope.dialog.vid}`)
             }
 
-            this.update(this.scope)
+            this.update()
         }
     }
 
@@ -108,7 +108,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         if (this.scope.alert) {
             await this.scope.alert.onClose()
             this.scope.alert = undefined
-            this.update(this.scope)
+            this.update()
         }
 
         return true
@@ -128,7 +128,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         alertScope.message = message
         alertScope.onClose = this.onCloseAlert.bind(this, onClose)
         this.scope.alert = alertScope
-        this.update(this.scope)
+        this.update()
     }
 
     // :: View Actions
@@ -136,13 +136,13 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     protected async onBodySlot(scope?:Scope) {
         if (this.scope.body !== scope) {
             this.scope.body = scope ?? this.bodyScope
-            this.update(this.scope)
+            this.update()
         }
     }
 
     protected async onCloseAlert(onClose?: () => Promise<void>) {
         this.scope.alert = undefined
-        this.update(this.scope)
+        this.update()
         if (onClose) {
             await onClose()
         }
@@ -154,7 +154,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         } catch (caught) {
             this.unexpected('Opening to root', caught)
         } finally {
-            this.update(this.scope)
+            this.update()
         }
     }
 
@@ -164,7 +164,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         } catch (caught) {
             this.unexpected('Opening to module-1', caught)
         } finally {
-            this.update(this.scope)
+            this.update()
         }
     }
 
@@ -174,7 +174,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         } catch (caught) {
             this.unexpected('Opening to module-2', caught)
         } finally {
-            this.update(this.scope)
+            this.update()
         }
     }
 
@@ -184,7 +184,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         } catch (caught) {
             this.unexpected('Opening to module-2', caught)
         } finally {
-            this.update(this.scope)
+            this.update()
         }
     }
 
@@ -197,7 +197,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         } catch (caught) {
             LOG.error('onAlert', caught)
         } finally {
-            this.update(this.scope)
+            this.update()
         }
     }
 }

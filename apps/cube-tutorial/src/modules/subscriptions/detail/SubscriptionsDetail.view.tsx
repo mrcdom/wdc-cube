@@ -5,11 +5,16 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
+import { Logger} from 'wdc-cube'
 import { bindUpdate } from 'wdc-cube-react'
 import { SubscriptionsDetailScope } from './SubscriptionsDetail.presenter'
 
+const LOG = Logger.get('SubscriptionsDetailView')
+
 export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailScope }) {
   bindUpdate(React, scope)
+
+  LOG.debug('update')
 
   return <>
     <DialogTitle>Subscribe</DialogTitle>

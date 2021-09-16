@@ -9,7 +9,6 @@ export { Presenter } from './cube/Presenter'
 export { ApplicationPresenter } from './cube/ApplicationPresenter'
 export { Scope } from './cube/Scope'
 export { ScopeUtils } from './cube/ScopeUtils'
-export { ChangeMonitor } from './cube/ChangeMonitor'
 
 export type { ILogger } from './utils/Logger'
 export type { ScopeSlot } from './cube/ScopeSlot'

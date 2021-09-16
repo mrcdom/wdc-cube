@@ -80,9 +80,7 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         super.emitAllBeforeScopeUpdate()
 
         if (this.isAutoUpdateEnabled()) {
-            this.emitBeforeScopeUpdate(!this.isDirty())
-        } else {
-            this.emitBeforeScopeUpdate(false)
+            this.emitBeforeScopeUpdate(true)
         }
     }
 

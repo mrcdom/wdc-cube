@@ -1,11 +1,8 @@
-import { Logger, ChangeMonitor } from 'wdc-cube'
+import { Logger } from 'wdc-cube'
 import { TutorialService } from '../services/TutorialService'
 import type { ServiceLike } from './ServiceLike'
 
 const LOG = Logger.get('Services')
-
-// @Inject
-const changeMonitor = ChangeMonitor.INSTANCE
 
 // @Inject
 const tutorialService = TutorialService.INSTANCE
@@ -33,7 +30,6 @@ async function noopBootstrap() {
 
 async function doBootstrap() {
     const failed = [] as string[]
-    await bootService('changeMonitor', changeMonitor, failed)
     await bootService('tutorialService', tutorialService, failed)
 
     if (failed.length === 0) {

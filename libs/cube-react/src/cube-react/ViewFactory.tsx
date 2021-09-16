@@ -20,18 +20,15 @@ export function ViewSlot({ scope, ...props }: IFactoryProps) {
         const ctor = elementFactoryMap.get(scope.vid)
         if (ctor) {
             return React.createElement(ctor, { scope, ...props })
+        } else {
+            return <div className={props.className} style={props.style}>
+                View({scope.vid}) not found!
+            </div>
         }
+    } else {
+        return <></>
     }
-
-    // fallback
-    return <></>
 }
-
-export const ViewSlotMemo = React.memo(ViewSlot, (prevProps, nextProps) => {
-    return prevProps.scope === nextProps.scope
-        && prevProps.className === nextProps.className
-        && lodash.isEqual(prevProps.style, nextProps.style)
-})
 
 export class ViewFactory {
 

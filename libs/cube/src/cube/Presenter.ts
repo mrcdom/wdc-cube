@@ -4,7 +4,7 @@ import { Application } from './Application'
 import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { Scope } from './Scope'
-import { ChangeMonitor } from './ChangeMonitor'
+import { CallbackManager } from './CallbackManager'
 import { instrumentViewActions } from './IPresenter'
 
 import type { IPresenter, IPresenterBase } from './IPresenter'
@@ -13,7 +13,7 @@ import type { AlertSeverity } from './Application'
 const LOG = Logger.get('Presenter')
 
 // @Inject
-const changeMonitor = ChangeMonitor.INSTANCE
+const callbackManager = CallbackManager.INSTANCE
 
 type ScopeUpdateConfig = {
     maxUpdate: number
@@ -62,13 +62,11 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
         this.update(this.scope)
 
-        //changeMonitor.bind(this.__emitBeforeScopeUpdate)
-
         instrumentViewActions.call(this)
     }
 
     public release(): void {
-        changeMonitor.unbind(this.__emitBeforeScopeUpdate)
+        callbackManager.unbind(this.__emitBeforeScopeUpdate)
         this.scope.update = NOOP_VOID
         this.__dirtyScopes.clear()
         this.__scopeUpdateFallback.clear()
@@ -133,7 +131,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
             }
         }
 
-        changeMonitor.bindOnce(this.__emitBeforeScopeUpdate)
+        callbackManager.bindOnce(this.__emitBeforeScopeUpdate)
     }
 
     public emitBeforeScopeUpdate(force = false): void {

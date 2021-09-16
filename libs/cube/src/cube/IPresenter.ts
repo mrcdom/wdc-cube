@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import lodash from 'lodash'
-import { Logger } from '../utils/Logger'
 import { PlaceUri } from './PlaceUri'
 import { Scope } from './Scope'
 import { ScopeUtils } from './ScopeUtils'
-
-const LOG = Logger.get('IPresenter')
 
 export interface IPresenter {
 
@@ -40,8 +37,6 @@ export interface IPresenterBase<S extends Scope> extends IPresenter {
 function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
     function onFinally(this: IPresenterBase<Scope>) {
         if (this.isAutoUpdateEnabled()) {
-            this.emitBeforeScopeUpdate(!this.isDirty())
-        } else {
             this.emitBeforeScopeUpdate(true)
         }
     }
@@ -64,7 +59,6 @@ export function instrumentViewActions(this: IPresenterBase<Scope>) {
                 const value = proto[key]
                 if (value !== this.onBeforeScopeUpdate && ScopeUtils.isAnActionName(key) && lodash.isFunction(value)) {
                     proto[key] = wrapViewAction(value)
-                    LOG.debug(`action.${key}`)
                 }
             }
         } finally {

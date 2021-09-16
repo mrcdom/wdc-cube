@@ -1,5 +1,6 @@
 import React from 'react'
 import clsx from 'clsx'
+import { Logger} from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
@@ -7,10 +8,14 @@ import ListItemText from '@material-ui/core/ListItemText'
 import { SubscriptionsScope } from './Subscriptions.presenter'
 import Css from './Subscriptions.module.css'
 
+const LOG = Logger.get('SubscriptionsView')
+
 type SubscriptionsViewProps = IViewProps & { scope: SubscriptionsScope }
 
 export function SubscriptionsView({ scope, className, ...props }: SubscriptionsViewProps) {
     bindUpdate(React, scope)
+
+    LOG.debug('update')
 
     const itemArray = [] as JSX.Element[]
 

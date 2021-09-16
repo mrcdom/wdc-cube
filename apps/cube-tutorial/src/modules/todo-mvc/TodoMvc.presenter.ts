@@ -65,7 +65,7 @@ export class FooterScope extends Scope {
     clearButtonVisible = false
     showing = ShowingOptions.ALL
 
-    actions = {
+    readonly actions = {
         onClearCompleted: Scope.ACTION(),
         onShowAll: Scope.ACTION(),
         onShowActives: Scope.ACTION(),
@@ -81,8 +81,6 @@ export class TodoMvcScope extends Scope {
     footer?: FooterScope
 }
 
-
-
 // :: Presentation
 
 export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
@@ -97,6 +95,10 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private itemScopes = [] as ItemScope[]
 
+    private stressEnabled = false
+
+    private updateHintEnabled = true
+
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
         this.scope.header = this.headerScope
@@ -104,13 +106,12 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     public override release() {
         super.release()
-        LOG.info('Finalized')
+        LOG.debug('Finalized')
     }
-
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         const uriShowing = uri.getParameterAsNumberOrDefault(ParamsIds.TodoShowing, this.footerScope.showing) as ShowingOptions
-        const isStress = uri.getParameterAsBooleanOrDefault(ParamsIds.TodoStress, false)
+        const isStress = uri.getParameterAsBooleanOrDefault(ParamsIds.TodoStress, this.stressEnabled)
 
         if (initialization) {
             // Bind Events
@@ -124,7 +125,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
             this.footerScope.showing = uriShowing
 
-            // Configure fallback scope just incase of to mutch small updates
+            // Configure fallback scope that must be used when there were
+            // to many small updates
             this.configureUpdate(ViewIds.todosItem, 10, this.mainScope)
 
             // Get slots
@@ -133,17 +135,16 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             this.enableAutoUpdate()
 
             // Load and prepare data
+            this.stressEnabled = isStress
             await this.loadData(isStress ? 1000 : 0)
 
-            LOG.info('Initialized')
+            LOG.debug('Initialized')
         } else {
-            if (uriShowing !== this.footerScope.showing) {
-                this.footerScope.showing = uriShowing
-                this.$apply(this.footerScope)
-            }
+            this.footerScope.showing = uriShowing
 
-            if(isStress) {
-                await this.loadData(1000)
+            if (this.stressEnabled !== isStress) {
+                this.stressEnabled = isStress
+                await this.loadData(isStress ? 1000 : 0)
             }
         }
 
@@ -156,8 +157,182 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         if (this.footerScope.showing !== ShowingOptions.ALL) {
             uri.setParameter(ParamsIds.TodoShowing, this.footerScope.showing)
         }
+
+        if (this.stressEnabled) {
+            uri.setParameter(ParamsIds.TodoStress, this.stressEnabled)
+        }
     }
 
+    private async loadData(quantity: number) {
+        this.itemScopes.length = 0
+
+        const todos = await tutorialService.fetchTodos(quantity)
+        for (const todo of todos) {
+            const todoScope = new ItemScope()
+            todoScope.id = todo.uid
+            todoScope.title = todo.text
+            todoScope.completed = todo.complete
+            this.bindItemScopeActions(todoScope)
+            this.itemScopes.push(todoScope)
+        }
+    }
+
+    protected async onAddTodo(val: string) {
+        const trimVal = val ? val.trim() : ''
+        if (trimVal) {
+            const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
+
+            const todoScope = new ItemScope()
+            todoScope.id = lastUid + 1
+            todoScope.title = val
+            todoScope.completed = false
+            this.bindItemScopeActions(todoScope)
+            this.itemScopes.push(todoScope)
+
+            this.updateHint(this.mainScope)
+        } else {
+            this.updateHint(this.headerScope)
+        }
+    }
+
+    protected async onToggleAll() {
+        let numOfCompletedTasks = 0
+        for (const itemScope of this.itemScopes) {
+            if (itemScope.completed) {
+                numOfCompletedTasks++
+            }
+        }
+
+        const checked = numOfCompletedTasks !== this.mainScope.items.length
+
+        for (const itemScope of this.itemScopes) {
+            if (itemScope.completed !== checked) {
+                itemScope.completed = checked
+
+                // Optional update hint (improve performance)
+                this.updateHint(itemScope)
+            }
+        }
+    }
+
+    protected async onClearCompleted() {
+        this.itemScopes = this.itemScopes.filter(item => !item.completed)
+        this.updateHint(this.mainScope)
+    }
+
+    protected async onShowAll() {
+        this.footerScope.showing = ShowingOptions.ALL
+        this.updateHint(this.footerScope)
+        this.app.updateHistory()
+    }
+
+    protected async onShowActives() {
+        this.footerScope.showing = ShowingOptions.ACTIVE
+        this.updateHint(this.footerScope)
+        this.app.updateHistory()
+    }
+
+    protected async onShowCompleteds() {
+        this.footerScope.showing = ShowingOptions.COMPLETED
+        this.updateHint(this.footerScope)
+        this.app.updateHistory()
+    }
+
+    private bindItemScopeActions(item: ItemScope) {
+        item.actions.onToggle = this.onItemToggle.bind(this, item)
+        item.actions.onEdit = this.onItemEdit.bind(this, item)
+        item.actions.onKeyDown = this.onItemKeyDown.bind(this, item)
+        item.actions.onBlur = this.onItemBlur.bind(this, item)
+        item.actions.onDestroy = this.onItemDestroy.bind(this, item)
+    }
+
+    protected async onItemToggle(item: ItemScope) {
+        item.completed = !item.completed
+
+        // Optional update hint (improve performance)
+        if (this.footerScope.showing !== ShowingOptions.ALL) {
+            this.updateHint(this.mainScope)
+        } else {
+            this.updateHint(item)
+        }
+    }
+
+    protected async onItemEdit(item: ItemScope) {
+        for (const otherItem of this.itemScopes) {
+            if (otherItem !== item && otherItem.editing) {
+                otherItem.editing = false
+                // Optional update hint (improve performance)
+                this.updateHint(otherItem)
+            }
+        }
+
+        if (!item.editing) {
+            item.editing = true
+            // Optional update hint (improve performance)
+            this.updateHint(item)
+        }
+    }
+
+    protected async onItemBlur(item: ItemScope, val: string) {
+        this.saveItem(item, val)
+    }
+
+    protected async onItemKeyDown(item: ItemScope, code: string, val: string) {
+        if (code === 'Escape') {
+            this.cancelItem(item)
+        } else if (code === 'Enter') {
+            this.saveItem(item, val)
+        }
+    }
+
+    protected async onItemDestroy(item: ItemScope) {
+        this.destroy(item)
+    }
+
+    protected destroy(item: ItemScope) {
+        const itemIdx = this.itemScopes.findIndex(i => i.id === item.id)
+        if (itemIdx !== -1) {
+            this.itemScopes.splice(itemIdx, 1)
+            this.updateHint(this.mainScope)
+        }
+    }
+
+    protected cancelItem(item: ItemScope) {
+        item.editing = false
+        this.updateHint(item)
+    }
+
+    protected saveItem(item: ItemScope, val: string) {
+        const trimVal = val ? val.trim() : ''
+        if (trimVal) {
+            item.title = trimVal
+            item.editing = false
+            this.updateHint(item)
+        } else {
+            this.destroy(item)
+        }
+    }
+
+    /**
+     * This method is a way of showing that calling update is an optional
+     * when AutoUpdate is enabled. However, calling the update works like
+     * a hint that can lead to beater performance
+     * 
+     * @param optionalScope reference scope
+     */
+    public updateHint(optionalScope?: Scope) {
+        if (this.updateHintEnabled) {
+            this.update(optionalScope)
+        }
+    }
+
+    /**
+     * This action is called just before scope changes be notified
+     * to the view. This action has a debounce controller related
+     * to the Presenter.update() and with scope.actions. Whenever one
+     * of this methods/actions (with autoUpdate) is called, it is 
+     * garanteed that this event will be emited
+     */
     public override onBeforeScopeUpdate() {
         let baseChanged = false
         let headerChanged = false
@@ -269,186 +444,24 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             baseChanged = true
         }
 
-        // Apply view changes
+        // Optional update hint: this is util to tune performance
+        if (this.updateHintEnabled) {
+            if (baseChanged) {
+                this.update(this.scope)
+            } else {
+                if (headerChanged) {
+                    this.update(this.headerScope)
+                }
 
-        if (baseChanged) {
-            this.$apply(this.scope)
-        } else {
-            if (headerChanged) {
-                this.$apply(this.headerScope)
-            }
+                if (mainChanged) {
+                    this.update(this.mainScope)
+                }
 
-            if (mainChanged) {
-                this.$apply(this.mainScope)
-            }
-
-            if (footerChanged) {
-                this.$apply(this.footerScope)
-            }
-        }
-    }
-
-    private async loadData(quantity: number) {
-        this.itemScopes.length = 0
-        try {
-            const todos = await tutorialService.fetchTodos(quantity)
-            for (const todo of todos) {
-                const todoScope = new ItemScope()
-                todoScope.id = todo.uid
-                todoScope.title = todo.text
-                todoScope.completed = todo.complete
-                this.bindItemScopeActions(todoScope)
-                this.itemScopes.push(todoScope)
-            }
-        } finally {
-            this.$apply()
-        }
-    }
-
-    protected async onAddTodo(val: string) {
-        const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
-
-        const todoScope = new ItemScope()
-        todoScope.id = lastUid + 1
-        todoScope.title = val
-        todoScope.completed = false
-        this.bindItemScopeActions(todoScope)
-        this.itemScopes.push(todoScope)
-
-        if (this.footerScope.showing !== ShowingOptions.COMPLETED) {
-            this.mainScope.items.push(todoScope)
-            this.$apply(this.mainScope)
-        }
-    }
-
-    protected async onToggleAll() {
-        let numOfCompletedTasks = 0
-        for (const itemScope of this.itemScopes) {
-            if (itemScope.completed) {
-                numOfCompletedTasks++
+                if (footerChanged) {
+                    this.update(this.footerScope)
+                }
             }
         }
-
-        const checked = numOfCompletedTasks !== this.mainScope.items.length
-
-        let numChanges = 0
-        for (const itemScope of this.itemScopes) {
-            if (itemScope.completed !== checked) {
-                itemScope.completed = checked
-                this.$apply(itemScope)
-                numChanges++
-            }
-        }
-
-        if (numChanges > 10 && !this.isAutoUpdateEnabled()) {
-            this.$apply(this.mainScope)
-        }
     }
 
-    protected async onClearCompleted() {
-        this.itemScopes = this.itemScopes.filter(item => !item.completed)
-        this.$apply(this.mainScope)
-    }
-
-    protected async onShowAll() {
-        if (this.footerScope.showing !== ShowingOptions.ALL) {
-            this.footerScope.showing = ShowingOptions.ALL
-            this.$apply(this.footerScope)
-            this.app.updateHistory()
-        }
-    }
-
-    protected async onShowActives() {
-        if (this.footerScope.showing !== ShowingOptions.ACTIVE) {
-            this.footerScope.showing = ShowingOptions.ACTIVE
-            this.$apply(this.footerScope)
-            this.app.updateHistory()
-        }
-    }
-
-    protected async onShowCompleteds() {
-        if (this.footerScope.showing !== ShowingOptions.COMPLETED) {
-            this.footerScope.showing = ShowingOptions.COMPLETED
-            this.$apply(this.footerScope)
-            this.app.updateHistory()
-        }
-    }
-
-    private bindItemScopeActions(item: ItemScope) {
-        item.actions.onToggle = this.onItemToggle.bind(this, item)
-        item.actions.onEdit = this.onItemEdit.bind(this, item)
-        item.actions.onKeyDown = this.onItemKeyDown.bind(this, item)
-        item.actions.onBlur = this.onItemBlur.bind(this, item)
-        item.actions.onDestroy = this.onItemDestroy.bind(this, item)
-    }
-
-    protected async onItemToggle(item: ItemScope) {
-        item.completed = !item.completed
-
-        if (this.footerScope.showing !== ShowingOptions.ALL) {
-            this.$apply(this.mainScope)
-        } else if (this.isAutoUpdateEnabled()) {
-            // Helping performance
-            this.update(item)
-        } else {
-            this.$apply(item)
-        }
-    }
-
-    protected async onItemEdit(item: ItemScope) {
-        for (const otherItem of this.itemScopes) {
-            if (otherItem !== item && otherItem.editing) {
-                otherItem.editing = false
-                this.$apply(otherItem)
-            }
-        }
-
-        if (!item.editing) {
-            item.editing = true
-            this.$apply(item)
-        }
-    }
-
-    protected async onItemBlur(item: ItemScope, val: string) {
-        const trimVal = val.trim()
-        if (trimVal) {
-            this.saveItem(item, trimVal)
-        } else {
-            await this.onItemDestroy(item)
-        }
-    }
-
-    protected async onItemKeyDown(item: ItemScope, code: string, val: string) {
-        if (code === 'Escape') {
-            this.cancelItem(item)
-        } else if (code === 'Enter') {
-            await this.onItemBlur(item, val.trim())
-        }
-    }
-
-    protected async onItemDestroy(item: ItemScope) {
-        const itemIdx = this.itemScopes.findIndex(i => i.id === item.id)
-        if (itemIdx !== -1) {
-            this.itemScopes.splice(itemIdx, 1)
-        }
-
-        this.$apply(this.mainScope)
-    }
-
-    protected cancelItem(item: ItemScope) {
-        item.editing = false
-        this.$apply(item)
-    }
-
-    protected saveItem(item: ItemScope, val: string) {
-        item.title = val
-        item.editing = false
-        this.$apply(item)
-    }
-
-    private $apply<T extends Scope>(optionalScope?: T): void {
-        if (!this.isAutoUpdateEnabled()) {
-            super.update(optionalScope)
-        }
-    }
 }
