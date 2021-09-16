@@ -1,15 +1,6 @@
 import { Logger } from '../utils/Logger'
-import { Scope } from './Scope'
-import type { PresenterType } from './Presenter'
-import type { IPresenter } from './IPresenter'
 
 const LOG = Logger.get('ChangeMonitor')
-
-type PresenterLike = IPresenter & {
-    scope?: Scope
-    update?(scope: Scope): void
-    enableApply?(): void
-}
 
 export class ChangeMonitor {
 
@@ -21,11 +12,14 @@ export class ChangeMonitor {
 
     private __callbackMap: Map<() => void, boolean>
 
+    private __onceCallbackMap: Map<() => void, boolean>
+
     private __errorCount = 0
 
     private constructor() {
         this.__initialized = false
         this.__callbackMap = new Map()
+        this.__onceCallbackMap = new Map()
     }
 
     public get initialized(): boolean {
@@ -51,18 +45,28 @@ export class ChangeMonitor {
 
     public bind(callback: () => void) {
         this.__callbackMap.set(callback, true)
+        if (!this.__animationFrameHandler) {
+            this.launchAnimationFrame()
+        }
+    }
+
+    public bindOnce(callback: () => void) {
+        this.__onceCallbackMap.set(callback, true)
         this.launchAnimationFrame()
     }
 
     public unbind(callback: () => void) {
         this.__callbackMap.delete(callback)
-        if (this.__callbackMap.size === 0) {
+        this.__onceCallbackMap.delete(callback)
+
+        if (this.__callbackMap.size === 0 && this.__onceCallbackMap.size === 0) {
             this.clearAnimationFrame()
         }
     }
 
     private launchAnimationFrame() {
-        if (!this.__animationFrameHandler) {
+        if (!this.__animationFrameHandler
+            && (this.__callbackMap.size > 0 || this.__onceCallbackMap.size > 0)) {
             this.__animationFrameHandler = setTimeout(this.onAnimationFrame.bind(this), 16)
         }
     }
@@ -86,12 +90,24 @@ export class ChangeMonitor {
                     callback()
                 } catch (caught) {
                     if (this.__errorCount < 100) {
-                        LOG.error('Updating frame', caught)
-                        this.__errorCount++;
+                        LOG.error('Updating frame - calling regular callback', caught)
+                        this.__errorCount++
+                    }
+                }
+            }
+
+            for (const callback of this.__onceCallbackMap.keys()) {
+                try {
+                    callback()
+                } catch (caught) {
+                    if (this.__errorCount < 100) {
+                        LOG.error('Updating frame - calling once callback', caught)
+                        this.__errorCount++
                     }
                 }
             }
         } finally {
+            this.__onceCallbackMap.clear()
             this.__animationFrameHandler = undefined
             this.launchAnimationFrame()
         }

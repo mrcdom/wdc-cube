@@ -110,6 +110,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         const uriShowing = uri.getParameterAsNumberOrDefault(ParamsIds.TodoShowing, this.footerScope.showing) as ShowingOptions
+        const isStress = uri.getParameterAsBooleanOrDefault(ParamsIds.TodoStress, false)
 
         if (initialization) {
             // Bind Events
@@ -130,14 +131,20 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
 
             this.enableAutoUpdate()
-            
+
             // Load and prepare data
-            await this.loadData(1000)
+            await this.loadData(isStress ? 1000 : 0)
 
             LOG.info('Initialized')
-        } else if (uriShowing !== this.footerScope.showing) {
-            this.footerScope.showing = uriShowing
-            this.$apply(this.footerScope)
+        } else {
+            if (uriShowing !== this.footerScope.showing) {
+                this.footerScope.showing = uriShowing
+                this.$apply(this.footerScope)
+            }
+
+            if(isStress) {
+                await this.loadData(1000)
+            }
         }
 
         this.parentSlot(this.scope)
@@ -310,7 +317,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         if (this.footerScope.showing !== ShowingOptions.COMPLETED) {
             this.mainScope.items.push(todoScope)
-            this.$apply()
+            this.$apply(this.mainScope)
         }
     }
 
@@ -324,18 +331,18 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         const checked = numOfCompletedTasks !== this.mainScope.items.length
 
-        //let numChanges = 0
+        let numChanges = 0
         for (const itemScope of this.itemScopes) {
             if (itemScope.completed !== checked) {
                 itemScope.completed = checked
                 this.$apply(itemScope)
-                //numChanges++
+                numChanges++
             }
         }
 
-        //if (numChanges > 0) {
-        //    this.$apply(this.mainScope)
-        //}
+        if (numChanges > 10 && !this.isAutoUpdateEnabled()) {
+            this.$apply(this.mainScope)
+        }
     }
 
     protected async onClearCompleted() {
@@ -380,6 +387,9 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         if (this.footerScope.showing !== ShowingOptions.ALL) {
             this.$apply(this.mainScope)
+        } else if (this.isAutoUpdateEnabled()) {
+            // Helping performance
+            this.update(item)
         } else {
             this.$apply(item)
         }

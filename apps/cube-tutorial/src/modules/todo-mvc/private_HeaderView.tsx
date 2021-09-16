@@ -1,8 +1,11 @@
 import React from 'react'
 import clsx from 'clsx'
+import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import Css from './TodoMvc.module.css'
 import { HeaderScope } from './TodoMvc.presenter'
+
+const LOG = Logger.get('TodoMvc.HeaderView')
 
 type HeaderActions = typeof HeaderScope.prototype.actions
 
@@ -12,7 +15,7 @@ export const HeaderView = function ({ className, style, scope }: IViewProps & { 
 
     const newField = React.useRef<HTMLInputElement>(null)
 
-    console.log('v-header')
+    LOG.debug('update')
 
     return <header className={clsx(Css.header, className)} style={style}>
         <div className={Css.headerInputPane}>

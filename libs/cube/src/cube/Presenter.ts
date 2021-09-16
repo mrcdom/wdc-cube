@@ -5,7 +5,7 @@ import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { Scope } from './Scope'
 import { ChangeMonitor } from './ChangeMonitor'
-import { instrumentViewActions}  from './IPresenter'
+import { instrumentViewActions } from './IPresenter'
 
 import type { IPresenter, IPresenterBase } from './IPresenter'
 import type { AlertSeverity } from './Application'
@@ -31,14 +31,13 @@ function pushScope(target: Map<string, Map<Scope, boolean>>, scope: Scope) {
     }
 }
 
-
 export type PresenterMapType = Map<number, IPresenter>
 export type PresenterFactory = (app: Application) => IPresenter
 
 export type PresenterType = Presenter<Application, Scope>
 export type PresenterContructor<A extends Application> = { new(app: A): PresenterType }
 
-export class Presenter<A extends Application, S extends Scope> implements IPresenter {
+export class Presenter<A extends Application, S extends Scope> implements IPresenterBase<S> {
 
     protected readonly app: A
 
@@ -63,7 +62,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
         this.update(this.scope)
 
-        changeMonitor.bind(this.__emitBeforeScopeUpdate)
+        //changeMonitor.bind(this.__emitBeforeScopeUpdate)
 
         instrumentViewActions.call(this)
     }
@@ -73,6 +72,10 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         this.scope.update = NOOP_VOID
         this.__dirtyScopes.clear()
         this.__scopeUpdateFallback.clear()
+    }
+
+    public isDirty(): boolean {
+        return this.__baseScopeUpdateRequested || this.__dirtyScopes.size > 0
     }
 
     public isAutoUpdateEnabled(): boolean {
@@ -119,9 +122,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
     }
 
     public update(optionalScope?: Scope) {
-        if (this.__baseScopeUpdateRequested) {
-            this.__dirtyScopes.clear()
-        } else {
+        if (!this.__baseScopeUpdateRequested) {
             const scope = optionalScope ?? this.scope
 
             if (scope === this.scope) {
@@ -131,17 +132,21 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
                 pushScope(this.__dirtyScopes, scope)
             }
         }
+
+        changeMonitor.bindOnce(this.__emitBeforeScopeUpdate)
     }
 
-    public emitBeforeScopeUpdate(): void {
-        if (this.__baseScopeUpdateRequested || this.__dirtyScopes.size > 0) {
+    public emitBeforeScopeUpdate(force = false): void {
+        if (force || this.__baseScopeUpdateRequested || this.__dirtyScopes.size > 0) {
             try {
                 this.onBeforeScopeUpdate()
 
                 if (this.__baseScopeUpdateRequested) {
                     this.scope.update()
-                } else {
-                    this.selectiveScopeUpdate()
+                }
+                // Use selective update
+                else if (this.selectiveScopeUpdate() === 0 && force) {
+                    this.scope.update()
                 }
             } catch (caught) {
                 LOG.error('Updating dirty scopes')
@@ -152,7 +157,8 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         }
     }
 
-    private selectiveScopeUpdate() {
+    private selectiveScopeUpdate(): number {
+        let updateCount = 0
         let changesCount = 0
         let sourceDirtyScopes = this.__dirtyScopes
         do {
@@ -160,6 +166,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
             if (sourceDirtyScopes.has(this.scope.vid)) {
                 this.scope.update()
+                updateCount++;
                 break
             } else {
                 // If fallbacks were configured
@@ -181,11 +188,14 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
                     for (const scopeMap of sourceDirtyScopes.values()) {
                         for (const scope of scopeMap.keys()) {
                             scope.update()
+                            updateCount++;
                         }
                     }
                 }
             }
         } while (changesCount > 0)
+
+        return updateCount
     }
 
 }

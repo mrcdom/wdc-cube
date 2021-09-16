@@ -17,7 +17,8 @@ export const ViewIds = {
 
 export const ParamsIds = {
     SiteId: 'site-id',
-    TodoShowing: 'todo-showing'
+    TodoShowing: 'todo-showing',
+    TodoStress: 'todo-stress'
 }
 
 export const AttrsIds = {

@@ -8,7 +8,7 @@ import { Scope } from './Scope'
 import { Presenter } from './Presenter'
 import { instrumentViewActions } from './IPresenter'
 
-import type { IPresenter, IPresenterBase } from './IPresenter'
+import type { IPresenterBase } from './IPresenter'
 
 const LOG = Logger.get('ApplicationPresenter')
 
@@ -33,6 +33,10 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
     public isAutoUpdateEnabled(): boolean {
         return this.__presenter.isAutoUpdateEnabled()
+    }
+
+    public isDirty(): boolean {
+        return this.__presenter.isDirty()
     }
 
     public enableAutoUpdate() {
@@ -72,8 +76,18 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         this.__presenter.update(optionalScope ?? this.scope)
     }
 
-    public emitBeforeScopeUpdate(): void {
-        this.__presenter.emitBeforeScopeUpdate()
+    protected override emitAllBeforeScopeUpdate() {
+        super.emitAllBeforeScopeUpdate()
+
+        if (this.isAutoUpdateEnabled()) {
+            this.emitBeforeScopeUpdate(!this.isDirty())
+        } else {
+            this.emitBeforeScopeUpdate(false)
+        }
+    }
+
+    public emitBeforeScopeUpdate(force = false): void {
+        this.__presenter.emitBeforeScopeUpdate(force)
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

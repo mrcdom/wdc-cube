@@ -25,14 +25,14 @@ export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailS
         label="Email Address"
         type="email"
         fullWidth
-        onChange={event => {scope.onEmailChanged(event.target.value)}}
+        onChange={event => { scope.onEmailChanged(event.target.value) }}
       />
     </DialogContent>
     <DialogActions>
-      <Button onClick={scope.onClose} color="primary">
+      <Button onClick={() => scope.onClose()} color="primary">
         Cancel
       </Button>
-      <Button onClick={scope.onSubscribe} color="primary">
+      <Button onClick={() => scope.onSubscribe()} color="primary">
         Subscribe
       </Button>
     </DialogActions>

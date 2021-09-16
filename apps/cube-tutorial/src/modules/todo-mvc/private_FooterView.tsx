@@ -1,8 +1,11 @@
 import React from 'react'
 import clsx from 'clsx'
+import { Logger } from 'wdc-cube'
 import Css from './TodoMvc.module.css'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { FooterScope, ShowingOptions } from './TodoMvc.presenter'
+
+const LOG = Logger.get('TodoMvc.FooterView')
 
 export const FooterView = function ({ className, style, scope }: IViewProps & { scope: FooterScope }) {
     const { actions } = scope
@@ -18,7 +21,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
         </button>
     }
 
-    console.log('v-footer')
+    LOG.debug('update')
 
     return <footer className={clsx(className, Css.footer)} style={style}>
         <span className={Css['todo-count']}>

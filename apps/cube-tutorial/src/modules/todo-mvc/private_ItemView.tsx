@@ -1,8 +1,11 @@
 import React from 'react'
 import clsx from 'clsx'
+import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import Css from './TodoMvc.module.css'
 import { ItemScope } from './TodoMvc.presenter'
+
+const LOG = Logger.get('TodoMvc.ItemView')
 
 export const ItemViewMemo = React.memo(ItemView, (prevProps, nextProps) => {
     return prevProps.scope.editing === nextProps.scope.editing
@@ -51,7 +54,7 @@ export function ItemView({ className, style, scope }: IViewProps & { scope: Item
         </>
     }
 
-    //console.log('v-item')
+    LOG.debug('update')
 
     return <li
         className={clsx(className, Css.view, scope.completed ? Css.completed : '', scope.editing ? Css.editing : '')}

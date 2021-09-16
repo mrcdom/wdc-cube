@@ -12,7 +12,13 @@ export interface IPresenter {
 
     release(): void
 
-    emitBeforeScopeUpdate(): void
+    isAutoUpdateEnabled(): boolean
+
+    isDirty(): boolean
+
+    update(optionalScope?: Scope): void
+
+    emitBeforeScopeUpdate(force?: boolean): void
 
     applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean>
 
@@ -24,26 +30,26 @@ export interface IPresenterBase<S extends Scope> extends IPresenter {
 
     readonly scope: S
 
-    isAutoUpdateEnabled(): boolean
-
     configureUpdate(vid: string, maxUpdate: number, scope: Scope): void
-
-    update(optionalScope?: Scope): void
 
     onBeforeScopeUpdate(): void
 
 }
 
 
-function wrapViewAction(me: IPresenterBase<Scope>, impl: (...args: unknown[]) => Promise<void>) {
-    return async function (...args: unknown[]) {
-        try {
-            return impl.apply(me, args)
-        } finally {
-            if (me.isAutoUpdateEnabled()) {
-                me.update(me.scope)
-            }
+function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
+    function onFinally(this: IPresenterBase<Scope>) {
+        if (this.isAutoUpdateEnabled()) {
+            this.emitBeforeScopeUpdate(!this.isDirty())
+        } else {
+            this.emitBeforeScopeUpdate(true)
         }
+    }
+
+    return function (this: IPresenterBase<Scope>, ...args: unknown[]) {
+        const result = impl.apply(this, args)
+        result.finally(onFinally.bind(this))
+        return result
     }
 }
 
@@ -57,7 +63,7 @@ export function instrumentViewActions(this: IPresenterBase<Scope>) {
             for (const key of methodNames) {
                 const value = proto[key]
                 if (value !== this.onBeforeScopeUpdate && ScopeUtils.isAnActionName(key) && lodash.isFunction(value)) {
-                    proto[key] = wrapViewAction(this, value)
+                    proto[key] = wrapViewAction(value)
                     LOG.debug(`action.${key}`)
                 }
             }

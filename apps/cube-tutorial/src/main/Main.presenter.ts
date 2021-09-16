@@ -58,12 +58,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     private readonly bodyScope = new BodyScope()
 
-    protected readonly bodySlot: ScopeSlot = scope => {
-        if (this.scope.body !== scope) {
-            this.scope.body = scope || this.bodyScope
-            this.update(this.scope)
-        }
-    }
+    protected readonly bodySlot = this.onBodySlot.bind(this)
 
     protected readonly dialogSlot: ScopeSlot = scope => {
         if (this.scope.dialog !== scope) {
@@ -131,19 +126,27 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         alertScope.severity = severity
         alertScope.title = title
         alertScope.message = message
-        alertScope.onClose = async () => {
-            this.scope.alert = undefined
-            this.update(this.scope)
-            if (onClose) {
-                await onClose()
-            }
-        }
-
+        alertScope.onClose = this.onCloseAlert.bind(this, onClose)
         this.scope.alert = alertScope
         this.update(this.scope)
     }
 
     // :: View Actions
+
+    protected async onBodySlot(scope?:Scope) {
+        if (this.scope.body !== scope) {
+            this.scope.body = scope ?? this.bodyScope
+            this.update(this.scope)
+        }
+    }
+
+    protected async onCloseAlert(onClose?: () => Promise<void>) {
+        this.scope.alert = undefined
+        this.update(this.scope)
+        if (onClose) {
+            await onClose()
+        }
+    }
 
     protected async onHome() {
         try {

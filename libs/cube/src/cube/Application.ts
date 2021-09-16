@@ -84,9 +84,17 @@ export class Application {
     }
 
 
-    public emitAllBeforeScopeUpdate(): void {
-        for (const presenter of this.__presenterMap.values()) {
-            presenter.emitBeforeScopeUpdate()
+    protected emitAllBeforeScopeUpdate(): void {
+        for (let i = this.lastPlace.path.length - 1; i >= 0; i--) {
+            const place = this.lastPlace.path[i];
+            const presenter = this.__presenterMap.get(place.id)
+            if (presenter) {
+                if (presenter.isAutoUpdateEnabled()) {
+                    presenter.emitBeforeScopeUpdate(!presenter.isDirty())
+                } else {
+                    presenter.emitBeforeScopeUpdate(false)
+                }
+            }
         }
     }
 
@@ -173,13 +181,12 @@ export class Application {
 
                 context.commit(this.__presenterMap)
                 this.__lastPlace = context.targetUri.place
-
-                this.emitAllBeforeScopeUpdate()
             } catch (caught) {
                 context.rollback()
                 throw caught
             } finally {
                 this.__flipContext = undefined
+                this.emitAllBeforeScopeUpdate()
                 this.updateHistory()
             }
         }
