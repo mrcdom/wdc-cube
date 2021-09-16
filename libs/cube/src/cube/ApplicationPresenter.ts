@@ -6,17 +6,20 @@ import { Application } from './Application'
 import { FlipContext } from './FlipContext'
 import { Scope } from './Scope'
 import { Presenter } from './Presenter'
-import type { IPresenter } from './IPresenter'
+import { instrumentViewActions } from './IPresenter'
+
+import type { IPresenter, IPresenterBase } from './IPresenter'
 
 const LOG = Logger.get('ApplicationPresenter')
 
-export class ApplicationPresenter<S extends Scope> extends Application implements IPresenter {
+export class ApplicationPresenter<S extends Scope> extends Application implements IPresenterBase<S> {
 
     private readonly __presenter: InternalApplicationPresenter<S, ApplicationPresenter<S>>
 
     public constructor(rootPlace: Place, historyManager: HistoryManager, scope: S) {
         super(rootPlace, historyManager)
         this.__presenter = new InternalApplicationPresenter<S, ApplicationPresenter<S>>(this, scope)
+        instrumentViewActions.call(this)
     }
 
     public get scope() {
@@ -26,6 +29,14 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
     public override release() {
         this.__presenter.release()
         super.release()
+    }
+
+    public isAutoUpdateEnabled(): boolean {
+        return this.__presenter.isAutoUpdateEnabled()
+    }
+
+    public enableAutoUpdate() {
+        this.__presenter.enableAutoUpdate()
     }
 
     protected override publishAllParameters(uri: PlaceUri) {
@@ -51,6 +62,10 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
             }
             return
         }
+    }
+
+    public configureUpdate(vid: string, maxUpdate: number, scope: Scope) {
+        this.__presenter.configureUpdate(vid, maxUpdate, scope)
     }
 
     public update<T extends Scope>(optionalScope?: T) {

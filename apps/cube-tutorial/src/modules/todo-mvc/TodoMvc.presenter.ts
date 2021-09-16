@@ -2,16 +2,13 @@
  * Based on https://todomvc.com/examples/react
  */
 
-import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, ChangeMonitor, NOOP_VOID } from 'wdc-cube'
+import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { v4 as uuidv4 } from 'uuid'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ViewIds, ParamsIds, AttrsIds } from '../../Constants'
 
 const LOG = Logger.get('TodoMvcPresenter')
-
-// @Inject
-const changeMonitor = ChangeMonitor.INSTANCE
 
 // @Inject
 const tutorialService = TutorialService.INSTANCE
@@ -84,6 +81,8 @@ export class TodoMvcScope extends Scope {
     footer?: FooterScope
 }
 
+
+
 // :: Presentation
 
 export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
@@ -98,18 +97,16 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private itemScopes = [] as ItemScope[]
 
-    private usingMonitor = false
-
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
         this.scope.header = this.headerScope
     }
 
     public override release() {
-        changeMonitor.unbind(this)
         super.release()
         LOG.info('Finalized')
     }
+
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         const uriShowing = uri.getParameterAsNumberOrDefault(ParamsIds.TodoShowing, this.footerScope.showing) as ShowingOptions
@@ -124,17 +121,18 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             this.footerScope.actions.onShowActives = this.onShowActives.bind(this)
             this.footerScope.actions.onShowCompleteds = this.onShowCompleteds.bind(this)
 
+            this.footerScope.showing = uriShowing
+
+            // Configure fallback scope just incase of to mutch small updates
+            this.configureUpdate(ViewIds.todosItem, 10, this.mainScope)
+
             // Get slots
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
 
-            this.footerScope.showing = uriShowing
+            this.enableAutoUpdate()
+            
             // Load and prepare data
-            await this.loadData()
-
-            //this.usingMonitor = changeMonitor.bind(this, true)
-            //if(!this.usingMonitor) {
-            //    this.enableApply()
-            //}
+            await this.loadData(1000)
 
             LOG.info('Initialized')
         } else if (uriShowing !== this.footerScope.showing) {
@@ -283,10 +281,10 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         }
     }
 
-    private async loadData() {
+    private async loadData(quantity: number) {
         this.itemScopes.length = 0
         try {
-            const todos = await tutorialService.fetchTodos()
+            const todos = await tutorialService.fetchTodos(quantity)
             for (const todo of todos) {
                 const todoScope = new ItemScope()
                 todoScope.id = todo.uid
@@ -326,17 +324,18 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         const checked = numOfCompletedTasks !== this.mainScope.items.length
 
-        let numChanges = 0
+        //let numChanges = 0
         for (const itemScope of this.itemScopes) {
             if (itemScope.completed !== checked) {
                 itemScope.completed = checked
-                numChanges++
+                this.$apply(itemScope)
+                //numChanges++
             }
         }
 
-        if (numChanges > 0) {
-            this.$apply(this.mainScope)
-        }
+        //if (numChanges > 0) {
+        //    this.$apply(this.mainScope)
+        //}
     }
 
     protected async onClearCompleted() {
@@ -438,11 +437,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     private $apply<T extends Scope>(optionalScope?: T): void {
-        if (!this.usingMonitor) {
-            //const scope = optionalScope ?? this.scope
-            //console.log(scope.vid)
+        if (!this.isAutoUpdateEnabled()) {
             super.update(optionalScope)
-            //super.apply(true)
         }
     }
 }

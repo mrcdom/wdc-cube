@@ -67,46 +67,47 @@ export class TutorialService implements ServiceLike {
         LOG.info('updateOrAddSiteSubscription: ', subscriberMap)
     }
 
-    public async fetchTodos(): Promise<TodoType[]> {
-        /*
-        const todos = [] as TodoType[]
-        for(let i = 0; i < 1000; i++) {
-            todos.push({
-                uid: i + 1,
-                text: 'Item ' + i,
-                complete: i % 2 === 0,
-            })
-        }
-        return todos
-        */
-
-        return [
-            {
-                uid: 1,
-                text: 'Walk the dog',
-                complete: false,
-            },
-            {
-                uid: 2,
-                text: 'Write an app',
-                complete: true,
-            },
-            {
-                uid: 3,
-                text: 'Go to school',
-                complete: false,
-            },
-            {
-                uid: 4,
-                text: 'Watch Michael Reeves',
-                complete: true,
-            },
-            {
-                uid: 5,
-                text: 'Add automatic deployment',
-                complete: true,
+    public async fetchTodos(quantity = 0): Promise<TodoType[]> {
+        if (quantity > 0) {
+            const todos = [] as TodoType[]
+            for (let i = 0; i < 1000; i++) {
+                todos.push({
+                    uid: i + 1,
+                    text: 'Item ' + i,
+                    complete: i % 2 === 0,
+                })
             }
-        ]
+            return todos
+        } else {
+
+            return [
+                {
+                    uid: 1,
+                    text: 'Walk the dog',
+                    complete: false,
+                },
+                {
+                    uid: 2,
+                    text: 'Write an app',
+                    complete: true,
+                },
+                {
+                    uid: 3,
+                    text: 'Go to school',
+                    complete: false,
+                },
+                {
+                    uid: 4,
+                    text: 'Watch Michael Reeves',
+                    complete: true,
+                },
+                {
+                    uid: 5,
+                    text: 'Add automatic deployment',
+                    complete: true,
+                }
+            ]
+        }
     }
 
 }

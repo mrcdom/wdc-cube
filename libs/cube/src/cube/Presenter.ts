@@ -1,15 +1,36 @@
+import { Logger } from '../utils/Logger'
 import { NOOP_VOID } from './Constants'
 import { Application } from './Application'
 import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { Scope } from './Scope'
-import { ScopeUtils } from './ScopeUtils'
+import { ChangeMonitor } from './ChangeMonitor'
+import { instrumentViewActions}  from './IPresenter'
 
-import type { IPresenter } from './IPresenter'
+import type { IPresenter, IPresenterBase } from './IPresenter'
 import type { AlertSeverity } from './Application'
-import { Logger } from '../utils/Logger'
 
 const LOG = Logger.get('Presenter')
+
+// @Inject
+const changeMonitor = ChangeMonitor.INSTANCE
+
+type ScopeUpdateConfig = {
+    maxUpdate: number
+    scope: Scope
+}
+
+function pushScope(target: Map<string, Map<Scope, boolean>>, scope: Scope) {
+    let scopeMap = target.get(scope.vid)
+    if (scopeMap) {
+        scopeMap.set(scope, true)
+    } else {
+        scopeMap = new Map()
+        scopeMap.set(scope, true)
+        target.set(scope.vid, scopeMap)
+    }
+}
+
 
 export type PresenterMapType = Map<number, IPresenter>
 export type PresenterFactory = (app: Application) => IPresenter
@@ -23,48 +44,52 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
     public readonly scope: S
 
-    private readonly __dirtyScopes: Map<Scope, Scope>
+    // :: Private Fields
 
-    private __dirtyHandler?: NodeJS.Timeout
+    private readonly __dirtyScopes: Map<string, Map<Scope, boolean>>
 
-    private __runningOnBeforeScopeUpdate = false
+    private readonly __scopeUpdateFallback: Map<string, ScopeUpdateConfig> = new Map()
 
-    private __oldState: Map<string, Record<string, unknown>>
+    private readonly __emitBeforeScopeUpdate = this.emitBeforeScopeUpdate.bind(this)
 
-    private __enableApply = false
+    private __baseScopeUpdateRequested = false
 
-    private __debugApply = false
+    private __autoUpdateEnabled = false
 
     public constructor(app: A, scope: S) {
         this.app = app
         this.scope = scope
         this.__dirtyScopes = new Map()
-        this.__oldState = new Map()
 
         this.update(this.scope)
+
+        changeMonitor.bind(this.__emitBeforeScopeUpdate)
+
+        instrumentViewActions.call(this)
     }
 
     public release(): void {
+        changeMonitor.unbind(this.__emitBeforeScopeUpdate)
         this.scope.update = NOOP_VOID
         this.__dirtyScopes.clear()
-        this.cancelDirtyScopesUpdate()
+        this.__scopeUpdateFallback.clear()
     }
 
-    public enableApply() {
-        this.__enableApply = true
-        this.__oldState = ScopeUtils.exportState(this.scope)
-
-        //for(const a of Object.keys(this.constructor.prototype)) {
-        //    LOG.info(a)
-        //}
+    public isAutoUpdateEnabled(): boolean {
+        return this.__autoUpdateEnabled
     }
 
-    private cancelDirtyScopesUpdate() {
-        if (this.__dirtyHandler) {
-            clearTimeout(this.__dirtyHandler)
-            this.__dirtyHandler = undefined
+    public enableAutoUpdate() {
+        if (!this.__autoUpdateEnabled) {
+            // TODO
+            this.__autoUpdateEnabled = true
         }
     }
+
+    public configureUpdate(vid: string, maxUpdate: number, scope: Scope) {
+        this.__scopeUpdateFallback.set(vid, { maxUpdate, scope })
+    }
+
 
     protected unexpected(message: string, error: unknown) {
         this.app.unexpected(message, error)
@@ -93,64 +118,74 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         // NOOP
     }
 
-    public update<T extends Scope>(optionalScope?: T) {
-        const scope = optionalScope ?? this.scope
-        if (this.__runningOnBeforeScopeUpdate) {
-            this.__dirtyScopes.set(scope, scope)
+    public update(optionalScope?: Scope) {
+        if (this.__baseScopeUpdateRequested) {
+            this.__dirtyScopes.clear()
         } else {
-            this.cancelDirtyScopesUpdate()
-            this.__dirtyScopes.set(scope, scope)
-            this.__dirtyHandler = setTimeout(this.__doUpdateDirtyScopes, 16)
-        }
-    }
+            const scope = optionalScope ?? this.scope
 
-    public apply(debug = false) {
-        this.__debugApply = debug
-        this.update(this.scope)
+            if (scope === this.scope) {
+                this.__baseScopeUpdateRequested = true
+                this.__dirtyScopes.clear()
+            } else {
+                pushScope(this.__dirtyScopes, scope)
+            }
+        }
     }
 
     public emitBeforeScopeUpdate(): void {
-        try {
-            this.cancelDirtyScopesUpdate()
-
+        if (this.__baseScopeUpdateRequested || this.__dirtyScopes.size > 0) {
             try {
-                this.__runningOnBeforeScopeUpdate = true
                 this.onBeforeScopeUpdate()
-            } finally {
-                this.__runningOnBeforeScopeUpdate = false
-            }
 
-            if (this.__enableApply) {
-                const dirtyScopes = ScopeUtils.exportDirties(this.scope, this.__oldState)
-                if (dirtyScopes.size > 0) {
-                    if (this.__debugApply) {
-                        LOG.debug('SCOPE Dirties:', JSON.stringify(Object.keys(Object.fromEntries(dirtyScopes)), null, '  '))
-                    }
-
-                    for (const dirtyScope of dirtyScopes.values()) {
-                        this.__dirtyScopes.set(dirtyScope, dirtyScope)
-                    }
+                if (this.__baseScopeUpdateRequested) {
+                    this.scope.update()
+                } else {
+                    this.selectiveScopeUpdate()
                 }
-                this.__debugApply = false
-            }
-
-            if(this.__dirtyScopes.has(this.scope)) {
-                this.scope.update()
-            } else for (const scope of this.__dirtyScopes.values()) {
-                scope.update()
-            }
-        } catch (caught) {
-            LOG.error('Updating dirty scopes')
-        } finally {
-            this.__dirtyScopes.clear()
-            if (this.__enableApply) {
-                this.__oldState = ScopeUtils.exportState(this.scope)
+            } catch (caught) {
+                LOG.error('Updating dirty scopes')
+            } finally {
+                this.__dirtyScopes.clear()
+                this.__baseScopeUpdateRequested = false
             }
         }
     }
 
-    private __doUpdateDirtyScopes = () => {
-        this.emitBeforeScopeUpdate()
+    private selectiveScopeUpdate() {
+        let changesCount = 0
+        let sourceDirtyScopes = this.__dirtyScopes
+        do {
+            changesCount = 0
+
+            if (sourceDirtyScopes.has(this.scope.vid)) {
+                this.scope.update()
+                break
+            } else {
+                // If fallbacks were configured
+                if (this.__scopeUpdateFallback.size > 0) {
+                    const newDirtyScopes = new Map<string, Map<Scope, boolean>>()
+                    for (const [vid, scopeMap] of sourceDirtyScopes.entries()) {
+                        const scopeFallbackCfg = this.__scopeUpdateFallback.get(vid)
+                        if (scopeFallbackCfg && scopeMap.size > scopeFallbackCfg.maxUpdate) {
+                            scopeMap.clear()
+                            scopeMap.set(scopeFallbackCfg.scope, true)
+                            changesCount++
+                        }
+                        newDirtyScopes.set(vid, scopeMap)
+                    }
+                    sourceDirtyScopes = newDirtyScopes
+                }
+
+                if (changesCount === 0) {
+                    for (const scopeMap of sourceDirtyScopes.values()) {
+                        for (const scope of scopeMap.keys()) {
+                            scope.update()
+                        }
+                    }
+                }
+            }
+        } while (changesCount > 0)
     }
 
 }

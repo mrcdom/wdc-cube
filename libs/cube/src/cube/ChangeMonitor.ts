@@ -11,11 +11,6 @@ type PresenterLike = IPresenter & {
     enableApply?(): void
 }
 
-type PrensenterHolder = {
-    presenter: PresenterType
-    debug: boolean
-}
-
 export class ChangeMonitor {
 
     public static readonly INSTANCE = new ChangeMonitor()
@@ -24,11 +19,13 @@ export class ChangeMonitor {
 
     private __animationFrameHandler?: NodeJS.Timeout
 
-    private __pendingMap: Map<PresenterType, PrensenterHolder>
+    private __callbackMap: Map<() => void, boolean>
+
+    private __errorCount = 0
 
     private constructor() {
         this.__initialized = false
-        this.__pendingMap = new Map()
+        this.__callbackMap = new Map()
     }
 
     public get initialized(): boolean {
@@ -37,6 +34,7 @@ export class ChangeMonitor {
 
     public async postConstruct() {
         if (!this.__initialized) {
+            this.__errorCount = 0
             this.__initialized = true
             LOG.debug('Initialized')
         }
@@ -44,37 +42,32 @@ export class ChangeMonitor {
 
     public async preDestroy() {
         if (this.__initialized) {
-            this.clearAnimationFrameHandler()
-            this.__pendingMap.clear()
+            this.clearAnimationFrame()
+            this.__callbackMap.clear()
+            this.__errorCount = 0
             LOG.debug('Finalized')
         }
     }
 
-    public bind(presenter: IPresenter, debug = false): boolean {
-        const presenterLike = presenter as PresenterLike
-        if (presenterLike.scope && presenterLike.update && presenterLike.enableApply) {
-            const realPresenter = presenter as PresenterType
-            this.__pendingMap.set(realPresenter, { presenter: realPresenter, debug })
-
-            realPresenter.enableApply()
-
-            if (!this.__animationFrameHandler) {
-                this.onAnimationFrame()
-            }
-
-            return true
-        }
-        return false
+    public bind(callback: () => void) {
+        this.__callbackMap.set(callback, true)
+        this.launchAnimationFrame()
     }
 
-    public unbind(presenter: IPresenter) {
-        this.__pendingMap.delete(presenter as PresenterType)
-        if (this.__pendingMap.size === 0) {
-            this.clearAnimationFrameHandler()
+    public unbind(callback: () => void) {
+        this.__callbackMap.delete(callback)
+        if (this.__callbackMap.size === 0) {
+            this.clearAnimationFrame()
         }
     }
 
-    private clearAnimationFrameHandler() {
+    private launchAnimationFrame() {
+        if (!this.__animationFrameHandler) {
+            this.__animationFrameHandler = setTimeout(this.onAnimationFrame.bind(this), 16)
+        }
+    }
+
+    private clearAnimationFrame() {
         if (this.__animationFrameHandler) {
             clearInterval(this.__animationFrameHandler)
             this.__animationFrameHandler = undefined
@@ -83,16 +76,24 @@ export class ChangeMonitor {
 
     private onAnimationFrame() {
         if (!this.initialized) {
-            this.clearAnimationFrameHandler()
+            this.clearAnimationFrame()
             return
         }
 
         try {
-            for (const holder of this.__pendingMap.values()) {
-                holder.presenter.apply(holder.debug)
+            for (const callback of this.__callbackMap.keys()) {
+                try {
+                    callback()
+                } catch (caught) {
+                    if (this.__errorCount < 100) {
+                        LOG.error('Updating frame', caught)
+                        this.__errorCount++;
+                    }
+                }
             }
         } finally {
-            this.__animationFrameHandler = setTimeout(this.onAnimationFrame.bind(this), 16)
+            this.__animationFrameHandler = undefined
+            this.launchAnimationFrame()
         }
     }
 

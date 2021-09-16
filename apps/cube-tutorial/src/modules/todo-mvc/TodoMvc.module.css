@@ -9,7 +9,6 @@
 .body {
     display: flex;
     flex-direction: column;
-    align-self: center;
 }
 
 .body h1 {
