@@ -47,9 +47,25 @@ function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
     }
 
     return function (this: IPresenterBase<Scope>, ...args: unknown[]) {
-        return impl.apply(this, args)
-            .catch(onCatch.bind(this))
-            .finally(onFinally.bind(this))
+        try {
+            const result = impl.apply(this, args) as unknown
+
+            // Result is a valid promise
+            if (result && (result as Promise<unknown>).catch && (result as Promise<unknown>).finally) {
+                return (result as Promise<unknown>)
+                    .catch(onCatch.bind(this))
+                    .finally(onFinally.bind(this))
+            }
+            // Otherwhise, is a synchronous action
+            else {
+                onFinally.bind(this)
+                return result
+            }
+        } catch (caught) {
+            // Will only be actioned on sincronus actions
+            onCatch.bind(this, caught)
+            return undefined
+        }
     }
 }
 

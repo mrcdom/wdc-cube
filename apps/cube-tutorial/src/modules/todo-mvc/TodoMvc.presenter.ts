@@ -3,7 +3,6 @@
  */
 
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
-import { v4 as uuidv4 } from 'uuid'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamsIds, AttrsIds } from '../../Constants'
@@ -40,19 +39,25 @@ export class ItemScope extends Scope {
     }
 }
 
+type KeyDownEvent = {
+    preventDefault: () => void
+    code: string
+}
+
 export class HeaderScope extends Scope {
-    uuid = uuidv4()
     allItemsCompleted = false
     toggleButtonVisible = false
+    inputValue = ''
 
     readonly actions = {
-        onToggleAll: Scope.ACTION,
-        onAddTodo: Scope.ACTION_STRING
+        onSyncInputChange: NOOP_VOID as (value: string) => void,
+        onSyncInputKeyDown: NOOP_VOID as (event: KeyDownEvent) => void,
+        onToggleAll: Scope.ACTION
     }
 }
 
 export class MainScope extends Scope {
-    clock?:ClockScope
+    clock?: ClockScope
 
     items = [] as ItemScope[]
 }
@@ -118,7 +123,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         if (initialization) {
             // Bind Events
-            this.headerScope.actions.onAddTodo = this.onAddTodo.bind(this)
+            this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
+            this.headerScope.actions.onSyncInputKeyDown = this.onHeaderSyncInputKeyDown.bind(this)
             this.headerScope.actions.onToggleAll = this.onToggleAll.bind(this)
 
             this.footerScope.actions.onClearCompleted = this.onClearCompleted.bind(this)
@@ -135,7 +141,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             // Get slots
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
 
-            if(isStress) {
+            if (isStress) {
                 this.mainScope.clock = this.clockScope
                 this.clockUpdateHandler = setInterval(this.onClockUpdate.bind(this), 1000)
                 this.stressEnabled = true
@@ -149,11 +155,11 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             this.footerScope.showing = uriShowing
 
             if (this.stressEnabled !== isStress) {
-                if(this.clockUpdateHandler) {
+                if (this.clockUpdateHandler) {
                     clearInterval(this.clockUpdateHandler)
                 }
 
-                if(isStress) {
+                if (isStress) {
                     this.mainScope.clock = this.clockScope
                     this.clockUpdateHandler = setInterval(this.onClockUpdate.bind(this), 1000)
                     this.stressEnabled = true
@@ -200,21 +206,47 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         this.update(this.mainScope.clock)
     }
 
-    protected async onAddTodo(val: string) {
-        const trimVal = val ? val.trim() : ''
-        if (trimVal) {
-            const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
+    protected onHeaderSyncInputChange(value: string) {
+        if (value !== this.headerScope.inputValue) {
+            this.headerScope.inputValue = value
+            this.update(this.headerScope)
+        }
+    }
 
-            const todoScope = new ItemScope()
-            todoScope.id = lastUid + 1
-            todoScope.title = val
-            todoScope.completed = false
-            this.bindItemScopeActions(todoScope)
-            this.itemScopes.push(todoScope)
+    protected onHeaderSyncInputKeyDown(event: KeyDownEvent) {
+        const oldValue = this.headerScope.inputValue
+        try {
+            if (event.code === 'Escape') {
+                this.headerScope.inputValue = ''
+                return
+            }
 
-            this.updateHint(this.mainScope)
-        } else {
-            this.updateHint(this.headerScope)
+            if (event.code !== 'Enter') {
+                return
+            }
+
+            event.preventDefault()
+
+            const trimVal = this.headerScope.inputValue.trim()
+
+            this.headerScope.inputValue = ''
+
+            if (trimVal) {
+                const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
+
+                const todoScope = new ItemScope()
+                todoScope.id = lastUid + 1
+                todoScope.title = trimVal
+                todoScope.completed = false
+                this.bindItemScopeActions(todoScope)
+                this.itemScopes.push(todoScope)
+
+                this.updateHint(this.mainScope)
+            }
+        } finally {
+            if (this.headerScope.inputValue !== oldValue) {
+                this.update(this.headerScope)
+            }
         }
     }
 

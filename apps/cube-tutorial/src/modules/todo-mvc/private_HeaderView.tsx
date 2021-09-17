@@ -1,4 +1,5 @@
-import React, { useCallback } from 'react'
+import React, { useRef, useState, useCallback } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
@@ -14,54 +15,39 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
 
     bindUpdate(React, scope)
 
-    const newField = React.useRef<HTMLInputElement>(null)
+    const inputField = useRef<HTMLInputElement>(null)
+    const [inputUuid] = useState(uuidv4)
+    const getCurrentFieldText = useCallback(() => inputField.current?.value ?? '', [inputField])
 
+    // Actions
+    const onChange = useCallback(() => actions.onSyncInputChange(getCurrentFieldText()), [actions.onSyncInputChange, getCurrentFieldText])
+    const onInputKeyDown = useCallback(actions.onSyncInputKeyDown, [actions.onSyncInputKeyDown])
     const onToggleAll = useCallback(actions.onToggleAll, [actions.onToggleAll])
-    const onNewTodoKeyDown = useCallback(newTodoKeyDown.bind(undefined, actions.onAddTodo, newField), [actions.onAddTodo, newField])
 
+    // Render
     return <header className={clsx(Css.header, className)} style={style}>
         <div className={Css.headerInputPane}>
             <>
                 <input
-                    id={scope.uuid}
+                    id={inputUuid}
                     className={Css['toggle-all']}
                     type="checkbox"
                     onChange={onToggleAll}
                     checked={!scope.allItemsCompleted}
                 />
-                <label htmlFor={scope.uuid} style={{ opacity: scope.toggleButtonVisible ? 1 : 0 }}>
+                <label htmlFor={inputUuid} style={{ opacity: scope.toggleButtonVisible ? 1 : 0 }}>
                     Mark all as complete
                 </label>
             </>
             <input
-                ref={newField}
+                ref={inputField}
                 className={Css['new-todo']}
                 placeholder="What needs to be done?"
-                onKeyDown={onNewTodoKeyDown}
+                onKeyDown={onInputKeyDown}
                 autoFocus={true}
+                onChange={onChange}
+                value={scope.inputValue}
             />
         </div>
     </header>
-}
-
-async function newTodoKeyDown(
-    onAddTodo: (val: string) => Promise<void>,
-    newField: React.RefObject<HTMLInputElement>,
-    event: React.KeyboardEvent<HTMLInputElement>
-) {
-    if (event.code !== 'Enter') {
-        return
-    }
-
-    event.preventDefault()
-
-    if (newField.current) {
-        const val = newField.current.value.trim()
-
-        if (val) {
-            await onAddTodo(val)
-
-            newField.current.value = ''
-        }
-    }
 }

@@ -3,8 +3,8 @@ import { NOOP_VOID } from './Constants'
 
 const LOG = Logger.get('Scope')
 
-async function actionWithNoArgs() {
-    LOG.debug('Noop Action', arguments)
+async function actionWithNoArgs(...args:unknown[]) {
+    LOG.debug('Noop Action', args)
 }
 
 export type ScopeType = typeof Scope
