@@ -66,6 +66,8 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
             this.scope.body = this.bodyScope
 
+            LOG.info('Initialized')
+
             try {
                 const targetUri = this.newUriFromString(this.historyManager.location)
                 if (targetUri.toString() !== uri.toString()) {
@@ -75,8 +77,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
             } catch (caught) {
                 this.unexpected('Navigation from history', caught)
             }
-
-            LOG.info('Initialized')
         }
 
         if (depeest) {
@@ -89,7 +89,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         if (this.scope.alert) {
             await this.scope.alert.onClose()
             this.scope.alert = undefined
-            this.update()
         }
 
         return true
@@ -117,7 +116,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     protected async setBodySlot(scope?: Scope) {
         const scopeOrDefault = scope ?? this.bodyScope
         if (this.scope.body != scopeOrDefault) {
-            this.scope.body = scope ?? this.bodyScope
+            this.scope.body = scopeOrDefault
             this.update()
         }
     }

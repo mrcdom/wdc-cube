@@ -1,7 +1,7 @@
 import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { bindUpdate, ViewFactory, IViewProps } from 'wdc-cube-react'
+import { bindUpdate, IViewProps, ViewSlot } from 'wdc-cube-react'
 import { RestrictedScope } from './Restricted.presenter'
 import Css from './Restricted.module.css'
 
@@ -14,9 +14,7 @@ export function RestrictedView({ scope, className, ...props }: RestrictedViewPro
 
     LOG.debug('update')
 
-    const detailView = ViewFactory.createView(scope.detail)
-
     return <div className={clsx(className, Css.View)} {...props}>
-        {detailView}
+        <ViewSlot scope={scope} />
     </div>
 }
