@@ -11,7 +11,7 @@ export function buildCube() {
 
     p.subscriptions = Place.create('/subscriptions', SubscriptionsPresenter)
     {
-        p.subscriptionsDetail = Place.create('subscriptions/detail', SubscriptionsDetailPresenter)
+        p.subscriptionsDetail = Place.create('/subscriptions/detail', SubscriptionsDetailPresenter)
     }
 
     p.restricted = Place.create('/restricted', RestrictedPresenter)
