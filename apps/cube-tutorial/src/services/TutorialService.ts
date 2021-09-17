@@ -1,5 +1,4 @@
-import { Logger } from 'wdc-cube'
-import type { ServiceLike } from './ServiceLike'
+import { Logger, ServiceLike } from 'wdc-cube'
 
 const LOG = Logger.get('TutorialService')
 
@@ -29,6 +28,10 @@ export class TutorialService implements ServiceLike {
     // :: Instance
 
     private __initialized = false
+
+    public get name() {
+        return 'tutorial-service'
+    }
 
     public get initialized(): boolean {
         return this.__initialized
