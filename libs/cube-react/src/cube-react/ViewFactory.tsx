@@ -8,13 +8,14 @@ export type IViewProps = {
 
 type IFactoryProps = IViewProps & {
     scope?: Scope
+    optional?:boolean
 }
 
 export type IViewConstructor<P extends IFactoryProps> = React.ComponentClass<P> | React.FunctionComponent<P>
 
 const elementFactoryMap: Map<ScopeType, IViewConstructor<IFactoryProps>> = new Map()
 
-export function ViewSlot({ scope, ...props }: IFactoryProps) {
+export function ViewSlot({ scope, optional = true, ...props }: IFactoryProps) {
     if (scope) {
         const ctor = elementFactoryMap.get(scope.constructor as ScopeType)
         if (ctor) {
@@ -24,6 +25,8 @@ export function ViewSlot({ scope, ...props }: IFactoryProps) {
                 View({scope.constructor.name}) not found!
             </div>
         }
+    } else if(!optional) {
+        return <div className={props.className} style={props.style} />
     } else {
         return <></>
     }

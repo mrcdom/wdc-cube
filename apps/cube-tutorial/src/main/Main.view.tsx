@@ -49,9 +49,7 @@ export function MainView({ className, ...props }: MainViewProps) {
         </Toolbar>
       </AppBar>
 
-      {scope.body
-        ? <ViewSlot className={Css.Body} scope={scope.body} />
-        : <div className={Css.Body}></div>}
+      <ViewSlot className={Css.Body} scope={scope.body} optional={false} />
 
       <Dialog open={!!scope.dialog} onClose={onCloseDialog} aria-labelledby="form-dialog-title">
         <ViewSlot scope={scope.dialog} />
