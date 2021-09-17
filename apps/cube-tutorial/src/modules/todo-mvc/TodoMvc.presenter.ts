@@ -14,6 +14,11 @@ const tutorialService = TutorialService.INSTANCE
 
 // :: Scopes
 
+type KeyDownEvent = {
+    preventDefault: () => void
+    code: string
+}
+
 export enum ShowingOptions {
     ALL,
     ACTIVE,
@@ -34,14 +39,9 @@ export class ItemScope extends Scope {
         onDestroy: Scope.ACTION,
         onToggle: Scope.ACTION,
         onEdit: Scope.ACTION,
-        onBlur: Scope.ACTION_STRING,
-        onKeyDown: Scope.ACTION_TWO<string, string>(),
+        onBlur: NOOP_VOID as (getValue: () => string) => void,
+        onKeyDown: NOOP_VOID as (getValue: () => string, event: KeyDownEvent) => void,
     }
-}
-
-type KeyDownEvent = {
-    preventDefault: () => void
-    code: string
 }
 
 export class HeaderScope extends Scope {
@@ -328,15 +328,15 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         }
     }
 
-    protected async onItemBlur(item: ItemScope, val: string) {
-        this.saveItem(item, val)
+    protected async onItemBlur(item: ItemScope, getValue: () => string) {
+        this.saveItem(item, getValue())
     }
 
-    protected async onItemKeyDown(item: ItemScope, code: string, val: string) {
-        if (code === 'Escape') {
+    protected async onItemKeyDown(item: ItemScope, getValue: () => string, event: KeyDownEvent) {
+        if (event.code === 'Escape') {
             this.cancelItem(item)
-        } else if (code === 'Enter') {
-            this.saveItem(item, val)
+        } else if (event.code === 'Enter') {
+            this.saveItem(item, getValue())
         }
     }
 

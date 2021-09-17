@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, KeyboardEvent } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
@@ -22,8 +22,8 @@ export function ItemView({ className, style, scope, scope: { actions } }: ItemVi
     const onDestroy = useCallback(actions.onDestroy, [actions.onDestroy])
     const onToggle = useCallback(actions.onToggle, [actions.onToggle])
     const onEdit = useCallback(actions.onEdit, [actions.onEdit])
-    const onBlur = useCallback(() => actions.onBlur(getCurrentEditText()), [actions.onBlur, getCurrentEditText])
-    const onKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => actions.onKeyDown(e.code, getCurrentEditText()), [actions.onKeyDown, getCurrentEditText])
+    const onBlur = useCallback(actions.onBlur.bind(undefined, getCurrentEditText), [actions.onBlur, getCurrentEditText])
+    const onKeyDown = useCallback(actions.onKeyDown.bind(undefined, getCurrentEditText), [actions.onKeyDown, getCurrentEditText])
     const onChange = useCallback(() => setEditText(getCurrentEditText()), [setEditText, getCurrentEditText])
 
     React.useEffect(() => {
