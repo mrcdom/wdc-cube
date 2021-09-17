@@ -29,6 +29,8 @@ export function MainView({ className, ...props }: MainViewProps) {
   const onOpenTodos = useCallback(scope.onOpenTodos, [scope.onOpenTodos])
   const onOpenSuscriptions = useCallback(scope.onOpenSuscriptions, [scope.onOpenSuscriptions])
   const onLogin = useCallback(scope.onLogin, [scope.onLogin])
+  const onCloseDialog = useCallback(() => scope.dialog?.onClose(), [scope.dialog])
+  const onCloseAlert = useCallback(() => scope.alert?.onClose(), [scope.dialog])
 
   return <>
     <div className={clsx(className, Css.MainView)} {...props}>
@@ -51,11 +53,11 @@ export function MainView({ className, ...props }: MainViewProps) {
         ? <ViewSlot className={Css.Body} scope={scope.body} />
         : <div className={Css.Body}></div>}
 
-      <Dialog open={!!scope.dialog} onClose={() => scope.dialog?.onClose()} aria-labelledby="form-dialog-title">
+      <Dialog open={!!scope.dialog} onClose={onCloseDialog} aria-labelledby="form-dialog-title">
         <ViewSlot scope={scope.dialog} />
       </Dialog>
 
-      <Dialog open={!!scope.alert} onClose={() => scope.alert?.onClose()} aria-labelledby="form-dialog-title">
+      <Dialog open={!!scope.alert} onClose={onCloseAlert} aria-labelledby="form-dialog-title">
         <ViewSlot scope={scope.alert} />
       </Dialog>
     </div>
