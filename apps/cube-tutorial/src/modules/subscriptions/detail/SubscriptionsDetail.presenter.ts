@@ -14,9 +14,9 @@ export class SubscriptionsDetailScope extends Scope {
     name?: string
 
     // Actions
-    onClose = Scope.ACTION
-    onSubscribe = Scope.ACTION
-    onEmailChanged = Scope.ACTION_ONE<string>()
+    onClose = Scope.ASYNC_ACTION
+    onSubscribe = Scope.ASYNC_ACTION
+    onEmailChanged = Scope.ASYNC_ACTION_ONE<string>()
 }
 
 export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, SubscriptionsDetailScope> {

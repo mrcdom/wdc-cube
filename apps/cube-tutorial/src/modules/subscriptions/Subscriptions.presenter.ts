@@ -13,7 +13,7 @@ export class SubscriptionsScope extends Scope {
     sites = [] as SiteItemType[]
 
     // Actions
-    onItemClicked = Scope.ACTION_ONE<SiteItemType>()
+    onItemClicked = Scope.ASYNC_ACTION_ONE<SiteItemType>()
 }
 
 export class SubscriptionsPresenter extends Presenter<MainPresenter, SubscriptionsScope> {

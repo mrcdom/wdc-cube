@@ -36,11 +36,11 @@ export class ItemScope extends Scope {
     title = ''
 
     readonly actions = {
-        onDestroy: Scope.ACTION,
-        onToggle: Scope.ACTION,
-        onEdit: Scope.ACTION,
-        onBlur: NOOP_VOID as (getValue: () => string) => void,
-        onKeyDown: NOOP_VOID as (getValue: () => string, event: KeyDownEvent) => void,
+        onDestroy: Scope.ASYNC_ACTION,
+        onToggle: Scope.ASYNC_ACTION,
+        onEdit: Scope.ASYNC_ACTION,
+        onBlur: Scope.SYNC_ACTION as (getValue: () => string) => void,
+        onKeyDown: Scope.SYNC_ACTION as (getValue: () => string, event: KeyDownEvent) => void,
     }
 }
 
@@ -50,9 +50,9 @@ export class HeaderScope extends Scope {
     inputValue = ''
 
     readonly actions = {
-        onSyncInputChange: NOOP_VOID as (value: string) => void,
-        onSyncInputKeyDown: NOOP_VOID as (event: KeyDownEvent) => void,
-        onToggleAll: Scope.ACTION
+        onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
+        onSyncInputKeyDown: Scope.SYNC_ACTION as (event: KeyDownEvent) => void,
+        onToggleAll: Scope.ASYNC_ACTION
     }
 }
 
@@ -69,10 +69,10 @@ export class FooterScope extends Scope {
     showing = ShowingOptions.ALL
 
     readonly actions = {
-        onClearCompleted: Scope.ACTION,
-        onShowAll: Scope.ACTION,
-        onShowActives: Scope.ACTION,
-        onShowCompleteds: Scope.ACTION
+        onClearCompleted: Scope.ASYNC_ACTION,
+        onShowAll: Scope.ASYNC_ACTION,
+        onShowActives: Scope.ASYNC_ACTION,
+        onShowCompleteds: Scope.ASYNC_ACTION
     }
 }
 

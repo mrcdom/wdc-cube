@@ -168,7 +168,7 @@ class LoginScope extends Scope {
     password?: string
     message?: string
 
-    onEnter = Scope.ACTION
+    onEnter = Scope.ASYNC_ACTION
 }
 
 class LoginPresenter extends Presenter<TestApplication, LoginScope> {
@@ -231,10 +231,10 @@ class RestrictedScope extends Scope {
     message?: string
     content?: Scope
 
-    onCart = Scope.ACTION_NUMBER
-    onProduct = Scope.ACTION_NUMBER
-    onReceipt = Scope.ACTION_NUMBER
-    onLogout = Scope.ACTION
+    onCart = Scope.ASYNC_ACTION_NUMBER
+    onProduct = Scope.ASYNC_ACTION_NUMBER
+    onReceipt = Scope.ASYNC_ACTION_NUMBER
+    onLogout = Scope.ASYNC_ACTION
 }
 
 class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {

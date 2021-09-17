@@ -19,11 +19,11 @@ export class AlertScope extends Scope {
     title?: string
     message?: string
 
-    onClose = Scope.ACTION
+    onClose = Scope.ASYNC_ACTION
 }
 
 export class BodyScope extends Scope {
-    onOpenAlert = Scope.ACTION_ONE<AlertSeverity>()
+    onOpenAlert = Scope.ASYNC_ACTION_ONE<AlertSeverity>()
 }
 
 export class MainScope extends Scope {
@@ -31,10 +31,10 @@ export class MainScope extends Scope {
     dialog?: IDialogScope
     alert?: AlertScope
 
-    onHome = Scope.ACTION
-    onOpenTodos = Scope.ACTION
-    onOpenSuscriptions = Scope.ACTION
-    onLogin = Scope.ACTION
+    onHome = Scope.ASYNC_ACTION
+    onOpenTodos = Scope.ASYNC_ACTION
+    onOpenSuscriptions = Scope.ASYNC_ACTION
+    onLogin = Scope.ASYNC_ACTION
 }
 
 export class MainPresenter extends ApplicationPresenter<MainScope> {
