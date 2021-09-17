@@ -7,10 +7,12 @@ import { MainScope } from './TodoMvc.presenter'
 
 const LOG = Logger.get('TodoMvc.MainView')
 
-export const MainView = function ({ className, style, scope }: IViewProps & { scope: MainScope }) {
-    bindUpdate(React, scope)
+type MainViewProps = IViewProps & { scope: MainScope }
 
+export const MainView = function ({ className, style, scope }: MainViewProps) {
     LOG.debug('update')
+
+    bindUpdate(React, scope)
 
     return <section className={clsx(className, Css.main)} style={style}>
         <ul className={Css['todo-list']}>

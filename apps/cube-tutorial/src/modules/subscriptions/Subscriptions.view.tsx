@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import clsx from 'clsx'
-import { Logger} from 'wdc-cube'
+import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
@@ -20,8 +20,10 @@ export function SubscriptionsView({ scope, className, ...props }: SubscriptionsV
     const itemArray = [] as JSX.Element[]
 
     for (const item of scope.sites) {
+        const onItemClicked = useCallback(() => scope.onItemClicked(item), [item, scope.onItemClicked])
+
         itemArray.push(<ListItem key={item.id} button>
-            <ListItemText primary={item.site} onClick={() => scope.onItemClicked(item)} />
+            <ListItemText primary={item.site} onClick={onItemClicked} />
         </ListItem>)
     }
 

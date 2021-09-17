@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import Css from './TodoMvc.module.css'
@@ -7,21 +7,27 @@ import { FooterScope, ShowingOptions } from './TodoMvc.presenter'
 
 const LOG = Logger.get('TodoMvc.FooterView')
 
-export const FooterView = function ({ className, style, scope }: IViewProps & { scope: FooterScope }) {
-    const { actions } = scope
+type FooterViewProps = IViewProps & { scope: FooterScope }
+
+export const FooterView = function ({ className, style, scope, scope: { actions } }: FooterViewProps) {
+    LOG.debug('update')
+
     bindUpdate(React, scope)
+
+    const onClearCompleted = useCallback(actions.onClearCompleted, [actions.onClearCompleted])
+    const onShowAll = useCallback(actions.onShowAll, [actions.onShowAll])
+    const onShowActives = useCallback(actions.onShowActives, [actions.onShowActives])
+    const onShowCompleteds = useCallback(actions.onShowCompleteds, [actions.onShowCompleteds])
 
     let clearButton = <></>
 
     if (scope.clearButtonVisible) {
         clearButton = <button
             className={Css['clear-completed']}
-            onClick={actions.onClearCompleted}>
+            onClick={onClearCompleted}>
             Clear completed
         </button>
     }
-
-    LOG.debug('update')
 
     return <footer className={clsx(className, Css.footer)} style={style}>
         <span className={Css['todo-count']}>
@@ -31,7 +37,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
             <li>
                 <a
                     className={clsx(scope.showing == ShowingOptions.ALL ? Css.selected : undefined)}
-                    onClick={actions.onShowAll}
+                    onClick={onShowAll}
                 >
                     All
                 </a>
@@ -40,7 +46,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
             <li>
                 <a
                     className={clsx(scope.showing == ShowingOptions.ACTIVE ? Css.selected : undefined)}
-                    onClick={actions.onShowActives}>
+                    onClick={onShowActives}>
                     Active
                 </a>
             </li>
@@ -48,7 +54,7 @@ export const FooterView = function ({ className, style, scope }: IViewProps & { 
             <li>
                 <a
                     className={clsx(scope.showing == ShowingOptions.COMPLETED ? Css.selected : undefined)}
-                    onClick={actions.onShowCompleteds}>
+                    onClick={onShowCompleteds}>
                     Completed
                 </a>
             </li>

@@ -1,10 +1,10 @@
 import { Logger } from '../utils/Logger'
-import { NOOP_VOID, NOOP_PROMISE_VOID } from './Constants'
+import { NOOP_VOID } from './Constants'
 
 const LOG = Logger.get('Scope')
 
 async function actionWithNoArgs() {
-    LOG.debug(`Noop Action(${JSON.stringify(arguments)})`)
+    LOG.debug('Noop Action', arguments)
 }
 
 export type ScopeType = typeof Scope

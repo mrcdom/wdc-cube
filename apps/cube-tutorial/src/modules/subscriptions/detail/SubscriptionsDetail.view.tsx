@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
 import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
-import { Logger} from 'wdc-cube'
+import { Logger } from 'wdc-cube'
 import { bindUpdate } from 'wdc-cube-react'
 import { SubscriptionsDetailScope } from './SubscriptionsDetail.presenter'
 
@@ -15,6 +15,9 @@ export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailS
   bindUpdate(React, scope)
 
   LOG.debug('update')
+
+  const onClose = useCallback(scope.onClose, [scope.onClose])
+  const onSubscribe = useCallback(scope.onSubscribe, [scope.onSubscribe])
 
   return <>
     <DialogTitle>Subscribe</DialogTitle>
@@ -34,10 +37,10 @@ export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailS
       />
     </DialogContent>
     <DialogActions>
-      <Button onClick={() => scope.onClose()} color="primary">
+      <Button onClick={onClose} color="primary">
         Cancel
       </Button>
-      <Button onClick={() => scope.onSubscribe()} color="primary">
+      <Button onClick={onSubscribe} color="primary">
         Subscribe
       </Button>
     </DialogActions>

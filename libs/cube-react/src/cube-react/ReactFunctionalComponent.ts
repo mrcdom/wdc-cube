@@ -4,16 +4,19 @@ import { Scope, Application, PlaceUri, NOOP_VOID, Logger } from 'wdc-cube'
 const LOG = Logger.get('React.FC')
 
 type ReactType = typeof React
+type UpdatableScope = {
+    update(): void
+}
 
-function doUpdate(this: Scope, setValue: React.Dispatch<React.SetStateAction<number>>, value: number) {
+function doUpdate(this: UpdatableScope, setValue: React.Dispatch<React.SetStateAction<number>>, value: number) {
     //console.log(`${this.vid}.update()`)
     setValue(value + 1)
 }
 
-export function bindUpdate<S extends Scope>(react: ReactType, scope: Partial<S>) {
+export function bindUpdate<S extends UpdatableScope>(react: ReactType, scope: S) {
     const [value, setValue] = react.useState(0)
 
-    scope.update = doUpdate.bind(scope as Scope, setValue, value)
+    scope.update = doUpdate.bind(scope, setValue, value)
 
     react.useEffect(() => {
         //LOG.debug(`scope(${scope.vid}).attached`)

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useCallback, useRef, KeyboardEvent } from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
@@ -7,59 +7,59 @@ import { ItemScope } from './TodoMvc.presenter'
 
 const LOG = Logger.get('TodoMvc.ItemView')
 
-export const ItemViewMemo = React.memo(ItemView, (prevProps, nextProps) => {
-    return prevProps.scope.editing === nextProps.scope.editing
-        && prevProps.scope.title === nextProps.scope.title
-        && prevProps.scope.completed === nextProps.scope.completed
-})
+type ItemViewProps = IViewProps & { scope: ItemScope }
 
-export function ItemView({ className, style, scope }: IViewProps & { scope: ItemScope }) {
+export function ItemView({ className, style, scope, scope: { actions } }: ItemViewProps) {
+    LOG.debug('update')
+
     bindUpdate(React, scope)
 
-    const { actions } = scope
+    const editTextField = useRef<HTMLInputElement>(null)
+    const [editText, setEditText] = useState(scope.title)
 
-    const editField = React.useRef<HTMLInputElement>(null)
-    const [editText, setEditText] = React.useState(scope.title)
+    const getCurrentEditText = useCallback(() => editTextField.current?.value ?? '', [editTextField])
+
+    const onDestroy = useCallback(actions.onDestroy, [actions.onDestroy])
+    const onToggle = useCallback(actions.onToggle, [actions.onToggle])
+    const onEdit = useCallback(actions.onEdit, [actions.onEdit])
+    const onBlur = useCallback(() => actions.onBlur(getCurrentEditText()), [actions.onBlur, getCurrentEditText])
+    const onKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => actions.onKeyDown(e.code, getCurrentEditText()), [actions.onKeyDown, getCurrentEditText])
+    const onChange = useCallback(() => setEditText(getCurrentEditText()), [setEditText, getCurrentEditText])
 
     React.useEffect(() => {
-        const node = editField.current
+        const node = editTextField.current
         if (node) {
             node.focus()
             node.setSelectionRange(node.value.length, node.value.length)
         }
     }, [scope.editing])
 
-    let bodyElm = <></>
-    if (scope.editing) {
-        bodyElm = <>
-            <input
-                ref={editField}
-                className={Css.edit}
-                value={editText}
-                onBlur={() => actions.onBlur(editText)}
-                onChange={e => setEditText(e.target.value)}
-                onKeyDown={e => actions.onKeyDown(e.code, editText)}
-            />
-        </>
-    } else {
-        bodyElm = <>
-            <input
-                className={Css.toggle}
-                type="checkbox"
-                checked={scope.completed}
-                onChange={() => actions.onToggle()}
-            />
-            <label onDoubleClick={() => actions && actions.onEdit()}>{scope.title}</label>
-            <button className={Css.destroy} onClick={() => actions && actions.onDestroy()} />
-        </>
-    }
-
-    LOG.debug('update')
-
     return <li
         className={clsx(className, Css.view, scope.completed ? Css.completed : '', scope.editing ? Css.editing : '')}
         style={style}
     >
-        {bodyElm}
+        {
+            scope.editing
+                ? <>
+                    <input
+                        ref={editTextField}
+                        className={Css.edit}
+                        value={editText}
+                        onBlur={onBlur}
+                        onChange={onChange}
+                        onKeyDown={onKeyDown}
+                    />
+                </>
+                : <>
+                    <input
+                        className={Css.toggle}
+                        type="checkbox"
+                        checked={scope.completed}
+                        onChange={onToggle}
+                    />
+                    <label onDoubleClick={onEdit}>{scope.title}</label>
+                    <button className={Css.destroy} onClick={onDestroy} />
+                </>
+        }
     </li>
 }

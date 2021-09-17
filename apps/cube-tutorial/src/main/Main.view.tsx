@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import clsx from 'clsx'
-import { Logger} from 'wdc-cube'
+import { Logger } from 'wdc-cube'
 import { getOrCreateApplication, ViewSlot, PageHistoryManager, IViewProps } from 'wdc-cube-react'
 import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
@@ -25,6 +25,11 @@ export function MainView({ className, ...props }: MainViewProps) {
 
   LOG.debug('update')
 
+  const onHome = useCallback(scope.onHome, [scope.onHome])
+  const onOpenTodos = useCallback(scope.onOpenTodos, [scope.onOpenTodos])
+  const onOpenSuscriptions = useCallback(scope.onOpenSuscriptions, [scope.onOpenSuscriptions])
+  const onLogin = useCallback(scope.onLogin, [scope.onLogin])
+
   return <>
     <div className={clsx(className, Css.MainView)} {...props}>
       <AppBar position="static">
@@ -35,10 +40,10 @@ export function MainView({ className, ...props }: MainViewProps) {
           <Typography variant="h6" className={Css.appBarTitle}>
             Cube Framework (Tutorial Example)
           </Typography>
-          <Button color="inherit" onClick={() => scope.onHome()}>Home</Button>
-          <Button color="inherit" onClick={() => scope.onOpenTodos()}>Todos</Button>
-          <Button color="inherit" onClick={() => scope.onOpenSuscriptions()}>Subscriptions</Button>
-          <Button color="inherit" onClick={() => scope.onLogin()}>Login</Button>
+          <Button color="inherit" onClick={onHome}>Home</Button>
+          <Button color="inherit" onClick={onOpenTodos}>Todos</Button>
+          <Button color="inherit" onClick={onOpenSuscriptions}>Subscriptions</Button>
+          <Button color="inherit" onClick={onLogin}>Login</Button>
         </Toolbar>
       </AppBar>
 

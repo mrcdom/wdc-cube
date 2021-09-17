@@ -7,10 +7,12 @@ import Css from './TodoMvc.module.css'
 
 const LOG = Logger.get('TodoMvc.View')
 
-export const TodoMvcView = function ({ className, style, scope }: IViewProps & { scope: TodoMvcScope }) {
-  bindUpdate(React, scope)
+type TodoMvcViewProps = IViewProps & { scope: TodoMvcScope }
 
+export const TodoMvcView = function ({ className, style, scope }: TodoMvcViewProps) {
   LOG.debug('update')
+
+  bindUpdate(React, scope)
 
   return <div className={clsx(className, Css.TodoMvcView)} style={style}>
     <div className={Css.body}>
