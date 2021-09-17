@@ -52,6 +52,7 @@ async function stopServices() {
         }
         service = serviceStack.shift()
     }
+    runBootstrap = doBootstrap
     LOG.info('Finalized')
 }
 
