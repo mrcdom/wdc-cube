@@ -10,9 +10,9 @@ const LOG = Logger.get('RestrictedView')
 type RestrictedViewProps = IViewProps & { scope: RestrictedScope }
 
 export function RestrictedView({ scope, className, ...props }: RestrictedViewProps) {
-    bindUpdate(React, scope)
-
     LOG.debug('update')
+
+    bindUpdate(React, scope)
 
     return <div className={clsx(className, Css.View)} {...props}>
         <ViewSlot scope={scope} />
