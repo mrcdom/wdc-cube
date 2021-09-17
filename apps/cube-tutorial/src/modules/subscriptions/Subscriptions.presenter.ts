@@ -1,7 +1,6 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
-import { AttrsIds, ParamsIds } from '../../Constants'
-import { Places } from '../../Places'
+import { Places, AttrsIds, ParamsIds } from '../../Constants'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
 
 const LOG = Logger.get('SubscriptionsPresenter')

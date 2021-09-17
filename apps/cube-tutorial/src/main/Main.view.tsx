@@ -25,6 +25,7 @@ export function MainView({ className, ...props }: MainViewProps) {
 
   LOG.debug('update')
 
+  // Read: https://dmitripavlutin.com/dont-overuse-react-usecallback/
   const onHome = useCallback(scope.onHome, [scope.onHome])
   const onOpenTodos = useCallback(scope.onOpenTodos, [scope.onOpenTodos])
   const onOpenSuscriptions = useCallback(scope.onOpenSuscriptions, [scope.onOpenSuscriptions])

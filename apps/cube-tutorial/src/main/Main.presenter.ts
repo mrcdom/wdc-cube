@@ -6,8 +6,7 @@ import {
     Scope,
     AlertSeverity
 } from 'wdc-cube'
-import { Places } from '../Places'
-import { AttrsIds } from '../Constants'
+import { Places, AttrsIds } from '../Constants'
 import { startServices } from '../services'
 
 const LOG = Logger.get('MainPresenter')
@@ -42,7 +41,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     // :: Class Methods
 
     public static create(historyManager: HistoryManager) {
-        const app = new MainPresenter(Places.root, historyManager, new MainScope())
+        const app = new MainPresenter(historyManager, new MainScope())
         app.catalogPlaces(Places)
         return app
     }
@@ -142,7 +141,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     }
 
     protected async onHome() {
-        await this.flip(Places.root)
+        await this.flip(this.rootPlace)
     }
 
     protected async onOpenTodos() {

@@ -16,8 +16,8 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
     private readonly __presenter: InternalApplicationPresenter<S, ApplicationPresenter<S>>
 
-    public constructor(rootPlace: Place, historyManager: HistoryManager, scope: S) {
-        super(rootPlace, historyManager)
+    public constructor(historyManager: HistoryManager, scope: S) {
+        super(Place.createDetached('/'), historyManager)
         this.__presenter = new InternalApplicationPresenter<S, ApplicationPresenter<S>>(this, scope)
         instrumentViewActions.call(this)
     }
