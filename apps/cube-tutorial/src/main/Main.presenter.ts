@@ -57,11 +57,13 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     private readonly bodyScope = new BodyScope()
 
-    private readonly bodySlot = this.onBodySlot.bind(this)
-    private readonly dialogSlot = this.onDialogSlot.bind(this)
+    private readonly bodySlot = this.setBodySlot.bind(this)
+    private readonly dialogSlot = this.setDialogSlot.bind(this)
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean, depeest?: boolean): Promise<boolean> {
         if (initialization) {
+            this.enableAutoUpdate()
+
             await startServices()
 
             this.scope.onHome = this.onHome.bind(this)
@@ -121,76 +123,52 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     // :: View Actions
 
-    protected async onBodySlot(scope?: Scope) {
-        if (this.scope.body !== scope) {
+    protected async setBodySlot(scope?: Scope) {
+        const scopeOrDefault = scope ?? this.bodyScope
+        if (this.scope.body != scopeOrDefault) {
             this.scope.body = scope ?? this.bodyScope
             this.update()
         }
     }
 
-    protected async onDialogSlot(scope?: Scope) {
+    protected async setDialogSlot(scope?: Scope) {
         if (this.scope.dialog !== scope) {
             this.scope.dialog = scope as IDialogScope
+            this.update()
 
             if (this.scope.dialog && !this.scope.dialog.onClose) {
                 LOG.error(`Missing onClose action on scope ${this.scope.dialog.vid}`)
             }
-
-            this.update()
         }
     }
 
     protected async onCloseAlert(onClose?: () => Promise<void>) {
-        try {
-            this.scope.alert = undefined
-            if (onClose) {
-                await onClose()
-            }
-        } finally {
-            this.update()
+        this.scope.alert = undefined
+        if (onClose) {
+            await onClose()
         }
     }
 
     protected async onHome() {
-        try {
-            await this.flip(Places.root)
-        } finally {
-            this.update()
-        }
+        await this.flip(Places.root)
     }
 
     protected async onOpenTodos() {
-        try {
-            await this.flip(Places.todos)
-        } finally {
-            this.update()
-        }
+        await this.flip(Places.todos)
     }
 
     protected async onOpenSuscriptions() {
-        try {
-            await this.flip(Places.subscriptions)
-        } finally {
-            this.update()
-        }
+        await this.flip(Places.subscriptions)
     }
 
     protected async onOpenLogin() {
-        try {
-            this.alert('info', 'Working in progress...', 'No implementation to this action, yet.')
-        } finally {
-            this.update()
-        }
+        this.alert('info', 'Working in progress...', 'No implementation to this action, yet.')
     }
 
     protected async onOpenAlert(severity: AlertSeverity) {
-        try {
-            LOG.info('onAlert clicked')
-            this.alert(severity, 'Some title', 'Some message', async () => {
-                LOG.info(`Alert with severity ${severity} was closed`)
-            })
-        } finally {
-            this.update()
-        }
+        LOG.info('onAlert clicked')
+        this.alert(severity, 'Some title', 'Some message', async () => {
+            LOG.info(`Alert with severity ${severity} was closed`)
+        })
     }
 }

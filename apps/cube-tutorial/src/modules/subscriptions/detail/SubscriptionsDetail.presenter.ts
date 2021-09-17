@@ -46,6 +46,8 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
         const paramSiteId = uri.getParameterAsNumberOrDefault(ParamsIds.SiteId, this.item?.id ?? -1)
 
         if (initialization) {
+            this.enableAutoUpdate()
+
             this.backPlace = this.app.lastPlace
 
             if (paramSiteId <= 0) {
@@ -65,14 +67,12 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
 
             this.item = siteItem
             this.scope.name = this.item?.site
-            this.update(this.scope)
 
             LOG.info('Initialized')
         } else if (this.item?.id !== paramSiteId) {
             this.item = await tutorialService.fetchSiteItem(paramSiteId)
             this.scope.name = this.item?.site
             this.update(this.scope)
-            this.app.updateHistory()
         }
 
         this.parentSlot(this.scope)
@@ -84,49 +84,32 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
         uri.setParameter(ParamsIds.SiteId, this.item?.id)
     }
 
-    private async asyncClose() {
+    protected async onClose() {
         await this.flip(this.backPlace)
     }
 
-    protected async onClose() {
-        try {
-            await this.asyncClose()
-        } catch (caught) {
-            this.unexpected('Trying to close', caught)
-        } finally {
-            this.update(this.scope)
-        }
-    }
-
     protected async onSubscribe() {
-        const app = this.app
-        try {
-            const siteId = this.item?.id
-            if (!siteId) {
-                throw new Error('Invalid case. SiteId must always be available here')
-            }
-
-            const email = (this.email || '').trim()
-            if (email === '') {
-                app.alert('warning', 'Field required', 'An e-mail is required in order to request a subscription')
-                return
-            }
-
-            if (!eMailRegExp.test(email)) {
-                app.alert('warning', 'Wrong value', 'The informed e-mail is not a valid email address')
-                return
-            }
-
-            this.email = email
-
-            await tutorialService.updateOrAddSiteSubscription(siteId, email)
-
-            await this.asyncClose()
-        } catch (caught) {
-            app.unexpected('Trying to save', caught)
-        } finally {
-            this.update(this.scope)
+        const siteId = this.item?.id
+        if (!siteId) {
+            throw new Error('Invalid case. SiteId must always be available here')
         }
+
+        const email = (this.email || '').trim()
+        if (email === '') {
+            this.alert('warning', 'Field required', 'An e-mail is required in order to request a subscription')
+            return
+        }
+
+        if (!eMailRegExp.test(email)) {
+            this.alert('warning', 'Wrong value', 'The informed e-mail is not a valid email address')
+            return
+        }
+
+        this.email = email
+
+        await tutorialService.updateOrAddSiteSubscription(siteId, email)
+
+        await this.flip(this.backPlace)
     }
 
     protected async onEmailChanged(eMail: string) {

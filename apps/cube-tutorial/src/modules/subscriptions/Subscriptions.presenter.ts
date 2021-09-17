@@ -33,9 +33,12 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         if (initialization) {
-            this.scope.onItemClicked = this.onItemClicked.bind(this)
+            this.enableAutoUpdate()
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
+
+            this.scope.onItemClicked = this.onItemClicked.bind(this)
             this.scope.sites = await tutorialService.fetchSubscribleSites()
+
             LOG.info('Initialized')
         }
 
@@ -45,21 +48,15 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
     }
 
     protected async onItemClicked(item: SiteItemType) {
-        try {
-            await this.flip(Places.subscriptionsDetail, {
-                params: {
-                    [ParamsIds.SiteId]: item.id
-                },
-                attrs: {
-                    // Helping performance (avoid a unneeded service fetch)
-                    [AttrsIds.subscriptionsDetail_item]: item
-                }
-            })
-        } catch (caught) {
-            this.unexpected(`Opening item ${JSON.stringify(item)}`, caught)
-        } finally {
-            this.update(this.scope)
-        }
+        await this.flip(Places.subscriptionsDetail, {
+            params: {
+                [ParamsIds.SiteId]: item.id
+            },
+            attrs: {
+                // Helping performance (avoid a unneeded service fetch)
+                [AttrsIds.subscriptionsDetail_item]: item
+            }
+        })
     }
 
 }
