@@ -8,6 +8,7 @@ export const ViewIds = {
     todosMain: 'todos-main',
     todosItem: 'todos-item',
     todosFooter: 'todos-footer',
+    todosClock: 'todos-clock',
 
     subscriptions: 'subscriptions',
     subscriptionsDetail: 'subscriptions-detail',

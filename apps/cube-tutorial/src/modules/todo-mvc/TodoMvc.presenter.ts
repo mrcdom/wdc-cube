@@ -21,6 +21,12 @@ export enum ShowingOptions {
     COMPLETED
 }
 
+export class ClockScope extends Scope {
+    vid = ViewIds.todosClock
+
+    date = new Date()
+}
+
 export class ItemScope extends Scope {
     vid = ViewIds.todosItem
 
@@ -53,6 +59,8 @@ export class HeaderScope extends Scope {
 
 export class MainScope extends Scope {
     vid = ViewIds.todosMain
+
+    clock?:ClockScope
 
     items = [] as ItemScope[]
 }
@@ -91,6 +99,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private mainScope = new MainScope()
 
+    private clockScope = new ClockScope()
+
     private footerScope = new FooterScope()
 
     private itemScopes = [] as ItemScope[]
@@ -99,12 +109,17 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private updateHintEnabled = true
 
+    private clockUpdateHandler?: NodeJS.Timeout
+
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
         this.scope.header = this.headerScope
     }
 
     public override release() {
+        if (this.clockUpdateHandler) {
+            clearInterval(this.clockUpdateHandler)
+        }
         super.release()
         LOG.debug('Finalized')
     }
@@ -134,17 +149,34 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
             this.enableAutoUpdate()
 
-            // Load and prepare data
-            this.stressEnabled = isStress
-            await this.loadData(isStress ? 1000 : 0)
+            if(isStress) {
+                this.mainScope.clock = this.clockScope
+                this.clockUpdateHandler = setInterval(this.onClockUpdate.bind(this), 1000)
+                this.stressEnabled = true
+                await this.loadData(1000)
+            } else {
+                await this.loadData(0)
+            }
 
             LOG.debug('Initialized')
         } else {
             this.footerScope.showing = uriShowing
 
             if (this.stressEnabled !== isStress) {
-                this.stressEnabled = isStress
-                await this.loadData(isStress ? 1000 : 0)
+                if(this.clockUpdateHandler) {
+                    clearInterval(this.clockUpdateHandler)
+                }
+
+                if(isStress) {
+                    this.mainScope.clock = this.clockScope
+                    this.clockUpdateHandler = setInterval(this.onClockUpdate.bind(this), 1000)
+                    this.stressEnabled = true
+                    await this.loadData(1000)
+                } else {
+                    this.stressEnabled = false
+                    this.mainScope.clock = undefined
+                    await this.loadData(0)
+                }
             }
         }
 
@@ -175,6 +207,11 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             this.bindItemScopeActions(todoScope)
             this.itemScopes.push(todoScope)
         }
+    }
+
+    protected async onClockUpdate() {
+        this.clockScope.date = new Date()
+        this.update(this.mainScope.clock)
     }
 
     protected async onAddTodo(val: string) {

@@ -14,6 +14,7 @@ export const MainView = function ({ className, style, scope }: IViewProps & { sc
 
     return <section className={clsx(className, Css.main)} style={style}>
         <ul className={Css['todo-list']}>
+            <ViewSlot scope={scope.clock} />
             {scope.items.map(todo => <ViewSlot key={todo.id} scope={todo} />)}
         </ul>
     </section>

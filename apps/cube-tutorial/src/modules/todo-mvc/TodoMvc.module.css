@@ -323,3 +323,9 @@
 .info a:hover {
     text-decoration: underline;
 }
+
+.clock {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}

@@ -6,7 +6,7 @@ const LOG = Logger.get('React.FC')
 type ReactType = typeof React
 
 function doUpdate(this: Scope, setValue: React.Dispatch<React.SetStateAction<number>>, value: number) {
-    console.log(`${this.vid}.update()`)
+    //console.log(`${this.vid}.update()`)
     setValue(value + 1)
 }
 
