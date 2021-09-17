@@ -31,10 +31,16 @@ export interface IPresenterBase<S extends Scope> extends IPresenter {
 
     onBeforeScopeUpdate(): void
 
+    unexpected(message: string, error: unknown): void
+
 }
 
 
 function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
+    function onCatch(this: IPresenterBase<Scope>, caught: unknown) {
+        this.unexpected(`Unexpected error invoking ${impl.name} action`, caught)
+    }
+
     function onFinally(this: IPresenterBase<Scope>) {
         if (this.isAutoUpdateEnabled()) {
             this.emitBeforeScopeUpdate(true)
@@ -42,9 +48,9 @@ function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
     }
 
     return function (this: IPresenterBase<Scope>, ...args: unknown[]) {
-        const result = impl.apply(this, args)
-        result.finally(onFinally.bind(this))
-        return result
+        return impl.apply(this, args)
+            .catch(onCatch.bind(this))
+            .finally(onFinally.bind(this))
     }
 }
 

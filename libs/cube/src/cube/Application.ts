@@ -86,7 +86,7 @@ export class Application {
 
     protected emitAllBeforeScopeUpdate(): void {
         for (let i = this.lastPlace.path.length - 1; i >= 0; i--) {
-            const place = this.lastPlace.path[i];
+            const place = this.lastPlace.path[i]
             const presenter = this.__presenterMap.get(place.id)
             if (presenter) {
                 if (presenter.isAutoUpdateEnabled()) {

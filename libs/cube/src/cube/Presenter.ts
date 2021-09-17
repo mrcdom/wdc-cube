@@ -91,10 +91,8 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         this.__scopeUpdateFallback.set(vid, { maxUpdate, scope })
     }
 
-
-    protected unexpected(message: string, error: unknown) {
+    public unexpected(message: string, error: unknown): void {
         this.app.unexpected(message, error)
-        this.app.alert('error', 'Unexpected error', message)
     }
 
     public alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
@@ -164,7 +162,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
             if (sourceDirtyScopes.has(this.scope.vid)) {
                 this.scope.update()
-                updateCount++;
+                updateCount++
                 break
             } else {
                 // If fallbacks were configured
@@ -186,7 +184,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
                     for (const scopeMap of sourceDirtyScopes.values()) {
                         for (const scope of scopeMap.keys()) {
                             scope.update()
-                            updateCount++;
+                            updateCount++
                         }
                     }
                 }

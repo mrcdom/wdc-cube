@@ -1,5 +1,4 @@
 import React from 'react'
-import lodash from 'lodash'
 import { Scope } from 'wdc-cube'
 
 export type IViewProps = {
