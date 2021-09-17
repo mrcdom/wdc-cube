@@ -35,10 +35,9 @@ export interface IPresenterBase<S extends Scope> extends IPresenter {
 
 }
 
-
 function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
     function onCatch(this: IPresenterBase<Scope>, caught: unknown) {
-        this.unexpected(`Unexpected error invoking ${impl.name} action`, caught)
+        this.unexpected(`During execution of ${impl.name} action`, caught)
     }
 
     function onFinally(this: IPresenterBase<Scope>) {

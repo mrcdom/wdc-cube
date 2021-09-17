@@ -4,7 +4,6 @@ import {
     HistoryManager,
     PlaceUri,
     Scope,
-    ScopeSlot,
     AlertSeverity
 } from 'wdc-cube'
 import { Places } from '../Places'
@@ -58,19 +57,8 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     private readonly bodyScope = new BodyScope()
 
-    protected readonly bodySlot = this.onBodySlot.bind(this)
-
-    protected readonly dialogSlot: ScopeSlot = scope => {
-        if (this.scope.dialog !== scope) {
-            this.scope.dialog = scope as IDialogScope
-
-            if (this.scope.dialog && !this.scope.dialog.onClose) {
-                LOG.error(`Missing onClose action on scope ${this.scope.dialog.vid}`)
-            }
-
-            this.update()
-        }
-    }
+    private readonly bodySlot = this.onBodySlot.bind(this)
+    private readonly dialogSlot = this.onDialogSlot.bind(this)
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean, depeest?: boolean): Promise<boolean> {
         if (initialization) {
@@ -133,26 +121,39 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     // :: View Actions
 
-    protected async onBodySlot(scope?:Scope) {
+    protected async onBodySlot(scope?: Scope) {
         if (this.scope.body !== scope) {
             this.scope.body = scope ?? this.bodyScope
             this.update()
         }
     }
 
+    protected async onDialogSlot(scope?: Scope) {
+        if (this.scope.dialog !== scope) {
+            this.scope.dialog = scope as IDialogScope
+
+            if (this.scope.dialog && !this.scope.dialog.onClose) {
+                LOG.error(`Missing onClose action on scope ${this.scope.dialog.vid}`)
+            }
+
+            this.update()
+        }
+    }
+
     protected async onCloseAlert(onClose?: () => Promise<void>) {
-        this.scope.alert = undefined
-        this.update()
-        if (onClose) {
-            await onClose()
+        try {
+            this.scope.alert = undefined
+            if (onClose) {
+                await onClose()
+            }
+        } finally {
+            this.update()
         }
     }
 
     protected async onHome() {
         try {
             await this.flip(Places.root)
-        } catch (caught) {
-            this.unexpected('Opening to root', caught)
         } finally {
             this.update()
         }
@@ -161,8 +162,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     protected async onOpenTodos() {
         try {
             await this.flip(Places.todos)
-        } catch (caught) {
-            this.unexpected('Opening to module-1', caught)
         } finally {
             this.update()
         }
@@ -171,8 +170,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     protected async onOpenSuscriptions() {
         try {
             await this.flip(Places.subscriptions)
-        } catch (caught) {
-            this.unexpected('Opening to module-2', caught)
         } finally {
             this.update()
         }
@@ -181,8 +178,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     protected async onOpenLogin() {
         try {
             this.alert('info', 'Working in progress...', 'No implementation to this action, yet.')
-        } catch (caught) {
-            this.unexpected('Opening to module-2', caught)
         } finally {
             this.update()
         }
@@ -194,8 +189,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
             this.alert(severity, 'Some title', 'Some message', async () => {
                 LOG.info(`Alert with severity ${severity} was closed`)
             })
-        } catch (caught) {
-            LOG.error('onAlert', caught)
         } finally {
             this.update()
         }
