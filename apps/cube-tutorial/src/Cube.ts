@@ -4,15 +4,17 @@ import { TodoMvcPresenter } from './modules/todo-mvc/TodoMvc.presenter'
 import { SubscriptionsPresenter } from './modules/subscriptions/Subscriptions.presenter'
 import { SubscriptionsDetailPresenter } from './modules/subscriptions/detail/SubscriptionsDetail.presenter'
 import { RestrictedPresenter } from './modules/restricted/Restricted.presenter'
-import { Places as p } from './Constants'
+import { Places as t } from './Constants'
+
+const p = Place.create
 
 export function buildCube() {
-    p.todos = Place.create('/todos', TodoMvcPresenter)
+    t.todos = p('/todos', TodoMvcPresenter)
 
-    p.subscriptions = Place.create('/subscriptions', SubscriptionsPresenter)
+    t.subscriptions = p('/subscriptions', SubscriptionsPresenter)
     {
-        p.subscriptionsDetail = Place.create('/subscriptions/detail', SubscriptionsDetailPresenter)
+        t.subscriptionsDetail = p('/subscriptions/detail', SubscriptionsDetailPresenter)
     }
 
-    p.restricted = Place.create('/restricted', RestrictedPresenter)
+    t.restricted = p('/restricted', RestrictedPresenter)
 }
