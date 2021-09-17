@@ -21,7 +21,7 @@ export function ViewSlot({ scope, ...props }: IFactoryProps) {
             return React.createElement(ctor, { scope, ...props })
         } else {
             return <div className={props.className} style={props.style}>
-                View({scope.vid}) not found!
+                View({scope.constructor.name}) not found!
             </div>
         }
     } else {
