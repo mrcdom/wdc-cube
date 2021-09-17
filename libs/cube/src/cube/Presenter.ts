@@ -3,7 +3,7 @@ import { NOOP_VOID } from './Constants'
 import { Application } from './Application'
 import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
-import { Scope } from './Scope'
+import { Scope, ScopeType } from './Scope'
 import { CallbackManager } from './CallbackManager'
 import { instrumentViewActions } from './IPresenter'
 
@@ -20,14 +20,14 @@ type ScopeUpdateConfig = {
     scope: Scope
 }
 
-function pushScope(target: Map<string, Map<Scope, boolean>>, scope: Scope) {
-    let scopeMap = target.get(scope.vid)
+function pushScope(target: Map<ScopeType, Map<Scope, boolean>>, scope: Scope) {
+    let scopeMap = target.get(scope.constructor as ScopeType)
     if (scopeMap) {
         scopeMap.set(scope, true)
     } else {
         scopeMap = new Map()
         scopeMap.set(scope, true)
-        target.set(scope.vid, scopeMap)
+        target.set(scope.constructor as ScopeType, scopeMap)
     }
 }
 
@@ -45,15 +45,15 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
     // :: Private Fields
 
-    private readonly __dirtyScopes: Map<string, Map<Scope, boolean>>
+    private readonly __dirtyScopes: Map<ScopeType, Map<Scope, boolean>>
 
-    private readonly __scopeUpdateFallback: Map<string, ScopeUpdateConfig> = new Map()
+    private readonly __scopeUpdateFallback: Map<ScopeType, ScopeUpdateConfig> = new Map()
 
     private readonly __emitBeforeScopeUpdate = this.emitBeforeScopeUpdate.bind(this)
 
     private __baseScopeUpdateRequested = false
 
-    private __autoUpdateEnabled = false
+    private __autoUpdateEnabled = true
 
     public constructor(app: A, scope: S) {
         this.app = app
@@ -80,15 +80,12 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         return this.__autoUpdateEnabled
     }
 
-    public enableAutoUpdate() {
-        if (!this.__autoUpdateEnabled) {
-            // TODO
-            this.__autoUpdateEnabled = true
-        }
+    public disableAutoUpdate(): void {
+        this.__autoUpdateEnabled = false
     }
 
-    public configureUpdate(vid: string, maxUpdate: number, scope: Scope) {
-        this.__scopeUpdateFallback.set(vid, { maxUpdate, scope })
+    public configureUpdate(scopeCtor: ScopeType, maxUpdate: number, scope: Scope) {
+        this.__scopeUpdateFallback.set(scopeCtor, { maxUpdate, scope })
     }
 
     public unexpected(message: string, error: unknown): void {
@@ -160,22 +157,22 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         do {
             changesCount = 0
 
-            if (sourceDirtyScopes.has(this.scope.vid)) {
+            if (sourceDirtyScopes.has(this.scope.constructor as ScopeType)) {
                 this.scope.update()
                 updateCount++
                 break
             } else {
                 // If fallbacks were configured
                 if (this.__scopeUpdateFallback.size > 0) {
-                    const newDirtyScopes = new Map<string, Map<Scope, boolean>>()
-                    for (const [vid, scopeMap] of sourceDirtyScopes.entries()) {
-                        const scopeFallbackCfg = this.__scopeUpdateFallback.get(vid)
+                    const newDirtyScopes = new Map<ScopeType, Map<Scope, boolean>>()
+                    for (const [scopeCtor, scopeMap] of sourceDirtyScopes.entries()) {
+                        const scopeFallbackCfg = this.__scopeUpdateFallback.get(scopeCtor)
                         if (scopeFallbackCfg && scopeMap.size > scopeFallbackCfg.maxUpdate) {
                             scopeMap.clear()
                             scopeMap.set(scopeFallbackCfg.scope, true)
                             changesCount++
                         }
-                        newDirtyScopes.set(vid, scopeMap)
+                        newDirtyScopes.set(scopeCtor, scopeMap)
                     }
                     sourceDirtyScopes = newDirtyScopes
                 }

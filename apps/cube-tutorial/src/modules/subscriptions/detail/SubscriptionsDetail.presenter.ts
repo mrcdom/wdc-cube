@@ -1,6 +1,6 @@
 import { Logger, Presenter, Scope, ScopeSlot, Place, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../../main/Main.presenter'
-import { ViewIds, AttrsIds, ParamsIds } from '../../../Constants'
+import { AttrsIds, ParamsIds } from '../../../Constants'
 import { TutorialService, SiteItemType } from '../../../services/TutorialService'
 
 const LOG = Logger.get('SubscriptionsDetailPresenter')
@@ -11,14 +11,12 @@ const tutorialService = TutorialService.INSTANCE
 const eMailRegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
 export class SubscriptionsDetailScope extends Scope {
-    vid = ViewIds.subscriptionsDetail
-
     name?: string
 
     // Actions
-    onClose = Scope.ACTION()
-    onEmailChanged = Scope.ACTION1<string>()
-    onSubscribe = Scope.ACTION()
+    onClose = Scope.ACTION
+    onSubscribe = Scope.ACTION
+    onEmailChanged = Scope.ACTION_ONE<string>()
 }
 
 export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, SubscriptionsDetailScope> {
@@ -46,8 +44,6 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
         const paramSiteId = uri.getParameterAsNumberOrDefault(ParamsIds.SiteId, this.item?.id ?? -1)
 
         if (initialization) {
-            this.enableAutoUpdate()
-
             this.backPlace = this.app.lastPlace
 
             if (paramSiteId <= 0) {

@@ -11,6 +11,7 @@ export { Scope } from './cube/Scope'
 export { ScopeUtils } from './cube/ScopeUtils'
 
 export type { ILogger } from './utils/Logger'
+export type { ScopeType } from './cube/Scope'
 export type { ScopeSlot } from './cube/ScopeSlot'
 export type { IPresenter } from './cube/IPresenter'
 export type { AlertSeverity } from './cube/Application'

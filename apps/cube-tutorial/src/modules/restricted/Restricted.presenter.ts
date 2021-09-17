@@ -1,13 +1,11 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
-import { ViewIds, AttrsIds } from '../../Constants'
+import { AttrsIds } from '../../Constants'
 
 
 const LOG = Logger.get('RestrictedPresenter')
 
 export class RestrictedScope extends Scope {
-    vid = ViewIds.restricted
-
     menu?: Scope
     detail?: Scope
 }

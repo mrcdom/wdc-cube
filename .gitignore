@@ -1,3 +1,5 @@
 node_modules
 /libs/cube/lib
 libs/cube/tsconfig.tsbuildinfo
+/libs/cube/tsconfig.tsbuildinfo
+/libs/cube-react/tsconfig.tsbuildinfo

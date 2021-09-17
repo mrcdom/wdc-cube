@@ -1,24 +1,37 @@
+import { Logger } from '../utils/Logger'
 import { NOOP_VOID, NOOP_PROMISE_VOID } from './Constants'
+
+const LOG = Logger.get('Scope')
+
+async function actionWithNoArgs() {
+    LOG.debug(`Noop Action(${JSON.stringify(arguments)})`)
+}
+
+export type ScopeType = typeof Scope
 
 export abstract class Scope {
 
     // Class
 
-    public static ACTION(): () => Promise<void> {
-        return NOOP_PROMISE_VOID
+    public static readonly ACTION = actionWithNoArgs
+    public static readonly ACTION_BOOLEAN: (p: boolean) => Promise<void> = actionWithNoArgs
+    public static readonly ACTION_NUMBER: (p: number) => Promise<void> = actionWithNoArgs
+    public static readonly ACTION_STRING: (p: string) => Promise<void> = actionWithNoArgs
+    public static readonly ACTION_DATE: (p: Date) => Promise<void> = actionWithNoArgs
+
+    public static ACTION_ONE<P>(): (p0: P) => Promise<void> {
+        return actionWithNoArgs
     }
 
-    public static ACTION1<T>(): (p0: T) => Promise<void> {
-        return NOOP_PROMISE_VOID
+    public static ACTION_TWO<P0, P1>(): (p0: P0, p1: P1) => Promise<void> {
+        return actionWithNoArgs
     }
 
-    public static ACTION2<T0, T1>(): (p0: T0, p1: T1) => Promise<void> {
-        return NOOP_PROMISE_VOID
+    public static ACTION_THREE<P0, P1, P2>(): (p0: P0, p1: P1, p2: P2) => Promise<void> {
+        return actionWithNoArgs
     }
 
     // API
-
-    public abstract get vid(): string
 
     public update: () => void = NOOP_VOID
 

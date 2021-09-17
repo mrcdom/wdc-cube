@@ -1,4 +1,4 @@
-import { NOOP_VOID, NOOP_PROMISE_VOID } from './Constants'
+import { NOOP_VOID } from './Constants'
 import { CastUtils } from '../utils/CastUtils'
 import { Place } from './Place'
 import { PlaceUri } from './PlaceUri'
@@ -105,7 +105,6 @@ class TestApplication extends Application {
 // :: Root
 
 class RootScope extends Scope {
-    vid = 'root'
     computedValue = 0
     body?: Scope
 }
@@ -162,13 +161,14 @@ class RootPresenter extends Presenter<TestApplication, RootScope> {
 
 // :: Login
 
+
+
 class LoginScope extends Scope {
-    vid = 'login'
     userName?: string
     password?: string
     message?: string
 
-    onEnter: () => Promise<void> = NOOP_PROMISE_VOID
+    onEnter = Scope.ACTION
 }
 
 class LoginPresenter extends Presenter<TestApplication, LoginScope> {
@@ -228,15 +228,13 @@ class LoginPresenter extends Presenter<TestApplication, LoginScope> {
 // :: Restricted
 
 class RestrictedScope extends Scope {
-    vid = 'restricted'
-
     message?: string
     content?: Scope
 
-    onCart: (cartId: number) => Promise<void> = NOOP_PROMISE_VOID
-    onProduct: (productId: number) => Promise<void> = NOOP_PROMISE_VOID
-    onReceipt: (receiptId: number) => Promise<void> = NOOP_PROMISE_VOID
-    onLogout: () => Promise<void> = NOOP_PROMISE_VOID
+    onCart = Scope.ACTION_NUMBER
+    onProduct = Scope.ACTION_NUMBER
+    onReceipt = Scope.ACTION_NUMBER
+    onLogout = Scope.ACTION
 }
 
 class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
@@ -348,7 +346,6 @@ class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
 // :: Cart
 
 class CartScope extends Scope {
-    vid = 'card'
 
 }
 
@@ -407,7 +404,6 @@ class CartPresenter extends Presenter<TestApplication, CartScope> {
 // :: Product
 
 class ProductScope extends Scope {
-    vid = 'product'
     name?: string
 }
 
@@ -467,7 +463,7 @@ class ProductPresenter extends Presenter<TestApplication, ProductScope> {
 // :: Receipt
 
 class ReceiptScope extends Scope {
-    vid = 'receipt'
+
 }
 
 class ReceiptPresenter extends Presenter<TestApplication, ReceiptScope> {

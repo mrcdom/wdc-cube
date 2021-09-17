@@ -1,5 +1,6 @@
 import { ViewFactory } from 'wdc-cube-react'
-import { ViewIds } from '../../Constants'
+import { TodoMvcScope, HeaderScope, MainScope, ItemScope, FooterScope, ClockScope } from './TodoMvc.presenter'
+
 import { TodoMvcView } from './TodoMvc.view'
 import { HeaderView } from './private_HeaderView'
 import { MainView } from './private_MainView'
@@ -10,10 +11,10 @@ import { ClockView } from './private_ClockView'
 export function registerTodoMvcViews() {
     const rv = ViewFactory.register
 
-    rv(ViewIds.todos, TodoMvcView)
-    rv(ViewIds.todosHeader, HeaderView)
-    rv(ViewIds.todosMain, MainView)
-    rv(ViewIds.todosItem, ItemView)
-    rv(ViewIds.todosFooter, FooterView)
-    rv(ViewIds.todosClock, ClockView)
+    rv(TodoMvcScope, TodoMvcView)
+    rv(HeaderScope, HeaderView)
+    rv(MainScope, MainView)
+    rv(ItemScope, ItemView)
+    rv(FooterScope, FooterView)
+    rv(ClockScope, ClockView)
 }

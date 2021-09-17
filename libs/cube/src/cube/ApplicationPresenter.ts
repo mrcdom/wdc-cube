@@ -4,7 +4,7 @@ import { PlaceUri } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
 import { FlipContext } from './FlipContext'
-import { Scope } from './Scope'
+import { Scope, ScopeType } from './Scope'
 import { Presenter } from './Presenter'
 import { instrumentViewActions } from './IPresenter'
 
@@ -39,8 +39,8 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         return this.__presenter.isDirty()
     }
 
-    public enableAutoUpdate() {
-        this.__presenter.enableAutoUpdate()
+    public disableAutoUpdate(): void {
+        this.__presenter.disableAutoUpdate()
     }
 
     protected override publishAllParameters(uri: PlaceUri) {
@@ -68,8 +68,8 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         }
     }
 
-    public configureUpdate(vid: string, maxUpdate: number, scope: Scope) {
-        this.__presenter.configureUpdate(vid, maxUpdate, scope)
+    public configureUpdate(scopeCtor: ScopeType, maxUpdate: number, scope: Scope) {
+        this.__presenter.configureUpdate(scopeCtor, maxUpdate, scope)
     }
 
     public update<T extends Scope>(optionalScope?: T) {

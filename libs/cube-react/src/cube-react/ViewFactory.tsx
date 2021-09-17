@@ -1,5 +1,5 @@
 import React from 'react'
-import { Scope } from 'wdc-cube'
+import { Scope, ScopeType } from 'wdc-cube'
 
 export type IViewProps = {
     className?: string
@@ -12,11 +12,11 @@ type IFactoryProps = IViewProps & {
 
 export type IViewConstructor<P extends IFactoryProps> = React.ComponentClass<P> | React.FunctionComponent<P>
 
-const elementFactoryMap: Map<string, IViewConstructor<IFactoryProps>> = new Map()
+const elementFactoryMap: Map<ScopeType, IViewConstructor<IFactoryProps>> = new Map()
 
 export function ViewSlot({ scope, ...props }: IFactoryProps) {
     if (scope) {
-        const ctor = elementFactoryMap.get(scope.vid)
+        const ctor = elementFactoryMap.get(scope.constructor as ScopeType)
         if (ctor) {
             return React.createElement(ctor, { scope, ...props })
         } else {
@@ -31,8 +31,8 @@ export function ViewSlot({ scope, ...props }: IFactoryProps) {
 
 export class ViewFactory {
 
-    public static register<P extends IFactoryProps>(vid: string, ctor: IViewConstructor<P>) {
-        elementFactoryMap.set(vid, ctor as IViewConstructor<IFactoryProps>)
+    public static register<P extends IFactoryProps>(scopeConstructor: ScopeType, ctor: IViewConstructor<P>) {
+        elementFactoryMap.set(scopeConstructor, ctor as IViewConstructor<IFactoryProps>)
     }
 
     public static createView(scope?: Scope, props?: IViewProps) {
@@ -44,4 +44,3 @@ export class ViewFactory {
     }
 
 }
-

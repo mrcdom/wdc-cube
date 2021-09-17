@@ -1,6 +1,6 @@
 import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
-import { ViewIds, AttrsIds, ParamsIds } from '../../Constants'
+import { AttrsIds, ParamsIds } from '../../Constants'
 import { Places } from '../../Places'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
 
@@ -10,12 +10,10 @@ const LOG = Logger.get('SubscriptionsPresenter')
 const tutorialService = TutorialService.INSTANCE
 
 export class SubscriptionsScope extends Scope {
-    vid = ViewIds.subscriptions
-
     sites = [] as SiteItemType[]
 
     // Actions
-    onItemClicked = Scope.ACTION1<SiteItemType>()
+    onItemClicked = Scope.ACTION_ONE<SiteItemType>()
 }
 
 export class SubscriptionsPresenter extends Presenter<MainPresenter, SubscriptionsScope> {
@@ -33,7 +31,6 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         if (initialization) {
-            this.enableAutoUpdate()
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
 
             this.scope.onItemClicked = this.onItemClicked.bind(this)

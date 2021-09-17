@@ -2,7 +2,7 @@
 
 import lodash from 'lodash'
 import { PlaceUri } from './PlaceUri'
-import { Scope } from './Scope'
+import { Scope, ScopeType } from './Scope'
 import { ScopeUtils } from './ScopeUtils'
 
 export interface IPresenter {
@@ -27,7 +27,7 @@ export interface IPresenterBase<S extends Scope> extends IPresenter {
 
     readonly scope: S
 
-    configureUpdate(vid: string, maxUpdate: number, scope: Scope): void
+    configureUpdate(scopeCtor: ScopeType, maxUpdate: number, scope: Scope): void
 
     onBeforeScopeUpdate(): void
 

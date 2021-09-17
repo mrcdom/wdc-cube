@@ -6,7 +6,7 @@ import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cu
 import { v4 as uuidv4 } from 'uuid'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
-import { ViewIds, ParamsIds, AttrsIds } from '../../Constants'
+import { ParamsIds, AttrsIds } from '../../Constants'
 
 const LOG = Logger.get('TodoMvcPresenter')
 
@@ -22,68 +22,56 @@ export enum ShowingOptions {
 }
 
 export class ClockScope extends Scope {
-    vid = ViewIds.todosClock
-
     date = new Date()
 }
 
 export class ItemScope extends Scope {
-    vid = ViewIds.todosItem
-
     id = 0
     completed = false
     editing = false
     title = ''
 
     readonly actions = {
-        onToggle: Scope.ACTION(),
-        onEdit: Scope.ACTION(),
-        onKeyDown: Scope.ACTION2<string, string>(),
-        onBlur: Scope.ACTION1<string>(),
-        onDestroy: Scope.ACTION()
+        onDestroy: Scope.ACTION,
+        onToggle: Scope.ACTION,
+        onEdit: Scope.ACTION,
+        onBlur: Scope.ACTION_STRING,
+        onKeyDown: Scope.ACTION_TWO<string, string>(),
     }
 }
 
 export class HeaderScope extends Scope {
-    vid = ViewIds.todosHeader
-
     uuid = uuidv4()
     allItemsCompleted = false
     toggleButtonVisible = false
 
     readonly actions = {
-        onToggleAll: Scope.ACTION(),
-        onAddTodo: Scope.ACTION1<string>()
+        onToggleAll: Scope.ACTION,
+        onAddTodo: Scope.ACTION_STRING
     }
 }
 
 export class MainScope extends Scope {
-    vid = ViewIds.todosMain
-
     clock?:ClockScope
 
     items = [] as ItemScope[]
 }
 
 export class FooterScope extends Scope {
-    vid = ViewIds.todosFooter
-
     count = 0
     activeTodoWord = 'item'
     clearButtonVisible = false
     showing = ShowingOptions.ALL
 
     readonly actions = {
-        onClearCompleted: Scope.ACTION(),
-        onShowAll: Scope.ACTION(),
-        onShowActives: Scope.ACTION(),
-        onShowCompleteds: Scope.ACTION()
+        onClearCompleted: Scope.ACTION,
+        onShowAll: Scope.ACTION,
+        onShowActives: Scope.ACTION,
+        onShowCompleteds: Scope.ACTION
     }
 }
 
 export class TodoMvcScope extends Scope {
-    vid = ViewIds.todos
-
     header?: HeaderScope
     main?: MainScope
     footer?: FooterScope
@@ -142,12 +130,10 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
             // Configure fallback scope that must be used when there were
             // to many small updates
-            this.configureUpdate(ViewIds.todosItem, 10, this.mainScope)
+            this.configureUpdate(ItemScope, 10, this.mainScope)
 
             // Get slots
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
-
-            this.enableAutoUpdate()
 
             if(isStress) {
                 this.mainScope.clock = this.clockScope

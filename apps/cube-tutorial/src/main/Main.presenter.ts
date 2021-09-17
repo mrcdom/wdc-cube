@@ -7,7 +7,7 @@ import {
     AlertSeverity
 } from 'wdc-cube'
 import { Places } from '../Places'
-import { ViewIds, AttrsIds } from '../Constants'
+import { AttrsIds } from '../Constants'
 import { startServices } from '../services'
 
 const LOG = Logger.get('MainPresenter')
@@ -15,32 +15,26 @@ const LOG = Logger.get('MainPresenter')
 type IDialogScope = Scope & { onClose: () => Promise<void> }
 
 export class AlertScope extends Scope {
-    vid = ViewIds.mainAlert
-
     severity: AlertSeverity = 'info'
     title?: string
     message?: string
 
-    onClose = Scope.ACTION()
+    onClose = Scope.ACTION
 }
 
 export class BodyScope extends Scope {
-    vid = ViewIds.mainBody
-
-    onOpenAlert = Scope.ACTION1<AlertSeverity>()
+    onOpenAlert = Scope.ACTION_ONE<AlertSeverity>()
 }
 
 export class MainScope extends Scope {
-    vid = ViewIds.main
-
     body?: Scope
     dialog?: IDialogScope
     alert?: AlertScope
 
-    onHome = Scope.ACTION()
-    onOpenTodos = Scope.ACTION()
-    onOpenSuscriptions = Scope.ACTION()
-    onLogin = Scope.ACTION()
+    onHome = Scope.ACTION
+    onOpenTodos = Scope.ACTION
+    onOpenSuscriptions = Scope.ACTION
+    onLogin = Scope.ACTION
 }
 
 export class MainPresenter extends ApplicationPresenter<MainScope> {
@@ -62,8 +56,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean, depeest?: boolean): Promise<boolean> {
         if (initialization) {
-            this.enableAutoUpdate()
-
             await startServices()
 
             this.scope.onHome = this.onHome.bind(this)
@@ -137,7 +129,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
             this.update()
 
             if (this.scope.dialog && !this.scope.dialog.onClose) {
-                LOG.error(`Missing onClose action on scope ${this.scope.dialog.vid}`)
+                LOG.error(`Missing onClose action on scope ${this.scope.dialog.constructor.name}`)
             }
         }
     }
