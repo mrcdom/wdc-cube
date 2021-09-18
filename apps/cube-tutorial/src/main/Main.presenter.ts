@@ -4,10 +4,10 @@ import {
     HistoryManager,
     PlaceUri,
     Scope,
-    AlertSeverity
+    AlertSeverity,
+    SingletonServices
 } from 'wdc-cube'
 import { Places, AttrsIds } from '../Constants'
-import { startServices } from '../services'
 
 const LOG = Logger.get('MainPresenter')
 
@@ -49,34 +49,47 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     // :: Instance
 
     private readonly bodyScope = new BodyScope()
-
     private readonly bodySlot = this.setBodySlot.bind(this)
     private readonly dialogSlot = this.setDialogSlot.bind(this)
 
+    private servicesStarted = false
+
+    public override release() {
+        if (this.servicesStarted) {
+            SingletonServices.stop().catch(() => void 0)
+            this.servicesStarted = false
+        }
+        super.release()
+    }
+
+    public async initialize(uri: PlaceUri) {
+        this.servicesStarted = await SingletonServices.start()
+
+        this.scope.onHome = this.onHome.bind(this)
+        this.scope.onOpenTodos = this.onOpenTodos.bind(this)
+        this.scope.onOpenSuscriptions = this.onOpenSuscriptions.bind(this)
+        this.scope.onLogin = this.onOpenLogin.bind(this)
+
+        this.bodyScope.onOpenAlert = this.onOpenAlert.bind(this)
+
+        this.scope.body = this.bodyScope
+
+        LOG.info('Initialized')
+
+        try {
+            const targetUri = this.newUriFromString(this.historyManager.location)
+            if (targetUri.toString() !== uri.toString()) {
+                await this.flipToUri(targetUri)
+                return false
+            }
+        } catch (caught) {
+            this.unexpected('Navigation from history', caught)
+        }
+    }
+
     public override async applyParameters(uri: PlaceUri, initialization: boolean, depeest?: boolean): Promise<boolean> {
         if (initialization) {
-            await startServices()
-
-            this.scope.onHome = this.onHome.bind(this)
-            this.scope.onOpenTodos = this.onOpenTodos.bind(this)
-            this.scope.onOpenSuscriptions = this.onOpenSuscriptions.bind(this)
-            this.scope.onLogin = this.onOpenLogin.bind(this)
-
-            this.bodyScope.onOpenAlert = this.onOpenAlert.bind(this)
-
-            this.scope.body = this.bodyScope
-
-            LOG.info('Initialized')
-
-            try {
-                const targetUri = this.newUriFromString(this.historyManager.location)
-                if (targetUri.toString() !== uri.toString()) {
-                    await this.flipToUri(targetUri)
-                    return false
-                }
-            } catch (caught) {
-                this.unexpected('Navigation from history', caught)
-            }
+            await this.initialize(uri)
         }
 
         if (depeest) {
@@ -115,7 +128,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     protected async setBodySlot(scope?: Scope) {
         const scopeOrDefault = scope ?? this.bodyScope
-        if (this.scope.body != scopeOrDefault) {
+        if (this.scope.body !== scopeOrDefault) {
             this.scope.body = scopeOrDefault
             this.update()
         }

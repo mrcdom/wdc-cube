@@ -18,12 +18,13 @@ export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailS
 
   const onClose = useCallback(scope.onClose, [scope.onClose])
   const onSubscribe = useCallback(scope.onSubscribe, [scope.onSubscribe])
+  const onEmailChanged = useCallback(event => { scope.onEmailChanged(event.target.value) }, [scope.onEmailChanged])
 
   return <>
     <DialogTitle>Subscribe</DialogTitle>
     <DialogContent>
       <DialogContentText>
-        To subscribe to this website({scope.name}), please enter your email address here. We will send updates
+        To subscribe to this website({scope.email}), please enter your email address here. We will send updates
         occasionally.
       </DialogContentText>
       <TextField
@@ -33,7 +34,7 @@ export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailS
         label="Email Address"
         type="email"
         fullWidth
-        onChange={event => { scope.onEmailChanged(event.target.value) }}
+        onChange={onEmailChanged}
       />
     </DialogContent>
     <DialogActions>

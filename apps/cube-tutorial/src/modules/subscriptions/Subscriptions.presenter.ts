@@ -18,6 +18,7 @@ export class SubscriptionsScope extends Scope {
 export class SubscriptionsPresenter extends Presenter<MainPresenter, SubscriptionsScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
+    private dialogSlot: ScopeSlot = NOOP_VOID
 
     public constructor(app: MainPresenter) {
         super(app, new SubscriptionsScope())
@@ -28,14 +29,19 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
         LOG.info('Finalized')
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepst: boolean): Promise<boolean> {
         if (initialization) {
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
+            this.dialogSlot = uri.getScopeSlot(AttrsIds.dialogSlot)
 
             this.scope.onItemClicked = this.onItemClicked.bind(this)
             this.scope.sites = await tutorialService.fetchSubscribleSites()
 
             LOG.info('Initialized')
+        }
+
+        if (deepst) {
+            this.dialogSlot(undefined)
         }
 
         this.parentSlot(this.scope)

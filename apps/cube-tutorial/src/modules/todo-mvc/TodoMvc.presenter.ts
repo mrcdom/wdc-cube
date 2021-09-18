@@ -119,57 +119,12 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
         const uriShowing = uri.getParameterAsNumberOrDefault(ParamsIds.TodoShowing, this.footerScope.showing) as ShowingOptions
-        const isStress = uri.getParameterAsBooleanOrDefault(ParamsIds.TodoStress, this.stressEnabled)
+        const uriIsStress = uri.getParameterAsBooleanOrDefault(ParamsIds.TodoStress, this.stressEnabled)
 
         if (initialization) {
-            // Bind Events
-            this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
-            this.headerScope.actions.onSyncInputKeyDown = this.onHeaderSyncInputKeyDown.bind(this)
-            this.headerScope.actions.onToggleAll = this.onToggleAll.bind(this)
-
-            this.footerScope.actions.onClearCompleted = this.onClearCompleted.bind(this)
-            this.footerScope.actions.onShowAll = this.onShowAll.bind(this)
-            this.footerScope.actions.onShowActives = this.onShowActives.bind(this)
-            this.footerScope.actions.onShowCompleteds = this.onShowCompleteds.bind(this)
-
-            this.footerScope.showing = uriShowing
-
-            // Configure fallback scope that must be used when there were
-            // to many small updates
-            this.configureUpdate(ItemScope, 10, this.mainScope)
-
-            // Get slots
-            this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
-
-            if (isStress) {
-                this.mainScope.clock = this.clockScope
-                this.clockUpdateHandler = setInterval(this.onClockUpdate.bind(this), 1000)
-                this.stressEnabled = true
-                await this.loadData(1000)
-            } else {
-                await this.loadData(0)
-            }
-
-            LOG.debug('Initialized')
+            this.initializeState(uri, uriShowing, uriIsStress)
         } else {
-            this.footerScope.showing = uriShowing
-
-            if (this.stressEnabled !== isStress) {
-                if (this.clockUpdateHandler) {
-                    clearInterval(this.clockUpdateHandler)
-                }
-
-                if (isStress) {
-                    this.mainScope.clock = this.clockScope
-                    this.clockUpdateHandler = setInterval(this.onClockUpdate.bind(this), 1000)
-                    this.stressEnabled = true
-                    await this.loadData(1000)
-                } else {
-                    this.stressEnabled = false
-                    this.mainScope.clock = undefined
-                    await this.loadData(0)
-                }
-            }
+            this.synchronizeState(uriShowing, uriIsStress)
         }
 
         this.parentSlot(this.scope)
@@ -187,6 +142,59 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         }
     }
 
+    private async initializeState(uri: PlaceUri, uriShowing: ShowingOptions, uriIsStress: boolean) {
+        // Bind Events
+        this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
+        this.headerScope.actions.onSyncInputKeyDown = this.onHeaderSyncInputKeyDown.bind(this)
+        this.headerScope.actions.onToggleAll = this.onToggleAll.bind(this)
+
+        this.footerScope.actions.onClearCompleted = this.onClearCompleted.bind(this)
+        this.footerScope.actions.onShowAll = this.onShowAll.bind(this)
+        this.footerScope.actions.onShowActives = this.onShowActives.bind(this)
+        this.footerScope.actions.onShowCompleteds = this.onShowCompleteds.bind(this)
+
+        this.footerScope.showing = uriShowing
+
+        // Configure fallback scope that must be used when there were
+        // to many small updates
+        this.configureUpdate(ItemScope, 10, this.mainScope) // TODO inverter ordem parametro
+
+        // Get slots
+        this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
+
+        if (uriIsStress) {
+            this.mainScope.clock = this.clockScope
+            this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
+            this.stressEnabled = true
+            await this.loadData(1000)
+        } else {
+            await this.loadData(0)
+        }
+
+        LOG.debug('Initialized')
+    }
+
+    private async synchronizeState(uriShowing: ShowingOptions, uriIsStress: boolean) {
+        this.footerScope.showing = uriShowing
+
+        if (this.stressEnabled !== uriIsStress) {
+            if (this.clockUpdateHandler) {
+                clearInterval(this.clockUpdateHandler)
+            }
+
+            if (uriIsStress) {
+                this.mainScope.clock = this.clockScope
+                this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
+                this.stressEnabled = true
+                await this.loadData(1000)
+            } else {
+                this.stressEnabled = false
+                this.mainScope.clock = undefined
+                await this.loadData(0)
+            }
+        }
+    }
+
     private async loadData(quantity: number) {
         this.itemScopes.length = 0
 
@@ -201,7 +209,15 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         }
     }
 
-    protected async onClockUpdate() {
+    private bindItemScopeActions(item: ItemScope) {
+        item.actions.onToggle = this.onItemToggle.bind(this, item)
+        item.actions.onEdit = this.onItemEdit.bind(this, item)
+        item.actions.onKeyDown = this.onItemKeyDown.bind(this, item)
+        item.actions.onBlur = this.onItemBlur.bind(this, item)
+        item.actions.onDestroy = this.onItemDestroy.bind(this, item)
+    }
+
+    protected async handleClockUpdate() {
         this.clockScope.date = new Date()
         this.update(this.mainScope.clock)
     }
@@ -263,9 +279,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         for (const itemScope of this.itemScopes) {
             if (itemScope.completed !== checked) {
                 itemScope.completed = checked
-
-                // Optional update hint (improve performance)
-                this.updateHint(itemScope)
+                this.update(itemScope)
             }
         }
     }
@@ -293,13 +307,6 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         this.app.updateHistory()
     }
 
-    private bindItemScopeActions(item: ItemScope) {
-        item.actions.onToggle = this.onItemToggle.bind(this, item)
-        item.actions.onEdit = this.onItemEdit.bind(this, item)
-        item.actions.onKeyDown = this.onItemKeyDown.bind(this, item)
-        item.actions.onBlur = this.onItemBlur.bind(this, item)
-        item.actions.onDestroy = this.onItemDestroy.bind(this, item)
-    }
 
     protected async onItemToggle(item: ItemScope) {
         item.completed = !item.completed
@@ -502,7 +509,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         // Optional update hint: this is util to tune performance
         if (this.updateHintEnabled) {
             if (baseChanged) {
-                this.update(this.scope)
+                this.update()
             } else {
                 if (headerChanged) {
                     this.update(this.headerScope)

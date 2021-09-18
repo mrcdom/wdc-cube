@@ -35,7 +35,7 @@ async function noopBootstrap() {
 async function doBootstrap() {
     const failed = [] as string[]
 
-    for(const service of availableServices) {
+    for (const service of availableServices) {
         await bootService(service, failed)
     }
     //
@@ -64,17 +64,34 @@ async function stopServices() {
     LOG.info('Finalized')
 }
 
+let startCount = 0
+
 export const SingletonServices = {
 
-    add(service:ServiceLike) {
+    add(service: ServiceLike) {
         availableServices.push(service)
     },
 
     async start() {
-        await startServices()
+        try {
+            await startServices()
+        } catch (caught) {
+            LOG.error('Starting', caught)
+        } finally {
+            if (serviceStack.length > 0) {
+                startCount++
+            }
+        }
+        return serviceStack.length > 0
     },
 
     async stop() {
-        await stopServices()
+        if (startCount > 0) {
+            try {
+                await stopServices()
+            } finally {
+                startCount--
+            }
+        }
     }
 }

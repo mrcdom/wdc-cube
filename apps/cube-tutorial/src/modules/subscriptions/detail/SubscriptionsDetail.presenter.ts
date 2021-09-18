@@ -11,31 +11,30 @@ const tutorialService = TutorialService.INSTANCE
 const eMailRegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
 export class SubscriptionsDetailScope extends Scope {
-    name?: string
+    email?: string
 
     // Actions
     onClose = Scope.ASYNC_ACTION
     onSubscribe = Scope.ASYNC_ACTION
-    onEmailChanged = Scope.ASYNC_ACTION_ONE<string>()
+    onEmailChanged = Scope.SYNC_ACTION_STRING
 }
 
 export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, SubscriptionsDetailScope> {
 
-    private parentSlot: ScopeSlot = NOOP_VOID
+    private dialogSlot: ScopeSlot = NOOP_VOID
 
     private item?: SiteItemType
 
     private email?: string
 
-    private backPlace: Place
+    private backPlace = Place.UNKNOWN
 
     public constructor(app: MainPresenter) {
         super(app, new SubscriptionsDetailScope())
-        this.backPlace = app.lastPlace
     }
 
     public override release() {
-        this.parentSlot(undefined)
+        this.dialogSlot(undefined)
         super.release()
         LOG.info('Finalized')
     }
@@ -51,10 +50,10 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
             }
 
             this.scope.onClose = this.onClose.bind(this)
-            this.scope.onEmailChanged = this.onEmailChanged.bind(this)
+            this.scope.onEmailChanged = this.handleEmailChanged.bind(this)
             this.scope.onSubscribe = this.onSubscribe.bind(this)
 
-            this.parentSlot = uri.getScopeSlot(AttrsIds.dialogSlot)
+            this.dialogSlot = uri.getScopeSlot(AttrsIds.dialogSlot)
 
             let siteItem = uri.attributes.get(AttrsIds.subscriptionsDetail_item) as SiteItemType | undefined
             if (!siteItem) {
@@ -62,16 +61,15 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
             }
 
             this.item = siteItem
-            this.scope.name = this.item?.site
+            this.scope.email = this.item?.site
 
             LOG.info('Initialized')
         } else if (this.item?.id !== paramSiteId) {
             this.item = await tutorialService.fetchSiteItem(paramSiteId)
-            this.scope.name = this.item?.site
-            this.update(this.scope)
+            this.scope.email = this.item?.site
         }
 
-        this.parentSlot(this.scope)
+        this.dialogSlot(this.scope)
 
         return true
     }
@@ -108,7 +106,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
         await this.flip(this.backPlace)
     }
 
-    protected async onEmailChanged(eMail: string) {
+    protected handleEmailChanged(eMail: string) {
         this.email = eMail
     }
 
