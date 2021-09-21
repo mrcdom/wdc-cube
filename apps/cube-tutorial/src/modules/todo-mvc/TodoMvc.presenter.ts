@@ -143,8 +143,6 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     private async initializeState(uri: PlaceUri, uriUserId: number, uriShowing: ShowingOptions) {
-        this.userId = uriUserId
-
         // Bind Events
         this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
         this.headerScope.actions.onSyncInputKeyDown = this.onHeaderSyncInputKeyDown.bind(this)
@@ -155,8 +153,6 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         this.footerScope.actions.onShowActives = this.onShowActives.bind(this)
         this.footerScope.actions.onShowCompleteds = this.onShowCompleteds.bind(this)
 
-        this.footerScope.showing = uriShowing
-
         // Configure fallback scope that must be used when there were
         // to many small updates
         this.configureUpdate(ItemScope, 10, this.mainScope) // TODO inverter ordem parametro
@@ -164,21 +160,29 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         // Get slots
         this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
 
-        if (this.userId < 0) {
-            this.mainScope.clock = this.clockScope
-            this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
-        }
-
-        await this.loadData()
+        await this.synchronizeState(uriUserId, uriShowing, true)
 
         LOG.debug('Initialized')
     }
 
-    private async synchronizeState(uriUserId: number, uriShowing: ShowingOptions) {
+    private async synchronizeState(uriUserId: number, uriShowing: ShowingOptions, force = false) {
         this.footerScope.showing = uriShowing
 
-        if (uriUserId !== this.userId) {
+        if (force || uriUserId !== this.userId) {
             this.userId = uriUserId
+
+            if (this.userId < 0) {
+                this.mainScope.clock = this.clockScope
+                if (!this.clockUpdateHandler) {
+                    this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
+                }
+            } else {
+                this.mainScope.clock = undefined
+                if (this.clockUpdateHandler) {
+                    clearInterval(this.clockUpdateHandler)
+                }
+            }
+
             await this.loadData()
         }
     }
@@ -196,20 +200,6 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             this.bindItemScopeActions(todoScope)
             this.itemScopes.push(todoScope)
         }
-
-        if (this.userId < 0) {
-            this.mainScope.clock = this.clockScope
-            if (!this.clockUpdateHandler) {
-                this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
-            }
-        } else {
-            this.mainScope.clock = undefined
-            if (this.clockUpdateHandler) {
-                clearInterval(this.clockUpdateHandler)
-            }
-        }
-
-        this.update()
     }
 
     private bindItemScopeActions(item: ItemScope) {
