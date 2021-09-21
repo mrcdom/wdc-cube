@@ -27,7 +27,7 @@ export interface IPresenterBase<S extends Scope> extends IPresenter {
 
     readonly scope: S
 
-    configureUpdate(scopeCtor: ScopeType, maxUpdate: number, scope: Scope): void
+    updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate: number): void
 
     onBeforeScopeUpdate(): void
 

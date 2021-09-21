@@ -84,8 +84,8 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         this.__autoUpdateEnabled = false
     }
 
-    public configureUpdate(scopeCtor: ScopeType, maxUpdate: number, scope: Scope) {
-        this.__scopeUpdateFallback.set(scopeCtor, { maxUpdate, scope })
+    public updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate = 10) {
+        this.__scopeUpdateFallback.set(scopeCtor, { scope, maxUpdate })
     }
 
     public unexpected(message: string, error: unknown): void {

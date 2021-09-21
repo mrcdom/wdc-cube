@@ -153,9 +153,8 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         this.footerScope.actions.onShowActives = this.onShowActives.bind(this)
         this.footerScope.actions.onShowCompleteds = this.onShowCompleteds.bind(this)
 
-        // Configure fallback scope that must be used when there were
-        // to many small updates
-        this.configureUpdate(ItemScope, 10, this.mainScope) // TODO inverter ordem parametro
+        // Hints given to presenter update debounce controller
+        this.updateHint(ItemScope, this.mainScope)
 
         // Get slots
         this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
@@ -250,7 +249,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
                 this.bindItemScopeActions(todoScope)
                 this.itemScopes.push(todoScope)
 
-                this.updateHint(this.mainScope)
+                this.optionalUpdateHint(this.mainScope)
             }
         } finally {
             if (this.headerScope.inputValue !== oldValue) {
@@ -279,24 +278,24 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     protected async onClearCompleted() {
         this.itemScopes = this.itemScopes.filter(item => !item.completed)
-        this.updateHint(this.mainScope)
+        this.optionalUpdateHint(this.mainScope)
     }
 
     protected async onShowAll() {
         this.footerScope.showing = ShowingOptions.ALL
-        this.updateHint(this.footerScope)
+        this.optionalUpdateHint(this.footerScope)
         this.app.updateHistory()
     }
 
     protected async onShowActives() {
         this.footerScope.showing = ShowingOptions.ACTIVE
-        this.updateHint(this.footerScope)
+        this.optionalUpdateHint(this.footerScope)
         this.app.updateHistory()
     }
 
     protected async onShowCompleteds() {
         this.footerScope.showing = ShowingOptions.COMPLETED
-        this.updateHint(this.footerScope)
+        this.optionalUpdateHint(this.footerScope)
         this.app.updateHistory()
     }
 
@@ -306,9 +305,9 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
         // Optional update hint (improve performance)
         if (this.footerScope.showing !== ShowingOptions.ALL) {
-            this.updateHint(this.mainScope)
+            this.optionalUpdateHint(this.mainScope)
         } else {
-            this.updateHint(item)
+            this.optionalUpdateHint(item)
         }
     }
 
@@ -317,14 +316,14 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             if (otherItem !== item && otherItem.editing) {
                 otherItem.editing = false
                 // Optional update hint (improve performance)
-                this.updateHint(otherItem)
+                this.optionalUpdateHint(otherItem)
             }
         }
 
         if (!item.editing) {
             item.editing = true
             // Optional update hint (improve performance)
-            this.updateHint(item)
+            this.optionalUpdateHint(item)
         }
     }
 
@@ -348,13 +347,13 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         const itemIdx = this.itemScopes.findIndex(i => i.id === item.id)
         if (itemIdx !== -1) {
             this.itemScopes.splice(itemIdx, 1)
-            this.updateHint(this.mainScope)
+            this.optionalUpdateHint(this.mainScope)
         }
     }
 
     protected cancelItem(item: ItemScope) {
         item.editing = false
-        this.updateHint(item)
+        this.optionalUpdateHint(item)
     }
 
     protected saveItem(item: ItemScope, val: string) {
@@ -362,7 +361,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         if (trimVal) {
             item.title = trimVal
             item.editing = false
-            this.updateHint(item)
+            this.optionalUpdateHint(item)
         } else {
             this.destroy(item)
         }
@@ -375,7 +374,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
      * 
      * @param optionalScope reference scope
      */
-    public updateHint(optionalScope?: Scope) {
+    public optionalUpdateHint(optionalScope?: Scope) {
         if (this.updateHintEnabled) {
             this.update(optionalScope)
         }
