@@ -1,6 +1,6 @@
-import { Logger, Presenter, Scope, ScopeSlot, Place, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../../main/Main.presenter'
-import { AttrsIds, ParamsIds } from '../../../Constants'
+import { AttrsIds, ParamsIds, Places } from '../../../Constants'
 import { TutorialService, SiteItemType } from '../../../services/TutorialService'
 
 const LOG = Logger.get('SubscriptionsDetailPresenter')
@@ -27,7 +27,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
 
     private email?: string
 
-    private backPlace = Place.UNKNOWN
+    private backUri?: PlaceUri
 
     public constructor(app: MainPresenter) {
         super(app, new SubscriptionsDetailScope())
@@ -43,7 +43,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
         const paramSiteId = uri.getParameterAsNumberOrDefault(ParamsIds.SiteId, this.item?.id ?? -1)
 
         if (initialization) {
-            this.backPlace = this.app.lastPlace
+            this.backUri = this.app.newUri(this.app.lastPlace)
 
             if (paramSiteId <= 0) {
                 throw new Error('No site id provided')
@@ -79,7 +79,7 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
     }
 
     protected async onClose() {
-        await this.flip(this.backPlace)
+        await this.close()
     }
 
     protected async onSubscribe() {
@@ -103,11 +103,19 @@ export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, Subsc
 
         await tutorialService.updateOrAddSiteSubscription(siteId, email)
 
-        await this.flip(this.backPlace)
+        await this.close()
     }
 
     protected handleEmailChanged(eMail: string) {
         this.email = eMail
+    }
+
+    protected async close() {
+        if (this.backUri) {
+            await this.flipToUri(this.backUri)
+        } else {
+            await this.flip(Places.subscriptions)
+        }
     }
 
 }

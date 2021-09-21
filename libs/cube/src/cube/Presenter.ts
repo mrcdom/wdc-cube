@@ -100,6 +100,10 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         return this.app.flip(place, args)
     }
 
+    public async flipToUri(uri: PlaceUri) {
+        return await this.app.flipToUri(uri)
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean> {
         return true
