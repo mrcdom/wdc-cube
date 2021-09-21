@@ -1,5 +1,5 @@
 export { Logger } from './utils/Logger'
-export { NOOP_VOID, NOOP_PROMISE_VOID } from './cube/Constants'
+export { NOOP_VOID, NOOP_PROMISE_VOID } from './utils/EmptyFunctions'
 export { CastUtils } from './utils/CastUtils'
 export { Place } from './cube/Place'
 export { PlaceUri } from './cube/PlaceUri'

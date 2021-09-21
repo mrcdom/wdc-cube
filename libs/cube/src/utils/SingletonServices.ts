@@ -1,4 +1,5 @@
 import { Logger } from './Logger'
+import { NOOP_PROMISE_VOID } from './EmptyFunctions'
 
 const LOG = Logger.get('SingletonServices')
 
@@ -9,7 +10,7 @@ export type ServiceLike = {
     preDestroy(): Promise<void>
 }
 
-const availableServices = [] as ServiceLike[]
+const availableServiceMap = new Map<ServiceLike, boolean>()
 
 const serviceStack = [] as ServiceLike[]
 
@@ -35,7 +36,7 @@ async function noopBootstrap() {
 async function doBootstrap() {
     const failed = [] as string[]
 
-    for (const service of availableServices) {
+    for (const service of availableServiceMap.keys()) {
         await bootService(service, failed)
     }
     //
@@ -56,7 +57,11 @@ async function stopServices() {
     let service = serviceStack.shift()
     while (service) {
         if (service.initialized) {
-            await service.preDestroy()
+            try {
+                await service.preDestroy()
+            } catch (caught) {
+                LOG.error(`Unexpected error destroying service ${service.name}`, caught)
+            }
         }
         service = serviceStack.shift()
     }
@@ -69,20 +74,36 @@ let startCount = 0
 export const SingletonServices = {
 
     add(service: ServiceLike) {
-        availableServices.push(service)
+        // Map preserves order
+        if (!availableServiceMap.has(service)) {
+            availableServiceMap.set(service, true)
+        }
+    },
+
+    async remove(service: ServiceLike) {
+        if (availableServiceMap.delete(service) && service.initialized) {
+            try {
+                await service.preDestroy()
+            } catch (caught) {
+                LOG.error(`Unexpected error destroying service ${service.name}`, caught)
+            }
+        }
     },
 
     async start() {
+        const numServicesBefore = serviceStack.length
         try {
             await startServices()
         } catch (caught) {
             LOG.error('Starting', caught)
-        } finally {
-            if (serviceStack.length > 0) {
-                startCount++
-            }
         }
-        return serviceStack.length > 0
+
+        if (serviceStack.length > numServicesBefore) {
+            startCount++
+            return SingletonServices.stop
+        } else {
+            return NOOP_PROMISE_VOID
+        }
     },
 
     async stop() {

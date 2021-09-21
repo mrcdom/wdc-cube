@@ -1,4 +1,4 @@
-import { NOOP_VOID } from './Constants'
+import { NOOP_VOID } from '../utils/EmptyFunctions'
 import { CastUtils } from '../utils/CastUtils'
 import { Place } from './Place'
 import { PlaceUri } from './PlaceUri'

@@ -1,6 +1,6 @@
 import lodash from 'lodash'
 import { Logger } from '../utils/Logger'
-import { NOOP_PROMISE_VOID } from './Constants'
+import { NOOP_PROMISE_VOID } from '../utils/EmptyFunctions'
 import { Scope } from './Scope'
 
 const LOG = Logger.get('ScopeUtils')

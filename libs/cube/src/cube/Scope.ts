@@ -1,5 +1,5 @@
 import { Logger } from '../utils/Logger'
-import { NOOP_VOID } from './Constants'
+import { NOOP_VOID } from '../utils/EmptyFunctions'
 
 const LOG = Logger.get('Scope')
 

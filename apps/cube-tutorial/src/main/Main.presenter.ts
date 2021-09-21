@@ -5,11 +5,15 @@ import {
     PlaceUri,
     Scope,
     AlertSeverity,
-    SingletonServices
+    SingletonServices,
+    NOOP_PROMISE_VOID
 } from 'wdc-cube'
+import { registerServices } from '../services'
 import { Places, AttrsIds } from '../Constants'
 
 const LOG = Logger.get('MainPresenter')
+
+registerServices()
 
 type IDialogScope = Scope & { onClose: () => Promise<void> }
 
@@ -52,18 +56,15 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     private readonly bodySlot = this.setBodySlot.bind(this)
     private readonly dialogSlot = this.setDialogSlot.bind(this)
 
-    private servicesStarted = false
+    private stopServices = NOOP_PROMISE_VOID
 
     public override release() {
-        if (this.servicesStarted) {
-            SingletonServices.stop().catch(() => void 0)
-            this.servicesStarted = false
-        }
+        this.stopServices().catch(() => void 0)
         super.release()
     }
 
     public async initialize(uri: PlaceUri) {
-        this.servicesStarted = await SingletonServices.start()
+        this.stopServices = await SingletonServices.start()
 
         this.scope.onHome = this.onHome.bind(this)
         this.scope.onOpenTodos = this.onOpenTodos.bind(this)

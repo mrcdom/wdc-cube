@@ -4,8 +4,11 @@ import { TutorialService } from '../services/TutorialService'
 // TODO: https://jsonplaceholder.typicode.com/
 // TODO: https://swapi.dev/
 
-SingletonServices.add(TutorialService.INSTANCE)
+function registerServices() {
+    SingletonServices.add(TutorialService.INSTANCE)
+}
 
 export {
-    TutorialService
+    TutorialService,
+    registerServices
 }
