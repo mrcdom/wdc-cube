@@ -203,12 +203,12 @@ function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
             }
             // Otherwhise, is a synchronous action
             else {
-                onFinally.bind(this)
+                onFinally.call(this)
                 return result
             }
         } catch (caught) {
             // Will only be actioned on sincronus actions
-            onCatch.bind(this, caught)
+            onCatch.call(this, caught)
             return undefined
         }
     }

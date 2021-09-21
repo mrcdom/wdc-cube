@@ -2,7 +2,7 @@
  * Based on https://todomvc.com/examples/react
  */
 
-import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, Presenter, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamsIds, AttrsIds } from '../../Constants'
@@ -84,11 +84,60 @@ export class TodoMvcScope extends Scope {
 
 // :: Presentation
 
+class HeaderPresenter extends Presenter<HeaderScope> {
+
+    public handleEnter = Scope.SYNC_ACTION_STRING
+
+    public handleToggleAll = Scope.ASYNC_ACTION
+
+    public constructor(app: MainPresenter) {
+        super(app, new HeaderScope())
+    }
+
+    public release() {
+        this.scope.actions.onSyncInputChange = Scope.SYNC_ACTION_STRING
+        this.scope.actions.onSyncInputKeyDown = Scope.SYNC_ACTION
+        this.scope.actions.onToggleAll = Scope.ASYNC_ACTION
+        super.release()
+    }
+
+    public initialize() {
+        this.scope.actions.onSyncInputChange = this.onSyncInputChange.bind(this)
+        this.scope.actions.onSyncInputKeyDown = this.onSyncInputKeyDown.bind(this)
+        this.scope.actions.onToggleAll = this.handleToggleAll
+    }
+
+    protected onSyncInputChange(value: string) {
+        this.scope.inputValue = value
+    }
+
+    protected onSyncInputKeyDown(event: KeyDownEvent) {
+        if (event.code === 'Escape') {
+            this.scope.inputValue = ''
+            return
+        }
+
+        if (event.code !== 'Enter') {
+            return
+        }
+
+        event.preventDefault()
+
+        const trimVal = this.scope.inputValue.trim()
+
+        this.scope.inputValue = ''
+
+        if (trimVal) {
+            this.handleEnter(trimVal)
+        }
+    }
+}
+
 export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
-    private headerScope = new HeaderScope()
+    private header = new HeaderPresenter(this.app)
 
     private mainScope = new MainScope()
 
@@ -106,13 +155,16 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
-        this.scope.header = this.headerScope
+        this.scope.header = this.header.scope
     }
 
     public override release() {
         if (this.clockUpdateHandler) {
             clearInterval(this.clockUpdateHandler)
         }
+
+        this.header.release()
+
         super.release()
         LOG.debug('Finalized')
     }
@@ -144,9 +196,9 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     private async initializeState(uri: PlaceUri, uriUserId: number, uriShowing: ShowingOptions) {
         // Bind Events
-        this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
-        this.headerScope.actions.onSyncInputKeyDown = this.onHeaderSyncInputKeyDown.bind(this)
-        this.headerScope.actions.onToggleAll = this.onToggleAll.bind(this)
+        this.header.handleEnter = this.onAddItem.bind(this)
+        this.header.handleToggleAll = this.onToggleAll.bind(this)
+        this.header.initialize()
 
         this.footerScope.actions.onClearCompleted = this.onClearCompleted.bind(this)
         this.footerScope.actions.onShowAll = this.onShowAll.bind(this)
@@ -214,48 +266,17 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.update(this.mainScope.clock)
     }
 
-    protected onHeaderSyncInputChange(value: string) {
-        if (value !== this.headerScope.inputValue) {
-            this.headerScope.inputValue = value
-            this.update(this.headerScope)
-        }
-    }
+    protected onAddItem(value: string) {
+        const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
 
-    protected onHeaderSyncInputKeyDown(event: KeyDownEvent) {
-        const oldValue = this.headerScope.inputValue
-        try {
-            if (event.code === 'Escape') {
-                this.headerScope.inputValue = ''
-                return
-            }
+        const todoScope = new ItemScope()
+        todoScope.id = lastUid + 1
+        todoScope.title = value
+        todoScope.completed = false
+        this.bindItemScopeActions(todoScope)
+        this.itemScopes.push(todoScope)
 
-            if (event.code !== 'Enter') {
-                return
-            }
-
-            event.preventDefault()
-
-            const trimVal = this.headerScope.inputValue.trim()
-
-            this.headerScope.inputValue = ''
-
-            if (trimVal) {
-                const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
-
-                const todoScope = new ItemScope()
-                todoScope.id = lastUid + 1
-                todoScope.title = trimVal
-                todoScope.completed = false
-                this.bindItemScopeActions(todoScope)
-                this.itemScopes.push(todoScope)
-
-                this.optionalUpdateHint(this.mainScope)
-            }
-        } finally {
-            if (this.headerScope.inputValue !== oldValue) {
-                this.update(this.headerScope)
-            }
-        }
+        this.optionalUpdateHint(this.mainScope)
     }
 
     protected async onToggleAll() {
@@ -452,13 +473,13 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
             }
         }
 
-        if (allItemsCompleted !== this.headerScope.allItemsCompleted) {
-            this.headerScope.allItemsCompleted = allItemsCompleted
+        if (allItemsCompleted !== this.header.scope.allItemsCompleted) {
+            this.header.scope.allItemsCompleted = allItemsCompleted
             headerChanged = true
         }
 
-        if (this.headerScope.toggleButtonVisible !== toggleButtonVisible) {
-            this.headerScope.toggleButtonVisible = toggleButtonVisible
+        if (this.header.scope.toggleButtonVisible !== toggleButtonVisible) {
+            this.header.scope.toggleButtonVisible = toggleButtonVisible
             headerChanged = true
         }
 
@@ -504,7 +525,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
                 this.update()
             } else {
                 if (headerChanged) {
-                    this.update(this.headerScope)
+                    this.update(this.header.scope)
                 }
 
                 if (mainChanged) {
