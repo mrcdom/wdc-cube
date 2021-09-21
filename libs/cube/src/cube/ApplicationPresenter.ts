@@ -5,14 +5,14 @@ import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
 import { FlipContext } from './FlipContext'
 import { Scope, ScopeType } from './Scope'
-import { Presenter } from './Presenter'
-import { instrumentViewActions } from './IPresenter'
+import { CubePresenter } from './CubePresenter'
+import { instrumentViewActions } from './Presenter'
 
-import type { IPresenterBase } from './IPresenter'
+import type { ICubePresenter } from './IPresenter'
 
 const LOG = Logger.get('ApplicationPresenter')
 
-export class ApplicationPresenter<S extends Scope> extends Application implements IPresenterBase<S> {
+export class ApplicationPresenter<S extends Scope> extends Application implements ICubePresenter {
 
     private readonly __presenter: InternalApplicationPresenter<S, ApplicationPresenter<S>>
 
@@ -68,7 +68,7 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         }
     }
 
-    public updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate?:number) {
+    public updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate?: number) {
         this.__presenter.updateHint(scopeCtor, scope, maxUpdate)
     }
 
@@ -104,7 +104,7 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
 }
 
-class InternalApplicationPresenter<S extends Scope, A extends ApplicationPresenter<S>> extends Presenter<A, S> {
+class InternalApplicationPresenter<S extends Scope, A extends ApplicationPresenter<S>> extends CubePresenter<A, S> {
 
     public constructor(app: A, scope: S) {
         super(app, scope)

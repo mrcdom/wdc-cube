@@ -3,14 +3,15 @@ import { Comparators } from '../utils/Comparators'
 import { Place } from './Place'
 import { PlaceUri } from './PlaceUri'
 import { Application } from './Application'
-import type { PresenterMapType } from './Presenter'
+
+import type { ICubePresenter } from './IPresenter'
 
 const LOG = Logger.get('FlipContext')
 
 export class FlipContext {
 
     private __app: Application
-    private __presenterMap: PresenterMapType
+    private __presenterMap: Map<number, ICubePresenter>
     private __sourceUri: PlaceUri
     private __targetUri: PlaceUri
     private __level: number
@@ -51,7 +52,7 @@ export class FlipContext {
         return ++this.__level
     }
 
-    private extractPresenters(map: PresenterMapType, path: Place[]) {
+    private extractPresenters(map: Map<number, ICubePresenter>, path: Place[]) {
         for (const place of path) {
             const presenter = this.__app.getPresenter(place)
             if (presenter) {
@@ -65,15 +66,15 @@ export class FlipContext {
 
         // Only runs if this context is the last context
         if (this.__level === atLevel) {
-            const deepest = this.__targetUri.place === place
+            const latest = this.__targetUri.place === place
             const presenter = this.__presenterMap.get(place.id)
 
             if (presenter) {
-                result = await presenter.applyParameters(this.__targetUri, false, deepest)
+                result = await presenter.applyParameters(this.__targetUri, false, latest)
             } else if (place.factory) {
                 const presenter = place.factory(this.__app)
                 this.__presenterMap.set(place.id, presenter)
-                result = await presenter.applyParameters(this.__targetUri, true, deepest)
+                result = await presenter.applyParameters(this.__targetUri, true, latest)
             } else {
                 result = true
             }
@@ -107,7 +108,7 @@ export class FlipContext {
         }
     }
 
-    public commit(newPresenterMap: PresenterMapType) {
+    public commit(newPresenterMap: Map<number, ICubePresenter>) {
         newPresenterMap.clear()
 
         // Keep only presenters belonging to 
@@ -137,7 +138,7 @@ export class FlipContext {
         return newPresenterMap
     }
 
-    private releasePresenters(presenterInstanceMap: PresenterMapType): void {
+    private releasePresenters(presenterInstanceMap: Map<number, ICubePresenter>): void {
         const presenterIds = [] as number[]
 
         for (const presenterId of presenterInstanceMap.keys()) {

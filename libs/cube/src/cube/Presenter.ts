@@ -1,49 +1,25 @@
+import lodash from 'lodash'
 import { Logger } from '../utils/Logger'
 import { NOOP_VOID } from '../utils/EmptyFunctions'
-import { Application } from './Application'
-import { Place } from './Place'
-import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { Scope, ScopeType } from './Scope'
+import { ScopeUtils } from './ScopeUtils'
 import { CallbackManager } from './CallbackManager'
-import { instrumentViewActions } from './IPresenter'
+import { IPresenterOwner, AlertSeverity } from './IPresenter'
 
-import type { IPresenter, IPresenterBase } from './IPresenter'
-import type { AlertSeverity } from './Application'
+import type { IPresenter } from './IPresenter'
 
-const LOG = Logger.get('Presenter')
+const LOG = Logger.get('PresenterBase')
 
 // @Inject
 const callbackManager = CallbackManager.INSTANCE
 
-type ScopeUpdateConfig = {
-    maxUpdate: number
-    scope: Scope
-}
-
-function pushScope(target: Map<ScopeType, Map<Scope, boolean>>, scope: Scope) {
-    let scopeMap = target.get(scope.constructor as ScopeType)
-    if (scopeMap) {
-        scopeMap.set(scope, true)
-    } else {
-        scopeMap = new Map()
-        scopeMap.set(scope, true)
-        target.set(scope.constructor as ScopeType, scopeMap)
-    }
-}
-
-export type PresenterMapType = Map<number, IPresenter>
-export type PresenterFactory = (app: Application) => IPresenter
-
-export type PresenterType = Presenter<Application, Scope>
-export type PresenterContructor<A extends Application> = { new(app: A): PresenterType }
-
-export class Presenter<A extends Application, S extends Scope> implements IPresenterBase<S> {
-
-    protected readonly app: A
-
-    public readonly scope: S
+export class Presenter<S extends Scope> implements IPresenter {
 
     // :: Private Fields
+
+    public readonly __scope: S
+
+    private readonly __owner: IPresenterOwner
 
     private readonly __dirtyScopes: Map<ScopeType, Map<Scope, boolean>>
 
@@ -55,21 +31,38 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
     private __autoUpdateEnabled = true
 
-    public constructor(app: A, scope: S) {
-        this.app = app
-        this.scope = scope
+    public constructor(owner: IPresenterOwner, scope: S) {
+        this.__owner = owner
+        this.__scope = scope
+
         this.__dirtyScopes = new Map()
 
-        this.update(this.scope)
+        this.update(scope)
 
         instrumentViewActions.call(this)
     }
 
     public release(): void {
         callbackManager.unbind(this.__emitBeforeScopeUpdate)
-        this.scope.update = NOOP_VOID
+        this.__scope.update = NOOP_VOID
         this.__dirtyScopes.clear()
         this.__scopeUpdateFallback.clear()
+    }
+
+    public get scope() {
+        return this.__scope
+    }
+
+    public get owner(): IPresenterOwner {
+        return this.__owner
+    }
+
+    public unexpected(message: string, error: unknown): void {
+        this.__owner.unexpected(message, error)
+    }
+
+    public alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
+        this.__owner.alert(severity, title, message, onClose)
     }
 
     public isDirty(): boolean {
@@ -88,41 +81,15 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         this.__scopeUpdateFallback.set(scopeCtor, { scope, maxUpdate })
     }
 
-    public unexpected(message: string, error: unknown): void {
-        this.app.unexpected(message, error)
-    }
-
-    public alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
-        this.app.alert(severity, title, message, onClose)
-    }
-
-    protected async flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }) {
-        return this.app.flip(place, args)
-    }
-
-    public async flipToUri(uri: PlaceUri) {
-        return await this.app.flipToUri(uri)
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public async applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean> {
-        return true
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public publishParameters(uri: PlaceUri): void {
-        // NOOP
-    }
-
     public onBeforeScopeUpdate(): void {
         // NOOP
     }
 
     public update(optionalScope?: Scope) {
         if (!this.__baseScopeUpdateRequested) {
-            const scope = optionalScope ?? this.scope
+            const scope = optionalScope ?? this.__scope
 
-            if (scope === this.scope) {
+            if (scope === this.__scope) {
                 this.__baseScopeUpdateRequested = true
                 this.__dirtyScopes.clear()
             } else {
@@ -139,11 +106,11 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
                 this.onBeforeScopeUpdate()
 
                 if (this.__baseScopeUpdateRequested) {
-                    this.scope.update()
+                    this.__scope.update()
                 }
                 // Use selective update
                 else if (this.selectiveScopeUpdate() === 0 && force) {
-                    this.scope.update()
+                    this.__scope.update()
                 }
             } catch (caught) {
                 LOG.error('Updating dirty scopes')
@@ -161,8 +128,8 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
         do {
             changesCount = 0
 
-            if (sourceDirtyScopes.has(this.scope.constructor as ScopeType)) {
-                this.scope.update()
+            if (sourceDirtyScopes.has(this.__scope.constructor as ScopeType)) {
+                this.__scope.update()
                 updateCount++
                 break
             } else {
@@ -197,8 +164,71 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
 
 }
 
-export function newPresenterFactory<A extends Application>(ctor: PresenterContructor<A>): PresenterFactory {
-    return (app) => {
-        return new ctor((app as unknown) as A)
+type ScopeUpdateConfig = {
+    maxUpdate: number
+    scope: Scope
+}
+
+function pushScope(target: Map<ScopeType, Map<Scope, boolean>>, scope: Scope) {
+    let scopeMap = target.get(scope.constructor as ScopeType)
+    if (scopeMap) {
+        scopeMap.set(scope, true)
+    } else {
+        scopeMap = new Map()
+        scopeMap.set(scope, true)
+        target.set(scope.constructor as ScopeType, scopeMap)
+    }
+}
+
+function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
+    function onCatch(this: IPresenter, caught: unknown) {
+        this.unexpected(`During execution of ${impl.name} action`, caught)
+    }
+
+    function onFinally(this: IPresenter) {
+        if (this.isAutoUpdateEnabled()) {
+            this.emitBeforeScopeUpdate(true)
+        }
+    }
+
+    return function (this: IPresenter, ...args: unknown[]) {
+        try {
+            const result = impl.apply(this, args) as unknown
+
+            // Result is a valid promise
+            if (result && (result as Promise<unknown>).catch && (result as Promise<unknown>).finally) {
+                return (result as Promise<unknown>)
+                    .catch(onCatch.bind(this))
+                    .finally(onFinally.bind(this))
+            }
+            // Otherwhise, is a synchronous action
+            else {
+                onFinally.bind(this)
+                return result
+            }
+        } catch (caught) {
+            // Will only be actioned on sincronus actions
+            onCatch.bind(this, caught)
+            return undefined
+        }
+    }
+}
+
+export function instrumentViewActions(this: IPresenter) {
+    const ctor = (this.constructor as unknown) as Record<string, unknown>
+
+    if (!ctor.$$instrumented$$) {
+        try {
+            const proto = Object.getPrototypeOf(this) as Record<string, unknown>
+            const methodNames = Object.getOwnPropertyNames(proto)
+            for (const key of methodNames) {
+                const value = proto[key]
+                if (value !== this.onBeforeScopeUpdate && ScopeUtils.isAnActionName(key) && lodash.isFunction(value)) {
+                    proto[key] = wrapViewAction(value)
+                }
+            }
+        } finally {
+            ctor.$$instrumented$$ = true
+        }
     }
 }

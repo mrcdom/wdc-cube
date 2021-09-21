@@ -1,7 +1,7 @@
 import { Application, } from './Application'
-import { newPresenterFactory } from './Presenter'
+import { newPresenterFactory } from './CubePresenter'
 
-import type { PresenterContructor, PresenterFactory } from './Presenter'
+import type { PresenterContructor, PresenterFactory } from './CubePresenter'
 
 const indexGenMap: Map<number, number> = new Map()
 

@@ -1,4 +1,4 @@
-import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../../main/Main.presenter'
 import { AttrsIds, ParamsIds, Places } from '../../../Constants'
 import { TutorialService, SiteItemType } from '../../../services/TutorialService'
@@ -19,7 +19,7 @@ export class SubscriptionsDetailScope extends Scope {
     onEmailChanged = Scope.SYNC_ACTION_STRING
 }
 
-export class SubscriptionsDetailPresenter extends Presenter<MainPresenter, SubscriptionsDetailScope> {
+export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, SubscriptionsDetailScope> {
 
     private dialogSlot: ScopeSlot = NOOP_VOID
 

@@ -5,17 +5,15 @@ import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
 import { FlipContext } from './FlipContext'
 
-import type { PresenterMapType } from './Presenter'
+import type { AlertSeverity, ICubePresenter, IPresenterOwner } from './IPresenter'
 
 const LOG = Logger.get('Application')
 
-export type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
-
-export class Application {
+export class Application implements IPresenterOwner {
 
     private __placeMap: Map<string, Place>
 
-    private __presenterMap: PresenterMapType
+    private __presenterMap: Map<number, ICubePresenter>
 
     private __rootPlace: Place
 

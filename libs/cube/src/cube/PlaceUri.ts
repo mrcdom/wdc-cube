@@ -1,5 +1,5 @@
 import { NOOP_VOID } from '../utils/EmptyFunctions'
-import { CastUtils } from '../utils/CastUtils'
+import { ReflectionUtils } from '../utils/ReflectionUtils'
 import { StandardCharsets } from '../utils/StandardCharsets'
 import { QueryStringParser } from '../utils/QueryStringParser'
 import { QueryStringBuilder } from '../utils/QueryStringBuilder'
@@ -59,7 +59,7 @@ export class PlaceUri extends Object {
 	 */
 	public getParameterValue(name: string): unknown {
 		const value = this.parameters.get(name)
-		if (CastUtils.isArray(value)) {
+		if (ReflectionUtils.isArray(value)) {
 			return (value as Array<unknown>)[0]
 		} else {
 			return value
@@ -81,7 +81,7 @@ export class PlaceUri extends Object {
 			return []
 		}
 
-		if (CastUtils.isArray(value)) {
+		if (ReflectionUtils.isArray(value)) {
 			return value as Array<unknown>
 		}
 
@@ -106,7 +106,7 @@ export class PlaceUri extends Object {
 	 */
 	public getParameterAsString(name: string): string | undefined {
 		const value = this.getParameterValue(name)
-		return CastUtils.toString(value)
+		return ReflectionUtils.toString(value)
 	}
 
 	/**
@@ -129,7 +129,7 @@ export class PlaceUri extends Object {
 	 */
 	public getParameterAsStringOrDefault(name: string, defaultValue: string): string {
 		const value = this.getParameterValue(name)
-		return CastUtils.toString(value, defaultValue) as string
+		return ReflectionUtils.toString(value, defaultValue) as string
 	}
 
 	/**
@@ -150,7 +150,7 @@ export class PlaceUri extends Object {
 	 */
 	public getParameterAsNumber(name: string): number | undefined {
 		const value = this.getParameterValue(name)
-		return CastUtils.toNumber(value)
+		return ReflectionUtils.toNumber(value)
 	}
 
 	/**
@@ -173,7 +173,7 @@ export class PlaceUri extends Object {
 	 */
 	public getParameterAsNumberOrDefault(name: string, defaultValue: number): number {
 		const value = this.getParameterValue(name)
-		return CastUtils.toNumber(value, defaultValue) as number
+		return ReflectionUtils.toNumber(value, defaultValue) as number
 	}
 
 	/**
@@ -194,7 +194,7 @@ export class PlaceUri extends Object {
 	 */
 	public getParameterAsBoolean(name: string): boolean | undefined {
 		const value = this.getParameterValue(name)
-		return CastUtils.toBoolean(value)
+		return ReflectionUtils.toBoolean(value)
 	}
 
 	/**
@@ -217,7 +217,7 @@ export class PlaceUri extends Object {
 	 */
 	public getParameterAsBooleanOrDefault(name: string, defaultValue: boolean): boolean {
 		const value = this.getParameterValue(name)
-		return CastUtils.toBoolean(value, defaultValue) as boolean
+		return ReflectionUtils.toBoolean(value, defaultValue) as boolean
 	}
 
 	/**

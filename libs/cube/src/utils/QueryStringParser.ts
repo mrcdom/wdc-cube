@@ -1,4 +1,4 @@
-import { CastUtils } from './CastUtils'
+import { ReflectionUtils } from './ReflectionUtils'
 import { StandardCharsets, Charset } from './StandardCharsets'
 
 export class QueryStringParser {
@@ -62,13 +62,13 @@ export class QueryStringParser {
 
         if (oldValue === undefined || oldValue === null) {
             params.set(name, value)
-        } else if (CastUtils.isArray(oldValue)) {
+        } else if (ReflectionUtils.isArray(oldValue)) {
             const array = oldValue as Array<unknown>
-            array.push(CastUtils.toUnknown(value, CastUtils.getArrayType(array)))
+            array.push(ReflectionUtils.toUnknown(value, ReflectionUtils.getArrayType(array)))
         } else {
             const array = new Array<unknown>(2)
             array[0] = oldValue
-            array[1] = CastUtils.toUnknown(value, CastUtils.getType(oldValue))
+            array[1] = ReflectionUtils.toUnknown(value, ReflectionUtils.getType(oldValue))
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             params.set(name, array as any)
         }

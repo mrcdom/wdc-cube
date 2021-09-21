@@ -1,4 +1,4 @@
-import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
 import { AttrsIds } from '../../Constants'
 
@@ -10,7 +10,7 @@ export class RestrictedScope extends Scope {
     detail?: Scope
 }
 
-export class RestrictedPresenter extends Presenter<MainPresenter, RestrictedScope> {
+export class RestrictedPresenter extends CubePresenter<MainPresenter, RestrictedScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 

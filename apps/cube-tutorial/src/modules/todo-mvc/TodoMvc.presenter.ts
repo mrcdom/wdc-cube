@@ -2,7 +2,7 @@
  * Based on https://todomvc.com/examples/react
  */
 
-import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamsIds, AttrsIds } from '../../Constants'
@@ -84,7 +84,7 @@ export class TodoMvcScope extends Scope {
 
 // :: Presentation
 
-export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
+export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 

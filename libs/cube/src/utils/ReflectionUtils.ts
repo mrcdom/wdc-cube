@@ -19,7 +19,7 @@ async function asyncFunction() {
 
 export const AsyncFunction = asyncFunction.constructor as { new(): Promise<unknown> }
 
-export class CastUtils {
+export class ReflectionUtils {
 
     public static isInstanceOf(instance: unknown, ctor: ClassConstructor): boolean {
         if (instance === undefined || instance === null) {
@@ -91,7 +91,7 @@ export class CastUtils {
         if (array && array.length > 0) {
             for (const item of array) {
                 if (item) {
-                    return CastUtils.getType(item)
+                    return ReflectionUtils.getType(item)
                 }
             }
         }
@@ -164,7 +164,7 @@ export class CastUtils {
 
     public static toString(value: unknown, defaultValue?: string): string | undefined {
         if (value !== null && value !== undefined) {
-            const v = CastUtils.toUnknown(value, String) as string
+            const v = ReflectionUtils.toUnknown(value, String) as string
             return v === null || v === undefined ? defaultValue : v
         }
         return defaultValue
@@ -172,7 +172,7 @@ export class CastUtils {
 
     public static toNumber(value: unknown, defaultValue?: number): number | undefined {
         if (value !== null && value !== undefined) {
-            const v = CastUtils.toUnknown(value, Number) as number
+            const v = ReflectionUtils.toUnknown(value, Number) as number
             return v === null || v === undefined ? defaultValue : v
         }
         return defaultValue
@@ -180,7 +180,7 @@ export class CastUtils {
 
     public static toBoolean(value: unknown, defaultValue?: boolean): boolean | undefined {
         if (value) {
-            const v = CastUtils.toUnknown(value, Boolean) as boolean
+            const v = ReflectionUtils.toUnknown(value, Boolean) as boolean
             return v === null || v === undefined ? defaultValue : v
         }
         return defaultValue

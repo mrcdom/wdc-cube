@@ -1,20 +1,20 @@
 import { NOOP_VOID } from '../utils/EmptyFunctions'
-import { CastUtils } from '../utils/CastUtils'
+import { ReflectionUtils } from '../utils/ReflectionUtils'
 import { Place } from './Place'
 import { PlaceUri } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
-import { Presenter } from './Presenter'
+import { CubePresenter } from './CubePresenter'
 import { Scope } from './Scope'
 import { ScopeSlot } from './ScopeSlot'
 
 it('CastUtils.isArray', () => {
-    expect(CastUtils.isArray(undefined)).toEqual(false)
-    expect(CastUtils.isArray(null)).toEqual(false)
-    expect(CastUtils.isArray(0)).toEqual(false)
-    expect(CastUtils.isArray(true)).toEqual(false)
-    expect(CastUtils.isArray('abc')).toEqual(false)
-    expect(CastUtils.isArray([])).toEqual(true)
+    expect(ReflectionUtils.isArray(undefined)).toEqual(false)
+    expect(ReflectionUtils.isArray(null)).toEqual(false)
+    expect(ReflectionUtils.isArray(0)).toEqual(false)
+    expect(ReflectionUtils.isArray(true)).toEqual(false)
+    expect(ReflectionUtils.isArray('abc')).toEqual(false)
+    expect(ReflectionUtils.isArray([])).toEqual(true)
 })
 
 it('WebFlowPlace.toString  :: Simple Value', () => {
@@ -109,7 +109,7 @@ class RootScope extends Scope {
     body?: Scope
 }
 
-class RootPresenter extends Presenter<TestApplication, RootScope> {
+class RootPresenter extends CubePresenter<TestApplication, RootScope> {
 
     public initialized = false
     public deepest = false
@@ -171,7 +171,7 @@ class LoginScope extends Scope {
     onEnter = Scope.ASYNC_ACTION
 }
 
-class LoginPresenter extends Presenter<TestApplication, LoginScope> {
+class LoginPresenter extends CubePresenter<TestApplication, LoginScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
@@ -237,7 +237,7 @@ class RestrictedScope extends Scope {
     onLogout = Scope.ASYNC_ACTION
 }
 
-class RestrictedPresenter extends Presenter<TestApplication, RestrictedScope> {
+class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
@@ -349,7 +349,7 @@ class CartScope extends Scope {
 
 }
 
-class CartPresenter extends Presenter<TestApplication, CartScope> {
+class CartPresenter extends CubePresenter<TestApplication, CartScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
@@ -407,7 +407,7 @@ class ProductScope extends Scope {
     name?: string
 }
 
-class ProductPresenter extends Presenter<TestApplication, ProductScope> {
+class ProductPresenter extends CubePresenter<TestApplication, ProductScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
@@ -466,7 +466,7 @@ class ReceiptScope extends Scope {
 
 }
 
-class ReceiptPresenter extends Presenter<TestApplication, ReceiptScope> {
+class ReceiptPresenter extends CubePresenter<TestApplication, ReceiptScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
 

@@ -1,4 +1,4 @@
-import { Logger, Presenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
 import { Places, AttrsIds, ParamsIds } from '../../Constants'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
@@ -15,7 +15,7 @@ export class SubscriptionsScope extends Scope {
     onItemClicked = Scope.ASYNC_ACTION_ONE<SiteItemType>()
 }
 
-export class SubscriptionsPresenter extends Presenter<MainPresenter, SubscriptionsScope> {
+export class SubscriptionsPresenter extends CubePresenter<MainPresenter, SubscriptionsScope> {
 
     private parentSlot: ScopeSlot = NOOP_VOID
     private dialogSlot: ScopeSlot = NOOP_VOID
