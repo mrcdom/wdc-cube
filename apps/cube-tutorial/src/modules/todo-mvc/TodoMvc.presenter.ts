@@ -98,7 +98,7 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
 
     private itemScopes = [] as ItemScope[]
 
-    private stressEnabled = false
+    private userId = 0
 
     private updateHintEnabled = true
 
@@ -118,13 +118,13 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
     }
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
+        const uriUserId = uri.getParameterAsNumberOrDefault(ParamsIds.TodoUserId, this.userId)
         const uriShowing = uri.getParameterAsNumberOrDefault(ParamsIds.TodoShowing, this.footerScope.showing) as ShowingOptions
-        const uriIsStress = uri.getParameterAsBooleanOrDefault(ParamsIds.TodoStress, this.stressEnabled)
 
         if (initialization) {
-            this.initializeState(uri, uriShowing, uriIsStress)
+            await this.initializeState(uri, uriUserId, uriShowing)
         } else {
-            this.synchronizeState(uriShowing, uriIsStress)
+            await this.synchronizeState(uriUserId, uriShowing)
         }
 
         this.parentSlot(this.scope)
@@ -137,12 +137,14 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
             uri.setParameter(ParamsIds.TodoShowing, this.footerScope.showing)
         }
 
-        if (this.stressEnabled) {
-            uri.setParameter(ParamsIds.TodoStress, this.stressEnabled)
+        if (this.userId !== 0) {
+            uri.setParameter(ParamsIds.TodoUserId, this.userId)
         }
     }
 
-    private async initializeState(uri: PlaceUri, uriShowing: ShowingOptions, uriIsStress: boolean) {
+    private async initializeState(uri: PlaceUri, uriUserId: number, uriShowing: ShowingOptions) {
+        this.userId = uriUserId
+
         // Bind Events
         this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
         this.headerScope.actions.onSyncInputKeyDown = this.onHeaderSyncInputKeyDown.bind(this)
@@ -162,51 +164,52 @@ export class TodoMvcPresenter extends Presenter<MainPresenter, TodoMvcScope> {
         // Get slots
         this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
 
-        if (uriIsStress) {
+        if (this.userId < 0) {
             this.mainScope.clock = this.clockScope
             this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
-            this.stressEnabled = true
-            await this.loadData(1000)
-        } else {
-            await this.loadData(0)
         }
+
+        await this.loadData()
 
         LOG.debug('Initialized')
     }
 
-    private async synchronizeState(uriShowing: ShowingOptions, uriIsStress: boolean) {
+    private async synchronizeState(uriUserId: number, uriShowing: ShowingOptions) {
         this.footerScope.showing = uriShowing
 
-        if (this.stressEnabled !== uriIsStress) {
-            if (this.clockUpdateHandler) {
-                clearInterval(this.clockUpdateHandler)
-            }
-
-            if (uriIsStress) {
-                this.mainScope.clock = this.clockScope
-                this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
-                this.stressEnabled = true
-                await this.loadData(1000)
-            } else {
-                this.stressEnabled = false
-                this.mainScope.clock = undefined
-                await this.loadData(0)
-            }
+        if (uriUserId !== this.userId) {
+            this.userId = uriUserId
+            await this.loadData()
         }
     }
 
-    private async loadData(quantity: number) {
+    private async loadData() {
+        const todos = await tutorialService.fetchTodos(this.userId)
+
         this.itemScopes.length = 0
 
-        const todos = await tutorialService.fetchTodos(quantity)
         for (const todo of todos) {
             const todoScope = new ItemScope()
-            todoScope.id = todo.uid
-            todoScope.title = todo.text
-            todoScope.completed = todo.complete
+            todoScope.id = todo.id
+            todoScope.title = todo.title
+            todoScope.completed = todo.completed
             this.bindItemScopeActions(todoScope)
             this.itemScopes.push(todoScope)
         }
+
+        if (this.userId < 0) {
+            this.mainScope.clock = this.clockScope
+            if (!this.clockUpdateHandler) {
+                this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
+            }
+        } else {
+            this.mainScope.clock = undefined
+            if (this.clockUpdateHandler) {
+                clearInterval(this.clockUpdateHandler)
+            }
+        }
+
+        this.update()
     }
 
     private bindItemScopeActions(item: ItemScope) {

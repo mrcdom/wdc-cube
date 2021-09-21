@@ -29,7 +29,7 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
         LOG.info('Finalized')
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepst: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
         if (initialization) {
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             this.dialogSlot = uri.getScopeSlot(AttrsIds.dialogSlot)
@@ -40,7 +40,7 @@ export class SubscriptionsPresenter extends Presenter<MainPresenter, Subscriptio
             LOG.info('Initialized')
         }
 
-        if (deepst) {
+        if (last) {
             this.dialogSlot(undefined)
         }
 

@@ -17,7 +17,7 @@ export interface IPresenter {
 
     emitBeforeScopeUpdate(force?: boolean): void
 
-    applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean>
+    applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean>
 
     publishParameters(uri: PlaceUri): void
 

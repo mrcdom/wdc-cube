@@ -16,9 +16,9 @@ export type SiteItemType = {
 }
 
 export type TodoType = {
-    uid: number
-    text: string
-    complete: boolean
+    id: number
+    title: string
+    completed: boolean
 }
 
 export class TutorialService implements ServiceLike {
@@ -70,46 +70,52 @@ export class TutorialService implements ServiceLike {
         LOG.info('updateOrAddSiteSubscription: ', subscriberMap)
     }
 
-    public async fetchTodos(quantity = 0): Promise<TodoType[]> {
-        if (quantity > 0) {
+    public async fetchTodos(userId: number): Promise<TodoType[]> {
+        if (userId < 0) {
             const todos = [] as TodoType[]
             for (let i = 0; i < 1000; i++) {
                 todos.push({
-                    uid: i + 1,
-                    text: 'Item ' + i,
-                    complete: i % 2 === 0,
+                    id: i + 1,
+                    title: 'Item ' + i,
+                    completed: i % 2 === 0,
                 })
             }
             return todos
-        } else {
-
+        }
+        // Local mock data
+        else if (userId === 0) {
             return [
                 {
-                    uid: 1,
-                    text: 'Walk the dog',
-                    complete: false,
+                    id: 1,
+                    title: 'Walk the dog',
+                    completed: false,
                 },
                 {
-                    uid: 2,
-                    text: 'Write an app',
-                    complete: true,
+                    id: 2,
+                    title: 'Write an app',
+                    completed: true,
                 },
                 {
-                    uid: 3,
-                    text: 'Go to school',
-                    complete: false,
+                    id: 3,
+                    title: 'Go to school',
+                    completed: false,
                 },
                 {
-                    uid: 4,
-                    text: 'Watch Michael Reeves',
-                    complete: true,
+                    id: 4,
+                    title: 'Watch Michael Reeves',
+                    completed: true,
                 },
                 {
-                    uid: 5,
-                    text: 'Add automatic deployment',
-                    complete: true,
+                    id: 5,
+                    title: 'Add automatic deployment',
+                    completed: true,
                 }
             ]
+        } else {
+            const data = await fetch(`https://jsonplaceholder.typicode.com/todos?userId=${userId}`)
+                .then(response => response.json()) as TodoType[]
+
+            return data
         }
     }
 

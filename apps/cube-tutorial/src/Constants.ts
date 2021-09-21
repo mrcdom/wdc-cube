@@ -2,8 +2,8 @@ import { Place } from 'wdc-cube'
 
 export const ParamsIds = {
     SiteId: 'site-id',
-    TodoShowing: 'todo-showing',
-    TodoStress: 'todo-stress'
+    TodoUserId: 'todo-uid',
+    TodoShowing: 'todo-showing'
 }
 
 export const AttrsIds = {

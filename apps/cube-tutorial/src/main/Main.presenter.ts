@@ -63,37 +63,24 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         super.release()
     }
 
-    public async initialize(uri: PlaceUri) {
-        this.stopServices = await SingletonServices.start()
-
-        this.scope.onHome = this.onHome.bind(this)
-        this.scope.onOpenTodos = this.onOpenTodos.bind(this)
-        this.scope.onOpenSuscriptions = this.onOpenSuscriptions.bind(this)
-        this.scope.onLogin = this.onOpenLogin.bind(this)
-
-        this.bodyScope.onOpenAlert = this.onOpenAlert.bind(this)
-
-        this.scope.body = this.bodyScope
-
-        LOG.info('Initialized')
-
-        try {
-            const targetUri = this.newUriFromString(this.historyManager.location)
-            if (targetUri.toString() !== uri.toString()) {
-                await this.flipToUri(targetUri)
-                return false
-            }
-        } catch (caught) {
-            this.unexpected('Navigation from history', caught)
-        }
-    }
-
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, depeest?: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean> {
         if (initialization) {
-            await this.initialize(uri)
+            await this.intializeState()
+  
+            try {
+                const targetUri = this.newUriFromString(this.historyManager.location)
+                if (targetUri.toString() !== uri.toString()) {
+                    await this.flipToUri(targetUri)
+                    return false
+                }
+            } catch (caught) {
+                this.unexpected('Navigation from history', caught)
+            }
+
+            return true
         }
 
-        if (depeest) {
+        if (last) {
             this.bodySlot(undefined)
         } else {
             uri.setScopeSlot(AttrsIds.parentSlot, this.bodySlot)
@@ -106,6 +93,21 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         }
 
         return true
+    }
+
+    private async intializeState() {
+        this.stopServices = await SingletonServices.start()
+
+        this.scope.onHome = this.onHome.bind(this)
+        this.scope.onOpenTodos = this.onOpenTodos.bind(this)
+        this.scope.onOpenSuscriptions = this.onOpenSuscriptions.bind(this)
+        this.scope.onLogin = this.onOpenLogin.bind(this)
+
+        this.bodyScope.onOpenAlert = this.onOpenAlert.bind(this)
+
+        this.scope.body = this.bodyScope
+
+        LOG.info('Initialized')
     }
 
     // :: Helper API

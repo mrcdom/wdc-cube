@@ -101,7 +101,7 @@ export class Presenter<A extends Application, S extends Scope> implements IPrese
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public async applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean> {
+    public async applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean> {
         return true
     }
 

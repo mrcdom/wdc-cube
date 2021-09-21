@@ -30,13 +30,13 @@ export class RestrictedPresenter extends Presenter<MainPresenter, RestrictedScop
         LOG.info('Finalized')
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
         if (initialization) {
             this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
             LOG.info('Initialized')
         }
 
-        if (deepest) {
+        if (last) {
             this.detailSlot(undefined)
         } else {
             uri.setScopeSlot(AttrsIds.parentSlot, this.detailSlot)
