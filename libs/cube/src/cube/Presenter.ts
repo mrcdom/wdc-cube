@@ -21,32 +21,38 @@ export class Presenter<S extends Scope> implements IPresenter {
 
     private readonly __owner: IPresenterOwner
 
-    private readonly __dirtyScopes: Map<ScopeType, Map<Scope, boolean>>
+    private readonly __updateManager: ScopeUpdateManager
 
-    private readonly __scopeUpdateFallback: Map<ScopeType, ScopeUpdateConfig> = new Map()
+    private readonly __updateManagerOwner: boolean
 
-    private readonly __emitBeforeScopeUpdate = this.emitBeforeScopeUpdate.bind(this)
+    private readonly __beforeScopeUpdateListener: () => void = this.onBeforeScopeUpdate.bind(this)
 
-    private __baseScopeUpdateRequested = false
-
-    private __autoUpdateEnabled = true
-
-    public constructor(owner: IPresenterOwner, scope: S) {
+    public constructor(owner: IPresenterOwner, scope: S, updateManager?: ScopeUpdateManager) {
         this.__owner = owner
         this.__scope = scope
 
-        this.__dirtyScopes = new Map()
+        if (updateManager) {
+            this.__updateManagerOwner = false
+            this.__updateManager = updateManager
 
-        this.update(scope)
+            updateManager.updateHint(scope.constructor as ScopeType, updateManager.scope)
+        } else {
+            this.__updateManagerOwner = true
+            this.__updateManager = new ScopeUpdateManager(scope)
+        }
+
+        this.__updateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
+        this.__updateManager.update(scope)
 
         instrumentViewActions.call(this)
     }
 
     public release(): void {
-        callbackManager.unbind(this.__emitBeforeScopeUpdate)
-        this.__scope.update = NOOP_VOID
-        this.__dirtyScopes.clear()
-        this.__scopeUpdateFallback.clear()
+        if (this.__updateManagerOwner) {
+            this.__updateManager.release()
+        } else {
+            this.__updateManager.removeOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
+        }
     }
 
     public get scope() {
@@ -57,12 +63,91 @@ export class Presenter<S extends Scope> implements IPresenter {
         return this.__owner
     }
 
+    public get scopeUpdateManager(): ScopeUpdateManager {
+        return this.__updateManager
+    }
+
     public unexpected(message: string, error: unknown): void {
         this.__owner.unexpected(message, error)
     }
 
     public alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>) {
         this.__owner.alert(severity, title, message, onClose)
+    }
+
+    public isDirty(): boolean {
+        return this.__updateManager.isDirty()
+    }
+
+    public isAutoUpdateEnabled(): boolean {
+        return this.__updateManager.isAutoUpdateEnabled()
+    }
+
+    public disableAutoUpdate(): void {
+        this.__updateManager.disableAutoUpdate()
+    }
+
+    public updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate?: number) {
+        this.__updateManager.updateHint(scopeCtor, scope, maxUpdate)
+    }
+
+    public update(optionalScope?: Scope) {
+        this.__updateManager.update(optionalScope ?? this.scope)
+    }
+
+    public emitBeforeScopeUpdate(force?: boolean): void {
+        if (this.__updateManagerOwner) {
+            this.__updateManager.emitBeforeScopeUpdate(force)
+        } else {
+            if (force) {
+                this.__updateManager.update(this.scope)
+            }
+            this.__updateManager.emitBeforeScopeUpdate(false)
+        }
+    }
+
+    public onBeforeScopeUpdate(): void {
+        // NOOP
+    }
+
+}
+
+type ScopeUpdateConfig = {
+    maxUpdate: number
+    scope: Scope
+}
+
+export class ScopeUpdateManager {
+
+    public readonly __scope: Scope
+
+    private readonly __dirtyScopes: Map<ScopeType, Map<Scope, boolean>>
+
+    private readonly __scopeUpdateFallback: Map<ScopeType, ScopeUpdateConfig> = new Map()
+
+    private readonly __emitBeforeScopeUpdate = this.emitBeforeScopeUpdate.bind(this)
+
+    private __baseScopeUpdateRequested = false
+
+    private __autoUpdateEnabled = true
+
+    private __beforeScopeUpdateHandlerMap = new Map<() => void, number>()
+
+    constructor(scope: Scope) {
+        this.__scope = scope
+        this.__dirtyScopes = new Map()
+    }
+
+    public release() {
+        callbackManager.unbind(this.__emitBeforeScopeUpdate)
+        this.__scope.update = NOOP_VOID
+        this.__beforeScopeUpdateHandlerMap.clear()
+        this.__dirtyScopes.clear()
+        this.__scopeUpdateFallback.clear()
+    }
+
+    public get scope() {
+        return this.__scope
     }
 
     public isDirty(): boolean {
@@ -81,8 +166,27 @@ export class Presenter<S extends Scope> implements IPresenter {
         this.__scopeUpdateFallback.set(scopeCtor, { scope, maxUpdate })
     }
 
-    public onBeforeScopeUpdate(): void {
-        // NOOP
+    public removeUpdateHint(scopeCtor: ScopeType) {
+        this.__scopeUpdateFallback.delete(scopeCtor)
+    }
+
+    public addOnBeforeScopeUpdateListener(listener: () => void) {
+        const count = this.__beforeScopeUpdateHandlerMap.get(listener)
+        if (count === undefined) {
+            this.__beforeScopeUpdateHandlerMap.set(listener, 1)
+        } else {
+            this.__beforeScopeUpdateHandlerMap.set(listener, count + 1)
+        }
+    }
+
+    public removeOnBeforeScopeUpdateListener(listener: () => void) {
+        const count = this.__beforeScopeUpdateHandlerMap.get(listener)
+        if (count != undefined && count > 0) {
+            const nextCount = count - 1
+            if (nextCount === 0) {
+                this.__beforeScopeUpdateHandlerMap.delete(listener)
+            }
+        }
     }
 
     public update(optionalScope?: Scope) {
@@ -103,7 +207,9 @@ export class Presenter<S extends Scope> implements IPresenter {
     public emitBeforeScopeUpdate(force = false): void {
         if (force || this.__baseScopeUpdateRequested || this.__dirtyScopes.size > 0) {
             try {
-                this.onBeforeScopeUpdate()
+                for (const listener of this.__beforeScopeUpdateHandlerMap.keys()) {
+                    listener()
+                }
 
                 if (this.__baseScopeUpdateRequested) {
                     this.__scope.update()
@@ -162,11 +268,6 @@ export class Presenter<S extends Scope> implements IPresenter {
         return updateCount
     }
 
-}
-
-type ScopeUpdateConfig = {
-    maxUpdate: number
-    scope: Scope
 }
 
 function pushScope(target: Map<ScopeType, Map<Scope, boolean>>, scope: Scope) {

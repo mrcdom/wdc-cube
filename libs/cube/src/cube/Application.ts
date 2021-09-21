@@ -81,6 +81,9 @@ export class Application implements IPresenterOwner {
         return this.__rootPlace
     }
 
+    protected putPresenter(place: Place, presenter: ICubePresenter) {
+        this.__presenterMap.set(place.id, presenter)
+    }
 
     protected emitAllBeforeScopeUpdate(): void {
         for (let i = this.lastPlace.path.length - 1; i >= 0; i--) {

@@ -90,8 +90,8 @@ class HeaderPresenter extends Presenter<HeaderScope> {
 
     public handleToggleAll = Scope.ASYNC_ACTION
 
-    public constructor(app: MainPresenter) {
-        super(app, new HeaderScope())
+    public constructor(app: MainPresenter, parent: TodoMvcPresenter) {
+        super(app, new HeaderScope(), parent.scopeUpdateManager)
     }
 
     public release() {
@@ -137,7 +137,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     private parentSlot: ScopeSlot = NOOP_VOID
 
-    private header = new HeaderPresenter(this.app)
+    private header: HeaderPresenter
 
     private mainScope = new MainScope()
 
@@ -155,6 +155,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
+        this.header = new HeaderPresenter(app, this)
         this.scope.header = this.header.scope
     }
 

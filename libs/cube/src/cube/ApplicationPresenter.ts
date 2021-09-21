@@ -5,8 +5,7 @@ import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
 import { FlipContext } from './FlipContext'
 import { Scope, ScopeType } from './Scope'
-import { CubePresenter } from './CubePresenter'
-import { instrumentViewActions } from './Presenter'
+import { instrumentViewActions, ScopeUpdateManager } from './Presenter'
 
 import type { ICubePresenter } from './IPresenter'
 
@@ -14,33 +13,44 @@ const LOG = Logger.get('ApplicationPresenter')
 
 export class ApplicationPresenter<S extends Scope> extends Application implements ICubePresenter {
 
-    private readonly __presenter: InternalApplicationPresenter<S, ApplicationPresenter<S>>
+    private readonly __scopeUpdateManager: ScopeUpdateManager
+
+    private readonly __beforeScopeUpdateListener: () => void = this.onBeforeScopeUpdate.bind(this)
 
     public constructor(historyManager: HistoryManager, scope: S) {
-        super(Place.createDetached('/'), historyManager)
-        this.__presenter = new InternalApplicationPresenter<S, ApplicationPresenter<S>>(this, scope)
+        super(Place.ROOT, historyManager)
+
+        this.__scopeUpdateManager = new ScopeUpdateManager(scope)
+        this.__scopeUpdateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
+
+        this.__scopeUpdateManager.update(scope)
+
         instrumentViewActions.call(this)
     }
 
     public get scope() {
-        return this.__presenter.scope
+        return this.__scopeUpdateManager.scope as S
+    }
+
+    public get scopeUpdateManager() {
+        return this.__scopeUpdateManager
     }
 
     public override release() {
-        this.__presenter.release()
+        this.__scopeUpdateManager.release()
         super.release()
     }
 
     public isAutoUpdateEnabled(): boolean {
-        return this.__presenter.isAutoUpdateEnabled()
+        return this.__scopeUpdateManager.isAutoUpdateEnabled()
     }
 
     public isDirty(): boolean {
-        return this.__presenter.isDirty()
+        return this.__scopeUpdateManager.isDirty()
     }
 
     public disableAutoUpdate(): void {
-        this.__presenter.disableAutoUpdate()
+        this.__scopeUpdateManager.disableAutoUpdate()
     }
 
     protected override publishAllParameters(uri: PlaceUri) {
@@ -69,11 +79,11 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
     }
 
     public updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate?: number) {
-        this.__presenter.updateHint(scopeCtor, scope, maxUpdate)
+        this.__scopeUpdateManager.updateHint(scopeCtor, scope, maxUpdate)
     }
 
     public update<T extends Scope>(optionalScope?: T) {
-        this.__presenter.update(optionalScope ?? this.scope)
+        this.__scopeUpdateManager.update(optionalScope ?? this.scope)
     }
 
     protected override emitAllBeforeScopeUpdate() {
@@ -85,11 +95,11 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
     }
 
     public emitBeforeScopeUpdate(force = false): void {
-        this.__presenter.emitBeforeScopeUpdate(force)
+        this.__scopeUpdateManager.emitBeforeScopeUpdate(force)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
+        LOG.debug(`applyParameters(uri=${uri}, initialization=${initialization}, last=${last}`)
         return true
     }
 
@@ -100,18 +110,6 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
     public onBeforeScopeUpdate(): void {
         // NOOP
-    }
-
-}
-
-class InternalApplicationPresenter<S extends Scope, A extends ApplicationPresenter<S>> extends CubePresenter<A, S> {
-
-    public constructor(app: A, scope: S) {
-        super(app, scope)
-    }
-
-    public override onBeforeScopeUpdate(): void {
-        this.app.onBeforeScopeUpdate()
     }
 
 }

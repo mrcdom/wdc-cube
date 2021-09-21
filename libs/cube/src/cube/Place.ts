@@ -12,10 +12,12 @@ export class Place {
     }
 
     public static create<A extends Application>(name: string, ctor: PresenterContructor<A>, parent?: Place) {
-        return new Place(name, parent, newPresenterFactory(ctor))
+        return new Place(name, parent ?? Place.ROOT, newPresenterFactory(ctor))
     }
 
     public static UNKNOWN = Place.createDetached('unknown')
+
+    public static ROOT = Place.createDetached('/')
 
     public readonly id: number
 
