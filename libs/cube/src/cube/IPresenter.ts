@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { PlaceUri } from './PlaceUri'
+import { Place } from './Place'
+import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { Scope, ScopeType } from './Scope'
 
 export type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
@@ -52,5 +53,11 @@ export interface ICubePresenter extends IPresenter {
     applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean>
 
     publishParameters(uri: PlaceUri): void
+
+    flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }): Promise<void>
+
+    flipToUri(uri: PlaceUri): Promise<void>
+
+    flipToUriString(suri: string): Promise<void>
 
 }

@@ -17,7 +17,7 @@ export class Presenter<S extends Scope> implements IPresenter {
 
     // :: Private Fields
 
-    public readonly __scope: S
+    private readonly __scope: S
 
     private readonly __owner: IPresenterOwner
 
