@@ -19,7 +19,7 @@ export class Place {
     }
 
     public static create<A extends Application>(name: string, ctor: PresenterContructor<A>, parent?: Place) {
-        return new Place(name, parent ?? Place.ROOT, (ctor as unknown) as PresenterContructor<Application>)
+        return new Place(name, parent ?? Place.ROOT, ctor as PresenterContructor<Application>)
     }
 
     public static UNKNOWN = Place.createDetached('unknown')
