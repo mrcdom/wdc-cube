@@ -117,6 +117,10 @@ type ScopeUpdateConfig = {
     scope: Scope
 }
 
+export const scopeUpdateManagerFactory = <S extends Scope>(scope: S) => {
+    return new ScopeUpdateManager(scope);
+} 
+
 export class ScopeUpdateManager {
 
     public readonly __scope: Scope

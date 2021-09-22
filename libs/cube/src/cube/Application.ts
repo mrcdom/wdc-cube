@@ -86,8 +86,8 @@ export class Application implements IPresenterOwner {
     }
 
     protected publishAllParameters(uri: PlaceUri) {
-        for (const presenter of this.__presenterMap.values()) {
-            presenter.publishParameters(uri)
+        for (const { publishParameters } of this.__presenterMap.values()) {
+            publishParameters && publishParameters(uri)
         }
     }
 

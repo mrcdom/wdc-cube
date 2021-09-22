@@ -99,6 +99,7 @@ class HeaderPresenter extends Presenter<HeaderScope> {
         this.scope.actions.onSyncInputKeyDown = Scope.SYNC_ACTION
         this.scope.actions.onToggleAll = Scope.ASYNC_ACTION
         super.release()
+        this.update(new ItemScope())
     }
 
     public initialize() {

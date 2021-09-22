@@ -37,6 +37,6 @@ export interface ICubePresenter extends IPresenter {
 
     applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean>
 
-    publishParameters(uri: PlaceUri): void
+    publishParameters?(uri: PlaceUri): void
 
 }

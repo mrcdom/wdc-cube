@@ -153,7 +153,7 @@ class RootPresenter extends CubePresenter<TestApplication, RootScope> {
         this.update(this.scope)
     }
 
-    public override publishParameters(uri: PlaceUri): void {
+    public publishParameters(uri: PlaceUri): void {
         uri.setParameter(PARAM_IDs.SESSION_ID, this.app.session.id)
     }
 
@@ -383,7 +383,7 @@ class CartPresenter extends CubePresenter<TestApplication, CartScope> {
         return true
     }
 
-    public override publishParameters(uri: PlaceUri): void {
+    public publishParameters(uri: PlaceUri): void {
         uri.setParameter(PARAM_IDs.CART_ID, this.cartId)
     }
 
@@ -441,7 +441,7 @@ class ProductPresenter extends CubePresenter<TestApplication, ProductScope> {
         return true
     }
 
-    public override publishParameters(uri: PlaceUri): void {
+    public publishParameters(uri: PlaceUri): void {
         uri.setParameter(PARAM_IDs.PRODUCT_ID, this.productId)
     }
 
