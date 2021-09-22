@@ -78,11 +78,11 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         }
     }
 
-    public updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate?: number) {
+    public updateHint(scopeCtor: ScopeType, scope: S, maxUpdate?: number) {
         this.__scopeUpdateManager.updateHint(scopeCtor, scope, maxUpdate)
     }
 
-    public update<T extends Scope>(optionalScope?: T) {
+    public update(optionalScope?: S) {
         this.__scopeUpdateManager.update(optionalScope ?? this.scope)
     }
 
