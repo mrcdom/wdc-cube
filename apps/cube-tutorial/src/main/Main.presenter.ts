@@ -90,6 +90,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         if (this.scope.alert) {
             await this.scope.alert.onClose()
             this.scope.alert = undefined
+            this.update()
         }
 
         return true
