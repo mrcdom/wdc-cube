@@ -75,7 +75,7 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
         return true
     }
 
-    public publishParameters(uri: PlaceUri): void {
+    public override publishParameters(uri: PlaceUri): void {
         uri.setParameter(ParamsIds.SiteId, this.item?.id)
     }
 

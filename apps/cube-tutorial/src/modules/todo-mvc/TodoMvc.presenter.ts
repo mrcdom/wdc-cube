@@ -187,7 +187,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         return true
     }
 
-    public publishParameters(uri: PlaceUri): void {
+    public override publishParameters(uri: PlaceUri): void {
         if (this.footerScope.showing !== ShowingOptions.ALL) {
             uri.setParameter(ParamsIds.TodoShowing, this.footerScope.showing)
         }
