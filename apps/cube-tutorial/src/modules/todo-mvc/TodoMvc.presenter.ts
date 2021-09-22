@@ -238,6 +238,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
             }
 
             await this.loadData()
+            this.update()
         }
     }
 
