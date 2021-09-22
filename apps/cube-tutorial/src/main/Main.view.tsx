@@ -17,7 +17,8 @@ const LOG = Logger.get('MainView')
 
 // HistoryManager
 
-const createApp = () => new MainPresenter(new PageHistoryManager(true))
+const historyManager = new PageHistoryManager(true)
+const createApp = () => new MainPresenter(historyManager)
 
 export type MainViewProps = IViewProps
 

@@ -3,15 +3,16 @@
 import { Place } from './Place'
 import { Application } from './Application'
 
-const NOOP_ONCHANGE_LISTENER = (sender: HistoryManager) => {
-    // NOOP
-}
+
+export type HistoryChangeListener = (sender: HistoryManager) => void
 
 export class HistoryManager {
 
     public static NOOP = new HistoryManager()
 
-    public onChangeListener = NOOP_ONCHANGE_LISTENER
+    private __changeListenerMap = new Map<number, HistoryChangeListener>()
+
+    private __listenerIdGen = 0
 
     public get location() {
         return ''
@@ -21,4 +22,19 @@ export class HistoryManager {
         // NOOP
     }
 
+    public addChangeListener(listener: HistoryChangeListener) {
+        const listenerId = this.__listenerIdGen++
+        this.__changeListenerMap.set(listenerId, listener)
+        return () => {
+            this.__changeListenerMap.delete(listenerId)
+        }
+    }
+
+    public notifyChanges() {
+        if (this.__changeListenerMap.size > 0) {
+            for (const listener of this.__changeListenerMap.values()) {
+                listener(this)
+            }
+        }
+    }
 }

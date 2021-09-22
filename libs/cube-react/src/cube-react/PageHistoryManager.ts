@@ -48,7 +48,7 @@ export class PageHistoryManager extends HistoryManager {
     }
 
     private emitOnChanged() {
-        this.onChangeListener(this)
+        this.notifyChanges()
     }
 
 }

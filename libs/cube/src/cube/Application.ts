@@ -25,16 +25,20 @@ export class Application implements IPresenterOwner {
 
     private __flipContext?: FlipContext
 
+    private __historyChangeUnregister: () => void
+
     public constructor(rootPlace: Place, historyManager: HistoryManager) {
         this.__rootPlace = rootPlace
         this.__lastPlace = rootPlace
         this.__historyManager = historyManager
         this.__presenterMap = new Map()
         this.__placeMap = new Map()
-        historyManager.onChangeListener = this.onHistoryChanged.bind(this)
+        this.__historyChangeUnregister = historyManager.addChangeListener(this.onHistoryChanged.bind(this))
     }
 
     public release(): void {
+        this.__historyChangeUnregister()
+
         const presenterIds = [] as number[]
 
         // Collect current presenters IDs
