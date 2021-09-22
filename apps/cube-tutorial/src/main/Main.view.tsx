@@ -11,6 +11,7 @@ import { Button } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu'
 import Css from './Main.module.css'
 import { MainPresenter } from './Main.presenter'
+import { AlertView } from './private_AlertView'
 
 const LOG = Logger.get('MainView')
 
@@ -57,7 +58,7 @@ export function MainView({ className, ...props }: MainViewProps) {
       </Dialog>
 
       <Dialog open={!!scope.alert} onClose={onCloseAlert} aria-labelledby="form-dialog-title">
-        <ViewSlot scope={scope.alert} />
+        <ViewSlot scope={scope.alert} view={AlertView} />
       </Dialog>
     </div>
   </>

@@ -1,31 +1,41 @@
 import React from 'react'
-import { Scope, ScopeType } from 'wdc-cube'
+import { Scope, ScopeConstructor } from 'wdc-cube'
 
 export type IViewProps = {
     className?: string
     style?: React.CSSProperties
 }
 
-type IFactoryProps = IViewProps & {
-    scope?: Scope
-    optional?:boolean
-}
-
 export type IViewConstructor<P extends IFactoryProps> = React.ComponentClass<P> | React.FunctionComponent<P>
 
-const elementFactoryMap: Map<ScopeType, IViewConstructor<IFactoryProps>> = new Map()
+type IFactoryProps = IViewProps & {
+    scope?: Scope
+}
 
-export function ViewSlot({ scope, optional = true, ...props }: IFactoryProps) {
+const elementFactoryMap: Map<ScopeConstructor, IViewConstructor<IFactoryProps>> = new Map()
+
+type ViewSlotProps<P extends IFactoryProps, S extends Scope> = IViewProps & {
+    scope?: S
+    optional?: boolean
+    view?: IViewConstructor<P>
+}
+
+export function ViewSlot<P extends IFactoryProps, S extends Scope>({ scope, optional = true, view, ...props }: ViewSlotProps<P, S>) {
     if (scope) {
-        const ctor = elementFactoryMap.get(scope.constructor as ScopeType)
+        if (view) {
+            const ctor = view as IViewConstructor<IFactoryProps>
+            return React.createElement(ctor, { scope, ...props })
+        }
+
+        const ctor = elementFactoryMap.get(scope.constructor as ScopeConstructor)
         if (ctor) {
             return React.createElement(ctor, { scope, ...props })
-        } else {
-            return <div className={props.className} style={props.style}>
-                View({scope.constructor.name}) not found!
-            </div>
         }
-    } else if(!optional) {
+
+        return <div className={props.className} style={props.style}>
+            View({scope.constructor.name}) not found!
+        </div>
+    } else if (!optional) {
         return <div className={props.className} style={props.style} />
     } else {
         return <></>
@@ -34,7 +44,7 @@ export function ViewSlot({ scope, optional = true, ...props }: IFactoryProps) {
 
 export class ViewFactory {
 
-    public static register<P extends IFactoryProps>(scopeConstructor: ScopeType, ctor: IViewConstructor<P>) {
+    public static register<P extends IFactoryProps>(scopeConstructor: ScopeConstructor, ctor: IViewConstructor<P>) {
         elementFactoryMap.set(scopeConstructor, ctor as IViewConstructor<IFactoryProps>)
     }
 

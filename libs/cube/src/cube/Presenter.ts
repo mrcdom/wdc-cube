@@ -1,7 +1,7 @@
 import lodash from 'lodash'
 import { Logger } from '../utils/Logger'
 import { NOOP_VOID } from '../utils/EmptyFunctions'
-import { Scope, ScopeType } from './Scope'
+import { Scope, ScopeConstructor } from './Scope'
 import { ScopeUtils } from './ScopeUtils'
 import { CallbackManager } from './CallbackManager'
 import { IPresenterOwner, IUpdateManager, AlertSeverity } from './IPresenter'
@@ -45,7 +45,7 @@ export class Presenter<S extends Scope> implements IPresenter {
             this.__updateManagerOwner = false
             this.__updateManager = updateManager
 
-            updateManager.hint(scope.constructor as ScopeType, updateManager.scope, 10)
+            updateManager.hint(scope.constructor as ScopeConstructor, updateManager.scope, 10)
         } else {
             this.__updateManagerOwner = true
             this.__updateManager = new ScopeUpdateManager(scope)
@@ -111,11 +111,11 @@ export class ScopeUpdateManager implements IUpdateManager {
 
     private readonly __scope: Scope
 
-    private readonly __dirtyScopes: Map<ScopeType, Map<Scope, boolean>>
+    private readonly __dirtyScopes: Map<ScopeConstructor, Map<Scope, boolean>>
 
-    private readonly __cancelledScopes: Map<ScopeType, boolean>
+    private readonly __cancelledScopes: Map<ScopeConstructor, boolean>
 
-    private readonly __scopeUpdateFallback: Map<ScopeType, ScopeUpdateConfig> = new Map()
+    private readonly __scopeUpdateFallback: Map<ScopeConstructor, ScopeUpdateConfig> = new Map()
 
     private readonly __emitBeforeScopeUpdate = this.emitBeforeScopeUpdate.bind(this)
 
@@ -157,11 +157,11 @@ export class ScopeUpdateManager implements IUpdateManager {
         this.__autoUpdateEnabled = false
     }
 
-    public hint(scopeCtor: ScopeType, scope: Scope, maxUpdate = 10) {
+    public hint(scopeCtor: ScopeConstructor, scope: Scope, maxUpdate = 10) {
         this.__scopeUpdateFallback.set(scopeCtor, { scope, maxUpdate })
     }
 
-    public removeUpdateHint(scopeCtor: ScopeType) {
+    public removeUpdateHint(scopeCtor: ScopeConstructor) {
         this.__scopeUpdateFallback.delete(scopeCtor)
     }
 
@@ -253,14 +253,14 @@ export class ScopeUpdateManager implements IUpdateManager {
         do {
             changesCount = 0
 
-            if (sourceDirtyScopes.has(this.__scope.constructor as ScopeType)) {
+            if (sourceDirtyScopes.has(this.__scope.constructor as ScopeConstructor)) {
                 this.__scope.update()
                 updateCount++
                 break
             } else {
                 // If fallbacks were configured
                 if (this.__scopeUpdateFallback.size > 0) {
-                    const newDirtyScopes = new Map<ScopeType, Map<Scope, boolean>>()
+                    const newDirtyScopes = new Map<ScopeConstructor, Map<Scope, boolean>>()
                     for (const [scopeCtor, scopeMap] of sourceDirtyScopes.entries()) {
                         const scopeFallbackCfg = this.__scopeUpdateFallback.get(scopeCtor)
                         if (scopeFallbackCfg && scopeMap.size > scopeFallbackCfg.maxUpdate) {
@@ -287,8 +287,8 @@ export class ScopeUpdateManager implements IUpdateManager {
         return updateCount
     }
 
-    private pushScope(target: Map<ScopeType, Map<Scope, boolean>>, scope: Scope) {
-        const key = scope.constructor as ScopeType
+    private pushScope(target: Map<ScopeConstructor, Map<Scope, boolean>>, scope: Scope) {
+        const key = scope.constructor as ScopeConstructor
         let scopeMap = target.get(key)
         if (scopeMap) {
             const cfg = this.__scopeUpdateFallback.get(key)

@@ -1,8 +1,2 @@
-import { ViewFactory } from 'wdc-cube-react'
-import { RestrictedScope } from './Restricted.presenter'
-import { RestrictedView } from './Restricted.view'
-
-export function registerRestrictedViews() {
-    const rv = ViewFactory.register
-    rv(RestrictedScope, RestrictedView)
-}
+export { RestrictedScope } from './Restricted.presenter'
+export { RestrictedView } from './Restricted.view'

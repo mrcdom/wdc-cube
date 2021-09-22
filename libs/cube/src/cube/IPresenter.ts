@@ -2,7 +2,7 @@
 
 import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
-import { Scope, ScopeType } from './Scope'
+import { Scope, ScopeConstructor } from './Scope'
 
 export type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
 
@@ -19,7 +19,7 @@ export interface IUpdateManager extends IDisposable {
     disableAutoUpdate(): void
     emitBeforeScopeUpdate(): void
 
-    hint(scopeCtor: ScopeType, scope: Scope, maxUpdate: number): void
+    hint(scopeCtor: ScopeConstructor, scope: Scope, maxUpdate: number): void
     update(optionalScope?: Scope): void
 
     addOnBeforeScopeUpdateListener(listener: () => void): void
@@ -52,7 +52,7 @@ export interface ICubePresenter extends IPresenter {
 
     applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean>
 
-    publishParameters(uri: PlaceUri): void
+    publishParameters?(uri: PlaceUri): void
 
     flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }): Promise<void>
 
