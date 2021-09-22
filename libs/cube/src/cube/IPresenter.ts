@@ -54,6 +54,8 @@ export interface ICubePresenter extends IPresenter {
 
     publishParameters?(uri: PlaceUri): void
 
+    updateHistory(): void
+
     flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }): Promise<void>
 
     flipToUri(uri: PlaceUri): Promise<void>

@@ -309,19 +309,19 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     protected async onShowAll() {
         this.footerScope.showing = ShowingOptions.ALL
         this.optionalUpdateHint(this.footerScope)
-        this.app.updateHistory()
+        this.updateHistory()
     }
 
     protected async onShowActives() {
         this.footerScope.showing = ShowingOptions.ACTIVE
         this.optionalUpdateHint(this.footerScope)
-        this.app.updateHistory()
+        this.updateHistory()
     }
 
     protected async onShowCompleteds() {
         this.footerScope.showing = ShowingOptions.COMPLETED
         this.optionalUpdateHint(this.footerScope)
-        this.app.updateHistory()
+        this.updateHistory()
     }
 
 

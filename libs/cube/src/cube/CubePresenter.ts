@@ -102,6 +102,10 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
         // NOOP
     }
 
+    public updateHistory(): void {
+        this.__app.updateHistory()
+    }
+
     public async flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }): Promise<void> {
         this.__app.flip(place, args)
     }
