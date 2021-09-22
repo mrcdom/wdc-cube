@@ -566,7 +566,7 @@ it('Application :: Basic Navigation', async () => {
     expect(root.scope.body).toBe(restricted.scope)
 
     // Check computed value
-    root.emitBeforeScopeUpdate()
+    root.updateManager.emitBeforeScopeUpdate()
     expect(2).toEqual(root.scope.computedValue)
 
     // Check logout
@@ -577,7 +577,7 @@ it('Application :: Basic Navigation', async () => {
     expect(login.initialized).toEqual(true)
 
     // Check computed value
-    root.emitBeforeScopeUpdate()
+    root.updateManager.emitBeforeScopeUpdate()
     expect(0).toEqual(root.scope.computedValue)
 })
 

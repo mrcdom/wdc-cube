@@ -75,6 +75,7 @@ export class FlipContext {
                 const presenter = new place.presenterCtor(this.__app)
                 this.__presenterMap.set(place.id, presenter)
                 result = await presenter.applyParameters(this.__targetUri, true, latest)
+                presenter.update()
             } else {
                 result = true
             }

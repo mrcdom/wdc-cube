@@ -9,7 +9,7 @@ type UpdatableScope = {
 }
 
 function doUpdate(this: UpdatableScope, setValue: React.Dispatch<React.SetStateAction<number>>, value: number) {
-    //console.log(`${this.vid}.update()`)
+    //LOG.debug(`${this.constructor.name}.update()`, new Error('doUpdate'))
     setValue(value + 1)
 }
 

@@ -4,21 +4,35 @@ import { PlaceUri } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
 import { FlipContext } from './FlipContext'
-import { Scope, ScopeType } from './Scope'
+import { Scope } from './Scope'
 import { instrumentViewActions, ScopeUpdateManager } from './Presenter'
 
-import type { ICubePresenter } from './IPresenter'
+import type { IUpdateManager, ICubePresenter } from './IPresenter'
 
 const LOG = Logger.get('ApplicationPresenter')
 
 export class ApplicationPresenter<S extends Scope> extends Application implements ICubePresenter {
 
-    private readonly __scopeUpdateManager: ScopeUpdateManager
+    private __scope: S
 
-    private readonly __beforeScopeUpdateListener: () => void = this.onBeforeScopeUpdate.bind(this)
+    private readonly __scopeUpdateManager: IUpdateManager
+
+    private readonly __beforeScopeUpdateListener: () => void
+
+    private __updateCount = 0
 
     public constructor(historyManager: HistoryManager, scope: S) {
         super(Place.ROOT, historyManager)
+
+        this.__scope = scope
+
+        this.__beforeScopeUpdateListener = () => {
+            try {
+                this.onBeforeScopeUpdate()
+            } finally {
+                this.__updateCount = 0
+            }
+        }
 
         this.__scopeUpdateManager = new ScopeUpdateManager(scope)
         this.__scopeUpdateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
@@ -28,30 +42,23 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         instrumentViewActions.call(this)
     }
 
-    public get scope() {
-        return this.__scopeUpdateManager.scope as S
-    }
-
-    public get scopeUpdateManager() {
-        return this.__scopeUpdateManager
-    }
-
     public override release() {
+        this.__scopeUpdateManager.removeOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__scopeUpdateManager.release()
         super.release()
     }
 
-    public isAutoUpdateEnabled(): boolean {
-        return this.__scopeUpdateManager.isAutoUpdateEnabled()
+    // :: Properties
+
+    public get scope(): S {
+        return this.__scope
     }
 
-    public isDirty(): boolean {
-        return this.__scopeUpdateManager.isDirty()
+    public get updateManager(): IUpdateManager {
+        return this.__scopeUpdateManager
     }
 
-    public disableAutoUpdate(): void {
-        this.__scopeUpdateManager.disableAutoUpdate()
-    }
+    // :: Application Extensions
 
     protected override publishAllParameters(uri: PlaceUri) {
         this.publishParameters(uri)
@@ -61,7 +68,8 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
     protected override async applyPathParameters(context: FlipContext, atLevel: number) {
         try {
             const uri = context.targetUri
-            const ok = await this.applyParameters(uri, false, uri.place.id === -1)
+            const last = uri.place.id === -1
+            const ok = await this.applyParameters(uri, false, last) && !last
             if (!ok) {
                 return
             }
@@ -78,17 +86,24 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         }
     }
 
-    public updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate?: number) {
-        this.__scopeUpdateManager.updateHint(scopeCtor, scope, maxUpdate)
-    }
+    // :: IPresenter Api
 
     public update<T extends Scope>(optionalScope?: T) {
         this.__scopeUpdateManager.update(optionalScope ?? this.scope)
+        this.__updateCount++
     }
 
-    public emitBeforeScopeUpdate(force = false): void {
-        this.__scopeUpdateManager.emitBeforeScopeUpdate(force)
+    public updateIfNotDirty(scope: Scope): void {
+        if (this.__updateCount === 0) {
+            this.update(scope)
+        }
     }
+
+    public onBeforeScopeUpdate(): void {
+        // NOOP
+    }
+
+    // :: ICubePresenter Api
 
     public async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
         LOG.debug(`applyParameters(uri=${uri}, initialization=${initialization}, last=${last}`)
@@ -97,10 +112,6 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public publishParameters(uri: PlaceUri): void {
-        // NOOP
-    }
-
-    public onBeforeScopeUpdate(): void {
         // NOOP
     }
 

@@ -67,6 +67,7 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
         } else if (this.item?.id !== paramSiteId) {
             this.item = await tutorialService.fetchSiteItem(paramSiteId)
             this.scope.email = this.item?.site
+            this.update()
         }
 
         this.dialogSlot(this.scope)

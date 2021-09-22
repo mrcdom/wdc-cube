@@ -11,6 +11,20 @@ export interface IDisposable {
 
 }
 
+export interface IUpdateManager extends IDisposable {
+    get scope(): Scope
+
+    isAutoUpdateEnabled(): boolean
+    disableAutoUpdate(): void
+    emitBeforeScopeUpdate(): void
+
+    hint(scopeCtor: ScopeType, scope: Scope, maxUpdate: number): void
+    update(optionalScope?: Scope): void
+
+    addOnBeforeScopeUpdateListener(listener: () => void): void
+    removeOnBeforeScopeUpdateListener(listener: () => void): void
+}
+
 export interface IPresenterOwner {
 
     unexpected(message: string, error: unknown): void
@@ -21,15 +35,13 @@ export interface IPresenterOwner {
 
 export interface IPresenter extends IPresenterOwner, IDisposable {
 
-    isAutoUpdateEnabled(): boolean
+    get scope(): Scope
 
-    isDirty(): boolean
+    get updateManager(): IUpdateManager
 
     update(optionalScope?: Scope): void
 
-    emitBeforeScopeUpdate(force?: boolean): void
-
-    updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate: number): void
+    updateIfNotDirty(scope: Scope): void
 
     onBeforeScopeUpdate(): void
 

@@ -91,7 +91,7 @@ class HeaderPresenter extends Presenter<HeaderScope> {
     public handleToggleAll = Scope.ASYNC_ACTION
 
     public constructor(app: MainPresenter, parent: TodoMvcPresenter) {
-        super(app, new HeaderScope(), parent.scopeUpdateManager)
+        super(app, new HeaderScope(), parent.updateManager)
     }
 
     public release() {
@@ -103,7 +103,7 @@ class HeaderPresenter extends Presenter<HeaderScope> {
 
     public initialize() {
         this.scope.actions.onSyncInputChange = this.onSyncInputChange.bind(this)
-        this.scope.actions.onSyncInputKeyDown = this.onSyncInputKeyDown.bind(this)
+        this.scope.actions.onSyncInputKeyDown = this.handleSyncInputKeyDown.bind(this)
         this.scope.actions.onToggleAll = this.handleToggleAll
     }
 
@@ -111,9 +111,10 @@ class HeaderPresenter extends Presenter<HeaderScope> {
         this.scope.inputValue = value
     }
 
-    protected onSyncInputKeyDown(event: KeyDownEvent) {
+    protected handleSyncInputKeyDown(event: KeyDownEvent) {
         if (event.code === 'Escape') {
             this.scope.inputValue = ''
+            this.update()
             return
         }
 
@@ -126,6 +127,7 @@ class HeaderPresenter extends Presenter<HeaderScope> {
         const trimVal = this.scope.inputValue.trim()
 
         this.scope.inputValue = ''
+        this.update()
 
         if (trimVal) {
             this.handleEnter(trimVal)
@@ -207,7 +209,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.footerScope.actions.onShowCompleteds = this.onShowCompleteds.bind(this)
 
         // Hints given to presenter update debounce controller
-        this.updateHint(ItemScope, this.mainScope)
+        this.updateManager.hint(ItemScope, this.mainScope, 10)
 
         // Get slots
         this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)

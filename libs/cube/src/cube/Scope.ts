@@ -11,7 +11,7 @@ async function asyncAction(...args: unknown[]): Promise<void> {
     LOG.debug('Noop Asynchronous Action', args)
 }
 
-export type ScopeType = typeof Scope
+export type ScopeType = new () => Scope
 
 export abstract class Scope {
 

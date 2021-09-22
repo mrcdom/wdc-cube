@@ -1,5 +1,4 @@
 import { Logger } from './Logger'
-import { NOOP_PROMISE_VOID } from './EmptyFunctions'
 
 const LOG = Logger.get('SingletonServices')
 
@@ -14,19 +13,6 @@ const availableServiceMap = new Map<ServiceLike, boolean>()
 
 const serviceStack = [] as ServiceLike[]
 
-async function bootService(service: ServiceLike, failed: string[]) {
-    if (!service.initialized) {
-        try {
-            await service.postConstruct()
-            serviceStack.push(service)
-            LOG.debug(`${service.name} succesfully initialized`)
-        } catch (caught) {
-            LOG.error(`${service.name} failed to initialize`, caught)
-            failed.push(service.name)
-        }
-    }
-}
-
 let runBootstrap = doBootstrap
 
 async function noopBootstrap() {
@@ -37,7 +23,16 @@ async function doBootstrap() {
     const failed = [] as string[]
 
     for (const service of availableServiceMap.keys()) {
-        await bootService(service, failed)
+        if (!service.initialized) {
+            try {
+                await service.postConstruct()
+                serviceStack.push(service)
+                LOG.debug(`${service.name} succesfully initialized`)
+            } catch (caught) {
+                LOG.error(`${service.name} failed to initialize`, caught)
+                failed.push(service.name)
+            }
+        }
     }
     //
 
@@ -91,27 +86,21 @@ export const SingletonServices = {
     },
 
     async start() {
-        const numServicesBefore = serviceStack.length
         try {
             await startServices()
         } catch (caught) {
             LOG.error('Starting', caught)
         }
 
-        if (serviceStack.length > numServicesBefore) {
-            startCount++
-            return SingletonServices.stop
-        } else {
-            return NOOP_PROMISE_VOID
-        }
+        startCount++
+        return SingletonServices.stop
     },
 
     async stop() {
         if (startCount > 0) {
-            try {
+            startCount--
+            if (startCount === 0) {
                 await stopServices()
-            } finally {
-                startCount--
             }
         }
     }
