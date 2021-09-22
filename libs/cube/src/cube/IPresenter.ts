@@ -29,8 +29,6 @@ export interface IPresenter extends IPresenterOwner, IDisposable {
 
     emitBeforeScopeUpdate(force?: boolean): void
 
-    updateHint(scopeCtor: ScopeType, scope: Scope, maxUpdate: number): void
-
     onBeforeScopeUpdate(): void
 
 }
