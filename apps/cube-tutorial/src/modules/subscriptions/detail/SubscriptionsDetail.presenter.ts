@@ -1,6 +1,6 @@
 import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../../main/Main.presenter'
-import { AttrsIds, ParamsIds, Places } from '../../../Constants'
+import { AttrIds, ParamIds, Places } from '../../../Constants'
 import { TutorialService, SiteItemType } from '../../../services/TutorialService'
 
 const LOG = Logger.get('SubscriptionsDetailPresenter')
@@ -40,7 +40,7 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
     }
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
-        const paramSiteId = uri.getParameterAsNumberOrDefault(ParamsIds.SiteId, this.item?.id ?? -1)
+        const paramSiteId = uri.getParameterAsNumberOrDefault(ParamIds.SiteId, this.item?.id ?? -1)
 
         if (initialization) {
             this.backUri = this.app.newUri(this.app.lastPlace)
@@ -53,9 +53,9 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             this.scope.onEmailChanged = this.handleEmailChanged.bind(this)
             this.scope.onSubscribe = this.onSubscribe.bind(this)
 
-            this.dialogSlot = uri.getScopeSlot(AttrsIds.dialogSlot)
+            this.dialogSlot = uri.getScopeSlot(AttrIds.dialogSlot)
 
-            let siteItem = uri.attributes.get(AttrsIds.subscriptionsDetail_item) as SiteItemType | undefined
+            let siteItem = uri.attributes.get(AttrIds.subscriptionsDetail_item) as SiteItemType | undefined
             if (!siteItem) {
                 siteItem = await tutorialService.fetchSiteItem(paramSiteId)
             }
@@ -76,7 +76,7 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
     }
 
     public override publishParameters(uri: PlaceUri): void {
-        uri.setParameter(ParamsIds.SiteId, this.item?.id)
+        uri.setParameter(ParamIds.SiteId, this.item?.id)
     }
 
     protected async onClose() {

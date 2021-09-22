@@ -1,6 +1,6 @@
 import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
-import { Places, AttrsIds, ParamsIds } from '../../Constants'
+import { Places, AttrIds, ParamIds } from '../../Constants'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
 
 const LOG = Logger.get('SubscriptionsPresenter')
@@ -31,8 +31,8 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
         if (initialization) {
-            this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
-            this.dialogSlot = uri.getScopeSlot(AttrsIds.dialogSlot)
+            this.parentSlot = uri.getScopeSlot(AttrIds.parentSlot)
+            this.dialogSlot = uri.getScopeSlot(AttrIds.dialogSlot)
 
             this.scope.onItemClicked = this.onItemClicked.bind(this)
             this.scope.sites = await tutorialService.fetchSubscribleSites()
@@ -52,11 +52,11 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
     protected async onItemClicked(item: SiteItemType) {
         await this.flip(Places.subscriptionsDetail, {
             params: {
-                [ParamsIds.SiteId]: item.id
+                [ParamIds.SiteId]: item.id
             },
             attrs: {
                 // Helping performance (avoid a unneeded service fetch)
-                [AttrsIds.subscriptionsDetail_item]: item
+                [AttrIds.subscriptionsDetail_item]: item
             }
         })
     }

@@ -1,12 +1,12 @@
 import { Place } from 'wdc-cube'
 
-export const ParamsIds = {
+export const ParamIds = {
     SiteId: 'site-id',
     TodoUserId: 'todo-uid',
     TodoShowing: 'todo-showing'
 }
 
-export const AttrsIds = {
+export const AttrIds = {
     parentSlot: 'parent-slot',
     dialogSlot: 'sialog-slot',
 

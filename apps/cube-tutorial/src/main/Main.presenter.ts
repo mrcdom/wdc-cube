@@ -9,7 +9,7 @@ import {
     NOOP_PROMISE_VOID
 } from 'wdc-cube'
 import { registerServices } from '../services'
-import { Places, AttrsIds } from '../Constants'
+import { Places, AttrIds } from '../Constants'
 import { buildCube } from '../Cube'
 
 const LOG = Logger.get('MainPresenter')
@@ -83,8 +83,8 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         if (last) {
             this.bodySlot(undefined)
         } else {
-            uri.setScopeSlot(AttrsIds.parentSlot, this.bodySlot)
-            uri.setScopeSlot(AttrsIds.dialogSlot, this.dialogSlot)
+            uri.setScopeSlot(AttrIds.parentSlot, this.bodySlot)
+            uri.setScopeSlot(AttrIds.dialogSlot, this.dialogSlot)
         }
 
         if (this.scope.alert) {

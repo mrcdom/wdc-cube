@@ -5,7 +5,7 @@
 import { Logger, Presenter, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
-import { ParamsIds, AttrsIds } from '../../Constants'
+import { ParamIds, AttrIds } from '../../Constants'
 
 const LOG = Logger.get('TodoMvcPresenter')
 
@@ -173,8 +173,8 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
-        const uriUserId = uri.getParameterAsNumberOrDefault(ParamsIds.TodoUserId, this.userId)
-        const uriShowing = uri.getParameterAsNumberOrDefault(ParamsIds.TodoShowing, this.footerScope.showing) as ShowingOptions
+        const uriUserId = uri.getParameterAsNumberOrDefault(ParamIds.TodoUserId, this.userId)
+        const uriShowing = uri.getParameterAsNumberOrDefault(ParamIds.TodoShowing, this.footerScope.showing) as ShowingOptions
 
         if (initialization) {
             await this.initializeState(uri, uriUserId, uriShowing)
@@ -189,11 +189,11 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     public override publishParameters(uri: PlaceUri): void {
         if (this.footerScope.showing !== ShowingOptions.ALL) {
-            uri.setParameter(ParamsIds.TodoShowing, this.footerScope.showing)
+            uri.setParameter(ParamIds.TodoShowing, this.footerScope.showing)
         }
 
         if (this.userId !== 0) {
-            uri.setParameter(ParamsIds.TodoUserId, this.userId)
+            uri.setParameter(ParamIds.TodoUserId, this.userId)
         }
     }
 
@@ -212,7 +212,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.updateManager.hint(ItemScope, this.mainScope, 10)
 
         // Get slots
-        this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
+        this.parentSlot = uri.getScopeSlot(AttrIds.parentSlot)
 
         await this.synchronizeState(uriUserId, uriShowing, true)
 

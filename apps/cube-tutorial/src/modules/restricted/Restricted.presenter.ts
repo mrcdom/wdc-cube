@@ -1,6 +1,6 @@
 import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
-import { AttrsIds } from '../../Constants'
+import { AttrIds } from '../../Constants'
 
 
 const LOG = Logger.get('RestrictedPresenter')
@@ -32,14 +32,14 @@ export class RestrictedPresenter extends CubePresenter<MainPresenter, Restricted
 
     public override async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
         if (initialization) {
-            this.parentSlot = uri.getScopeSlot(AttrsIds.parentSlot)
+            this.parentSlot = uri.getScopeSlot(AttrIds.parentSlot)
             LOG.info('Initialized')
         }
 
         if (last) {
             this.detailSlot(undefined)
         } else {
-            uri.setScopeSlot(AttrsIds.parentSlot, this.detailSlot)
+            uri.setScopeSlot(AttrIds.parentSlot, this.detailSlot)
         }
 
         this.parentSlot(this.scope)
