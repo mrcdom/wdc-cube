@@ -71,8 +71,8 @@ export class FlipContext {
 
             if (presenter) {
                 result = await presenter.applyParameters(this.__targetUri, false, latest)
-            } else if (place.factory) {
-                const presenter = place.factory(this.__app)
+            } else if (place.presenterCtor) {
+                const presenter = new place.presenterCtor(this.__app)
                 this.__presenterMap.set(place.id, presenter)
                 result = await presenter.applyParameters(this.__targetUri, true, latest)
             } else {

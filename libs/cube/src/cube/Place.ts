@@ -1,7 +1,6 @@
-import { Application, } from './Application'
-import { newPresenterFactory } from './CubePresenter'
+import { Application } from './Application'
 
-import type { PresenterContructor, PresenterFactory } from './CubePresenter'
+import type { PresenterContructor } from './CubePresenter'
 
 const indexGenMap: Map<number, number> = new Map()
 
@@ -9,7 +8,7 @@ export type PlaceCreator = (path: string, parent: Place) => Place
 
 export class Place {
 
-    public static factory<A extends Application, NAME extends string>(ctor: PresenterContructor<A>, places: Record<NAME, Place>, name: NAME): PlaceCreator {
+    public static creator<A extends Application, NAME extends string>(ctor: PresenterContructor<A>, places: Record<NAME, Place>, name: NAME): PlaceCreator {
         return (path, parent) => {
             return places[name] = Place.create(path, ctor, parent)
         }
@@ -20,7 +19,7 @@ export class Place {
     }
 
     public static create<A extends Application>(name: string, ctor: PresenterContructor<A>, parent?: Place) {
-        return new Place(name, parent ?? Place.ROOT, newPresenterFactory(ctor))
+        return new Place(name, parent ?? Place.ROOT, (ctor as unknown) as PresenterContructor<Application>)
     }
 
     public static UNKNOWN = Place.createDetached('unknown')
@@ -35,7 +34,7 @@ export class Place {
     public constructor(
         public readonly name: string,
         public readonly parent?: Place,
-        public readonly factory?: PresenterFactory,
+        public readonly presenterCtor?: PresenterContructor<Application>,
         id?: number,
     ) {
         this.id = typeof id === 'number' ? id : this.nextId()

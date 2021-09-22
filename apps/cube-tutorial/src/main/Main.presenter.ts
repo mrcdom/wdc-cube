@@ -10,6 +10,7 @@ import {
 } from 'wdc-cube'
 import { registerServices } from '../services'
 import { Places, AttrsIds } from '../Constants'
+import { buildCube } from '../Cube'
 
 const LOG = Logger.get('MainPresenter')
 
@@ -42,14 +43,6 @@ export class MainScope extends Scope {
 
 export class MainPresenter extends ApplicationPresenter<MainScope> {
 
-    // :: Class Methods
-
-    public static create(historyManager: HistoryManager) {
-        const app = new MainPresenter(historyManager, new MainScope())
-        app.catalogPlaces(Places)
-        return app
-    }
-
     // :: Instance
 
     private readonly bodyScope = new BodyScope()
@@ -57,6 +50,13 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     private readonly dialogSlot = this.setDialogSlot.bind(this)
 
     private stopServices = NOOP_PROMISE_VOID
+
+    public constructor(historyManager: HistoryManager) {
+        super(historyManager, new MainScope())
+
+        // Important to allow newUriFromString to work properly
+        this.setPlaces(buildCube())
+    }
 
     public override release() {
         this.stopServices().catch(() => void 0)
@@ -66,7 +66,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     public override async applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean> {
         if (initialization) {
             await this.intializeState()
-  
+
             try {
                 const targetUri = this.newUriFromString(this.historyManager.location)
                 if (targetUri.toString() !== uri.toString()) {

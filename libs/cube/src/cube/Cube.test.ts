@@ -97,7 +97,7 @@ class TestApplication extends Application {
 
     constructor() {
         super(Places.ROOT, new TestHistoryManager())
-        this.catalogPlaces(Places)
+        this.setPlaces(Places)
     }
 
 }

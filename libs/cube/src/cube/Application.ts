@@ -115,7 +115,8 @@ export class Application implements IPresenterOwner {
         return this.__presenterMap.get(place.id)
     }
 
-    protected catalogPlaces(places: Record<string, Place>) {
+    protected setPlaces(places: Record<string, Place>) {
+        this.__placeMap.clear()
         for (const place of Object.values(places)) {
             this.__placeMap.set(place.name, place)
         }

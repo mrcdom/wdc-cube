@@ -9,10 +9,7 @@ import type { ICubePresenter } from './IPresenter'
 
 const LOG = Logger.get('Presenter')
 
-export type PresenterFactory = (app: Application) => ICubePresenter
-
-export type PresenterType = CubePresenter<Application, Scope>
-export type PresenterContructor<A extends Application> = { new(app: A): PresenterType }
+export type PresenterContructor<A extends Application> = { new(app: A): ICubePresenter }
 
 export class CubePresenter<A extends Application, S extends Scope> extends Presenter<S> implements ICubePresenter {
 
@@ -42,10 +39,4 @@ export class CubePresenter<A extends Application, S extends Scope> extends Prese
         // NOOP
     }
 
-}
-
-export function newPresenterFactory<A extends Application>(ctor: PresenterContructor<A>): PresenterFactory {
-    return (app) => {
-        return new ctor((app as unknown) as A)
-    }
 }

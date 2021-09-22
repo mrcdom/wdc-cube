@@ -1,4 +1,4 @@
-import { Place, CubeBuilder } from 'wdc-cube'
+import { Place, CubeBuilder, NOOP_VOID } from 'wdc-cube'
 
 import { TodoMvcPresenter } from './modules/todo-mvc/TodoMvc.presenter'
 import { SubscriptionsPresenter } from './modules/subscriptions/Subscriptions.presenter'
@@ -6,20 +6,27 @@ import { SubscriptionsDetailPresenter } from './modules/subscriptions/detail/Sub
 import { RestrictedPresenter } from './modules/restricted/Restricted.presenter'
 import { Places } from './Constants'
 
-export function buildCube() {
+let buildOnce = () => {
     CubeBuilder.build({
         'todos': {
-            presenter: Place.factory(TodoMvcPresenter, Places, 'todos'),
+            presenter: Place.creator(TodoMvcPresenter, Places, 'todos'),
         },
         'subscriptions': {
-            presenter: Place.factory(SubscriptionsPresenter, Places, 'subscriptions'),
-    
+            presenter: Place.creator(SubscriptionsPresenter, Places, 'subscriptions'),
+
             'detail': {
-                presenter: Place.factory(SubscriptionsDetailPresenter, Places, 'subscriptionsDetail'),
+                presenter: Place.creator(SubscriptionsDetailPresenter, Places, 'subscriptionsDetail'),
             }
         },
         'restricted': {
-            presenter: Place.factory(RestrictedPresenter, Places, 'restricted'),
+            presenter: Place.creator(RestrictedPresenter, Places, 'restricted'),
         }
     })
+
+    buildOnce = NOOP_VOID
+}
+
+export function buildCube() {
+    buildOnce()
+    return Places
 }
