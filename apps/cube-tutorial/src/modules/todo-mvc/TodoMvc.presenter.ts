@@ -220,7 +220,10 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     private async synchronizeState(uriUserId: number, uriShowing: ShowingOptions, force = false) {
-        this.footerScope.showing = uriShowing
+        if( this.footerScope.showing != uriShowing) {
+            this.footerScope.showing = uriShowing
+            this.update(this.footerScope)
+        }
 
         if (force || uriUserId !== this.userId) {
             this.userId = uriUserId
@@ -238,7 +241,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
             }
 
             await this.loadData()
-            this.update()
+            this.update(this.mainScope)
         }
     }
 
