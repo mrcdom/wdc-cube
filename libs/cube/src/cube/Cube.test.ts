@@ -523,7 +523,7 @@ it('Application :: Basic Navigation', async () => {
     // Check if presenter state was reached
     const root = app.getPresenter(Places.ROOT) as RootPresenter
     expect(root).toBeDefined()
-
+ 
     expect(root.initialized).toEqual(true)
     expect(root.deepest).toEqual(false)
     expect(app.session.id).toEqual(0)
@@ -566,6 +566,7 @@ it('Application :: Basic Navigation', async () => {
     expect(root.scope.body).toBe(restricted.scope)
 
     // Check computed value
+    root.emitBeforeScopeUpdate()
     expect(2).toEqual(root.scope.computedValue)
 
     // Check logout
@@ -576,6 +577,7 @@ it('Application :: Basic Navigation', async () => {
     expect(login.initialized).toEqual(true)
 
     // Check computed value
+    root.emitBeforeScopeUpdate()
     expect(0).toEqual(root.scope.computedValue)
 })
 

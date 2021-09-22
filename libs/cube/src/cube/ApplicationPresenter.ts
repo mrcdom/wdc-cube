@@ -86,14 +86,6 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         this.__scopeUpdateManager.update(optionalScope ?? this.scope)
     }
 
-    protected override emitAllBeforeScopeUpdate() {
-        super.emitAllBeforeScopeUpdate()
-
-        if (this.isAutoUpdateEnabled()) {
-            this.emitBeforeScopeUpdate(true)
-        }
-    }
-
     public emitBeforeScopeUpdate(force = false): void {
         this.__scopeUpdateManager.emitBeforeScopeUpdate(force)
     }

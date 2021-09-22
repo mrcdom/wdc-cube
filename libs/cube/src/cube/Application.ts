@@ -85,20 +85,6 @@ export class Application implements IPresenterOwner {
         this.__presenterMap.set(place.id, presenter)
     }
 
-    protected emitAllBeforeScopeUpdate(): void {
-        for (let i = this.lastPlace.path.length - 1; i >= 0; i--) {
-            const place = this.lastPlace.path[i]
-            const presenter = this.__presenterMap.get(place.id)
-            if (presenter) {
-                if (presenter.isAutoUpdateEnabled()) {
-                    presenter.emitBeforeScopeUpdate(!presenter.isDirty())
-                } else {
-                    presenter.emitBeforeScopeUpdate(false)
-                }
-            }
-        }
-    }
-
     protected publishAllParameters(uri: PlaceUri) {
         for (const presenter of this.__presenterMap.values()) {
             presenter.publishParameters(uri)
@@ -187,7 +173,6 @@ export class Application implements IPresenterOwner {
                 throw caught
             } finally {
                 this.__flipContext = undefined
-                this.emitAllBeforeScopeUpdate()
                 this.updateHistory()
             }
         }
