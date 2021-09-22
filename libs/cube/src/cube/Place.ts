@@ -5,7 +5,15 @@ import type { PresenterContructor, PresenterFactory } from './CubePresenter'
 
 const indexGenMap: Map<number, number> = new Map()
 
+export type PlaceCreator = (path: string, parent: Place) => Place
+
 export class Place {
+
+    public static factory<A extends Application, NAME extends string>(ctor: PresenterContructor<A>, places: Record<NAME, Place>, name: NAME): PlaceCreator {
+        return (path, parent) => {
+            return places[name] = Place.create(path, ctor, parent)
+        }
+    }
 
     public static createDetached(name: string) {
         return new Place(name, undefined, undefined, -1)
