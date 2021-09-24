@@ -44,18 +44,6 @@ export class ItemScope extends Scope {
     }
 }
 
-export class HeaderScope extends Scope {
-    allItemsCompleted = false
-    toggleButtonVisible = false
-    inputValue = ''
-
-    readonly actions = {
-        onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
-        onSyncInputKeyDown: Scope.SYNC_ACTION as (event: KeyDownEvent) => void,
-        onToggleAll: Scope.ASYNC_ACTION
-    }
-}
-
 export class MainScope extends Scope {
     clock?: ClockScope
 
@@ -84,14 +72,25 @@ export class TodoMvcScope extends Scope {
 
 // :: Presentation
 
+export class HeaderScope extends Scope {
+    allItemsCompleted = false
+    toggleButtonVisible = false
+    inputValue = ''
+
+    readonly actions = {
+        onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
+        onSyncInputKeyDown: Scope.SYNC_ACTION as (event: KeyDownEvent) => void,
+        onToggleAll: Scope.ASYNC_ACTION
+    }
+}
 class HeaderPresenter extends Presenter<HeaderScope> {
 
     public handleEnter = Scope.SYNC_ACTION_STRING
 
     public handleToggleAll = Scope.ASYNC_ACTION
 
-    public constructor(app: MainPresenter, parent: TodoMvcPresenter) {
-        super(app, new HeaderScope(), parent.updateManager)
+    public constructor(app: MainPresenter) {
+        super(app, new HeaderScope())
     }
 
     public release() {
@@ -103,7 +102,7 @@ class HeaderPresenter extends Presenter<HeaderScope> {
 
     public initialize() {
         this.scope.actions.onSyncInputChange = this.onSyncInputChange.bind(this)
-        this.scope.actions.onSyncInputKeyDown = this.handleSyncInputKeyDown.bind(this)
+        this.scope.actions.onSyncInputKeyDown = this.onSyncInputKeyDown.bind(this)
         this.scope.actions.onToggleAll = this.handleToggleAll
     }
 
@@ -112,7 +111,7 @@ class HeaderPresenter extends Presenter<HeaderScope> {
         this.scope.inputValue = value
     }
 
-    protected handleSyncInputKeyDown(event: KeyDownEvent) {
+    protected onSyncInputKeyDown(event: KeyDownEvent) {
         if (event.code === 'Escape') {
             this.scope.inputValue = ''
             this.update()
@@ -158,7 +157,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
-        this.header = new HeaderPresenter(app, this)
+        this.header = new HeaderPresenter(app)
         this.scope.header = this.header.scope
     }
 
@@ -221,7 +220,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     private async synchronizeState(uriUserId: number, uriShowing: ShowingOptions, force = false) {
-        if( this.footerScope.showing != uriShowing) {
+        if (this.footerScope.showing != uriShowing) {
             this.footerScope.showing = uriShowing
             this.update(this.footerScope)
         }

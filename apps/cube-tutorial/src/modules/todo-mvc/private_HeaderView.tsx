@@ -21,8 +21,8 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
 
     // Actions
     const onChange = useCallback(() => actions.onSyncInputChange(getCurrentFieldText()), [actions.onSyncInputChange, getCurrentFieldText])
-    const onInputKeyDown = useCallback(actions.onSyncInputKeyDown, [actions.onSyncInputKeyDown])
-    const onToggleAll = useCallback(actions.onToggleAll, [actions.onToggleAll])
+    const onInputKeyDown = useCallback(e => actions.onSyncInputKeyDown(e), [actions.onSyncInputKeyDown])
+    const onToggleAll = useCallback(() => actions.onToggleAll(), [actions.onToggleAll])
 
     // Render
     return <header className={clsx(Css.header, className)} style={style}>
