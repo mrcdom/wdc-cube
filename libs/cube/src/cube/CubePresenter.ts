@@ -4,7 +4,7 @@ import { Application } from './Application'
 import { Place } from './Place'
 import { PlaceUri, ValidParamTypes } from './PlaceUri'
 import { Scope } from './Scope'
-import { instrumentViewActions, ScopeUpdateManager } from './Presenter'
+import { ScopeUpdateManager } from './Presenter'
 
 import type { ICubePresenter, IUpdateManager, AlertSeverity } from './IPresenter'
 
@@ -42,8 +42,6 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
 
         this.__updateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__updateManager.update(scope)
-
-        instrumentViewActions.call(this)
     }
 
     // :: IDisposable API
