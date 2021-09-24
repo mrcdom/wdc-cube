@@ -52,8 +52,6 @@ export class Presenter<S extends Scope> implements IPresenter {
 
         this.__updateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__updateManager.update(scope)
-
-        instrumentViewActions.call(this)
     }
 
     public release(): void {
@@ -306,22 +304,15 @@ export class ScopeUpdateManager implements IUpdateManager {
 
 }
 
-type CubeActionMethod = {
-    (...args: unknown[]): void
-    $$cube_action: boolean
-}
-
 export function action() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return function (target: any, propertyKey: string) {
-        const method = target[propertyKey]
-        if (lodash.isFunction(method)) {
-            (method as CubeActionMethod).$$cube_action = true
+    return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
+        if (lodash.isFunction(descriptor.value)) {
+            descriptor.value = instrumentActionMethod(descriptor.value)
         }
     }
 }
 
-function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
+function instrumentActionMethod(impl: (...args: unknown[]) => unknown) {
     function onCatch(this: IPresenter, caught: unknown) {
         this.unexpected(`During execution of ${impl.name} action`, caught)
     }
@@ -336,7 +327,8 @@ function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
 
     return function (this: IPresenter, ...args: unknown[]) {
         try {
-            const result = impl.apply(this, args) as unknown
+            LOG.debug(`Calling ${impl.name}`)
+            const result = impl.call(this, ...args) as unknown
 
             // Result is a valid promise
             if (result && (result as Promise<unknown>).catch && (result as Promise<unknown>).finally) {
@@ -353,26 +345,6 @@ function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
             // Will only be actioned on sincronus actions
             onCatch.call(this, caught)
             return undefined
-        }
-    }
-}
-
-export function instrumentViewActions(this: IPresenter) {
-    const ctor = (this.constructor as unknown) as Record<string, unknown>
-
-    if (!ctor.$$instrumented$$) {
-        try {
-            const proto = Object.getPrototypeOf(this) as Record<string, unknown>
-            const methodNames = Object.getOwnPropertyNames(proto)
-            for (const key of methodNames) {
-                const value = proto[key]
-                
-                if (value !== this.onBeforeScopeUpdate && lodash.isFunction(value) && (value as CubeActionMethod).$$cube_action) {
-                    proto[key] = wrapViewAction(value)
-                }
-            }
-        } finally {
-            ctor.$$instrumented$$ = true
         }
     }
 }

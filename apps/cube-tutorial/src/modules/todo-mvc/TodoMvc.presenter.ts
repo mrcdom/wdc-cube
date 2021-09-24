@@ -109,6 +109,7 @@ class HeaderPresenter extends Presenter<HeaderScope> {
     @action()
     protected onSyncInputChange(value: string) {
         this.scope.inputValue = value
+        this.update()
     }
 
     protected onSyncInputKeyDown(event: KeyDownEvent) {
