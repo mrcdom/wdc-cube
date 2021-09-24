@@ -2,7 +2,6 @@ import lodash from 'lodash'
 import { Logger } from '../utils/Logger'
 import { NOOP_VOID } from '../utils/EmptyFunctions'
 import { Scope, ScopeConstructor } from './Scope'
-import { ScopeUtils } from './ScopeUtils'
 import { CallbackManager } from './CallbackManager'
 import { IPresenterOwner, IUpdateManager, AlertSeverity } from './IPresenter'
 
@@ -307,6 +306,21 @@ export class ScopeUpdateManager implements IUpdateManager {
 
 }
 
+type CubeActionMethod = {
+    (...args: unknown[]): void
+    $$cube_action: boolean
+}
+
+export function action() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return function (target: any, propertyKey: string) {
+        const method = target[propertyKey]
+        if (lodash.isFunction(method)) {
+            (method as CubeActionMethod).$$cube_action = true
+        }
+    }
+}
+
 function wrapViewAction(impl: (...args: unknown[]) => Promise<void>) {
     function onCatch(this: IPresenter, caught: unknown) {
         this.unexpected(`During execution of ${impl.name} action`, caught)
@@ -352,7 +366,8 @@ export function instrumentViewActions(this: IPresenter) {
             const methodNames = Object.getOwnPropertyNames(proto)
             for (const key of methodNames) {
                 const value = proto[key]
-                if (value !== this.onBeforeScopeUpdate && ScopeUtils.isAnActionName(key) && lodash.isFunction(value)) {
+                
+                if (value !== this.onBeforeScopeUpdate && lodash.isFunction(value) && (value as CubeActionMethod).$$cube_action) {
                     proto[key] = wrapViewAction(value)
                 }
             }

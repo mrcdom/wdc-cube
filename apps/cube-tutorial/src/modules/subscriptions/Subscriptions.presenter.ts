@@ -1,4 +1,4 @@
-import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, action, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
 import { Places, AttrIds, ParamIds } from '../../Constants'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
@@ -49,6 +49,7 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
         return true
     }
 
+    @action()
     protected async onItemClicked(item: SiteItemType) {
         await this.flip(Places.subscriptionsDetail, {
             params: {

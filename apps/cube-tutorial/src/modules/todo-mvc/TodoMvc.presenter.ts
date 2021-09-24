@@ -2,7 +2,7 @@
  * Based on https://todomvc.com/examples/react
  */
 
-import { Logger, Presenter, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
+import { Logger, Presenter, CubePresenter, Scope, ScopeSlot, PlaceUri, action, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamIds, AttrIds } from '../../Constants'
@@ -159,16 +159,16 @@ class HeaderPresenter extends Presenter<HeaderScope> {
     }
 
     public initialize() {
-        this.scope.actions.onSyncInputChange = this.handleSyncInputChange.bind(this)
-        this.scope.actions.onSyncInputKeyDown = this.handleSyncInputKeyDown.bind(this)
+        this.scope.actions.onSyncInputChange = this.onSyncInputChange.bind(this)
+        this.scope.actions.onSyncInputKeyDown = this.onSyncInputKeyDown.bind(this)
         this.scope.actions.onToggleAll = this.handleToggleAll
     }
 
-    protected handleSyncInputChange(value: string) {
+    protected onSyncInputChange(value: string) {
         this.scope.inputValue = value
     }
 
-    protected handleSyncInputKeyDown(event: KeyDownEvent) {
+    protected onSyncInputKeyDown(event: KeyDownEvent) {
         if (event.code === 'Escape') {
             this.scope.inputValue = ''
             return
@@ -328,6 +328,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.update(this.mainScope.clock)
     }
 
+    @action()
     protected onAddItem(value: string) {
         const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
 
@@ -341,6 +342,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.optionalUpdateHint(this.mainScope)
     }
 
+    @action()
     protected async onToggleAll() {
         let numOfCompletedTasks = 0
         for (const itemScope of this.itemScopes) {
@@ -359,30 +361,34 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         }
     }
 
+    @action()
     protected async onClearCompleted() {
         this.itemScopes = this.itemScopes.filter(item => !item.completed)
         this.optionalUpdateHint(this.mainScope)
     }
 
+    @action()
     protected async onShowAll() {
         this.footerScope.showing = ShowingOptions.ALL
         this.optionalUpdateHint(this.footerScope)
         this.updateHistory()
     }
 
+    @action()
     protected async onShowActives() {
         this.footerScope.showing = ShowingOptions.ACTIVE
         this.optionalUpdateHint(this.footerScope)
         this.updateHistory()
     }
 
+    @action()
     protected async onShowCompleteds() {
         this.footerScope.showing = ShowingOptions.COMPLETED
         this.optionalUpdateHint(this.footerScope)
         this.updateHistory()
     }
 
-
+    @action()
     protected async onItemToggle(item: ItemScope) {
         item.completed = !item.completed
 
@@ -394,6 +400,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         }
     }
 
+    @action()
     protected async onItemEdit(item: ItemScope) {
         for (const otherItem of this.itemScopes) {
             if (otherItem !== item && otherItem.editing) {
@@ -410,10 +417,12 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         }
     }
 
+    @action()
     protected async onItemBlur(item: ItemScope, getValue: () => string) {
         this.saveItem(item, getValue())
     }
 
+    @action()
     protected async onItemKeyDown(item: ItemScope, getValue: () => string, event: KeyDownEvent) {
         if (event.code === 'Escape') {
             this.cancelItem(item)
@@ -422,6 +431,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         }
     }
 
+    @action()
     protected async onItemDestroy(item: ItemScope) {
         this.destroy(item)
     }
