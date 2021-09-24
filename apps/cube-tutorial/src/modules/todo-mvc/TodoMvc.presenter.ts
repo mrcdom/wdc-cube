@@ -7,7 +7,7 @@ import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamIds, AttrIds } from '../../Constants'
 
-import { types, onSnapshot, IDisposer } from 'mobx-state-tree'
+import { types, Instance, onSnapshot, IDisposer } from 'mobx-state-tree'
 
 const LOG = Logger.get('TodoMvcPresenter')
 
@@ -99,7 +99,7 @@ const HeaderMobX = types
 
 export class HeaderScope extends Scope {
 
-    private __state: typeof HeaderMobX.Type
+    private __state: Instance<typeof HeaderMobX>
 
     get allItemsCompleted(): boolean {
         return this.__state.allItemsCompleted
