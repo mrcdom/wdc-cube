@@ -5,7 +5,7 @@ import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
 import { FlipContext } from './FlipContext'
 import { Scope } from './Scope'
-import { instrumentViewActions, ScopeUpdateManager } from './Presenter'
+import { ScopeUpdateManager } from './Presenter'
 
 import type { IUpdateManager, ICubePresenter } from './IPresenter'
 
@@ -38,8 +38,6 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         this.__scopeUpdateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
 
         this.__scopeUpdateManager.update(scope)
-
-        instrumentViewActions.call(this)
     }
 
     public override release() {
