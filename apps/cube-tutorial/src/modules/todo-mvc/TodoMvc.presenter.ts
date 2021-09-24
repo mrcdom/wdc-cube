@@ -80,58 +80,57 @@ const HeaderMobX = types
         toggleButtonVisible: false,
         inputValue: ''
     })
-    .actions(state => {
-        return {
+    .actions(state => ({
 
-            setAllItemsCompleted(value: boolean) {
-                state.allItemsCompleted = value
-            },
+        setAllItemsCompleted(value: boolean) {
+            state.allItemsCompleted = value
+        },
 
-            setToggleButtonVisible(value: boolean) {
-                state.toggleButtonVisible = value
-            },
+        setToggleButtonVisible(value: boolean) {
+            state.toggleButtonVisible = value
+        },
 
-            setInputValue(value: string) {
-                state.inputValue = value
-            }
+        setInputValue(value: string) {
+            state.inputValue = value
         }
-    })
+
+    }))
 
 export class HeaderScope extends Scope {
 
-    private __state: Instance<typeof HeaderMobX>
+    private model: Instance<typeof HeaderMobX>
 
     get allItemsCompleted(): boolean {
-        return this.__state.allItemsCompleted
+        return this.model.allItemsCompleted
     }
 
     set allItemsCompleted(value: boolean) {
-        this.__state.setAllItemsCompleted(value)
+        this.model.setAllItemsCompleted(value)
     }
 
     get toggleButtonVisible(): boolean {
-        return this.__state.toggleButtonVisible
+        return this.model.toggleButtonVisible
     }
 
     set toggleButtonVisible(value: boolean) {
-        this.__state.setToggleButtonVisible(value)
+        this.model.setToggleButtonVisible(value)
     }
 
     get inputValue(): string {
-        return this.__state.inputValue
+        return this.model.inputValue
     }
 
     set inputValue(value: string) {
-        this.__state.setInputValue(value)
+        this.model.setInputValue(value)
     }
 
     constructor() {
         super()
-        this.__state = HeaderMobX.create()
+        this.model = HeaderMobX.create()
     }
 
     observe(callback: () => void) {
-        return onSnapshot(this.__state, callback)
+        return onSnapshot(this.model, callback)
     }
 
     readonly actions = {
