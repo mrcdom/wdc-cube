@@ -307,7 +307,14 @@ export class ScopeUpdateManager implements IUpdateManager {
 export function action() {
     return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
         if (lodash.isFunction(descriptor.value)) {
-            descriptor.value = instrumentActionMethod(descriptor.value)
+            const instrumentedMethod = instrumentActionMethod(descriptor.value)
+
+            Object.defineProperty(instrumentedMethod, 'name', {
+                value: propertyKey + '_action',
+                configurable: true,
+            })
+
+            descriptor.value = instrumentedMethod
         }
     }
 }
