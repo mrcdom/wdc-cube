@@ -4,6 +4,7 @@ import {
     HistoryManager,
     PlaceUri,
     Scope,
+    action,
     AlertSeverity,
     SingletonServices,
     NOOP_PROMISE_VOID
@@ -149,6 +150,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         }
     }
 
+    @action()
     protected async onCloseAlert(onClose?: () => Promise<void>) {
         this.scope.alert = undefined
         if (onClose) {
@@ -156,22 +158,27 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         }
     }
 
+    @action()
     protected async onHome() {
         await this.flip(this.rootPlace)
     }
 
+    @action()
     protected async onOpenTodos() {
         await this.flip(Places.todos)
     }
 
+    @action()
     protected async onOpenSuscriptions() {
         await this.flip(Places.subscriptions)
     }
 
+    @action()
     protected async onOpenLogin() {
         this.alert('info', 'Working in progress...', 'No implementation to this action, yet.')
     }
 
+    @action()
     protected async onOpenAlert(severity: AlertSeverity) {
         LOG.info('onAlert clicked')
         this.alert(severity, 'Some title', 'Some message', async () => {
