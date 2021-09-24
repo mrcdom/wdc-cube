@@ -2,6 +2,7 @@
  * Based on https://todomvc.com/examples/react
  */
 
+import { types, onSnapshot, IStateTreeNode, IDisposer } from 'mobx-state-tree'
 import { Logger, Presenter, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
@@ -44,18 +45,6 @@ export class ItemScope extends Scope {
     }
 }
 
-export class HeaderScope extends Scope {
-    allItemsCompleted = false
-    toggleButtonVisible = false
-    inputValue = ''
-
-    readonly actions = {
-        onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
-        onSyncInputKeyDown: Scope.SYNC_ACTION as (event: KeyDownEvent) => void,
-        onToggleAll: Scope.ASYNC_ACTION
-    }
-}
-
 export class MainScope extends Scope {
     clock?: ClockScope
 
@@ -84,37 +73,114 @@ export class TodoMvcScope extends Scope {
 
 // :: Presentation
 
+type HeaderMobX = {
+    allItemsCompleted: boolean
+    toggleButtonVisible: boolean
+    inputValue: string
+
+    setAllItemsCompleted(value: boolean): void
+    setToggleButtonVisible(value: boolean): void
+    setInputValue(value: string): void
+}
+
+export class HeaderScope extends Scope {
+
+    private __state: HeaderMobX & IStateTreeNode
+
+    get allItemsCompleted(): boolean {
+        return this.__state.allItemsCompleted
+    }
+
+    set allItemsCompleted(value: boolean) {
+        this.__state.setAllItemsCompleted(value)
+    }
+
+    get toggleButtonVisible(): boolean {
+        return this.__state.toggleButtonVisible
+    }
+
+    set toggleButtonVisible(value: boolean) {
+        this.__state.setToggleButtonVisible(value)
+    }
+
+    get inputValue(): string {
+        return this.__state.inputValue
+    }
+
+    set inputValue(value: string) {
+        this.__state.setInputValue(value)
+    }
+
+    constructor() {
+        super()
+
+        this.__state = types
+            .model({
+                allItemsCompleted: false,
+                toggleButtonVisible: false,
+                inputValue: ''
+            })
+            .actions(state => {
+                return {
+
+                    setAllItemsCompleted(value: boolean) {
+                        state.allItemsCompleted = value
+                    },
+
+                    setToggleButtonVisible(value: boolean) {
+                        state.toggleButtonVisible = value
+                    },
+
+                    setInputValue(value: string) {
+                        state.inputValue = value
+                    }
+                }
+            })
+            .create()
+    }
+
+    observe(callback: () => void) {
+        return onSnapshot(this.__state, callback)
+    }
+
+    readonly actions = {
+        onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
+        onSyncInputKeyDown: Scope.SYNC_ACTION as (event: KeyDownEvent) => void,
+        onToggleAll: Scope.ASYNC_ACTION
+    }
+}
+
 class HeaderPresenter extends Presenter<HeaderScope> {
 
     public handleEnter = Scope.SYNC_ACTION_STRING
 
     public handleToggleAll = Scope.ASYNC_ACTION
 
-    public constructor(app: MainPresenter, parent: TodoMvcPresenter) {
-        super(app, new HeaderScope(), parent.updateManager)
+    private _observerDisposer: IDisposer
+
+    public constructor(app: MainPresenter) {
+        super(app, new HeaderScope())
+        this._observerDisposer = this.scope.observe(this.update.bind(this, this.scope))
     }
 
     public release() {
-        this.scope.actions.onSyncInputChange = Scope.SYNC_ACTION_STRING
-        this.scope.actions.onSyncInputKeyDown = Scope.SYNC_ACTION
-        this.scope.actions.onToggleAll = Scope.ASYNC_ACTION
+        this._observerDisposer()
         super.release()
     }
 
     public initialize() {
-        this.scope.actions.onSyncInputChange = this.onSyncInputChange.bind(this)
+        this.scope.actions.onSyncInputChange = this.handleSyncInputChange.bind(this)
         this.scope.actions.onSyncInputKeyDown = this.handleSyncInputKeyDown.bind(this)
         this.scope.actions.onToggleAll = this.handleToggleAll
     }
 
-    protected onSyncInputChange(value: string) {
+    protected handleSyncInputChange(value: string) {
         this.scope.inputValue = value
     }
 
     protected handleSyncInputKeyDown(event: KeyDownEvent) {
         if (event.code === 'Escape') {
             this.scope.inputValue = ''
-            this.update()
             return
         }
 
@@ -127,7 +193,6 @@ class HeaderPresenter extends Presenter<HeaderScope> {
         const trimVal = this.scope.inputValue.trim()
 
         this.scope.inputValue = ''
-        this.update()
 
         if (trimVal) {
             this.handleEnter(trimVal)
@@ -157,7 +222,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
-        this.header = new HeaderPresenter(app, this)
+        this.header = new HeaderPresenter(app)
         this.scope.header = this.header.scope
     }
 
@@ -220,7 +285,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     private async synchronizeState(uriUserId: number, uriShowing: ShowingOptions, force = false) {
-        if( this.footerScope.showing != uriShowing) {
+        if (this.footerScope.showing != uriShowing) {
             this.footerScope.showing = uriShowing
             this.update(this.footerScope)
         }
