@@ -2,11 +2,12 @@
  * Based on https://todomvc.com/examples/react
  */
 
-import { types, onSnapshot, IStateTreeNode, IDisposer } from 'mobx-state-tree'
 import { Logger, Presenter, CubePresenter, Scope, ScopeSlot, PlaceUri, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamIds, AttrIds } from '../../Constants'
+
+import { types, onSnapshot, IDisposer } from 'mobx-state-tree'
 
 const LOG = Logger.get('TodoMvcPresenter')
 
@@ -73,19 +74,32 @@ export class TodoMvcScope extends Scope {
 
 // :: Presentation
 
-type HeaderMobX = {
-    allItemsCompleted: boolean
-    toggleButtonVisible: boolean
-    inputValue: string
+const HeaderMobX = types
+    .model({
+        allItemsCompleted: false,
+        toggleButtonVisible: false,
+        inputValue: ''
+    })
+    .actions(state => {
+        return {
 
-    setAllItemsCompleted(value: boolean): void
-    setToggleButtonVisible(value: boolean): void
-    setInputValue(value: string): void
-}
+            setAllItemsCompleted(value: boolean) {
+                state.allItemsCompleted = value
+            },
+
+            setToggleButtonVisible(value: boolean) {
+                state.toggleButtonVisible = value
+            },
+
+            setInputValue(value: string) {
+                state.inputValue = value
+            }
+        }
+    })
 
 export class HeaderScope extends Scope {
 
-    private __state: HeaderMobX & IStateTreeNode
+    private __state: typeof HeaderMobX.Type
 
     get allItemsCompleted(): boolean {
         return this.__state.allItemsCompleted
@@ -113,30 +127,7 @@ export class HeaderScope extends Scope {
 
     constructor() {
         super()
-
-        this.__state = types
-            .model({
-                allItemsCompleted: false,
-                toggleButtonVisible: false,
-                inputValue: ''
-            })
-            .actions(state => {
-                return {
-
-                    setAllItemsCompleted(value: boolean) {
-                        state.allItemsCompleted = value
-                    },
-
-                    setToggleButtonVisible(value: boolean) {
-                        state.toggleButtonVisible = value
-                    },
-
-                    setInputValue(value: string) {
-                        state.inputValue = value
-                    }
-                }
-            })
-            .create()
+        this.__state = HeaderMobX.create()
     }
 
     observe(callback: () => void) {
@@ -160,7 +151,7 @@ class HeaderPresenter extends Presenter<HeaderScope> {
 
     public constructor(app: MainPresenter) {
         super(app, new HeaderScope())
-        this._observerDisposer = this.scope.observe(this.update.bind(this, this.scope))
+        this._observerDisposer = this.scope.observe(() => this.update())
     }
 
     public release() {
