@@ -7,7 +7,7 @@ import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamIds, AttrIds } from '../../Constants'
 
-import { types, Instance, onSnapshot, IDisposer } from 'mobx-state-tree'
+import { observableScope, observe } from '../../cube/ObservableScope'
 
 const LOG = Logger.get('TodoMvcPresenter')
 
@@ -27,15 +27,18 @@ export enum ShowingOptions {
     COMPLETED
 }
 
+@observableScope
 export class ClockScope extends Scope {
-    date = new Date()
+    @observe({ type: 'date' }) date = new Date()
 }
 
+
+@observableScope
 export class ItemScope extends Scope {
-    id = 0
-    completed = false
-    editing = false
-    title = ''
+    @observe() id = 0
+    @observe() completed = false
+    @observe() editing = false
+    @observe() title = ''
 
     readonly actions = {
         onDestroy: Scope.ASYNC_ACTION,
@@ -52,11 +55,12 @@ export class MainScope extends Scope {
     items = [] as ItemScope[]
 }
 
+@observableScope
 export class FooterScope extends Scope {
-    count = 0
-    activeTodoWord = 'item'
-    clearButtonVisible = false
-    showing = ShowingOptions.ALL
+    @observe() count = 0
+    @observe() activeTodoWord = 'item'
+    @observe() clearButtonVisible = false
+    @observe() showing = ShowingOptions.ALL
 
     readonly actions = {
         onClearCompleted: Scope.ASYNC_ACTION,
@@ -74,64 +78,11 @@ export class TodoMvcScope extends Scope {
 
 // :: Presentation
 
-const HeaderMobX = types
-    .model({
-        allItemsCompleted: false,
-        toggleButtonVisible: false,
-        inputValue: ''
-    })
-    .actions(state => ({
-
-        setAllItemsCompleted(value: boolean) {
-            state.allItemsCompleted = value
-        },
-
-        setToggleButtonVisible(value: boolean) {
-            state.toggleButtonVisible = value
-        },
-
-        setInputValue(value: string) {
-            state.inputValue = value
-        }
-
-    }))
-
+@observableScope
 export class HeaderScope extends Scope {
-
-    private model: Instance<typeof HeaderMobX>
-
-    get allItemsCompleted(): boolean {
-        return this.model.allItemsCompleted
-    }
-
-    set allItemsCompleted(value: boolean) {
-        this.model.setAllItemsCompleted(value)
-    }
-
-    get toggleButtonVisible(): boolean {
-        return this.model.toggleButtonVisible
-    }
-
-    set toggleButtonVisible(value: boolean) {
-        this.model.setToggleButtonVisible(value)
-    }
-
-    get inputValue(): string {
-        return this.model.inputValue
-    }
-
-    set inputValue(value: string) {
-        this.model.setInputValue(value)
-    }
-
-    constructor() {
-        super()
-        this.model = HeaderMobX.create()
-    }
-
-    observe(callback: () => void) {
-        return onSnapshot(this.model, callback)
-    }
+    @observe() allItemsCompleted = false
+    @observe() toggleButtonVisible = false
+    @observe() inputValue = ''
 
     readonly actions = {
         onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
@@ -146,16 +97,8 @@ class HeaderPresenter extends Presenter<HeaderScope> {
 
     public handleToggleAll = Scope.ASYNC_ACTION
 
-    private _observerDisposer: IDisposer
-
     public constructor(app: MainPresenter) {
         super(app, new HeaderScope())
-        this._observerDisposer = this.scope.observe(() => this.update())
-    }
-
-    public release() {
-        this._observerDisposer()
-        super.release()
     }
 
     public initialize() {

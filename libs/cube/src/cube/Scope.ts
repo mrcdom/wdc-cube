@@ -57,4 +57,6 @@ export abstract class Scope {
 
     public update: () => void = NOOP_VOID
 
+    public observe?: (callback: () => void) => () => void
+
 }

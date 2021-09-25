@@ -27,6 +27,8 @@ export class Presenter<S extends Scope> implements IPresenter {
 
     private __updateCount = 0
 
+    private __disposeObserver = NOOP_VOID
+
     public constructor(owner: IPresenterOwner, scope: S, updateManager?: IUpdateManager) {
         this.__owner = owner
         this.__scope = scope
@@ -51,9 +53,15 @@ export class Presenter<S extends Scope> implements IPresenter {
 
         this.__updateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__updateManager.update(scope)
+
+        if (scope.observe) {
+            this.__disposeObserver = scope.observe(() => this.update(this.scope))
+        }
     }
 
     public release(): void {
+        this.__disposeObserver()
+
         if (this.__updateManagerOwner) {
             this.__updateManager.release()
         } else {
