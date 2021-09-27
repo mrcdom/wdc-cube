@@ -27,8 +27,6 @@ export class Presenter<S extends Scope> implements IPresenter {
 
     private __updateCount = 0
 
-    private __disposeObserver = NOOP_VOID
-
     public constructor(owner: IPresenterOwner, scope: S, updateManager?: IUpdateManager) {
         this.__owner = owner
         this.__scope = scope
@@ -54,14 +52,12 @@ export class Presenter<S extends Scope> implements IPresenter {
         this.__updateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__updateManager.update(scope)
 
-        if (scope.observe) {
-            this.__disposeObserver = scope.observe(() => this.update(this.scope))
-        }
+        this.__scope.update = this.update.bind(this)
     }
 
     public release(): void {
-        this.__disposeObserver()
-
+        this.__scope.update = NOOP_VOID
+        this.__scope.forceUpdate = NOOP_VOID
         if (this.__updateManagerOwner) {
             this.__updateManager.release()
         } else {
@@ -139,7 +135,7 @@ export class ScopeUpdateManager implements IUpdateManager {
 
     public release() {
         callbackManager.unbind(this.__emitBeforeScopeUpdate)
-        this.__scope.update = NOOP_VOID
+        this.__scope.forceUpdate = NOOP_VOID
         this.__beforeScopeUpdateHandlerMap.clear()
         this.__dirtyScopes.clear()
         this.__scopeUpdateFallback.clear()
@@ -229,14 +225,14 @@ export class ScopeUpdateManager implements IUpdateManager {
             if (this.__baseScopeUpdateRequested || this.__dirtyScopes.size > 0) {
                 try {
                     if (this.__baseScopeUpdateRequested) {
-                        this.__scope.update()
+                        this.__scope.forceUpdate()
                     }
                     // Use selective update
                     else {
                         this.selectiveScopeUpdate()
                     }
                 } catch (caught) {
-                    LOG.error('Updating dirty scopes')
+                    LOG.error('Updating dirty scopes', caught)
                 } finally {
                     this.__dirtyScopes.clear()
                     this.__cancelledScopes.clear()
@@ -258,7 +254,7 @@ export class ScopeUpdateManager implements IUpdateManager {
             changesCount = 0
 
             if (sourceDirtyScopes.has(this.__scope.constructor as ScopeConstructor)) {
-                this.__scope.update()
+                this.__scope.forceUpdate()
                 updateCount++
                 break
             } else {
@@ -280,7 +276,11 @@ export class ScopeUpdateManager implements IUpdateManager {
                 if (changesCount === 0) {
                     for (const scopeMap of sourceDirtyScopes.values()) {
                         for (const scope of scopeMap.keys()) {
-                            scope.update()
+                            try {
+                                scope.forceUpdate()
+                            } catch(caught) {
+                                LOG.info('scope.forceUpdate: ', scope, caught)
+                            }
                             updateCount++
                         }
                     }

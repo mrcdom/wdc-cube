@@ -17,7 +17,7 @@ export class RestrictedPresenter extends CubePresenter<MainPresenter, Restricted
     private readonly detailSlot: ScopeSlot = scope => {
         if (this.scope.detail !== scope) {
             this.scope.detail = scope
-            this.scope.update()
+            this.update()
         }
     }
 

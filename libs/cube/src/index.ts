@@ -15,7 +15,7 @@ export { CubeBuilder } from './cube/CubeBuilder'
 export { SingletonServices } from './utils/SingletonServices'
 
 export type { ILogger } from './utils/Logger'
-export type { ScopeConstructor } from './cube/Scope'
+export type { ScopeConstructor, IScope } from './cube/Scope'
 export type { ScopeSlot } from './cube/ScopeSlot'
 export type { PlaceCreator } from './cube/Place'
 export type { IPresenter, ICubePresenter, AlertSeverity } from './cube/IPresenter'

@@ -42,12 +42,15 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
 
         this.__updateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__updateManager.update(scope)
+
+        this.__scope.update = this.update.bind(this)
     }
 
     // :: IDisposable API
 
     public release(): void {
-        this.scope.update = NOOP_VOID
+        this.__scope.update = NOOP_VOID
+        this.__scope.forceUpdate = NOOP_VOID
         this.__updateManager.release()
     }
 

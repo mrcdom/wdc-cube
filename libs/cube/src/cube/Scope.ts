@@ -13,7 +13,12 @@ async function asyncAction(...args: unknown[]): Promise<void> {
 
 export type ScopeConstructor = new () => Scope
 
-export abstract class Scope {
+export interface IScope {
+    forceUpdate: () => void
+    update: (scope?: Scope) => void
+}
+
+export abstract class Scope implements IScope {
 
     // Class
 
@@ -53,10 +58,11 @@ export abstract class Scope {
         return asyncAction
     }
 
+
     // API
 
-    public update: () => void = NOOP_VOID
+    public forceUpdate: () => void = NOOP_VOID
 
-    public observe?: (callback: () => void) => () => void
+    public update: (scope?: Scope) => void = NOOP_VOID
 
 }

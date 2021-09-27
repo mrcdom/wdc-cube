@@ -1,4 +1,5 @@
 import { Logger } from '../utils/Logger'
+import { NOOP_VOID } from '../utils/EmptyFunctions'
 import { Place } from './Place'
 import { PlaceUri } from './PlaceUri'
 import { HistoryManager } from './HistoryManager'
@@ -38,9 +39,13 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         this.__scopeUpdateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
 
         this.__scopeUpdateManager.update(scope)
+
+        this.__scope.update = this.update.bind(this)
     }
 
     public override release() {
+        this.__scope.update = NOOP_VOID
+        this.__scope.forceUpdate = NOOP_VOID
         this.__scopeUpdateManager.removeOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__scopeUpdateManager.release()
         super.release()

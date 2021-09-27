@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import lodash from 'lodash'
-import { NOOP_VOID, Scope } from 'wdc-cube'
+import { IScope, NOOP_VOID } from 'wdc-cube'
 import { types, onSnapshot } from 'mobx-state-tree'
 
 export type PropertyType = 'string' | 'boolean' | 'number' | 'integer' | 'date' | 'map' | 'array'
@@ -27,22 +27,39 @@ type ObservePropertyDef = {
 
 const propertyDefByConstructorMap = new Map<new (...args: any[]) => any, ObservePropertyDef[]>()
 
-interface IMobXScope extends Scope {
+interface IMobXScope extends IScope {
     $$mobx_model: Record<string, any>
 }
 
-export function observableScope<T extends new (...args: any[]) => Scope>(constructor: T) {
+export function observableScope<T extends new (...args: any[]) => IScope>(constructor: T) {
     const statics = createConstructorBodyAction(constructor)
 
-    return class extends constructor {
+    const constructorExt = class extends constructor implements IMobXScope {
+
+        $$mobx_model: Record<string, any>
 
         constructor(...args: any[]) {
             super(...args)
-            const me = (this as unknown) as IMobXScope
-            statics.init(me)
-            this.observe = callback => onSnapshot(me.$$mobx_model, callback)
+            this.$$mobx_model = {}
+            statics.init(this)
         }
+
+        public override set forceUpdate(action: () => void) {
+            super.forceUpdate = action
+        }
+
+        //public override observe(callback: () => void): () => void {
+        //    return onSnapshot(this.$$mobx_model, callback)
+        //}
     }
+
+    Object.defineProperty(constructorExt, 'name', {
+        value: constructor.name + 'MobX',
+        configurable: true,
+    })
+
+
+    return constructorExt
 }
 
 
@@ -71,13 +88,29 @@ function createMobXStateClass(propertyKeyArray: ObservePropertyDef[], scope: any
         let mobXType = initValue
         if (cfg && cfg.type) {
             const [informedType, defaultValue] = propertyTypeToMobXType[cfg.type]
-            const computedDefaultValue = initValue ?? defaultValue()
-            mobXType = types.optional(informedType as any, computedDefaultValue)
+            mobXType = types.optional(informedType as any, initValue ?? defaultValue())
         } else if (initValue !== undefined) {
-            if(lodash.isArray(initValue)) {
-                // TODO: mobXType = types.optional(types.array(), [])
+            if (lodash.isBoolean(initValue)) {
+                const [informedType, defaultValue] = propertyTypeToMobXType['boolean']
+                mobXType = types.optional(informedType as any, initValue ?? defaultValue())
+            } else if (lodash.isNumber(initValue)) {
+                const [informedType, defaultValue] = propertyTypeToMobXType['number']
+                mobXType = types.optional(informedType as any, initValue ?? defaultValue())
+            } else if (lodash.isString(initValue)) {
+                const [informedType, defaultValue] = propertyTypeToMobXType['string']
+                mobXType = types.optional(informedType as any, initValue ?? defaultValue())
+            } else if (lodash.isDate(initValue)) {
+                const [informedType, defaultValue] = propertyTypeToMobXType['date']
+                mobXType = types.optional(informedType as any, initValue ?? defaultValue())
+            } else if (lodash.isArray(initValue)) {
+                //mobXType = types.optional(types.array(initValue), [])
+                mobXType = initValue
+            } else if (lodash.isObject(initValue)) {
+                //mobXType = types.optional(types.map(initValue), [])
+                mobXType = initValue
+            } else {
+                mobXType = initValue
             }
-            mobXType = initValue
         } else {
             mobXType = types.undefined
         }
@@ -97,7 +130,7 @@ function createMobXStateClass(propertyKeyArray: ObservePropertyDef[], scope: any
     return types.model(modelDef as any).actions(actionBuilder as any)
 }
 
-function createConstructorBodyAction<T extends new (...args: any[]) => Scope>(constructor: T) {
+function createConstructorBodyAction<T extends new (...args: any[]) => IScope>(constructor: T) {
     const statics = {
         init: NOOP_VOID as (scope: IMobXScope) => void
     }
@@ -113,14 +146,14 @@ function createConstructorBodyAction<T extends new (...args: any[]) => Scope>(co
         statics.init = (scope: IMobXScope) => {
             const modelClass = createMobXStateClass(propertyDefArray, scope)
 
-            // Remove instance property in order to avoid
-            // misleading behaviour of getting defined attribute
-            // instead of using the property
-            for (const { key } of propertyDefArray) {
-                delete (scope as any)[key]
-            }
-
             statics.init = (scope) => {
+                // Remove instance property in order to avoid
+                // misleading behaviour of getting defined attribute
+                // instead of using the property
+                for (const { key } of propertyDefArray) {
+                    delete (scope as any)[key]
+                }
+
                 scope.$$mobx_model = modelClass.create()
             }
 
