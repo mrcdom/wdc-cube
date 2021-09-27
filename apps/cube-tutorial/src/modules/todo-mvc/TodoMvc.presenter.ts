@@ -26,6 +26,52 @@ export enum ShowingOptions {
     COMPLETED
 }
 
+export class HeaderScope extends Scope {
+
+    private __allItemsCompleted = false
+    private __toggleButtonVisible = false
+    private __inputValue = ''
+
+    get allItemsCompleted() {
+        return this.__allItemsCompleted
+    }
+
+    set allItemsCompleted(value: boolean) {
+        if (this.__allItemsCompleted !== value) {
+            this.__allItemsCompleted = value
+            this.update(this)
+        }
+    }
+
+    get toggleButtonVisible() {
+        return this.__toggleButtonVisible
+    }
+
+    set toggleButtonVisible(value: boolean) {
+        if (this.__toggleButtonVisible !== value) {
+            this.__toggleButtonVisible = value
+            this.update(this)
+        }
+    }
+
+    get inputValue() {
+        return this.__inputValue
+    }
+
+    set inputValue(value: string) {
+        if (this.__inputValue !== value) {
+            this.__inputValue = value
+            this.update(this)
+        }
+    }
+
+    readonly actions = {
+        onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
+        onSyncInputKeyDown: Scope.SYNC_ACTION as (event: KeyDownEvent) => void,
+        onToggleAll: Scope.ASYNC_ACTION
+    }
+}
+
 export class ClockScope extends Scope {
 
     private __date = new Date()
@@ -220,52 +266,6 @@ export class TodoMvcScope extends Scope {
 }
 
 // :: Presentation
-
-export class HeaderScope extends Scope {
-
-    private __allItemsCompleted = false
-    private __toggleButtonVisible = false
-    private __inputValue = ''
-
-    get allItemsCompleted() {
-        return this.__allItemsCompleted
-    }
-
-    set allItemsCompleted(value: boolean) {
-        if (this.__allItemsCompleted !== value) {
-            this.__allItemsCompleted = value
-            this.update(this)
-        }
-    }
-
-    get toggleButtonVisible() {
-        return this.__toggleButtonVisible
-    }
-
-    set toggleButtonVisible(value: boolean) {
-        if (this.__toggleButtonVisible !== value) {
-            this.__toggleButtonVisible = value
-            this.update(this)
-        }
-    }
-
-    get inputValue() {
-        return this.__inputValue
-    }
-
-    set inputValue(value: string) {
-        if (this.__inputValue !== value) {
-            this.__inputValue = value
-            this.update(this)
-        }
-    }
-
-    readonly actions = {
-        onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
-        onSyncInputKeyDown: Scope.SYNC_ACTION as (event: KeyDownEvent) => void,
-        onToggleAll: Scope.ASYNC_ACTION
-    }
-}
 
 export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope> {
 

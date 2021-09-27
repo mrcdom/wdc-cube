@@ -2,7 +2,7 @@
 
 import lodash from 'lodash'
 import { IScope, NOOP_VOID } from 'wdc-cube'
-import { types, onSnapshot } from 'mobx-state-tree'
+import { types } from 'mobx-state-tree' // onSnapshot
 
 export type PropertyType = 'string' | 'boolean' | 'number' | 'integer' | 'date' | 'map' | 'array'
 
