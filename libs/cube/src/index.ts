@@ -13,6 +13,8 @@ export { Scope } from './cube/Scope'
 export { ScopeUtils } from './cube/ScopeUtils'
 export { CubeBuilder } from './cube/CubeBuilder'
 export { SingletonServices } from './utils/SingletonServices'
+export { observable } from './cube/Observable'
+export { ObservableArray } from './cube/ObservableArray'
 
 export type { ILogger } from './utils/Logger'
 export type { ScopeConstructor, IScope } from './cube/Scope'

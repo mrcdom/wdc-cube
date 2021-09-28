@@ -22,9 +22,9 @@ export const TodoMvcView = function ({ className, style, scope }: TodoMvcViewPro
     <div className={Css.body}>
       <h1>todos</h1>
       <div className={Css.todoapp}>
-        <ViewSlot scope={scope.header} view={HeaderView} />
-        <ViewSlot scope={scope.main} view={MainView} />
-        <ViewSlot scope={scope.footer} view={FooterView} />
+        <ViewSlot scope={scope.header()} view={HeaderView} />
+        <ViewSlot scope={scope.main()} view={MainView} />
+        <ViewSlot scope={scope.footer()} view={FooterView} />
       </div>
     </div>
   </div>

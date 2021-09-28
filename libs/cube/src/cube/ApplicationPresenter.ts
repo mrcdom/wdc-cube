@@ -40,7 +40,7 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
         this.__scopeUpdateManager.update(scope)
 
-        this.__scope.update = this.update.bind(this)
+        this.__scope.update = this.update
     }
 
     public override release() {
@@ -91,14 +91,16 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
     // :: IPresenter Api
 
-    public update<T extends Scope>(optionalScope?: T) {
+    public readonly update = this.doUpdate.bind(this)
+
+    private doUpdate(optionalScope?: Scope) {
         this.__scopeUpdateManager.update(optionalScope ?? this.scope)
         this.__updateCount++
     }
 
     public updateIfNotDirty(scope: Scope): void {
         if (this.__updateCount === 0) {
-            this.update(scope)
+            this.doUpdate(scope)
         }
     }
 

@@ -43,7 +43,7 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
         this.__updateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__updateManager.update(scope)
 
-        this.__scope.update = this.update.bind(this)
+        this.__scope.update = this.update
     }
 
     // :: IDisposable API
@@ -76,14 +76,16 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
         this.__app.alert(severity, title, message, onClose)
     }
 
-    public update(optionalScope?: Scope) {
+    public readonly update = this.doUpdate.bind(this)
+
+    private doUpdate(optionalScope?: Scope) {
         this.__updateManager.update(optionalScope ?? this.scope)
         this.__updateCount++
     }
 
     public updateIfNotDirty(scope: Scope) {
         if (this.__updateCount === 0) {
-            this.update(scope)
+            this.doUpdate(scope)
         }
     }
 

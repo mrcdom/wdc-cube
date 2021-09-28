@@ -1,4 +1,4 @@
-import { Scope } from 'wdc-cube'
+import { Scope } from './Scope'
 
 export class ObservableArray<T> implements Iterable<T> {
 

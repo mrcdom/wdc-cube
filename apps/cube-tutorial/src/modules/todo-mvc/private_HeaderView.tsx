@@ -33,9 +33,9 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
                     className={Css['toggle-all']}
                     type="checkbox"
                     onChange={onToggleAll}
-                    checked={!scope.allItemsCompleted}
+                    checked={!scope.allItemsCompleted()}
                 />
-                <label htmlFor={inputUuid} style={{ opacity: scope.toggleButtonVisible ? 1 : 0 }}>
+                <label htmlFor={inputUuid} style={{ opacity: scope.toggleButtonVisible() ? 1 : 0 }}>
                     Mark all as complete
                 </label>
             </>
@@ -46,7 +46,7 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
                 onKeyDown={onInputKeyDown}
                 autoFocus={true}
                 onChange={onChange}
-                value={scope.inputValue}
+                value={scope.inputValue()}
             />
         </div>
     </header>

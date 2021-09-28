@@ -52,7 +52,7 @@ export class Presenter<S extends Scope> implements IPresenter {
         this.__updateManager.addOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
         this.__updateManager.update(scope)
 
-        this.__scope.update = this.update.bind(this)
+        this.__scope.update = this.update
     }
 
     public release(): void {
@@ -85,14 +85,16 @@ export class Presenter<S extends Scope> implements IPresenter {
         this.__owner.alert(severity, title, message, onClose)
     }
 
-    public update(optionalScope?: Scope) {
+    public readonly update = this.doUpdate.bind(this)
+
+    private doUpdate(optionalScope?: Scope) {
         this.__updateManager.update(optionalScope ?? this.scope)
         this.__updateCount++
     }
 
     public updateIfNotDirty(scope: Scope) {
         if (this.__updateCount === 0) {
-            this.update(scope)
+            this.doUpdate(scope)
         }
     }
 
@@ -278,7 +280,7 @@ export class ScopeUpdateManager implements IUpdateManager {
                         for (const scope of scopeMap.keys()) {
                             try {
                                 scope.forceUpdate()
-                            } catch(caught) {
+                            } catch (caught) {
                                 LOG.info('scope.forceUpdate: ', scope, caught)
                             }
                             updateCount++
