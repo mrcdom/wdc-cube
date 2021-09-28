@@ -367,9 +367,6 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
         if (this.itemScopes.length > 0) {
             let numItems = 0
-            const updateOrAddItem = (itemScope: ItemScope) => {
-                this.mainScope.items.set(numItems++, itemScope)
-            }
 
             for (const itemScope of this.itemScopes) {
                 if (itemScope.completed()) {
@@ -381,16 +378,16 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
                 switch (this.footerScope.showing()) {
                     case ShowingOptions.ACTIVE:
                         if (!itemScope.completed()) {
-                            updateOrAddItem(itemScope)
+                            this.mainScope.items.set(numItems++, itemScope)
                         }
                         break
                     case ShowingOptions.COMPLETED:
                         if (itemScope.completed()) {
-                            updateOrAddItem(itemScope)
+                            this.mainScope.items.set(numItems++, itemScope)
                         }
                         break
                     default:
-                        updateOrAddItem(itemScope)
+                        this.mainScope.items.set(numItems++, itemScope)
                 }
             }
 
