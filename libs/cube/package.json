@@ -6,6 +6,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "@aws-sdk/util-utf8-browser": "^3.23.0",
+    "ansi-regex": "^5.0.1",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13"
   },
@@ -13,7 +14,7 @@
     "@types/jest": "^27.0.1",
     "@types/lodash": "^4.14.172",
     "@typescript-eslint/eslint-plugin": "^4.31.0",
-    "@typescript-eslint/typescript-estree": "^4.29.3",
+    "@typescript-eslint/typescript-estree": "^4.32.0",
     "eslint": "^7.32.0",
     "ts-jest": "^27.0.5"
   },
