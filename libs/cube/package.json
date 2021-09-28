@@ -6,7 +6,6 @@
   "main": "lib/index.js",
   "dependencies": {
     "@aws-sdk/util-utf8-browser": "^3.23.0",
-    "ansi-regex": "^5.0.1",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13"
   },
