@@ -2,10 +2,11 @@
  * Based on https://todomvc.com/examples/react
  */
 
-import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, action, observable, ObservableArray, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, observable, ObservableArray, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamIds, AttrIds } from '../../Constants'
+import { TodoMvcScope, HeaderScope, MainScope, ClockScope, FooterScope, ItemScope, ShowingOptions, KeyDownEvent } from './TodoMvc.scopes'
 
 const LOG = Logger.get('TodoMvcPresenter')
 
@@ -14,73 +15,7 @@ const tutorialService = TutorialService.INSTANCE
 
 // :: Scopes
 
-type KeyDownEvent = {
-    preventDefault: () => void
-    code: string
-}
 
-export enum ShowingOptions {
-    ALL,
-    ACTIVE,
-    COMPLETED
-}
-
-export class HeaderScope extends Scope {
-    readonly allItemsCompleted = observable.value(this, false)
-    readonly toggleButtonVisible = observable.value(this, false)
-    readonly inputValue = observable.value(this, '')
-
-    readonly actions = {
-        onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
-        onSyncInputKeyDown: Scope.SYNC_ACTION as (event: KeyDownEvent) => void,
-        onToggleAll: Scope.ASYNC_ACTION
-    }
-}
-
-export class ClockScope extends Scope {
-    readonly date = observable.value(this, new Date())
-}
-
-export class ItemScope extends Scope {
-    readonly id = observable.value(this, 0)
-    readonly completed = observable.value(this, false)
-    readonly editing = observable.value(this, false)
-    readonly title = observable.value(this, '')
-
-    readonly actions = {
-        onDestroy: Scope.ASYNC_ACTION,
-        onToggle: Scope.ASYNC_ACTION,
-        onEdit: Scope.ASYNC_ACTION,
-        onBlur: Scope.SYNC_ACTION as (getValue: () => string) => void,
-        onKeyDown: Scope.SYNC_ACTION as (getValue: () => string, event: KeyDownEvent) => void,
-    }
-
-}
-
-export class MainScope extends Scope {
-    readonly clock = observable.optional<ClockScope>(this)
-    readonly items = observable.array<ItemScope>(this)
-}
-
-export class FooterScope extends Scope {
-    readonly count = observable.value(this, 0)
-    readonly activeTodoWord = observable.value(this, 'item')
-    readonly clearButtonVisible = observable.value(this, false)
-    readonly showing = observable.value(this, ShowingOptions.ALL)
-
-    readonly actions = {
-        onClearCompleted: Scope.ASYNC_ACTION,
-        onShowAll: Scope.ASYNC_ACTION,
-        onShowActives: Scope.ASYNC_ACTION,
-        onShowCompleteds: Scope.ASYNC_ACTION
-    }
-}
-
-export class TodoMvcScope extends Scope {
-    readonly header = observable.optional<HeaderScope>(this)
-    readonly main = observable.optional<MainScope>(this)
-    readonly footer = observable.optional<FooterScope>(this)
-}
 
 // :: Presentation
 
@@ -137,14 +72,14 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         LOG.debug('Finalized')
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
-        const uriUserId = uri.getParameterAsNumberOrDefault(ParamIds.TodoUserId, this.userId)
-        const uriShowing = uri.getParameterAsNumberOrDefault(ParamIds.TodoShowing, this.footerScope.showing()) as ShowingOptions
+    public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
+        const ctxUserId = intent.getParameterAsNumberOrDefault(ParamIds.TodoUserId, this.userId)
+        const ctxShowing = intent.getParameterAsNumberOrDefault(ParamIds.TodoShowing, this.footerScope.showing()) as ShowingOptions
 
         if (initialization) {
-            await this.initializeState(uri, uriUserId, uriShowing)
+            await this.initializeState(intent, ctxUserId, ctxShowing)
         } else {
-            await this.synchronizeState(uriUserId, uriShowing)
+            await this.synchronizeState(ctxUserId, ctxShowing)
         }
 
         this.parentSlot(this.scope)
@@ -152,19 +87,19 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         return true
     }
 
-    public override publishParameters(uri: PlaceUri): void {
+    public override publishParameters(intent: FlipIntent): void {
         if (this.footerScope.showing() !== ShowingOptions.ALL) {
-            uri.setParameter(ParamIds.TodoShowing, this.footerScope.showing())
+            intent.setParameter(ParamIds.TodoShowing, this.footerScope.showing())
         }
 
         if (this.userId !== 0) {
-            uri.setParameter(ParamIds.TodoUserId, this.userId)
+            intent.setParameter(ParamIds.TodoUserId, this.userId)
         }
     }
 
-    private async initializeState(uri: PlaceUri, uriUserId: number, uriShowing: ShowingOptions) {
+    private async initializeState(intent: FlipIntent, uriUserId: number, uriShowing: ShowingOptions) {
         // Get slots
-        this.parentSlot = uri.getScopeSlot(AttrIds.parentSlot)
+        this.parentSlot = intent.getScopeSlot(AttrIds.parentSlot)
 
         await this.synchronizeState(uriUserId, uriShowing, true)
 

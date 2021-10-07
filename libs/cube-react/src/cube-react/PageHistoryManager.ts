@@ -31,7 +31,7 @@ export class PageHistoryManager extends HistoryManager {
     }
 
     private doUpdate(app: Application, place: Place): void {
-        const currentUri = app.newUri(place)
+        const currentUri = app.newFlipIntent(place)
 
         const oldLocation = this.__history.location
 

@@ -6,7 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
-import { AlertScope } from './Main.presenter'
+import { AlertScope } from '../Main.scopes'
 import Css from './Main.module.css'
 
 const LOG = Logger.get('Main.AlertView')

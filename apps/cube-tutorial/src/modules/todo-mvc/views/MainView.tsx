@@ -3,9 +3,9 @@ import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, ViewSlot, IViewProps } from 'wdc-cube-react'
 import Css from './TodoMvc.module.css'
-import { MainScope } from './TodoMvc.presenter'
-import { ItemView } from './private_ItemView'
-import { ClockView } from './private_ClockView'
+import { MainScope } from '../TodoMvc.scopes'
+import { ItemView } from './ItemView'
+import { ClockView } from './ClockView'
 
 const LOG = Logger.get('TodoMvc.MainView')
 

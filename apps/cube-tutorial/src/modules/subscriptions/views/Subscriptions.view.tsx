@@ -5,7 +5,7 @@ import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
-import { SubscriptionsScope } from './Subscriptions.presenter'
+import { SubscriptionsScope } from '../Subscriptions.scopes'
 import Css from './Subscriptions.module.css'
 
 const LOG = Logger.get('SubscriptionsView')

@@ -10,8 +10,8 @@ import Dialog from '@material-ui/core/Dialog'
 import { Button } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu'
 import Css from './Main.module.css'
-import { MainPresenter } from './Main.presenter'
-import { AlertView } from './private_AlertView'
+import { MainPresenter } from '../Main.presenter'
+import { AlertView } from './AlertView'
 
 const LOG = Logger.get('MainView')
 

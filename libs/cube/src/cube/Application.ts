@@ -1,7 +1,7 @@
 import { Logger } from '../utils/Logger'
 import { Comparators } from '../utils/Comparators'
 import { Place } from './Place'
-import { PlaceUri, ValidParamTypes } from './PlaceUri'
+import { FlipIntent, ValidParamTypes } from './FlipIntent'
 import { HistoryManager } from './HistoryManager'
 import { FlipContext } from './FlipContext'
 
@@ -89,27 +89,26 @@ export class Application implements IPresenterOwner {
         this.__presenterMap.set(place.id, presenter)
     }
 
-    protected publishAllParameters(uri: PlaceUri) {
+    protected publishAllParameters(intent: FlipIntent) {
         for (const presenter of this.__presenterMap.values()) {
             if (presenter.publishParameters) {
-                presenter.publishParameters(uri)
+                presenter.publishParameters(intent)
             }
         }
     }
 
-    public newUri(place: Place): PlaceUri {
-        const uri = new PlaceUri(place)
-        this.publishAllParameters(uri)
-        return uri
+    public newFlipIntent(place: Place): FlipIntent {
+        const intent = new FlipIntent(place)
+        this.publishAllParameters(intent)
+        return intent
     }
 
-    public newUriFromString(suri: string): PlaceUri {
+    public newIntentFromString(sIntent: string): FlipIntent {
         const defaultPlace = this.__lastPlace ?? this.rootPlace
-        if (suri) {
-            const uri = PlaceUri.parse(suri, name => this.__placeMap.get(name) || defaultPlace)
-            return uri
+        if (sIntent) {
+            return FlipIntent.parse(sIntent, name => this.__placeMap.get(name) || defaultPlace)
         } else {
-            return new PlaceUri(defaultPlace)
+            return new FlipIntent(defaultPlace)
         }
     }
 
@@ -129,52 +128,52 @@ export class Application implements IPresenterOwner {
     }
 
     public async flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }) {
-        const uri = this.newUri(place)
+        const intent = this.newFlipIntent(place)
 
         if (args?.params) {
             for (const [name, value] of Object.entries(args.params)) {
-                uri.setParameter(name, value)
+                intent.setParameter(name, value)
             }
         }
 
         if (args?.attrs) {
             for (const [name, value] of Object.entries(args.attrs)) {
-                uri.attributes.set(name, value)
+                intent.attributes.set(name, value)
             }
         }
 
-        await this.doFlipToNewPlace(uri)
+        await this.doFlipToNewPlace(intent)
     }
 
-    public async flipToUriString(suri: string) {
-        const uri = this.newUriFromString(suri)
-        await this.doFlipToNewPlace(uri)
+    public async flipToIntentString(sIntent: string) {
+        const intent = this.newIntentFromString(sIntent)
+        await this.doFlipToNewPlace(intent)
     }
 
-    public async flipToUri(uri: PlaceUri) {
-        if (uri) {
-            await this.doFlipToNewPlace(uri)
+    public async flipToIntent(intent: FlipIntent) {
+        if (intent) {
+            await this.doFlipToNewPlace(intent)
         } else {
             const defaultPlace = this.__lastPlace ?? this.rootPlace
-            await this.doFlipToNewPlace(this.newUri(defaultPlace))
+            await this.doFlipToNewPlace(this.newFlipIntent(defaultPlace))
         }
     }
 
-    protected async doFlipToNewPlace(uri: PlaceUri) {
+    protected async doFlipToNewPlace(intent: FlipIntent) {
         let context = this.__flipContext
         if (context) {
-            context.targetUri = uri
+            context.targetIntent = intent
             const level = context.incrementAndGetLevel()
             await this.applyPathParameters(context, level)
         } else {
-            context = new FlipContext(this, uri)
+            context = new FlipContext(this, intent)
             try {
                 this.__flipContext = context
 
                 await this.applyPathParameters(context, 0)
 
                 context.commit(this.__presenterMap)
-                this.__lastPlace = context.targetUri.place
+                this.__lastPlace = context.targetIntent.place
             } catch (caught) {
                 context.rollback()
                 throw caught
@@ -186,9 +185,9 @@ export class Application implements IPresenterOwner {
     }
 
     protected async applyPathParameters(context: FlipContext, atLevel: number) {
-        const uri = context.targetUri
+        const intent = context.targetIntent
 
-        for (const place of uri.place.path) {
+        for (const place of intent.place.path) {
             if (place.id != -1 && !(await context.step(place, atLevel))) {
                 break
             }
@@ -196,14 +195,14 @@ export class Application implements IPresenterOwner {
     }
 
     protected onHistoryChanged(sender: HistoryManager) {
-        const currentLocation = this.newUri(this.lastPlace).toString()
+        const currentLocation = this.newFlipIntent(this.lastPlace).toString()
 
         if (!this.__flipContext && sender.location !== currentLocation) {
             const action = async () => {
                 try {
-                    await this.flipToUriString(sender.location)
+                    await this.flipToIntentString(sender.location)
                 } catch (caught) {
-                    LOG.error(`Invalid history location uri=${sender.location}`, caught)
+                    LOG.error(`Invalid history location intent=${sender.location}`, caught)
 
                     if (this.fallbackPlace !== this.rootPlace) {
                         try {

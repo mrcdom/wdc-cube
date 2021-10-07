@@ -1,7 +1,7 @@
 import { Logger } from '../utils/Logger'
 import { Comparators } from '../utils/Comparators'
 import { Place } from './Place'
-import { PlaceUri } from './PlaceUri'
+import { FlipIntent } from './FlipIntent'
 import { Application } from './Application'
 
 import type { ICubePresenter } from './IPresenter'
@@ -12,36 +12,36 @@ export class FlipContext {
 
     private __app: Application
     private __presenterMap: Map<number, ICubePresenter>
-    private __sourceUri: PlaceUri
-    private __targetUri: PlaceUri
+    private __sourceIntent: FlipIntent
+    private __targetIntent: FlipIntent
     private __level: number
     private __cycleDetectionMap: Map<string, boolean>
 
-    public constructor(app: Application, targetUri: PlaceUri) {
+    public constructor(app: Application, targetIntent: FlipIntent) {
         this.__app = app
         this.__level = 0
-        this.__sourceUri = app.newUri(app.lastPlace)
+        this.__sourceIntent = app.newFlipIntent(app.lastPlace)
         this.__cycleDetectionMap = new Map()
         this.__presenterMap = new Map()
-        this.__targetUri = targetUri
-        this.__cycleDetectionMap.set(this.targetUri.place.pathName, true)
-        this.extractPresenters(this.__presenterMap, this.__sourceUri.place.path)
+        this.__targetIntent = targetIntent
+        this.__cycleDetectionMap.set(this.targetIntent.place.pathName, true)
+        this.extractPresenters(this.__presenterMap, this.__sourceIntent.place.path)
     }
 
-    public get targetUri(): PlaceUri {
-        return this.__targetUri
+    public get targetIntent(): FlipIntent {
+        return this.__targetIntent
     }
 
-    public set targetUri(uri: PlaceUri) {
-        if (this.__cycleDetectionMap.has(uri.place.pathName)) {
+    public set targetIntent(intent: FlipIntent) {
+        if (this.__cycleDetectionMap.has(intent.place.pathName)) {
             throw new Error(
                 'Dectected a navigation cycle between '
-                + `source(${this.__sourceUri})=>target(${this.__targetUri}). `
-                + `The intermediate target was "${uri}"`
+                + `source(${this.__sourceIntent})=>target(${this.__targetIntent}). `
+                + `The intermediate target was "${intent}"`
             )
         }
-        this.__targetUri = uri
-        this.__cycleDetectionMap.set(uri.place.pathName, true)
+        this.__targetIntent = intent
+        this.__cycleDetectionMap.set(intent.place.pathName, true)
     }
 
     public get level(): number {
@@ -66,15 +66,15 @@ export class FlipContext {
 
         // Only runs if this context is the last context
         if (this.__level === atLevel) {
-            const latest = this.__targetUri.place === place
+            const latest = this.__targetIntent.place === place
             const presenter = this.__presenterMap.get(place.id)
 
             if (presenter) {
-                result = await presenter.applyParameters(this.__targetUri, false, latest)
+                result = await presenter.applyParameters(this.__targetIntent, false, latest)
             } else if (place.presenterCtor) {
                 const presenter = new place.presenterCtor(this.__app)
                 this.__presenterMap.set(place.id, presenter)
-                result = await presenter.applyParameters(this.__targetUri, true, latest)
+                result = await presenter.applyParameters(this.__targetIntent, true, latest)
                 presenter.update()
             } else {
                 result = true
@@ -89,14 +89,14 @@ export class FlipContext {
     }
 
     public rollback(): void {
-        for (const place of this.__sourceUri.place.path) {
+        for (const place of this.__sourceIntent.place.path) {
             if (place.id !== -1) {
                 const presenter = this.__presenterMap.get(place.id)
 
                 this.__presenterMap.delete(place.id)
 
                 if (presenter != null) {
-                    presenter.applyParameters(this.__sourceUri, false, place === this.__sourceUri.place)
+                    presenter.applyParameters(this.__sourceIntent, false, place === this.__sourceIntent.place)
                 } else {
                     LOG.warn(`Missing presenter for ID=${place.id}`)
                 }
@@ -113,7 +113,7 @@ export class FlipContext {
         newPresenterMap.clear()
 
         // Keep only presenters belonging to 
-        const targetPlace = this.__targetUri.place
+        const targetPlace = this.__targetIntent.place
 
         // Avoid processing detached places
         if (targetPlace.id !== -1) {

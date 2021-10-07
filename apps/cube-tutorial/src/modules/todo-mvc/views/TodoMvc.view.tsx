@@ -2,12 +2,12 @@ import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps, ViewSlot } from 'wdc-cube-react'
-import { TodoMvcScope } from './TodoMvc.presenter'
+import { TodoMvcScope } from '../TodoMvc.scopes'
 import Css from './TodoMvc.module.css'
 
-import { HeaderView } from './private_HeaderView'
-import { MainView } from './private_MainView'
-import { FooterView } from './private_FooterView'
+import { HeaderView } from './HeaderView'
+import { MainView } from './MainView'
+import { FooterView } from './FooterView'
 
 const LOG = Logger.get('TodoMvc.View')
 

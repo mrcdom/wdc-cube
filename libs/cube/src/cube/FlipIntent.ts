@@ -8,21 +8,21 @@ import type { ScopeSlot } from './ScopeSlot'
 
 export type ValidParamTypes = string | string[] | number | number[] | boolean | boolean[] | null
 
-export class PlaceUri extends Object {
+export class FlipIntent extends Object {
 
-	public static parse(placeStr: string, stepProvider: (name: string) => Place = Place.createDetached): PlaceUri {
-		// If we have a not blank URI, then we will proceed with URI parsing
+	public static parse(placeStr: string, stepProvider: (name: string) => Place = Place.createDetached): FlipIntent {
+		// If we have a not blank Intent, then we will proceed with Intent parsing
 		if (placeStr && placeStr.length > 0) {
-			// First, we are going to brake the URI into two parts
+			// First, we are going to brake the Intent into two parts
 			const parts = placeStr.split(/\?/)
 			const step = stepProvider(parts[0])
-			const uri = new PlaceUri(step)
+			const intent = new FlipIntent(step)
 			if (parts.length > 1) {
-				QueryStringParser.parse(uri.parameters, parts[1], StandardCharsets.UTF_8)
+				QueryStringParser.parse(intent.parameters, parts[1], StandardCharsets.UTF_8)
 			}
-			return uri
+			return intent
 		} else {
-			return new PlaceUri(Place.UNKNOWN)
+			return new FlipIntent(Place.UNKNOWN)
 		}
 	}
 

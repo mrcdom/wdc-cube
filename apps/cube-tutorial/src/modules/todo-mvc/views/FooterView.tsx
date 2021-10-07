@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import Css from './TodoMvc.module.css'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
-import { FooterScope, ShowingOptions } from './TodoMvc.presenter'
+import { FooterScope, ShowingOptions } from '../TodoMvc.scopes'
 
 const LOG = Logger.get('TodoMvc.FooterView')
 

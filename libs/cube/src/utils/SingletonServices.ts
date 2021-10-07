@@ -45,7 +45,7 @@ async function doBootstrap() {
 }
 
 async function startServices() {
-    runBootstrap()
+    await runBootstrap()
 }
 
 async function stopServices() {

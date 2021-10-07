@@ -1,19 +1,13 @@
-import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, action, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
 import { Places, AttrIds, ParamIds } from '../../Constants'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
+import { SubscriptionsScope } from './Subscriptions.scopes'
 
 const LOG = Logger.get('SubscriptionsPresenter')
 
 // @Inject
 const tutorialService = TutorialService.INSTANCE
-
-export class SubscriptionsScope extends Scope {
-    sites = [] as SiteItemType[]
-
-    // Actions
-    onItemClicked = Scope.ASYNC_ACTION_ONE<SiteItemType>()
-}
 
 export class SubscriptionsPresenter extends CubePresenter<MainPresenter, SubscriptionsScope> {
 
@@ -29,7 +23,7 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
         LOG.info('Finalized')
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
+    public override async applyParameters(uri: FlipIntent, initialization: boolean, last: boolean): Promise<boolean> {
         if (initialization) {
             this.parentSlot = uri.getScopeSlot(AttrIds.parentSlot)
             this.dialogSlot = uri.getScopeSlot(AttrIds.dialogSlot)

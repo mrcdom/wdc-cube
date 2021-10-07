@@ -1,2 +1,2 @@
-export { RestrictedScope } from './Restricted.presenter'
-export { RestrictedView } from './Restricted.view'
+export { RestrictedScope } from './Restricted.scopes'
+export { RestrictedPresenter } from './Restricted.presenter'

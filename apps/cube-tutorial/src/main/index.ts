@@ -1,3 +1,3 @@
-export { MainView } from './Main.view'
-export { BodyView } from './private_BodyView'
-export { BodyScope } from './Main.presenter'
+export { MainView } from './views/Main.view'
+export { BodyView } from './views/BodyView'
+export { BodyScope } from './Main.scopes'
