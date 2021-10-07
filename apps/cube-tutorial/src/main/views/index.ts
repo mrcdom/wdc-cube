@@ -5,7 +5,7 @@ import { MainScope, BodyScope } from '../Main.scopes'
 
 export { MainView } from './Main.view'
 
-export function registerMainViews(rv = ViewFactory.register) {
+export function registerViews(rv = ViewFactory.register) {
     rv(MainScope, MainView)
     rv(BodyScope, BodyView)
 }
