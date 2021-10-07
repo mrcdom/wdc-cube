@@ -40,7 +40,6 @@ export class ItemScope extends Scope {
         onBlur: Scope.SYNC_ACTION as (getValue: () => string) => void,
         onKeyDown: Scope.SYNC_ACTION as (getValue: () => string, event: KeyDownEvent) => void,
     }
-
 }
 
 export class MainScope extends Scope {
