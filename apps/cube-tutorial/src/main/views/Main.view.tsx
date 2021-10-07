@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { getOrCreateApplication, ViewSlot, PageHistoryManager, IViewProps } from 'wdc-cube-react'
+import { getOrCreateApplication, ViewSlot, IViewProps } from 'wdc-cube-react'
 import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -15,15 +15,12 @@ import { AlertView } from './AlertView'
 
 const LOG = Logger.get('MainView')
 
-// HistoryManager
+export type MainViewProps = IViewProps & {
+  presenterFactory: () => MainPresenter
+}
 
-const historyManager = new PageHistoryManager(true)
-const createApp = () => new MainPresenter(historyManager)
-
-export type MainViewProps = IViewProps
-
-export function MainView({ className, ...props }: MainViewProps) {
-  const { scope } = getOrCreateApplication(React, createApp)
+export function MainView({ className, presenterFactory }: MainViewProps) {
+  const { scope } = getOrCreateApplication(React, presenterFactory)
 
   LOG.debug('update')
 
@@ -36,7 +33,7 @@ export function MainView({ className, ...props }: MainViewProps) {
   const onCloseAlert = useCallback(() => scope.alert?.onClose(), [scope.dialog])
 
   return <>
-    <div className={clsx(className, Css.MainView)} {...props}>
+    <div className={clsx(className, Css.MainView)} >
       <AppBar position="static">
         <Toolbar>
           <IconButton edge="start" className={Css.appBarMenuButton} color="inherit" aria-label="menu">

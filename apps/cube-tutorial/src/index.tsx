@@ -1,5 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { PageHistoryManager } from 'wdc-cube-react'
+import { MainPresenter } from './main'
 import { registerMainViews as registerMainViews, MainView } from './main/views'
 import { registerTodoMvcViews as registerTodoMvcViews } from './modules/todo-mvc/views'
 import { registerViews as registerSubscriptionsViews } from './modules/subscriptions/views'
@@ -11,4 +13,7 @@ registerTodoMvcViews()
 registerSubscriptionsViews()
 registerRestrictedViews()
 
-ReactDOM.render(<MainView />, document.getElementById('root'))
+const historyManager = new PageHistoryManager(true)
+const mainPresenterFactory = () => new MainPresenter(historyManager)
+
+ReactDOM.render(<MainView presenterFactory={mainPresenterFactory} />, document.getElementById('root'))
