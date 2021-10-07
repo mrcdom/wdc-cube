@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps, ViewSlot } from 'wdc-cube-react'
-import { RestrictedScope } from './Restricted.presenter'
+import { RestrictedScope } from '../Restricted.scopes'
 import Css from './Restricted.module.css'
 
 const LOG = Logger.get('RestrictedView')

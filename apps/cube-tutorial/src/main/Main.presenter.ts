@@ -2,7 +2,7 @@ import {
     Logger,
     ApplicationPresenter,
     HistoryManager,
-    PlaceUri,
+    FlipIntent,
     Scope,
     action,
     AlertSeverity,
@@ -12,35 +12,13 @@ import {
 import { registerServices } from '../services'
 import { Places, AttrIds } from '../Constants'
 import { buildCube } from '../Cube'
+import { MainScope, BodyScope, AlertScope, IDialogScope } from './Main.scopes'
 
 const LOG = Logger.get('MainPresenter')
 
 registerServices()
 
-type IDialogScope = Scope & { onClose: () => Promise<void> }
 
-export class AlertScope extends Scope {
-    severity: AlertSeverity = 'info'
-    title?: string
-    message?: string
-
-    onClose = Scope.ASYNC_ACTION
-}
-
-export class BodyScope extends Scope {
-    onOpenAlert = Scope.ASYNC_ACTION_ONE<AlertSeverity>()
-}
-
-export class MainScope extends Scope {
-    body?: Scope
-    dialog?: IDialogScope
-    alert?: AlertScope
-
-    onHome = Scope.ASYNC_ACTION
-    onOpenTodos = Scope.ASYNC_ACTION
-    onOpenSuscriptions = Scope.ASYNC_ACTION
-    onLogin = Scope.ASYNC_ACTION
-}
 
 export class MainPresenter extends ApplicationPresenter<MainScope> {
 
@@ -64,14 +42,14 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         super.release()
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean> {
+    public override async applyParameters(intent: FlipIntent, initialization: boolean, last?: boolean): Promise<boolean> {
         if (initialization) {
             await this.intializeState()
 
             try {
-                const targetUri = this.newUriFromString(this.historyManager.location)
-                if (targetUri.toString() !== uri.toString()) {
-                    await this.flipToUri(targetUri)
+                const targetUri = this.newIntentFromString(this.historyManager.location)
+                if (targetUri.toString() !== intent.toString()) {
+                    await this.flipToIntent(targetUri)
                     return false
                 }
             } catch (caught) {
@@ -84,14 +62,8 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         if (last) {
             this.bodySlot(undefined)
         } else {
-            uri.setScopeSlot(AttrIds.parentSlot, this.bodySlot)
-            uri.setScopeSlot(AttrIds.dialogSlot, this.dialogSlot)
-        }
-
-        if (this.scope.alert) {
-            await this.scope.alert.onClose()
-            this.scope.alert = undefined
-            this.update()
+            intent.setScopeSlot(AttrIds.parentSlot, this.bodySlot)
+            intent.setScopeSlot(AttrIds.dialogSlot, this.dialogSlot)
         }
 
         return true

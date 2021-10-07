@@ -2,7 +2,7 @@ import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
-import { ClockScope } from './TodoMvc.presenter'
+import { ClockScope } from '../TodoMvc.scopes'
 import Css from './TodoMvc.module.css'
 
 const LOG = Logger.get('TodoMvc.ClockScope')

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Scope, Application, PlaceUri, NOOP_VOID, Logger } from 'wdc-cube'
+import { Scope, Application, FlipIntent, NOOP_VOID, Logger } from 'wdc-cube'
 
 const LOG = Logger.get('React.FC')
 
@@ -24,10 +24,8 @@ export function bindUpdate<S extends Scope>(react: ReactType, scope: S) {
 
 type IApplication<S extends Scope> = Application & {
     scope: S
-    applyParameters(uri: PlaceUri, initialization: boolean, deepest?: boolean): Promise<boolean>
+    applyParameters(intent: FlipIntent, initialization: boolean, deepest?: boolean): Promise<boolean>
 }
-
-
 
 export function getOrCreateApplication<S extends Scope, A extends IApplication<S>>(react: ReactType, factory: () => A) {
     const [app, setApp] = react.useState<A>()
@@ -41,7 +39,7 @@ export function getOrCreateApplication<S extends Scope, A extends IApplication<S
         instance = factory()
         setApp(instance)
         instance.scope.forceUpdate = doUpdate.bind(instance.scope, setValue, value)
-        instance.applyParameters(instance.newUri(instance.rootPlace), true, true)
+        instance.applyParameters(instance.newFlipIntent(instance.rootPlace), true, true)
     }
 
     react.useEffect(() => {

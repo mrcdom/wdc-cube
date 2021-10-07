@@ -2,7 +2,7 @@ import { Logger } from '../utils/Logger'
 import { NOOP_VOID } from '../utils/EmptyFunctions'
 import { Application } from './Application'
 import { Place } from './Place'
-import { PlaceUri, ValidParamTypes } from './PlaceUri'
+import { FlipIntent, ValidParamTypes } from './FlipIntent'
 import { Scope } from './Scope'
 import { ScopeUpdateManager } from './Presenter'
 
@@ -95,13 +95,13 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
 
     // :: ICubePresenter Api
 
-    public async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
-        LOG.debug(`applyParameters(uri=${uri}, initialization=${initialization}, last=${last}`)
+    public async applyParameters(intent: FlipIntent, initialization: boolean, last: boolean): Promise<boolean> {
+        LOG.debug(`applyParameters(intent=${intent}, initialization=${initialization}, last=${last}`)
         return true
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public publishParameters(uri: PlaceUri): void {
+    public publishParameters(intent: FlipIntent): void {
         // NOOP
     }
 
@@ -113,12 +113,12 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
         this.__app.flip(place, args)
     }
 
-    public async flipToUri(uri: PlaceUri): Promise<void> {
-        this.__app.flipToUri(uri)
+    public async flipToIntent(intent: FlipIntent): Promise<void> {
+        this.__app.flipToIntent(intent)
     }
 
-    public async flipToUriString(suri: string): Promise<void> {
-        this.__app.flipToUriString(suri)
+    public async flipToIntentString(sIntent: string): Promise<void> {
+        this.__app.flipToIntentString(sIntent)
     }
 
 }

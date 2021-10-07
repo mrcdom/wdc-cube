@@ -1,7 +1,7 @@
 import { Logger } from '../utils/Logger'
 import { NOOP_VOID } from '../utils/EmptyFunctions'
 import { Place } from './Place'
-import { PlaceUri } from './PlaceUri'
+import { FlipIntent } from './FlipIntent'
 import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
 import { FlipContext } from './FlipContext'
@@ -63,16 +63,16 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
     // :: Application Extensions
 
-    protected override publishAllParameters(uri: PlaceUri) {
-        this.publishParameters(uri)
-        super.publishAllParameters(uri)
+    protected override publishAllParameters(intent: FlipIntent) {
+        this.publishParameters(intent)
+        super.publishAllParameters(intent)
     }
 
     protected override async applyPathParameters(context: FlipContext, atLevel: number) {
         try {
-            const uri = context.targetUri
-            const last = uri.place.id === -1
-            const ok = await this.applyParameters(uri, false, last) && !last
+            const intent = context.targetIntent
+            const last = intent.place.id === -1
+            const ok = await this.applyParameters(intent, false, last) && !last
             if (!ok) {
                 return
             }
@@ -110,13 +110,13 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
     // :: ICubePresenter Api
 
-    public async applyParameters(uri: PlaceUri, initialization: boolean, last: boolean): Promise<boolean> {
-        LOG.debug(`applyParameters(uri=${uri}, initialization=${initialization}, last=${last}`)
+    public async applyParameters(intent: FlipIntent, initialization: boolean, last: boolean): Promise<boolean> {
+        LOG.debug(`applyParameters(intent=${intent}, initialization=${initialization}, last=${last}`)
         return true
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public publishParameters(uri: PlaceUri): void {
+    public publishParameters(intent: FlipIntent): void {
         // NOOP
     }
 

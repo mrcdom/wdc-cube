@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { Place } from './Place'
-import { PlaceUri, ValidParamTypes } from './PlaceUri'
+import { FlipIntent, ValidParamTypes } from './FlipIntent'
 import { Scope, ScopeConstructor } from './Scope'
 
 export type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
@@ -50,16 +50,16 @@ export interface IPresenter extends IPresenterOwner, IDisposable {
 
 export interface ICubePresenter extends IPresenter {
 
-    applyParameters(uri: PlaceUri, initialization: boolean, last?: boolean): Promise<boolean>
+    applyParameters(intent: FlipIntent, initialization: boolean, last?: boolean): Promise<boolean>
 
-    publishParameters?(uri: PlaceUri): void
+    publishParameters?(intent: FlipIntent): void
 
     updateHistory(): void
 
     flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }): Promise<void>
 
-    flipToUri(uri: PlaceUri): Promise<void>
+    flipToIntent(intent: FlipIntent): Promise<void>
 
-    flipToUriString(suri: string): Promise<void>
+    flipToIntentString(sIntent: string): Promise<void>
 
 }

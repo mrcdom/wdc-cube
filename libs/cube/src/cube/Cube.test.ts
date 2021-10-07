@@ -1,7 +1,7 @@
 import { NOOP_VOID } from '../utils/EmptyFunctions'
 import { ReflectionUtils } from '../utils/ReflectionUtils'
 import { Place } from './Place'
-import { PlaceUri } from './PlaceUri'
+import { FlipIntent } from './FlipIntent'
 import { HistoryManager } from './HistoryManager'
 import { Application } from './Application'
 import { CubePresenter } from './CubePresenter'
@@ -17,36 +17,36 @@ it('CastUtils.isArray', () => {
     expect(ReflectionUtils.isArray([])).toEqual(true)
 })
 
-it('WebFlowPlace.toString  :: Simple Value', () => {
-    const uri = new PlaceUri(new Place('root'))
-    uri.setParameter('p0', 1)
-    uri.setParameter('p1', 1.1)
-    uri.setParameter('p2', true)
-    uri.setParameter('p3', 'a b c')
+it('FlipIntent.toString  :: Simple Value', () => {
+    const intent = new FlipIntent(new Place('root'))
+    intent.setParameter('p0', 1)
+    intent.setParameter('p1', 1.1)
+    intent.setParameter('p2', true)
+    intent.setParameter('p3', 'a b c')
 
-    expect(uri.toString()).toEqual('root?p0=1&p1=1.1&p2=true&p3=a+b+c')
+    expect(intent.toString()).toEqual('root?p0=1&p1=1.1&p2=true&p3=a+b+c')
 })
 
-it('WebFlowURI.parse :: Simple Value', () => {
+it('FlipIntent.parse :: Simple Value', () => {
     const expected = 'root?p0=1&p1=1.1&p2=true&p3=a+b+c'
-    const uri = PlaceUri.parse(expected)
-    expect(uri.toString()).toEqual(expected)
+    const intent = FlipIntent.parse(expected)
+    expect(intent.toString()).toEqual(expected)
 })
 
-it('WebFlowURI.toString :: Multiple Values', () => {
-    const uri = new PlaceUri(new Place('root'))
-    uri.setParameter('p0', [1, 2])
-    uri.setParameter('p1', [1.1, 2.2])
-    uri.setParameter('p2', [true, false])
-    uri.setParameter('p3', ['a', 'b', 'c'])
+it('FlipIntent.toString :: Multiple Values', () => {
+    const intent = new FlipIntent(new Place('root'))
+    intent.setParameter('p0', [1, 2])
+    intent.setParameter('p1', [1.1, 2.2])
+    intent.setParameter('p2', [true, false])
+    intent.setParameter('p3', ['a', 'b', 'c'])
 
-    expect(uri.toString()).toEqual('root?p0=1&p0=2&p1=1.1&p1=2.2&p2=true&p2=false&p3=a&p3=b&p3=c')
+    expect(intent.toString()).toEqual('root?p0=1&p0=2&p1=1.1&p1=2.2&p2=true&p2=false&p3=a&p3=b&p3=c')
 })
 
-it('WebFlowURI.parse :: Multiple Values', () => {
+it('FlipIntent.parse :: Multiple Values', () => {
     const expected = 'root?p0=1&p0=2&p1=1.1&p1=2.2&p2=true&p2=false&p3=a&p3=b&p3=c'
-    const uri = PlaceUri.parse(expected)
-    expect(uri.toString()).toEqual(expected)
+    const intent = FlipIntent.parse(expected)
+    expect(intent.toString()).toEqual(expected)
 })
 
 async function echoService<T>(v: T): Promise<T> {
@@ -73,7 +73,7 @@ class TestHistoryManager extends HistoryManager {
     }
 
     public override update(app: Application, place: Place): void {
-        this.token = app.newUri(place).toString()
+        this.token = app.newFlipIntent(place).toString()
     }
 
 }
@@ -127,12 +127,12 @@ class RootPresenter extends CubePresenter<TestApplication, RootScope> {
         }
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
-        const uriSessionId = uri.getParameterAsNumberOrDefault(PARAM_IDs.SESSION_ID, this.app.session.id)
+    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
+        const intentSessionId = intent.getParameterAsNumberOrDefault(PARAM_IDs.SESSION_ID, this.app.session.id)
         if (initialization) {
             this.initialized = true
             this.app.session = await echoService({
-                id: uriSessionId,
+                id: intentSessionId,
                 active: true
             })
         }
@@ -142,7 +142,7 @@ class RootPresenter extends CubePresenter<TestApplication, RootScope> {
         if (deepest) {
             this.setBody(undefined)
         } else {
-            uri.setScopeSlot(ATTR_IDs.PARENT, this.bodySlot)
+            intent.setScopeSlot(ATTR_IDs.PARENT, this.bodySlot)
         }
 
         return true
@@ -153,8 +153,8 @@ class RootPresenter extends CubePresenter<TestApplication, RootScope> {
         this.update(this.scope)
     }
 
-    public override publishParameters(uri: PlaceUri): void {
-        uri.setParameter(PARAM_IDs.SESSION_ID, this.app.session.id)
+    public override publishParameters(intent: FlipIntent): void {
+        intent.setParameter(PARAM_IDs.SESSION_ID, this.app.session.id)
     }
 
 }
@@ -188,10 +188,10 @@ class LoginPresenter extends CubePresenter<TestApplication, LoginScope> {
         super.release()
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
         if (initialization) {
             this.initialized = true
-            this.parentSlot = uri.getScopeSlot(ATTR_IDs.PARENT)
+            this.parentSlot = intent.getScopeSlot(ATTR_IDs.PARENT)
         }
 
         this.deepest = deepest
@@ -212,8 +212,8 @@ class LoginPresenter extends CubePresenter<TestApplication, LoginScope> {
                     active: true
                 })
 
-                const uri = this.app.newUri(Places.RESTRICTED)
-                await this.app.flipToUri(uri)
+                const intent = this.app.newFlipIntent(Places.RESTRICTED)
+                await this.app.flipToIntent(intent)
             } else {
                 this.scope.message = 'User or password invalid'
             }
@@ -259,17 +259,17 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
         super.release()
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
         // Safe guard agains getting into a restricted area without a valid session
         if (this.app.session.id === 0) {
-            const uri = this.app.newUri(Places.LOGIN)
-            await this.app.flipToUri(uri)
+            const intent = this.app.newFlipIntent(Places.LOGIN)
+            await this.app.flipToIntent(intent)
             return false
         }
 
         if (initialization) {
             this.initialized = true
-            this.parentSlot = uri.getScopeSlot(ATTR_IDs.PARENT)
+            this.parentSlot = intent.getScopeSlot(ATTR_IDs.PARENT)
         }
 
         this.deepest = deepest
@@ -277,7 +277,7 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
         if (deepest) {
             this.setContent(undefined)
         } else {
-            uri.setScopeSlot(ATTR_IDs.PARENT, this.contentSlot)
+            intent.setScopeSlot(ATTR_IDs.PARENT, this.contentSlot)
         }
 
         this.parentSlot(this.scope)
@@ -294,9 +294,9 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
 
     private async onCart(cartId: number) {
         try {
-            const uri = this.app.newUri(Places.CART)
-            uri.setParameter(PARAM_IDs.CART_ID, cartId)
-            await this.app.flipToUri(uri)
+            const intent = this.app.newFlipIntent(Places.CART)
+            intent.setParameter(PARAM_IDs.CART_ID, cartId)
+            await this.app.flipToIntent(intent)
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
@@ -306,9 +306,9 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
 
     private async onProduct(productId: number) {
         try {
-            const uri = this.app.newUri(Places.PRODUCT)
-            uri.setParameter(PARAM_IDs.PRODUCT_ID, productId)
-            await this.app.flipToUri(uri)
+            const intent = this.app.newFlipIntent(Places.PRODUCT)
+            intent.setParameter(PARAM_IDs.PRODUCT_ID, productId)
+            await this.app.flipToIntent(intent)
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
@@ -318,9 +318,9 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
 
     private async onReceipt(receiptId: number) {
         try {
-            const uri = this.app.newUri(Places.RECEIPT)
-            uri.setParameter(PARAM_IDs.RECEIPT_ID, receiptId)
-            await this.app.flipToUri(uri)
+            const intent = this.app.newFlipIntent(Places.RECEIPT)
+            intent.setParameter(PARAM_IDs.RECEIPT_ID, receiptId)
+            await this.app.flipToIntent(intent)
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
@@ -332,8 +332,8 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
         try {
             this.app.session.id = 0
             this.app.session.active = false
-            const uri = this.app.newUri(Places.LOGIN)
-            await this.app.flipToUri(uri)
+            const intent = this.app.newFlipIntent(Places.LOGIN)
+            await this.app.flipToIntent(intent)
         } catch (caught) {
             this.scope.message = (caught as Error).message
         } finally {
@@ -366,12 +366,12 @@ class CartPresenter extends CubePresenter<TestApplication, CartScope> {
         super.release()
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
-        const urlCartId = uri.getParameterAsNumber(PARAM_IDs.CART_ID)
+    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
+        const urlCartId = intent.getParameterAsNumber(PARAM_IDs.CART_ID)
 
         if (initialization) {
             this.initialized = true
-            this.parentSlot = uri.getScopeSlot(ATTR_IDs.PARENT)
+            this.parentSlot = intent.getScopeSlot(ATTR_IDs.PARENT)
             await this.loadData(urlCartId)
         } else if (urlCartId && this.cartId != urlCartId) {
             await this.loadData(urlCartId)
@@ -383,8 +383,8 @@ class CartPresenter extends CubePresenter<TestApplication, CartScope> {
         return true
     }
 
-    public override publishParameters(uri: PlaceUri): void {
-        uri.setParameter(PARAM_IDs.CART_ID, this.cartId)
+    public override publishParameters(intent: FlipIntent): void {
+        intent.setParameter(PARAM_IDs.CART_ID, this.cartId)
     }
 
     private async loadData(cartId?: number) {
@@ -424,14 +424,14 @@ class ProductPresenter extends CubePresenter<TestApplication, ProductScope> {
         super.release()
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
-        const uriProductId = uri.getParameterAsNumber(PARAM_IDs.PRODUCT_ID) || this.productId
+    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
+        const intentProductId = intent.getParameterAsNumber(PARAM_IDs.PRODUCT_ID) || this.productId
         if (initialization) {
             this.initialized = true
-            this.parentSlot = uri.getScopeSlot(ATTR_IDs.PARENT)
-            await this.loadData(uriProductId)
-        } else if (uriProductId && uriProductId != this.productId) {
-            await this.loadData(uriProductId)
+            this.parentSlot = intent.getScopeSlot(ATTR_IDs.PARENT)
+            await this.loadData(intentProductId)
+        } else if (intentProductId && intentProductId != this.productId) {
+            await this.loadData(intentProductId)
         }
 
         this.deepest = deepest
@@ -441,8 +441,8 @@ class ProductPresenter extends CubePresenter<TestApplication, ProductScope> {
         return true
     }
 
-    public override publishParameters(uri: PlaceUri): void {
-        uri.setParameter(PARAM_IDs.PRODUCT_ID, this.productId)
+    public override publishParameters(intent: FlipIntent): void {
+        intent.setParameter(PARAM_IDs.PRODUCT_ID, this.productId)
     }
 
     private async loadData(productId?: number) {
@@ -482,11 +482,11 @@ class ReceiptPresenter extends CubePresenter<TestApplication, ReceiptScope> {
         super.release()
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
 
         if (initialization) {
             this.initialized = true
-            this.parentSlot = uri.getScopeSlot(ATTR_IDs.PARENT)
+            this.parentSlot = intent.getScopeSlot(ATTR_IDs.PARENT)
         }
 
         this.deepest = deepest
@@ -518,7 +518,7 @@ class ReceiptPresenter extends CubePresenter<TestApplication, ReceiptScope> {
 
 it('Application :: Basic Navigation', async () => {
     const app = new TestApplication()
-    await app.flipToUri(app.newUri(Places.LOGIN))
+    await app.flipToIntent(app.newFlipIntent(Places.LOGIN))
 
     // Check if presenter state was reached
     const root = app.getPresenter(Places.ROOT) as RootPresenter
@@ -547,7 +547,7 @@ it('Application :: Basic Navigation', async () => {
     expect(app.session.id).toEqual(0)
 
     // Check safe guard trying to access restricted area without a valid session
-    await app.flipToUri(app.newUri(Places.RESTRICTED))
+    await app.flipToIntent(app.newFlipIntent(Places.RESTRICTED))
     expect(app.getPresenter(Places.RESTRICTED)).toBeUndefined()
     expect(app.getPresenter(Places.LOGIN)).toBeDefined()
     expect(login).toBe(app.getPresenter(Places.LOGIN)) // Same instance
@@ -588,14 +588,14 @@ it('Application :: Token Accuracity', async () => {
     app.session.id = 1
     app.session.active = true
 
-    await app.flipToUri(app.newUri(Places.RESTRICTED))
+    await app.flipToIntent(app.newFlipIntent(Places.RESTRICTED))
     const restricted = app.getPresenter(Places.RESTRICTED) as RestrictedPresenter
     expect(restricted.initialized).toEqual(true)
     expect('restricted?s=1').toEqual(history.token)
 
-    const productUri = app.newUri(Places.PRODUCT)
-    productUri.setParameter(PARAM_IDs.PRODUCT_ID, 9999)
-    await app.flipToUri(productUri)
+    const productIntent = app.newFlipIntent(Places.PRODUCT)
+    productIntent.setParameter(PARAM_IDs.PRODUCT_ID, 9999)
+    await app.flipToIntent(productIntent)
     expect(restricted.initialized).toEqual(true)
 
     const product = app.getPresenter(Places.PRODUCT) as ProductPresenter
@@ -605,9 +605,9 @@ it('Application :: Token Accuracity', async () => {
     expect('product-' + 9999).toEqual(product.scope.name)
     expect('product?s=1&p=9999').toEqual(history.token)
 
-    const cartUri = app.newUri(Places.CART)
-    cartUri.setParameter(PARAM_IDs.CART_ID, 1234)
-    await app.flipToUri(cartUri)
+    const cartIntent = app.newFlipIntent(Places.CART)
+    cartIntent.setParameter(PARAM_IDs.CART_ID, 1234)
+    await app.flipToIntent(cartIntent)
     expect(restricted.initialized).toEqual(true)
     expect(product.initialized).toEqual(false)
     const cart = app.getPresenter(Places.CART) as CartPresenter
@@ -615,7 +615,7 @@ it('Application :: Token Accuracity', async () => {
     expect(1234).toEqual(cart.cartId)
     expect('cart?s=1&c=1234').toEqual(history.token)
 
-    await app.flipToUri(app.newUri(Places.RESTRICTED))
+    await app.flipToIntent(app.newFlipIntent(Places.RESTRICTED))
     expect(restricted.initialized).toEqual(true)
     expect(cart.initialized).toEqual(false)
     expect(product.initialized).toEqual(false)
@@ -628,7 +628,7 @@ it('Application :: token Navigation', async () => {
     app.session.id = 1
     app.session.active = true
 
-    await app.flipToUriString('cart?s=1&c=1234')
+    await app.flipToIntentString('cart?s=1&c=1234')
 
     const root = app.getPresenter(Places.ROOT) as RootPresenter
     expect(root).toBeDefined()
@@ -641,7 +641,7 @@ it('Application :: token Navigation', async () => {
     expect(1234).toEqual(cart.cartId)
     expect('cart?s=1&c=1234').toEqual(history.token)
 
-    await app.flipToUriString('product?s=1&p=9999')
+    await app.flipToIntentString('product?s=1&p=9999')
     const product = app.getPresenter(Places.PRODUCT) as ProductPresenter
     expect(product).toBeDefined()
     expect(product.initialized).toEqual(true)
@@ -650,7 +650,7 @@ it('Application :: token Navigation', async () => {
     expect('product-' + 9999).toEqual(product.scope.name)
     expect('product?s=1&p=9999').toEqual(history.token)
 
-    await app.flipToUriString('restricted')
+    await app.flipToIntentString('restricted')
     const restricted = app.getPresenter(Places.RESTRICTED) as RestrictedPresenter
     expect(restricted).toBeDefined()
     expect(restricted.initialized).toEqual(true)

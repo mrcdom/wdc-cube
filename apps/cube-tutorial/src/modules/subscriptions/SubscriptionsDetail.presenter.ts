@@ -1,7 +1,8 @@
-import { Logger, CubePresenter, Scope, ScopeSlot, PlaceUri, action, NOOP_VOID } from 'wdc-cube'
-import { MainPresenter } from '../../../main/Main.presenter'
-import { AttrIds, ParamIds, Places } from '../../../Constants'
-import { TutorialService, SiteItemType } from '../../../services/TutorialService'
+import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, NOOP_VOID } from 'wdc-cube'
+import { MainPresenter } from '../../main/Main.presenter'
+import { AttrIds, ParamIds, Places } from '../../Constants'
+import { TutorialService, SiteItemType } from '../../services/TutorialService'
+import { SubscriptionsDetailScope } from './SubscriptionsDetail.scopes'
 
 const LOG = Logger.get('SubscriptionsDetailPresenter')
 
@@ -9,15 +10,6 @@ const LOG = Logger.get('SubscriptionsDetailPresenter')
 const tutorialService = TutorialService.INSTANCE
 
 const eMailRegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-
-export class SubscriptionsDetailScope extends Scope {
-    email?: string
-
-    // Actions
-    onClose = Scope.ASYNC_ACTION
-    onSubscribe = Scope.ASYNC_ACTION
-    onEmailChanged = Scope.SYNC_ACTION_STRING
-}
 
 export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, SubscriptionsDetailScope> {
 
@@ -27,7 +19,7 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
 
     private email?: string
 
-    private backUri?: PlaceUri
+    private previousIntent?: FlipIntent
 
     public constructor(app: MainPresenter) {
         super(app, new SubscriptionsDetailScope())
@@ -39,11 +31,11 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
         LOG.info('Finalized')
     }
 
-    public override async applyParameters(uri: PlaceUri, initialization: boolean): Promise<boolean> {
-        const paramSiteId = uri.getParameterAsNumberOrDefault(ParamIds.SiteId, this.item?.id ?? -1)
+    public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
+        const paramSiteId = intent.getParameterAsNumberOrDefault(ParamIds.SiteId, this.item?.id ?? -1)
 
         if (initialization) {
-            this.backUri = this.app.newUri(this.app.lastPlace)
+            this.previousIntent = this.app.newFlipIntent(this.app.lastPlace)
 
             if (paramSiteId <= 0) {
                 throw new Error('No site id provided')
@@ -53,9 +45,9 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             this.scope.onEmailChanged = this.handleEmailChanged.bind(this)
             this.scope.onSubscribe = this.onSubscribe.bind(this)
 
-            this.dialogSlot = uri.getScopeSlot(AttrIds.dialogSlot)
+            this.dialogSlot = intent.getScopeSlot(AttrIds.dialogSlot)
 
-            let siteItem = uri.attributes.get(AttrIds.subscriptionsDetail_item) as SiteItemType | undefined
+            let siteItem = intent.attributes.get(AttrIds.subscriptionsDetail_item) as SiteItemType | undefined
             if (!siteItem) {
                 siteItem = await tutorialService.fetchSiteItem(paramSiteId)
             }
@@ -75,8 +67,8 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
         return true
     }
 
-    public override publishParameters(uri: PlaceUri): void {
-        uri.setParameter(ParamIds.SiteId, this.item?.id)
+    public override publishParameters(intent: FlipIntent): void {
+        intent.setParameter(ParamIds.SiteId, this.item?.id)
     }
 
     @action()
@@ -114,8 +106,8 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
     }
 
     protected async close() {
-        if (this.backUri) {
-            await this.flipToUri(this.backUri)
+        if (this.previousIntent) {
+            await this.flipToIntent(this.previousIntent)
         } else {
             await this.flip(Places.subscriptions)
         }

@@ -7,7 +7,7 @@ import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import { Logger } from 'wdc-cube'
 import { bindUpdate } from 'wdc-cube-react'
-import { SubscriptionsDetailScope } from './SubscriptionsDetail.presenter'
+import { SubscriptionsDetailScope } from '../SubscriptionsDetail.scopes'
 
 const LOG = Logger.get('SubscriptionsDetailView')
 

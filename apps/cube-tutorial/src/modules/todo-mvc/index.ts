@@ -1,2 +1,2 @@
-export { TodoMvcScope } from './TodoMvc.presenter'
-export { TodoMvcView } from './TodoMvc.view'
+export { TodoMvcScope } from './TodoMvc.scopes'
+export { TodoMvcPresenter } from './TodoMvc.presenter'
