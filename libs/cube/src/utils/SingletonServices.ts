@@ -67,7 +67,6 @@ async function stopServices() {
 let startCount = 0
 
 export const SingletonServices = {
-
     add(service: ServiceLike) {
         // Map preserves order
         if (!availableServiceMap.has(service)) {

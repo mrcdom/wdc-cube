@@ -9,15 +9,14 @@ import type { IPresenter } from './IPresenter'
 const LOG = Logger.get('Presenter')
 
 // @Inject
-const callbackManager = CallbackManager.INSTANCE
+const callbackManager = CallbackManager.singleton()
 
-export class Presenter<S extends Scope> implements IPresenter {
-
+export class Presenter<S extends Scope, OWNER extends IPresenterOwner = IPresenterOwner> implements IPresenter {
     // :: Private Fields
 
     private readonly __scope: S
 
-    private readonly __owner: IPresenterOwner
+    private readonly __owner: OWNER
 
     private readonly __updateManager: IUpdateManager
 
@@ -27,7 +26,9 @@ export class Presenter<S extends Scope> implements IPresenter {
 
     private __updateCount = 0
 
-    public constructor(owner: IPresenterOwner, scope: S, updateManager?: IUpdateManager) {
+    private __releasePhase = 0
+
+    public constructor(owner: OWNER, scope: S, updateManager?: IUpdateManager) {
         this.__owner = owner
         this.__scope = scope
 
@@ -56,20 +57,33 @@ export class Presenter<S extends Scope> implements IPresenter {
     }
 
     public release(): void {
-        this.__scope.update = NOOP_VOID
-        this.__scope.forceUpdate = NOOP_VOID
-        if (this.__updateManagerOwner) {
-            this.__updateManager.release()
-        } else {
-            this.__updateManager.removeOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
+        try {
+            this.__releasePhase = 1
+            this.__scope.update = NOOP_VOID
+            this.__scope.forceUpdate = NOOP_VOID
+            if (this.__updateManagerOwner) {
+                this.__updateManager.release()
+            } else {
+                this.__updateManager.removeOnBeforeScopeUpdateListener(this.__beforeScopeUpdateListener)
+            }
+        } finally {
+            this.__releasePhase = 2
         }
+    }
+
+    public get isReleasing(): boolean {
+        return this.__releasePhase === 1
+    }
+
+    public get isReleased(): boolean {
+        return this.__releasePhase > 0
     }
 
     public get scope(): S {
         return this.__scope
     }
 
-    public get owner(): IPresenterOwner {
+    public get owner(): OWNER {
         return this.__owner
     }
 
@@ -87,7 +101,7 @@ export class Presenter<S extends Scope> implements IPresenter {
 
     public readonly update = this.doUpdate.bind(this)
 
-    private doUpdate(optionalScope?: Scope) {
+    protected doUpdate(optionalScope?: Scope) {
         this.__updateManager.update(optionalScope ?? this.scope)
         this.__updateCount++
     }
@@ -101,7 +115,6 @@ export class Presenter<S extends Scope> implements IPresenter {
     public onBeforeScopeUpdate(): void {
         // NOOP
     }
-
 }
 
 type ScopeUpdateConfig = {
@@ -110,7 +123,6 @@ type ScopeUpdateConfig = {
 }
 
 export class ScopeUpdateManager implements IUpdateManager {
-
     private readonly __scope: Scope
 
     private readonly __dirtyScopes: Map<ScopeConstructor, Map<Scope, boolean>>
@@ -129,6 +141,8 @@ export class ScopeUpdateManager implements IUpdateManager {
 
     private __emittingOnBeforeScopeUpdate = false
 
+    private __releasePhase = 0
+
     constructor(scope: Scope) {
         this.__scope = scope
         this.__dirtyScopes = new Map()
@@ -136,11 +150,24 @@ export class ScopeUpdateManager implements IUpdateManager {
     }
 
     public release() {
-        callbackManager.unbind(this.__emitBeforeScopeUpdate)
-        this.__scope.forceUpdate = NOOP_VOID
-        this.__beforeScopeUpdateHandlerMap.clear()
-        this.__dirtyScopes.clear()
-        this.__scopeUpdateFallback.clear()
+        this.__releasePhase = 1
+        try {
+            callbackManager.unbind(this.__emitBeforeScopeUpdate)
+            this.__scope.forceUpdate = NOOP_VOID
+            this.__beforeScopeUpdateHandlerMap.clear()
+            this.__dirtyScopes.clear()
+            this.__scopeUpdateFallback.clear()
+        } finally {
+            this.__releasePhase = 2
+        }
+    }
+
+    public get isReleasing(): boolean {
+        return this.__releasePhase === 1
+    }
+
+    public get isReleased(): boolean {
+        return this.__releasePhase > 0
     }
 
     public get scope() {
@@ -215,7 +242,6 @@ export class ScopeUpdateManager implements IUpdateManager {
                 }
             }
 
-
             if (this.__cancelledScopes.size > 0) {
                 // Remove all cancelled scopes
                 for (const key of this.__cancelledScopes.keys()) {
@@ -241,7 +267,6 @@ export class ScopeUpdateManager implements IUpdateManager {
                     this.__baseScopeUpdateRequested = false
                 }
             }
-
         } finally {
             callbackManager.unbind(this.__emitBeforeScopeUpdate)
             this.__emittingOnBeforeScopeUpdate = false
@@ -310,5 +335,4 @@ export class ScopeUpdateManager implements IUpdateManager {
             target.set(key, scopeMap)
         }
     }
-
 }

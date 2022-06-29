@@ -4,23 +4,23 @@
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "types": "lib/index.d.ts",
   "main": "lib/index.js",
-  "dependencies": {
-    "@aws-sdk/util-utf8-browser": "^3.23.0",
-    "lodash": "^4.17.21"
-  },
-  "devDependencies": {
-    "@types/jest": "^27.0.1",
-    "@types/lodash": "^4.14.172",
-    "@typescript-eslint/eslint-plugin": "^4.31.0",
-    "@typescript-eslint/typescript-estree": "^4.32.0",
-    "eslint": "^7.32.0",
-    "ts-jest": "^27.0.5",
-    "ansi-regex": ">=5.0.1"
-  },
   "scripts": {
     "compile": "tsc",
+    "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint . --ext .tsx --ext .ts",
     "lint:fix": "eslint . --ext .tsx --ext .ts --fix",
     "test": "jest"
+  },
+  "dependencies": {
+    "@aws-sdk/util-utf8-browser": "^3.55.0",
+    "install": "^0.13.0",
+    "lodash": "^4.17.21",
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "@types/jest": "27.5.0",
+    "@types/lodash": "4.14.179",
+    "ansi-regex": "6.0.1",
+    "ts-jest": "^28.0.2"
   }
 }

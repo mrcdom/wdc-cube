@@ -13,6 +13,6 @@ export function ClockView({ className, style, scope }: IViewProps & { scope: Clo
     LOG.debug('update')
 
     return <li className={clsx(className, Css.clock)} style={style}>
-        <div>{scope.date().toLocaleTimeString()}</div>
+        <div>{scope.date.toLocaleTimeString()}</div>
     </li>
 }

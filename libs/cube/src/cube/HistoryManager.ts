@@ -3,11 +3,9 @@
 import { Place } from './Place'
 import { Application } from './Application'
 
-
 export type HistoryChangeListener = (sender: HistoryManager) => void
 
 export class HistoryManager {
-
     public static NOOP = new HistoryManager()
 
     private __changeListenerMap = new Map<number, HistoryChangeListener>()

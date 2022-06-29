@@ -1,7 +1,6 @@
 import { ReflectionUtils } from './ReflectionUtils'
 
 export class QueryStringBuilder extends Object {
-
     private query: Array<string> = []
 
     public appendValue(name: string, value: unknown): QueryStringBuilder {
@@ -34,5 +33,4 @@ export class QueryStringBuilder extends Object {
     public override toString(): string {
         return this.query.join('')
     }
-
 }

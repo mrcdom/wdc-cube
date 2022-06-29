@@ -25,7 +25,7 @@
       "never"
     ],
     "quotes": [
-      "error",
+      0,
       "single"
     ],
     "@typescript-eslint/member-delimiter-style": [

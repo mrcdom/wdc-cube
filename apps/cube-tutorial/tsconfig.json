@@ -1,21 +1,35 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "allowJs": true,
-    "rootDir": "src",
-    "outDir": "lib",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ]
+    "incremental": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "composite": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": false,
+    "outDir": "./build",
+    "baseUrl": "./",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "paths": {
+      "src/*": ["./src/*"],
+      "process": ["./node_modules/process"]
+    }
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "build"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "build"]
 }

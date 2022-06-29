@@ -3,8 +3,11 @@ import { Logger } from '../utils/Logger'
 const LOG = Logger.get('ChangeMonitor')
 
 export class CallbackManager {
+    private static readonly INSTANCE = new CallbackManager()
 
-    public static readonly INSTANCE = new CallbackManager()
+    public static singleton() {
+        return CallbackManager.INSTANCE
+    }
 
     private __animationFrameHandler?: NodeJS.Timeout
 
@@ -41,8 +44,7 @@ export class CallbackManager {
     }
 
     private launchAnimationFrame() {
-        if (!this.__animationFrameHandler
-            && (this.__callbackMap.size > 0 || this.__onceCallbackMap.size > 0)) {
+        if (!this.__animationFrameHandler && (this.__callbackMap.size > 0 || this.__onceCallbackMap.size > 0)) {
             this.__animationFrameHandler = setTimeout(this.onFlush.bind(this), 16)
         }
     }
@@ -83,5 +85,4 @@ export class CallbackManager {
             this.launchAnimationFrame()
         }
     }
-
 }

@@ -1,7 +1,8 @@
-import { Scope } from 'wdc-cube'
+import { Observable, observe, Scope } from 'wdc-cube'
 
+@Observable
 export class SubscriptionsDetailScope extends Scope {
-    email?: string
+    @observe() email?: string
 
     // Actions
     onClose = Scope.ASYNC_ACTION

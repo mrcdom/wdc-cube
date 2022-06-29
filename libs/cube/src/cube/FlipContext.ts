@@ -3,19 +3,19 @@ import { Comparators } from '../utils/Comparators'
 import { Place } from './Place'
 import { FlipIntent } from './FlipIntent'
 import { Application } from './Application'
+import { CubePresenterInternals } from './CubePresenter'
 
 import type { ICubePresenter } from './IPresenter'
 
 const LOG = Logger.get('FlipContext')
 
 export class FlipContext {
-
     private __app: Application
     private __presenterMap: Map<number, ICubePresenter>
     private __sourceIntent: FlipIntent
     private __targetIntent: FlipIntent
     private __level: number
-    private __cycleDetectionMap: Map<string, boolean>
+    private __cycleDetectionMap: Map<string, number>
 
     public constructor(app: Application, targetIntent: FlipIntent) {
         this.__app = app
@@ -24,7 +24,7 @@ export class FlipContext {
         this.__cycleDetectionMap = new Map()
         this.__presenterMap = new Map()
         this.__targetIntent = targetIntent
-        this.__cycleDetectionMap.set(this.targetIntent.place.pathName, true)
+        this.__cycleDetectionMap.set(this.targetIntent.place.pathName, 1)
         this.extractPresenters(this.__presenterMap, this.__sourceIntent.place.path)
     }
 
@@ -33,15 +33,17 @@ export class FlipContext {
     }
 
     public set targetIntent(intent: FlipIntent) {
-        if (this.__cycleDetectionMap.has(intent.place.pathName)) {
+        let cycleCount = (this.__cycleDetectionMap.get(intent.place.pathName) ?? 0) + 1
+        if (cycleCount > 5) {
             throw new Error(
-                'Dectected a navigation cycle between '
-                + `source(${this.__sourceIntent})=>target(${this.__targetIntent}). `
-                + `The intermediate target was "${intent}"`
+                'Dectected a navigation cycle between ' +
+                    `source(${this.__sourceIntent})=>target(${this.__targetIntent}). ` +
+                    `The intermediate target was "${intent}"`
             )
         }
+
         this.__targetIntent = intent
-        this.__cycleDetectionMap.set(intent.place.pathName, true)
+        this.__cycleDetectionMap.set(intent.place.pathName, cycleCount)
     }
 
     public get level(): number {
@@ -112,7 +114,7 @@ export class FlipContext {
     public commit(newPresenterMap: Map<number, ICubePresenter>) {
         newPresenterMap.clear()
 
-        // Keep only presenters belonging to 
+        // Keep only presenters belonging to
         const targetPlace = this.__targetIntent.place
 
         // Avoid processing detached places
@@ -154,9 +156,9 @@ export class FlipContext {
 
             presenterInstanceMap.delete(presenterId)
 
-            if (presenter != null) {
+            if (presenter) {
                 try {
-                    presenter.release()
+                    CubePresenterInternals.release.call(presenter)
                 } catch (caught) {
                     LOG.error('Releasing presenter', caught)
                 }
@@ -164,4 +166,10 @@ export class FlipContext {
         }
     }
 
+    removePresenter(place: Place, presenter: ICubePresenter) {
+        const otherPresenter = this.__presenterMap.get(place.id)
+        if (otherPresenter === presenter) {
+            this.__presenterMap.delete(place.id)
+        }
+    }
 }

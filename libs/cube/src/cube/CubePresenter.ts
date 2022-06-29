@@ -10,10 +10,14 @@ import type { ICubePresenter, IUpdateManager, AlertSeverity } from './IPresenter
 
 const LOG = Logger.get('CubePresenter')
 
-export type PresenterContructor<A extends Application> = { new(app: A): ICubePresenter }
+export type PresenterContructor<A extends Application> = { new (app: A): ICubePresenter }
+
+export const CubePresenterInternals = {
+    uninitialized: true,
+    release: NOOP_VOID as (this: ICubePresenter) => void
+}
 
 export class CubePresenter<A extends Application, S extends Scope> implements ICubePresenter {
-
     // :: Private Fields
 
     private readonly __app: A
@@ -26,7 +30,14 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
 
     private __updateCount = 0
 
+    private __releasePhase = 0
+
     public constructor(app: A, scope: S) {
+        if (CubePresenterInternals.uninitialized) {
+            CubePresenterInternals.release = this.internalRelease
+            CubePresenterInternals.uninitialized = false
+        }
+
         this.__app = app
         this.__scope = scope
 
@@ -48,13 +59,31 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
 
     // :: IDisposable API
 
+    private internalRelease(): void {
+        try {
+            this.release()
+        } finally {
+            this.__releasePhase = 2
+        }
+    }
+
     public release(): void {
+        this.__releasePhase = 1
         this.__scope.update = NOOP_VOID
         this.__scope.forceUpdate = NOOP_VOID
         this.__updateManager.release()
+        this.__releasePhase = 2
     }
 
     // :: IPresenter API
+
+    public get isReleasing(): boolean {
+        return this.__releasePhase === 1
+    }
+
+    public get isReleased(): boolean {
+        return this.__releasePhase > 0
+    }
 
     public get scope(): S {
         return this.__scope
@@ -109,7 +138,10 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
         this.__app.updateHistory()
     }
 
-    public async flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }): Promise<void> {
+    public async flip(
+        place: Place,
+        args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }
+    ): Promise<void> {
         this.__app.flip(place, args)
     }
 
@@ -120,5 +152,4 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
     public async flipToIntentString(sIntent: string): Promise<void> {
         this.__app.flipToIntentString(sIntent)
     }
-
 }

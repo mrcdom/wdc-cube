@@ -2,11 +2,20 @@
  * Based on https://todomvc.com/examples/react
  */
 
-import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, observable, ObservableArray, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, ObservableArray, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
 import { ParamIds, AttrIds } from '../../Constants'
-import { TodoMvcScope, HeaderScope, MainScope, ClockScope, FooterScope, ItemScope, ShowingOptions, KeyDownEvent } from './TodoMvc.scopes'
+import {
+    TodoMvcScope,
+    HeaderScope,
+    MainScope,
+    ClockScope,
+    FooterScope,
+    ItemScope,
+    ShowingOptions,
+    KeyDownEvent
+} from './TodoMvc.scopes'
 
 const LOG = Logger.get('TodoMvcPresenter')
 
@@ -15,12 +24,9 @@ const tutorialService = TutorialService.INSTANCE
 
 // :: Scopes
 
-
-
 // :: Presentation
 
 export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope> {
-
     private parentSlot: ScopeSlot = NOOP_VOID
 
     private readonly headerScope = new HeaderScope()
@@ -40,7 +46,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
 
-        this.itemScopes = observable.array<ItemScope>(this.mainScope)
+        this.itemScopes = new ObservableArray<ItemScope>(this.mainScope)
 
         // Bind Events
         this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
@@ -57,7 +63,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.footerScope.update = this.update
         this.clockScope.update = this.update
 
-        this.scope.header(this.headerScope)
+        this.scope.header = this.headerScope
 
         // Hints given to presenter update debounce controller
         this.updateManager.hint(ItemScope, this.mainScope, 10)
@@ -74,7 +80,10 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
         const ctxUserId = intent.getParameterAsNumberOrDefault(ParamIds.TodoUserId, this.userId)
-        const ctxShowing = intent.getParameterAsNumberOrDefault(ParamIds.TodoShowing, this.footerScope.showing()) as ShowingOptions
+        const ctxShowing = intent.getParameterAsNumberOrDefault(
+            ParamIds.TodoShowing,
+            this.footerScope.showing
+        ) as ShowingOptions
 
         if (initialization) {
             await this.initializeState(intent, ctxUserId, ctxShowing)
@@ -88,8 +97,8 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     public override publishParameters(intent: FlipIntent): void {
-        if (this.footerScope.showing() !== ShowingOptions.ALL) {
-            intent.setParameter(ParamIds.TodoShowing, this.footerScope.showing())
+        if (this.footerScope.showing !== ShowingOptions.ALL) {
+            intent.setParameter(ParamIds.TodoShowing, this.footerScope.showing)
         }
 
         if (this.userId !== 0) {
@@ -107,18 +116,18 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     private async synchronizeState(uriUserId: number, uriShowing: ShowingOptions, force = false) {
-        this.footerScope.showing(uriShowing)
+        this.footerScope.showing = uriShowing
 
         if (force || uriUserId !== this.userId) {
             this.userId = uriUserId
 
             if (this.userId < 0) {
-                this.mainScope.clock(this.clockScope)
+                this.mainScope.clock = this.clockScope
                 if (!this.clockUpdateHandler) {
                     this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
                 }
             } else {
-                this.mainScope.clock(undefined)
+                this.mainScope.clock = undefined
                 if (this.clockUpdateHandler) {
                     clearInterval(this.clockUpdateHandler)
                 }
@@ -135,9 +144,9 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
         for (const todo of todos) {
             const todoScope = new ItemScope()
-            todoScope.id(todo.id)
-            todoScope.title(todo.title)
-            todoScope.completed(todo.completed)
+            todoScope.id = todo.id
+            todoScope.title = todo.title
+            todoScope.completed = todo.completed
             this.bindItemScopeActions(todoScope)
             this.itemScopes.push(todoScope)
         }
@@ -153,16 +162,16 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     protected async handleClockUpdate() {
-        this.clockScope.date(new Date())
+        this.clockScope.date = new Date()
     }
 
     protected onHeaderSyncInputChange(value: string) {
-        this.headerScope.inputValue(value)
+        this.headerScope.inputValue = value
     }
 
     protected onHeaderSyncInputKeyDown(event: KeyDownEvent) {
         if (event.code === 'Escape') {
-            this.headerScope.inputValue('')
+            this.headerScope.inputValue = ''
             return
         }
 
@@ -172,9 +181,9 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
         event.preventDefault()
 
-        const trimVal = this.headerScope.inputValue().trim()
+        const trimVal = this.headerScope.inputValue.trim()
 
-        this.headerScope.inputValue('')
+        this.headerScope.inputValue = ''
 
         if (trimVal) {
             this.onAddItem(trimVal)
@@ -183,12 +192,12 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     @action()
     protected onAddItem(value: string) {
-        const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id(), accum), 0)
+        const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
 
         const todoScope = new ItemScope()
-        todoScope.id(lastUid + 1)
-        todoScope.title(value)
-        todoScope.completed(false)
+        todoScope.id = lastUid + 1
+        todoScope.title = value
+        todoScope.completed = false
         this.bindItemScopeActions(todoScope)
         this.itemScopes.push(todoScope)
     }
@@ -197,7 +206,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     protected async onToggleAll() {
         let numOfCompletedTasks = 0
         for (const itemScope of this.itemScopes) {
-            if (itemScope.completed()) {
+            if (itemScope.completed) {
                 numOfCompletedTasks++
             }
         }
@@ -205,47 +214,47 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         const checked = numOfCompletedTasks !== this.mainScope.items.length
 
         for (const itemScope of this.itemScopes) {
-            itemScope.completed(checked)
+            itemScope.completed = checked
         }
     }
 
     @action()
     protected async onClearCompleted() {
-        this.itemScopes.removeByCriteria(item => !item.completed())
+        this.itemScopes.removeByCriteria((item) => !item.completed)
     }
 
     @action()
     protected async onShowAll() {
-        this.footerScope.showing(ShowingOptions.ALL)
+        this.footerScope.showing = ShowingOptions.ALL
         this.updateHistory()
     }
 
     @action()
     protected async onShowActives() {
-        this.footerScope.showing(ShowingOptions.ACTIVE)
+        this.footerScope.showing = ShowingOptions.ACTIVE
         this.updateHistory()
     }
 
     @action()
     protected async onShowCompleteds() {
-        this.footerScope.showing(ShowingOptions.COMPLETED)
+        this.footerScope.showing = ShowingOptions.COMPLETED
         this.updateHistory()
     }
 
     @action()
     protected async onItemToggle(item: ItemScope) {
-        item.completed(!item.completed())
+        item.completed = !item.completed
     }
 
     @action()
     protected async onItemEdit(item: ItemScope) {
         for (const otherItem of this.itemScopes) {
             if (otherItem !== item) {
-                otherItem.editing(false)
+                otherItem.editing = false
             }
         }
 
-        item.editing(true)
+        item.editing = true
     }
 
     @action()
@@ -268,32 +277,31 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     protected destroy(item: ItemScope) {
-        const itemIdx = this.itemScopes.findIndex(i => i.id() === item.id())
+        const itemIdx = this.itemScopes.findIndex((i) => i.id === item.id)
         if (itemIdx !== -1) {
             this.itemScopes.removeByIndex(itemIdx)
         }
     }
 
     protected cancelItem(item: ItemScope) {
-        item.editing(false)
+        item.editing = false
     }
 
     protected saveItem(item: ItemScope, val: string) {
         const trimVal = val ? val.trim() : ''
         if (trimVal) {
-            item.title(trimVal)
-            item.editing(false)
+            item.title = trimVal
+            item.editing = false
         } else {
             this.destroy(item)
         }
     }
 
-
     /**
      * This action is called just before scope changes be notified
      * to the view. This action has a debounce controller related
      * to the Presenter.update() and with scope.actions. Whenever one
-     * of this methods/actions (with autoUpdate) is called, it is 
+     * of this methods/actions (with autoUpdate) is called, it is
      * garanteed that this event will be emited
      */
     public override onBeforeScopeUpdate() {
@@ -304,20 +312,20 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
             let numItems = 0
 
             for (const itemScope of this.itemScopes) {
-                if (itemScope.completed()) {
+                if (itemScope.completed) {
                     numCompletedTasks++
                 } else {
                     numPendingTasks++
                 }
 
-                switch (this.footerScope.showing()) {
+                switch (this.footerScope.showing) {
                     case ShowingOptions.ACTIVE:
-                        if (!itemScope.completed()) {
+                        if (!itemScope.completed) {
                             this.mainScope.items.set(numItems++, itemScope)
                         }
                         break
                     case ShowingOptions.COMPLETED:
-                        if (itemScope.completed()) {
+                        if (itemScope.completed) {
                             this.mainScope.items.set(numItems++, itemScope)
                         }
                         break
@@ -330,29 +338,28 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         }
 
         if (numCompletedTasks > 0 || numPendingTasks > 0) {
-            this.headerScope.allItemsCompleted(numPendingTasks === 0)
-            this.headerScope.toggleButtonVisible(true)
+            this.headerScope.allItemsCompleted = numPendingTasks === 0
+            this.headerScope.toggleButtonVisible = true
 
-            this.footerScope.count(numPendingTasks)
-            this.footerScope.activeTodoWord(numPendingTasks > 1 ? 'items' : 'item')
-            this.footerScope.clearButtonVisible(numCompletedTasks > 0)
+            this.footerScope.count = numPendingTasks
+            this.footerScope.activeTodoWord = numPendingTasks > 1 ? 'items' : 'item'
+            this.footerScope.clearButtonVisible = numCompletedTasks > 0
 
-            if (this.mainScope.clock() || this.mainScope.items.length > 0) {
-                this.scope.main(this.mainScope)
+            if (this.mainScope.clock || this.mainScope.items.length > 0) {
+                this.scope.main = this.mainScope
             } else {
-                this.scope.main(undefined)
+                this.scope.main = undefined
             }
 
-            this.scope.footer(this.footerScope)
+            this.scope.footer = this.footerScope
         } else {
-            this.headerScope.allItemsCompleted(false)
-            this.headerScope.toggleButtonVisible(false)
-            this.footerScope.count(0)
-            this.footerScope.clearButtonVisible(false)
+            this.headerScope.allItemsCompleted = false
+            this.headerScope.toggleButtonVisible = false
+            this.footerScope.count = 0
+            this.footerScope.clearButtonVisible = false
             this.mainScope.items.length = 0
-            this.scope.main(this.mainScope.clock() ? this.mainScope : undefined)
-            this.scope.footer(undefined)
+            this.scope.main = this.mainScope.clock ? this.mainScope : undefined
+            this.scope.footer = undefined
         }
     }
-
 }

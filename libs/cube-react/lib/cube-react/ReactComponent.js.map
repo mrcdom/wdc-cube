@@ -1,0 +1,1 @@
+{"version":3,"file":"ReactComponent.js","sourceRoot":"","sources":["../../src/cube-react/ReactComponent.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAA;AAGzB,MAAM,OAAO,cAAmD,SAAQ,KAAK,CAAC,SAAmB;IAC7E,yBAAyB;QACrC,IAAI,CAAC,QAAQ,EAAE,CAAA;IACnB,CAAC;IAEe,oBAAoB;QAChC,IAAI,CAAC,QAAQ,EAAE,CAAA;IACnB,CAAC;IAES,QAAQ;IAElB,CAAC;IAES,QAAQ;IAElB,CAAC;CACJ"}

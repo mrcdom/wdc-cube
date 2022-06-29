@@ -14,6 +14,7 @@ export const AttrIds = {
 }
 
 export const Places = {
+    main: Place.ROOT,
     todos: Place.UNKNOWN,
     subscriptions: Place.UNKNOWN,
     subscriptionsDetail: Place.UNKNOWN,

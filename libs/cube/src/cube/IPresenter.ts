@@ -7,9 +7,11 @@ import { Scope, ScopeConstructor } from './Scope'
 export type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
 
 export interface IDisposable {
+    get isReleasing(): boolean
+
+    get isReleased(): boolean
 
     release(): void
-
 }
 
 export interface IUpdateManager extends IDisposable {
@@ -27,15 +29,12 @@ export interface IUpdateManager extends IDisposable {
 }
 
 export interface IPresenterOwner {
-
     unexpected(message: string, error: unknown): void
 
     alert(severity: AlertSeverity, title: string, message: string, onClose?: () => Promise<void>): void
-
 }
 
 export interface IPresenter extends IPresenterOwner, IDisposable {
-
     get scope(): Scope
 
     get updateManager(): IUpdateManager
@@ -45,21 +44,21 @@ export interface IPresenter extends IPresenterOwner, IDisposable {
     updateIfNotDirty(scope: Scope): void
 
     onBeforeScopeUpdate(): void
-
 }
 
 export interface ICubePresenter extends IPresenter {
-
     applyParameters(intent: FlipIntent, initialization: boolean, last?: boolean): Promise<boolean>
 
     publishParameters?(intent: FlipIntent): void
 
     updateHistory(): void
 
-    flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }): Promise<void>
+    flip(
+        place: Place,
+        args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }
+    ): Promise<void>
 
     flipToIntent(intent: FlipIntent): Promise<void>
 
     flipToIntentString(sIntent: string): Promise<void>
-
 }

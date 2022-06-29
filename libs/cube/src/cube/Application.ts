@@ -10,7 +10,6 @@ import type { AlertSeverity, ICubePresenter, IPresenterOwner } from './IPresente
 const LOG = Logger.get('Application')
 
 export class Application implements IPresenterOwner {
-
     private __placeMap: Map<string, Place>
 
     private __presenterMap: Map<number, ICubePresenter>
@@ -27,6 +26,8 @@ export class Application implements IPresenterOwner {
 
     private __historyChangeUnregister: () => void
 
+    private __releasePhase = 0
+
     public constructor(rootPlace: Place, historyManager: HistoryManager) {
         this.__rootPlace = rootPlace
         this.__lastPlace = rootPlace
@@ -37,32 +38,45 @@ export class Application implements IPresenterOwner {
     }
 
     public release(): void {
-        this.__historyChangeUnregister()
+        this.__releasePhase = 1
+        try {
+            this.__historyChangeUnregister()
 
-        const presenterIds = [] as number[]
+            const presenterIds = [] as number[]
 
-        // Collect current presenters IDs
-        for (const id of this.__presenterMap.keys()) {
-            presenterIds.push(id)
-        }
+            // Collect current presenters IDs
+            for (const id of this.__presenterMap.keys()) {
+                presenterIds.push(id)
+            }
 
-        // Release must be made in reverse order
-        presenterIds.sort(Comparators.reverseOrderForNumber)
+            // Release must be made in reverse order
+            presenterIds.sort(Comparators.reverseOrderForNumber)
 
-        // Release all presenters
-        for (const presenterId of presenterIds) {
-            const presenter = this.__presenterMap.get(presenterId)
-            if (presenter) {
-                this.__presenterMap.delete(presenterId)
-                try {
-                    presenter.release()
-                } catch (caught) {
-                    LOG.error(`Releasing presenter ${presenter.constructor.name}`, caught)
+            // Release all presenters
+            for (const presenterId of presenterIds) {
+                const presenter = this.__presenterMap.get(presenterId)
+                if (presenter) {
+                    this.__presenterMap.delete(presenterId)
+                    try {
+                        presenter.release()
+                    } catch (caught) {
+                        LOG.error(`Releasing presenter ${presenter.constructor.name}`, caught)
+                    }
                 }
             }
-        }
 
-        this.__presenterMap.clear()
+            this.__presenterMap.clear()
+        } finally {
+            this.__releasePhase = 2
+        }
+    }
+
+    public get isReleasing(): boolean {
+        return this.__releasePhase === 1
+    }
+
+    public get isReleased(): boolean {
+        return this.__releasePhase > 0
     }
 
     public get historyManager() {
@@ -89,6 +103,21 @@ export class Application implements IPresenterOwner {
         this.__presenterMap.set(place.id, presenter)
     }
 
+    public getPresenter(place: Place) {
+        return this.__presenterMap.get(place.id)
+    }
+
+    public removePresenter(place: Place) {
+        const presenter = this.__presenterMap.get(place.id)
+        if (presenter) {
+            if (this.__flipContext) {
+                this.__flipContext.removePresenter(place, presenter)
+            }
+            this.__presenterMap.delete(place.id)
+        }
+        return presenter
+    }
+
     protected publishAllParameters(intent: FlipIntent) {
         for (const presenter of this.__presenterMap.values()) {
             if (presenter.publishParameters) {
@@ -99,25 +128,28 @@ export class Application implements IPresenterOwner {
 
     public newFlipIntent(place: Place): FlipIntent {
         const intent = new FlipIntent(place)
+        intent.populateAttributes(this.__flipContext?.targetIntent.attributes)
         this.publishAllParameters(intent)
         return intent
     }
 
     public newIntentFromString(sIntent: string): FlipIntent {
         const defaultPlace = this.__lastPlace ?? this.rootPlace
+
+        let intent: FlipIntent
         if (sIntent) {
-            return FlipIntent.parse(sIntent, name => this.__placeMap.get(name) || defaultPlace)
+            intent = FlipIntent.parse(sIntent, (name) => this.__placeMap.get(name) || defaultPlace)
         } else {
-            return new FlipIntent(defaultPlace)
+            intent = new FlipIntent(defaultPlace)
         }
+
+        intent.populateAttributes(this.__flipContext?.targetIntent.attributes)
+
+        return intent
     }
 
     public updateHistory(): void {
         this.historyManager.update(this, this.lastPlace)
-    }
-
-    public getPresenter(place: Place) {
-        return this.__presenterMap.get(place.id)
     }
 
     protected setPlaces(places: Record<string, Place>) {
@@ -127,7 +159,10 @@ export class Application implements IPresenterOwner {
         }
     }
 
-    public async flip(place: Place, args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }) {
+    public async flip(
+        place: Place,
+        args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }
+    ) {
         const intent = this.newFlipIntent(place)
 
         if (args?.params) {
@@ -195,27 +230,16 @@ export class Application implements IPresenterOwner {
     }
 
     protected onHistoryChanged(sender: HistoryManager) {
-        const currentLocation = this.newFlipIntent(this.lastPlace).toString()
+        const previousIntent = this.newFlipIntent(this.lastPlace)
 
-        if (!this.__flipContext && sender.location !== currentLocation) {
-            const action = async () => {
-                try {
-                    await this.flipToIntentString(sender.location)
-                } catch (caught) {
-                    LOG.error(`Invalid history location intent=${sender.location}`, caught)
+        if (!this.__flipContext && sender.location !== previousIntent.toString()) {
+            this.flipToIntentString(sender.location).catch((caught) => {
+                LOG.error(`Invalid history location intent=${sender.location}`, caught)
 
-                    if (this.fallbackPlace !== this.rootPlace) {
-                        try {
-                            await this.flip(this.fallbackPlace)
-                        } catch (caught) {
-                            LOG.error('Invalid fallback place', caught)
-                        }
-                    }
-                }
-            }
-
-            // Run it
-            action().catch(() => void 0)
+                this.flipToIntent(previousIntent).catch((caught) => {
+                    LOG.error('Problems returning to source', caught)
+                })
+            })
         }
     }
 
@@ -241,10 +265,9 @@ export class Application implements IPresenterOwner {
         }
 
         if (onClose) {
-            onClose().catch(caught => {
+            onClose().catch((caught) => {
                 LOG.error('Closing alert', caught)
             })
         }
     }
-
 }

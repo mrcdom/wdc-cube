@@ -1,26 +1,30 @@
 import React, { useCallback } from 'react'
 import clsx from 'clsx'
+
 import { Logger } from 'wdc-cube'
-import { getOrCreateApplication, ViewSlot, IViewProps } from 'wdc-cube-react'
-import Typography from '@material-ui/core/Typography'
-import IconButton from '@material-ui/core/IconButton'
-import Toolbar from '@material-ui/core/Toolbar'
-import AppBar from '@material-ui/core/AppBar'
-import Dialog from '@material-ui/core/Dialog'
-import { Button } from '@material-ui/core'
-import MenuIcon from '@material-ui/icons/Menu'
+import { ViewSlot, bindUpdate } from 'wdc-cube-react'
+
+import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
+import Toolbar from '@mui/material/Toolbar'
+import AppBar from '@mui/material/AppBar'
+import Dialog from '@mui/material/Dialog'
+import Button from '@mui/material/Button'
+import MenuIcon from '@mui/icons-material/Menu'
+
 import Css from './Main.module.css'
-import { MainPresenter } from '../Main.presenter'
+import { MainScope } from '../Main.scopes'
 import { AlertView } from './AlertView'
 
 const LOG = Logger.get('MainView')
 
-export type MainViewProps = IViewProps & {
-  presenterFactory: () => MainPresenter
+export type MainViewProps = {
+  className?: string
+  scope: MainScope
 }
 
-export function MainView({ className, presenterFactory }: MainViewProps) {
-  const { scope } = getOrCreateApplication(React, presenterFactory)
+export function MainView({ className, scope }: MainViewProps) {
+  bindUpdate(React, scope)
 
   LOG.debug('update')
 
@@ -29,8 +33,8 @@ export function MainView({ className, presenterFactory }: MainViewProps) {
   const onOpenTodos = useCallback(scope.onOpenTodos, [scope.onOpenTodos])
   const onOpenSuscriptions = useCallback(scope.onOpenSuscriptions, [scope.onOpenSuscriptions])
   const onLogin = useCallback(scope.onLogin, [scope.onLogin])
-  const onCloseDialog = useCallback(() => scope.dialog?.onClose(), [scope.dialog])
-  const onCloseAlert = useCallback(() => scope.alert?.onClose(), [scope.dialog])
+  const onCloseDialog = useCallback(() => scope.dialog?.onClose(), [scope.dialog?.onClose])
+  const onCloseAlert = useCallback(() => scope.alert?.onClose(), [scope.alert?.onClose])
 
   return <>
     <div className={clsx(className, Css.MainView)} >

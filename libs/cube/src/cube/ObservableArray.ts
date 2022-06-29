@@ -1,26 +1,24 @@
 import { Scope } from './Scope'
 
-export class ObservableArray<T> implements Iterable<T> {
-
+export class ObservableArray<T> implements RelativeIndexable<T>, Iterable<T> {
     private __scope: Scope
+    private __items: Array<T>
 
-    private __items = [] as T[]
-
-    constructor(scope: Scope) {
+    constructor(scope: Scope, items?: T[]) {
         this.__scope = scope
+        this.__items = items ?? []
     }
 
     public [Symbol.iterator]() {
-        let pos = 0
-        const items = this.__items
-        return {
-            next: function () {
-                return {
-                    done: pos >= items.length,
-                    value: items[pos++]
-                }
-            }
-        }
+        return this.__items[Symbol.iterator]()
+    }
+
+    public keys() {
+        return this.__items.keys()
+    }
+
+    public values() {
+        return this.__items.values()
     }
 
     public get length() {
@@ -32,6 +30,10 @@ export class ObservableArray<T> implements Iterable<T> {
             this.__items.length = value
             this.__scope.update(this.__scope)
         }
+    }
+
+    public at(index: number) {
+        return this.__items.at(index)
     }
 
     public get(idx: number) {
@@ -51,11 +53,25 @@ export class ObservableArray<T> implements Iterable<T> {
         this.__scope.update(this.__scope)
     }
 
+    public assign(array: T[]) {
+        this.length = array.length
+        for (let i = 0; i < array.length; i++) {
+            this.set(i, array[i])
+        }
+    }
+
+    public filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown): T[] {
+        return this.__items.filter(predicate, thisArg)
+    }
+
     public map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: unknown): U[] {
         return this.__items.map(callbackfn, thisArg)
     }
 
-    public reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U {
+    public reduce<U>(
+        callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U,
+        initialValue: U
+    ): U {
         return this.__items.reduce(callbackfn, initialValue)
     }
 
@@ -90,4 +106,12 @@ export class ObservableArray<T> implements Iterable<T> {
         }
     }
 
+    public join(separator?: string): string {
+        return this.__items.join(separator)
+    }
+
+    public sort(compareFn?: (a: T, b: T) => number) {
+        this.__items.sort(compareFn)
+        return this
+    }
 }

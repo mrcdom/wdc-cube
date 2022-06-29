@@ -35,11 +35,11 @@ export function ItemView({ className, style, scope, scope: { actions } }: ItemVi
     }, [scope.editing])
 
     return <li
-        className={clsx(className, Css.view, scope.completed() ? Css.completed : '', scope.editing() ? Css.editing : '')}
+        className={clsx(className, Css.view, scope.completed ? Css.completed : '', scope.editing ? Css.editing : '')}
         style={style}
     >
         {
-            scope.editing()
+            scope.editing
                 ? <>
                     <input
                         ref={editTextField}
@@ -54,10 +54,10 @@ export function ItemView({ className, style, scope, scope: { actions } }: ItemVi
                     <input
                         className={Css.toggle}
                         type="checkbox"
-                        checked={scope.completed()}
+                        checked={scope.completed}
                         onChange={onToggle}
                     />
-                    <label onDoubleClick={onEdit}>{scope.title()}</label>
+                    <label onDoubleClick={onEdit}>{scope.title}</label>
                     <button className={Css.destroy} onClick={onDestroy} />
                 </>
         }

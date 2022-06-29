@@ -21,7 +21,7 @@ export const FooterView = function ({ className, style, scope, scope: { actions 
 
     let clearButton = <></>
 
-    if (scope.clearButtonVisible()) {
+    if (scope.clearButtonVisible) {
         clearButton = <button
             className={Css['clear-completed']}
             onClick={onClearCompleted}>
@@ -31,12 +31,12 @@ export const FooterView = function ({ className, style, scope, scope: { actions 
 
     return <footer className={clsx(className, Css.footer)} style={style}>
         <span className={Css['todo-count']}>
-            <strong>{scope.count()}</strong> {scope.activeTodoWord()} left
+            <strong>{scope.count}</strong> {scope.activeTodoWord} left
         </span>
         <ul className={Css.filters}>
             <li>
                 <a
-                    className={clsx(scope.showing() == ShowingOptions.ALL ? Css.selected : undefined)}
+                    className={clsx(scope.showing == ShowingOptions.ALL ? Css.selected : undefined)}
                     onClick={onShowAll}
                 >
                     All
@@ -45,7 +45,7 @@ export const FooterView = function ({ className, style, scope, scope: { actions 
             {' '}
             <li>
                 <a
-                    className={clsx(scope.showing() == ShowingOptions.ACTIVE ? Css.selected : undefined)}
+                    className={clsx(scope.showing == ShowingOptions.ACTIVE ? Css.selected : undefined)}
                     onClick={onShowActives}>
                     Active
                 </a>
@@ -53,7 +53,7 @@ export const FooterView = function ({ className, style, scope, scope: { actions 
             {' '}
             <li>
                 <a
-                    className={clsx(scope.showing() == ShowingOptions.COMPLETED ? Css.selected : undefined)}
+                    className={clsx(scope.showing == ShowingOptions.COMPLETED ? Css.selected : undefined)}
                     onClick={onShowCompleteds}>
                     Completed
                 </a>

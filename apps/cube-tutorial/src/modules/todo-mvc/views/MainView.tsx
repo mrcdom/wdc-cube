@@ -18,8 +18,8 @@ export const MainView = function ({ className, style, scope }: MainViewProps) {
 
     return <section className={clsx(className, Css.main)} style={style}>
         <ul className={Css['todo-list']}>
-            <ViewSlot scope={scope.clock()} view={ClockView} />
-            {scope.items.map(todo => <ViewSlot key={todo.id()} scope={todo} view={ItemView} />)}
+            <ViewSlot scope={scope.clock} view={ClockView} />
+            {scope.items.map(todo => <ViewSlot key={todo.id} scope={todo} view={ItemView} />)}
         </ul>
     </section>
 }

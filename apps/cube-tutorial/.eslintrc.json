@@ -17,6 +17,7 @@
   ],
   "rules": {
     "no-unused-vars": "off",
+    "react/prop-types": "off",
     "semi-style": [
       "error"
     ],
@@ -25,7 +26,7 @@
       "never"
     ],
     "quotes": [
-      "error",
+      0,
       "single"
     ],
     "@typescript-eslint/member-delimiter-style": [

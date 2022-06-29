@@ -10,12 +10,11 @@ export type CubeComponentProps<S extends Scope> = {
 }
 
 export class CubeComponent<
-    SC extends Scope, 
-    P extends CubeComponentProps<SC> = { scope: SC }, 
-    S = unknown, 
+    SC extends Scope,
+    P extends CubeComponentProps<SC> = { scope: SC },
+    S = unknown,
     SS = unknown
 > extends ReactComponent<P, S, SS> {
-
     public attached() {
         this.props.scope.forceUpdate = this.boundForceUpdate
     }
@@ -25,5 +24,4 @@ export class CubeComponent<
     }
 
     private readonly boundForceUpdate = this.forceUpdate.bind(this)
-
 }

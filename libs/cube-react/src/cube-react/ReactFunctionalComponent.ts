@@ -28,7 +28,7 @@ type IApplication<S extends Scope> = Application & {
 }
 
 export function getOrCreateApplication<S extends Scope, A extends IApplication<S>>(react: ReactType, factory: () => A) {
-    const [app, setApp] = react.useState<A>()
+    const [app, setApp] = react.useState<A | null>(null)
     const [value, setValue] = react.useState(0)
 
     let instance: A
@@ -45,7 +45,7 @@ export function getOrCreateApplication<S extends Scope, A extends IApplication<S
     react.useEffect(() => {
         return () => {
             instance.scope.forceUpdate = NOOP_VOID
-            setApp(undefined)
+            setApp(null)
             LOG.debug('app.detached')
         }
     }, [])

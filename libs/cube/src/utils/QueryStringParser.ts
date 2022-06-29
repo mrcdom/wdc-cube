@@ -2,7 +2,6 @@ import { ReflectionUtils } from './ReflectionUtils'
 import { StandardCharsets, Charset } from './StandardCharsets'
 
 export class QueryStringParser {
-
     /**
      * Append request parameters from the specified String to the specified Map. It is presumed that the specified Map is not accessed from any other thread, so no synchronization
      * is performed.
@@ -134,7 +133,5 @@ export class QueryStringParser {
                 this.putMapEntry(params, key, value)
             }
         }
-
     }
-
 }

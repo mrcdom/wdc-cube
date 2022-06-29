@@ -19,7 +19,6 @@ export interface IScope {
 }
 
 export abstract class Scope implements IScope {
-
     // Class
 
     public static readonly SYNC_ACTION = syncAction
@@ -58,11 +57,9 @@ export abstract class Scope implements IScope {
         return asyncAction
     }
 
-
     // API
 
     public forceUpdate: () => void = NOOP_VOID
 
     public update: (scope?: Scope) => void = NOOP_VOID
-
 }

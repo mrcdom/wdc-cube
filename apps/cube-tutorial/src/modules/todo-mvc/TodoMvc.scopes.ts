@@ -1,4 +1,4 @@
-import { Scope, observable } from 'wdc-cube'
+import { Observable, ObservableArray, observe, Scope } from 'wdc-cube'
 
 export type KeyDownEvent = {
     preventDefault: () => void
@@ -11,10 +11,11 @@ export enum ShowingOptions {
     COMPLETED
 }
 
+@Observable
 export class HeaderScope extends Scope {
-    readonly allItemsCompleted = observable.value(this, false)
-    readonly toggleButtonVisible = observable.value(this, false)
-    readonly inputValue = observable.value(this, '')
+    @observe() allItemsCompleted = false
+    @observe() toggleButtonVisible = false
+    @observe() inputValue = ''
 
     readonly actions = {
         onSyncInputChange: Scope.SYNC_ACTION as (value: string) => void,
@@ -23,35 +24,39 @@ export class HeaderScope extends Scope {
     }
 }
 
+@Observable
 export class ClockScope extends Scope {
-    readonly date = observable.value(this, new Date())
+    @observe() date = new Date()
 }
 
+@Observable
 export class ItemScope extends Scope {
-    readonly id = observable.value(this, 0)
-    readonly completed = observable.value(this, false)
-    readonly editing = observable.value(this, false)
-    readonly title = observable.value(this, '')
+    @observe() id = 0
+    @observe() completed = false
+    @observe() editing = false
+    @observe() title = ''
 
     readonly actions = {
         onDestroy: Scope.ASYNC_ACTION,
         onToggle: Scope.ASYNC_ACTION,
         onEdit: Scope.ASYNC_ACTION,
         onBlur: Scope.SYNC_ACTION as (getValue: () => string) => void,
-        onKeyDown: Scope.SYNC_ACTION as (getValue: () => string, event: KeyDownEvent) => void,
+        onKeyDown: Scope.SYNC_ACTION as (getValue: () => string, event: KeyDownEvent) => void
     }
 }
 
+@Observable
 export class MainScope extends Scope {
-    readonly clock = observable.optional<ClockScope>(this)
-    readonly items = observable.array<ItemScope>(this)
+    @observe() clock?: ClockScope
+    readonly items = new ObservableArray<ItemScope>(this)
 }
 
+@Observable
 export class FooterScope extends Scope {
-    readonly count = observable.value(this, 0)
-    readonly activeTodoWord = observable.value(this, 'item')
-    readonly clearButtonVisible = observable.value(this, false)
-    readonly showing = observable.value(this, ShowingOptions.ALL)
+    @observe() count = 0
+    @observe() activeTodoWord = 'item'
+    @observe() clearButtonVisible = false
+    @observe() showing = ShowingOptions.ALL
 
     readonly actions = {
         onClearCompleted: Scope.ASYNC_ACTION,
@@ -61,8 +66,9 @@ export class FooterScope extends Scope {
     }
 }
 
+@Observable
 export class TodoMvcScope extends Scope {
-    readonly header = observable.optional<HeaderScope>(this)
-    readonly main = observable.optional<MainScope>(this)
-    readonly footer = observable.optional<FooterScope>(this)
+    @observe() header?: HeaderScope
+    @observe() main?: MainScope
+    @observe() footer?: FooterScope
 }

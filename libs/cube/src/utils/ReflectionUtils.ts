@@ -1,4 +1,7 @@
-import lodash from 'lodash'
+import _isBoolean from 'lodash/isBoolean'
+import _isNumber from 'lodash/isNumber'
+import _isString from 'lodash/isString'
+import _isArray from 'lodash/isArray'
 
 export type PossibleParameterTypes = NumberConstructor | StringConstructor | BooleanConstructor
 
@@ -17,10 +20,9 @@ async function asyncFunction() {
     // NOOP
 }
 
-export const AsyncFunction = asyncFunction.constructor as { new(): Promise<unknown> }
+export const AsyncFunction = asyncFunction.constructor as { new (): Promise<unknown> }
 
 export class ReflectionUtils {
-
     public static isInstanceOf(instance: unknown, ctor: ClassConstructor): boolean {
         if (instance === undefined || instance === null) {
             return false
@@ -45,7 +47,7 @@ export class ReflectionUtils {
     }
 
     public static isArray(value: unknown): boolean {
-        return lodash.isArray(value)
+        return _isArray(value)
     }
 
     public static isFunction(value: unknown): boolean {
@@ -72,15 +74,15 @@ export class ReflectionUtils {
 
     public static getType(item: unknown): PossibleParameterTypes | undefined {
         if (item !== undefined && item !== null) {
-            if (lodash.isString(item)) {
+            if (_isString(item)) {
                 return String
             }
 
-            if (lodash.isNumber(item)) {
+            if (_isNumber(item)) {
                 return Number
             }
 
-            if (lodash.isBoolean(item)) {
+            if (_isBoolean(item)) {
                 return Boolean
             }
         }
@@ -107,7 +109,7 @@ export class ReflectionUtils {
             return value
         }
 
-        if (lodash.isNumber(value)) {
+        if (_isNumber(value)) {
             if (clazz === Number) {
                 return value
             }
@@ -123,7 +125,7 @@ export class ReflectionUtils {
             return value
         }
 
-        if (lodash.isString(value)) {
+        if (_isString(value)) {
             if (clazz === String) {
                 return value
             }
@@ -141,7 +143,7 @@ export class ReflectionUtils {
             return s
         }
 
-        if (lodash.isBoolean(value)) {
+        if (_isBoolean(value)) {
             if (clazz === Boolean) {
                 return value
             }
@@ -185,5 +187,4 @@ export class ReflectionUtils {
         }
         return defaultValue
     }
-
 }

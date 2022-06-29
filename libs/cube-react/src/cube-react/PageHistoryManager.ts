@@ -2,7 +2,6 @@ import { History, createBrowserHistory, createHashHistory, Path } from 'history'
 import { Application, Place, HistoryManager } from 'wdc-cube'
 
 export class PageHistoryManager extends HistoryManager {
-
     private __debounceHandler?: NodeJS.Timeout
 
     private __history: History
@@ -50,5 +49,4 @@ export class PageHistoryManager extends HistoryManager {
     private emitOnChanged() {
         this.notifyChanges()
     }
-
 }

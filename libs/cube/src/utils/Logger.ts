@@ -17,9 +17,8 @@ export interface ILogger {
     setInfoEnabled(value: boolean): void
     setWarnEnabled(value: boolean): void
     setErrorEnabled(value: boolean): void
+    caught(error: unknown): void
 }
-
-
 
 // :: Helpers
 
@@ -59,7 +58,15 @@ function ILogger_setErrorEnabled(this: ILogger, value: boolean): void {
     }
 }
 
-export const Logger = function () {
+function ILogger_caught(this: ILogger, error: unknown): void {
+    if (error instanceof Error) {
+        this.error(error.message, error.stack)
+    } else if (error) {
+        this.error(String(error))
+    }
+}
+
+export const Logger = (function () {
     const __instanceMap = new Map<string, ILogger>()
 
     let __defaultDebugFunction = ILogger_noop as ILoggerMethodType
@@ -90,7 +97,7 @@ export const Logger = function () {
             __defaultInfoFunction = console.info
 
             if ('development' === process.env.NODE_ENV) {
-                const $wnd = (window as unknown) as Record<string, unknown>
+                const $wnd = window as unknown as Record<string, unknown>
                 const cube = ($wnd.WeDoCodeCube || {}) as { Logger?: unknown }
                 cube.Logger = me
                 $wnd.WeDoCodeCube = cube
@@ -159,11 +166,12 @@ export const Logger = function () {
                 info: __defaultInfoFunction.bind(console, context),
                 warn: __defaultWarnFunction.bind(console, context),
                 error: __defaultErrorFunction.bind(console, context),
+                caught: ILogger_caught,
 
                 setDebugEnabled: ILogger_setDebugEnabled,
                 setInfoEnabled: ILogger_setInfoEnabled,
                 setWarnEnabled: ILogger_setWarnEnabled,
-                setErrorEnabled: ILogger_setErrorEnabled,
+                setErrorEnabled: ILogger_setErrorEnabled
             }
 
             __instanceMap.set(name, logger)
@@ -171,5 +179,4 @@ export const Logger = function () {
 
         return logger
     }
-
-}()
+})()

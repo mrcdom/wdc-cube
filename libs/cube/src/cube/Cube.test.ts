@@ -65,7 +65,6 @@ const ATTR_IDs = {
 }
 
 class TestHistoryManager extends HistoryManager {
-
     public token = ''
 
     constructor() {
@@ -75,9 +74,7 @@ class TestHistoryManager extends HistoryManager {
     public override update(app: Application, place: Place): void {
         this.token = app.newFlipIntent(place).toString()
     }
-
 }
-
 
 const Places = {
     ROOT: Place.UNKNOWN,
@@ -85,11 +82,10 @@ const Places = {
     RESTRICTED: Place.UNKNOWN,
     CART: Place.UNKNOWN,
     PRODUCT: Place.UNKNOWN,
-    RECEIPT: Place.UNKNOWN,
+    RECEIPT: Place.UNKNOWN
 }
 
 class TestApplication extends Application {
-
     public session = {
         id: 0,
         active: false
@@ -99,18 +95,16 @@ class TestApplication extends Application {
         super(Places.ROOT, new TestHistoryManager())
         this.setPlaces(Places)
     }
-
 }
 
 // :: Root
 
 class RootScope extends Scope {
     computedValue = 0
-    body?: Scope
+    body?: Scope | null
 }
 
 class RootPresenter extends CubePresenter<TestApplication, RootScope> {
-
     public initialized = false
     public deepest = false
 
@@ -120,14 +114,18 @@ class RootPresenter extends CubePresenter<TestApplication, RootScope> {
         super(app, new RootScope())
     }
 
-    private setBody(scope?: Scope) {
+    private setBody(scope?: Scope | null) {
         if (this.scope.body !== scope) {
             this.scope.body = scope
             this.update(this.scope)
         }
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        deepest: boolean
+    ): Promise<boolean> {
         const intentSessionId = intent.getParameterAsNumberOrDefault(PARAM_IDs.SESSION_ID, this.app.session.id)
         if (initialization) {
             this.initialized = true
@@ -140,7 +138,7 @@ class RootPresenter extends CubePresenter<TestApplication, RootScope> {
         this.deepest = deepest
 
         if (deepest) {
-            this.setBody(undefined)
+            this.setBody(null)
         } else {
             intent.setScopeSlot(ATTR_IDs.PARENT, this.bodySlot)
         }
@@ -156,12 +154,9 @@ class RootPresenter extends CubePresenter<TestApplication, RootScope> {
     public override publishParameters(intent: FlipIntent): void {
         intent.setParameter(PARAM_IDs.SESSION_ID, this.app.session.id)
     }
-
 }
 
 // :: Login
-
-
 
 class LoginScope extends Scope {
     userName?: string
@@ -172,7 +167,6 @@ class LoginScope extends Scope {
 }
 
 class LoginPresenter extends CubePresenter<TestApplication, LoginScope> {
-
     private parentSlot: ScopeSlot = NOOP_VOID
 
     deepest = false
@@ -188,7 +182,11 @@ class LoginPresenter extends CubePresenter<TestApplication, LoginScope> {
         super.release()
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        deepest: boolean
+    ): Promise<boolean> {
         if (initialization) {
             this.initialized = true
             this.parentSlot = intent.getScopeSlot(ATTR_IDs.PARENT)
@@ -229,7 +227,7 @@ class LoginPresenter extends CubePresenter<TestApplication, LoginScope> {
 
 class RestrictedScope extends Scope {
     message?: string
-    content?: Scope
+    content?: Scope | null
 
     onCart = Scope.ASYNC_ACTION_NUMBER
     onProduct = Scope.ASYNC_ACTION_NUMBER
@@ -238,7 +236,6 @@ class RestrictedScope extends Scope {
 }
 
 class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope> {
-
     private parentSlot: ScopeSlot = NOOP_VOID
 
     deepest = false
@@ -259,7 +256,11 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
         super.release()
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        deepest: boolean
+    ): Promise<boolean> {
         // Safe guard agains getting into a restricted area without a valid session
         if (this.app.session.id === 0) {
             const intent = this.app.newFlipIntent(Places.LOGIN)
@@ -285,7 +286,7 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
         return true
     }
 
-    private setContent(contentScope?: Scope) {
+    private setContent(contentScope?: Scope | null) {
         if (contentScope !== this.scope.content) {
             this.scope.content = contentScope
             this.update(this.scope)
@@ -340,17 +341,13 @@ class RestrictedPresenter extends CubePresenter<TestApplication, RestrictedScope
             this.update(this.scope)
         }
     }
-
 }
 
 // :: Cart
 
-class CartScope extends Scope {
-
-}
+class CartScope extends Scope {}
 
 class CartPresenter extends CubePresenter<TestApplication, CartScope> {
-
     private parentSlot: ScopeSlot = NOOP_VOID
 
     public initialized = false
@@ -366,7 +363,11 @@ class CartPresenter extends CubePresenter<TestApplication, CartScope> {
         super.release()
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        deepest: boolean
+    ): Promise<boolean> {
         const urlCartId = intent.getParameterAsNumber(PARAM_IDs.CART_ID)
 
         if (initialization) {
@@ -398,7 +399,6 @@ class CartPresenter extends CubePresenter<TestApplication, CartScope> {
 
         this.cartId = data.cartId
     }
-
 }
 
 // :: Product
@@ -408,7 +408,6 @@ class ProductScope extends Scope {
 }
 
 class ProductPresenter extends CubePresenter<TestApplication, ProductScope> {
-
     private parentSlot: ScopeSlot = NOOP_VOID
 
     public deepest = false
@@ -424,7 +423,11 @@ class ProductPresenter extends CubePresenter<TestApplication, ProductScope> {
         super.release()
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        deepest: boolean
+    ): Promise<boolean> {
         const intentProductId = intent.getParameterAsNumber(PARAM_IDs.PRODUCT_ID) || this.productId
         if (initialization) {
             this.initialized = true
@@ -457,17 +460,13 @@ class ProductPresenter extends CubePresenter<TestApplication, ProductScope> {
         this.productId = data.id
         this.scope.name = data.name
     }
-
 }
 
 // :: Receipt
 
-class ReceiptScope extends Scope {
-
-}
+class ReceiptScope extends Scope {}
 
 class ReceiptPresenter extends CubePresenter<TestApplication, ReceiptScope> {
-
     private parentSlot: ScopeSlot = NOOP_VOID
 
     public deepest = false
@@ -482,8 +481,11 @@ class ReceiptPresenter extends CubePresenter<TestApplication, ReceiptScope> {
         super.release()
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean, deepest: boolean): Promise<boolean> {
-
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        deepest: boolean
+    ): Promise<boolean> {
         if (initialization) {
             this.initialized = true
             this.parentSlot = intent.getScopeSlot(ATTR_IDs.PARENT)
@@ -495,7 +497,6 @@ class ReceiptPresenter extends CubePresenter<TestApplication, ReceiptScope> {
 
         return true
     }
-
 }
 
 // Prepare places
@@ -523,7 +524,7 @@ it('Application :: Basic Navigation', async () => {
     // Check if presenter state was reached
     const root = app.getPresenter(Places.ROOT) as RootPresenter
     expect(root).toBeDefined()
- 
+
     expect(root.initialized).toEqual(true)
     expect(root.deepest).toEqual(false)
     expect(app.session.id).toEqual(0)

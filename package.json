@@ -2,29 +2,46 @@
   "name": "cube-workspaces",
   "private": true,
   "scripts": {
-    "clean": "rimraf \"libs/**/lib\"  \"libs/**/*.tsbuildinfo\"",
+    "clean": "rimraf \"{libs,apps}/**/{lib,coverage,dist,build,node_modules,*.tsbuildinfo,.scannerwork,junit.xml,test-report.xml}\"",
     "compile": "tsc -b tsconfig.build.json",
-    "prepare": "npm run compile",
-    "install-libs": "node ./scripts/dependence-install.js libs",
+    "format": "prettier --write \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/*/src/**/*.{ts,tsx,yml}\" \"apps/*/*.yml\"",
+    "format:check": "npm run format -- --check",
+    "test": "lerna run test",
+    "build": "npm run compile --workspaces --if-present && npm run build --workspaces --if-present",
     "install-apps": "node ./scripts/dependence-install.js apps"
   },
+  "lint-staged": {
+    "*.{ts,tsx,js,md,yml,json}": [
+      "prettier --write --check",
+      "git add"
+    ]
+  },
   "devDependencies": {
-    "@types/node": "^14.17.4",
-    "@types/jest": "^27.0.1",
-    "@typescript-eslint/typescript-estree": "^4.32.0",
+    "@types/node": "17.0.18",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "@typescript-eslint/typescript-estree": "^5.12.0",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.2",
+    "lerna": "4.0.0",
+    "lint-staged": "^13.0.2",
+    "prettier": "2.5.1",
+    "rewire": "^6.0.0",
     "rimraf": "3.0.2",
-    "ts-node": "^10.2.1",
-    "tslib": "^2.3.1",
-    "typescript": "^4.4.2",
-    "eslint": "^7.32.0",
-    "ansi-regex": ">=5.0.1"
+    "typescript": "4.6.4"
   },
   "workspaces": [
-    "libs/*"
+    "libs/cube",
+    "libs/cube-react"
   ],
   "dependencies": {
-    "cache-manager": "^3.4.3",
-    "class-transformer": "^0.4.0",
-    "class-validator": "^0.13.1"
+    "assert": "^2.0.0",
+    "cache-manager": "^3.6.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
+    "wdc-cube": "file:libs/cube",
+    "wdc-cube-react": "file:libs/cube-react"
   }
 }

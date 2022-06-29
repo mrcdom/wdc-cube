@@ -1,10 +1,9 @@
-import lodash from 'lodash'
-import { Logger } from '../utils/Logger'
+import _isFunction from 'lodash/isFunction'
 import { NOOP_PROMISE_VOID } from '../utils/EmptyFunctions'
+import { Logger } from '../utils/Logger'
 import { Scope } from './Scope'
 
 const LOG = Logger.get('ScopeUtils')
-
 
 // :: Internal Types
 
@@ -24,15 +23,14 @@ function isAnActionName(s: string) {
 }
 
 export const ScopeUtils = {
-
     isAnActionName: isAnActionName,
 
     bind(scope: Scope, source: unknown) {
-        const target = (scope as unknown) as Record<string, unknown>
+        const target = scope as unknown as Record<string, unknown>
         for (const name of Object.keys(target)) {
             if (isAnActionName(name)) {
                 const possibleAction = (source as Record<string, unknown>)[name]
-                if (lodash.isFunction(possibleAction)) {
+                if (_isFunction(possibleAction)) {
                     target[name] = (possibleAction as FunctionLike).bind(source)
                 } else {
                     target[name] = NOOP_PROMISE_VOID

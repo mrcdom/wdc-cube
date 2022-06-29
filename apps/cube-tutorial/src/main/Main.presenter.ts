@@ -9,19 +9,12 @@ import {
     SingletonServices,
     NOOP_PROMISE_VOID
 } from 'wdc-cube'
-import { registerServices } from '../services'
 import { Places, AttrIds } from '../Constants'
-import { buildCube } from '../Cube'
 import { MainScope, BodyScope, AlertScope, IDialogScope } from './Main.scopes'
 
 const LOG = Logger.get('MainPresenter')
 
-registerServices()
-
-
-
 export class MainPresenter extends ApplicationPresenter<MainScope> {
-
     // :: Instance
 
     private readonly bodyScope = new BodyScope()
@@ -34,7 +27,29 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         super(historyManager, new MainScope())
 
         // Important to allow newUriFromString to work properly
-        this.setPlaces(buildCube())
+        this.setPlaces(Places)
+    }
+
+    initialize() {
+        let initialized = false
+
+        const bootstrap = async () => {
+            try {
+                await this.kickStart(Places.main)
+                initialized = true
+            } catch (error) {
+                LOG.error('Initializing', error)
+                this.release()
+            }
+        }
+
+        bootstrap().catch(LOG.caught)
+
+        return () => {
+            if (initialized) {
+                this.release()
+            }
+        }
     }
 
     public override release() {
@@ -42,7 +57,11 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         super.release()
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean, last?: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        last?: boolean
+    ): Promise<boolean> {
         if (initialization) {
             await this.intializeState()
 
@@ -55,8 +74,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
             } catch (caught) {
                 this.unexpected('Navigation from history', caught)
             }
-
-            return true
+            this.update()
         }
 
         if (last) {
@@ -78,6 +96,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         this.scope.onLogin = this.onOpenLogin.bind(this)
 
         this.bodyScope.onOpenAlert = this.onOpenAlert.bind(this)
+        this.bodyScope.update = this.update
 
         this.scope.body = this.bodyScope
 
@@ -97,24 +116,19 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         alertScope.title = title
         alertScope.message = message
         alertScope.onClose = this.onCloseAlert.bind(this, onClose)
+        alertScope.update = this.update
         this.scope.alert = alertScope
-        this.update()
     }
 
     // :: View Actions
 
-    protected async setBodySlot(scope?: Scope) {
-        const scopeOrDefault = scope ?? this.bodyScope
-        if (this.scope.body !== scopeOrDefault) {
-            this.scope.body = scopeOrDefault
-            this.update()
-        }
+    protected async setBodySlot(scope: Scope | undefined | null) {
+        this.scope.body = scope ?? this.bodyScope
     }
 
-    protected async setDialogSlot(scope?: Scope) {
+    protected async setDialogSlot(scope: Scope | undefined | null) {
         if (this.scope.dialog !== scope) {
             this.scope.dialog = scope as IDialogScope
-            this.update()
 
             if (this.scope.dialog && !this.scope.dialog.onClose) {
                 LOG.error(`Missing onClose action on scope ${this.scope.dialog.constructor.name}`)

@@ -13,7 +13,6 @@ import type { IUpdateManager, ICubePresenter } from './IPresenter'
 const LOG = Logger.get('ApplicationPresenter')
 
 export class ApplicationPresenter<S extends Scope> extends Application implements ICubePresenter {
-
     private __scope: S
 
     private readonly __scopeUpdateManager: IUpdateManager
@@ -69,31 +68,21 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
     }
 
     protected override async applyPathParameters(context: FlipContext, atLevel: number) {
-        try {
-            const intent = context.targetIntent
-            const last = intent.place.id === -1
-            const ok = await this.applyParameters(intent, false, last) && !last
-            if (!ok) {
-                return
-            }
-
-            await super.applyPathParameters(context, atLevel)
-        } catch (caught) {
-            if (this.fallbackPlace !== this.rootPlace) {
-                LOG.error('Failed navigating just on root presenter. Going to fallback place', caught)
-                this.flip(this.fallbackPlace)
-            } else {
-                LOG.error('Failed navigating just on root presenter. Nothing can be done!', caught)
-            }
+        const intent = context.targetIntent
+        const last = intent.place.id === -1
+        const ok = (await this.applyParameters(intent, false, last)) && !last
+        if (!ok) {
             return
         }
+
+        await super.applyPathParameters(context, atLevel)
     }
 
     // :: IPresenter Api
 
     public readonly update = this.doUpdate.bind(this)
 
-    private doUpdate(optionalScope?: Scope) {
+    protected doUpdate(optionalScope?: Scope) {
         this.__scopeUpdateManager.update(optionalScope ?? this.scope)
         this.__updateCount++
     }
@@ -110,6 +99,21 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
 
     // :: ICubePresenter Api
 
+    public async kickStart(safePlace: Place) {
+        let intent = this.newIntentFromString(this.historyManager.location)
+        try {
+            await this.applyParameters(intent, true, intent.place === safePlace)
+        } catch (caught) {
+            // Intent could have been changed, so redirect to a safe place
+            intent = intent.redirect(safePlace)
+        }
+
+        if (intent.place !== safePlace) {
+            intent.attributes.clear()
+            await this.flipToIntent(intent)
+        }
+    }
+
     public async applyParameters(intent: FlipIntent, initialization: boolean, last: boolean): Promise<boolean> {
         LOG.debug(`applyParameters(intent=${intent}, initialization=${initialization}, last=${last}`)
         return true
@@ -119,5 +123,4 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
     public publishParameters(intent: FlipIntent): void {
         // NOOP
     }
-
 }

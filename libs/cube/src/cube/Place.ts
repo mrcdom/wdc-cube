@@ -7,10 +7,13 @@ const indexGenMap: Map<number, number> = new Map()
 export type PlaceCreator = (path: string, parent: Place) => Place
 
 export class Place {
-
-    public static creator<A extends Application, NAME extends string>(ctor: PresenterContructor<A>, places: Record<NAME, Place>, name: NAME): PlaceCreator {
+    public static creator<A extends Application, NAME extends string>(
+        ctor: PresenterContructor<A>,
+        places: Record<NAME, Place>,
+        name: NAME
+    ): PlaceCreator {
         return (path, parent) => {
-            return places[name] = Place.create(path, ctor, parent)
+            return (places[name] = Place.create(path, ctor, parent))
         }
     }
 
@@ -35,7 +38,7 @@ export class Place {
         public readonly name: string,
         public readonly parent?: Place,
         public readonly presenterCtor?: PresenterContructor<Application>,
-        id?: number,
+        id?: number
     ) {
         this.id = typeof id === 'number' ? id : this.nextId()
         if (parent) {
@@ -73,5 +76,4 @@ export class Place {
         indexGenMap.set(this.path.length, idxLevelGen)
         return idxLevelGen
     }
-
 }
