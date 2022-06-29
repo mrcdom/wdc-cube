@@ -1,14 +1,11 @@
 import { Observable, ObservableArray, observe, Scope } from 'wdc-cube'
+import { ShowingOptions } from './TodoMvc.keys'
+
+export { ShowingOptions }
 
 export type KeyDownEvent = {
     preventDefault: () => void
     code: string
-}
-
-export enum ShowingOptions {
-    ALL,
-    ACTIVE,
-    COMPLETED
 }
 
 @Observable

@@ -5,7 +5,7 @@
 import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, ObservableArray, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../../main/Main.presenter'
-import { ParamIds, AttrIds } from '../../Constants'
+import { TodoMvcKeys } from './TodoMvc.keys'
 import {
     TodoMvcScope,
     HeaderScope,
@@ -79,16 +79,12 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
-        const ctxUserId = intent.getParameterAsNumberOrDefault(ParamIds.TodoUserId, this.userId)
-        const ctxShowing = intent.getParameterAsNumberOrDefault(
-            ParamIds.TodoShowing,
-            this.footerScope.showing
-        ) as ShowingOptions
+        const keys = new TodoMvcKeys(this.app, intent)
 
         if (initialization) {
-            await this.initializeState(intent, ctxUserId, ctxShowing)
+            await this.initializeState(keys)
         } else {
-            await this.synchronizeState(ctxUserId, ctxShowing)
+            await this.synchronizeState(keys)
         }
 
         this.parentSlot(this.scope)
@@ -97,25 +93,27 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     public override publishParameters(intent: FlipIntent): void {
+        const keys = new TodoMvcKeys(this.app, intent)
+
         if (this.footerScope.showing !== ShowingOptions.ALL) {
-            intent.setParameter(ParamIds.TodoShowing, this.footerScope.showing)
+            keys.showing = this.footerScope.showing
         }
 
         if (this.userId !== 0) {
-            intent.setParameter(ParamIds.TodoUserId, this.userId)
+            keys.userId = this.userId
         }
     }
 
-    private async initializeState(intent: FlipIntent, uriUserId: number, uriShowing: ShowingOptions) {
-        // Get slots
-        this.parentSlot = intent.getScopeSlot(AttrIds.parentSlot)
-
-        await this.synchronizeState(uriUserId, uriShowing, true)
-
+    private async initializeState(keys: TodoMvcKeys) {
+        this.parentSlot = keys.parentSlot
+        await this.synchronizeState(keys, true)
         LOG.debug('Initialized')
     }
 
-    private async synchronizeState(uriUserId: number, uriShowing: ShowingOptions, force = false) {
+    private async synchronizeState(keys: TodoMvcKeys, force = false) {
+        const uriUserId = keys.userId ?? this.userId
+        const uriShowing = keys.showing ?? this.footerScope.showing
+
         this.footerScope.showing = uriShowing
 
         if (force || uriUserId !== this.userId) {

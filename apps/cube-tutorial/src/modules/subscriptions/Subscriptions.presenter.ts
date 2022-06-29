@@ -1,7 +1,8 @@
 import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
-import { Places, AttrIds, ParamIds } from '../../Constants'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
+import { SubstriptionsKeys } from './Subscriptions.keys'
+import { SubstriptionsDetailKeys } from './SubscriptionsDetail.keys'
 import { SubscriptionsScope } from './Subscriptions.scopes'
 
 const LOG = Logger.get('SubscriptionsPresenter')
@@ -10,7 +11,6 @@ const LOG = Logger.get('SubscriptionsPresenter')
 const tutorialService = TutorialService.INSTANCE
 
 export class SubscriptionsPresenter extends CubePresenter<MainPresenter, SubscriptionsScope> {
-
     private parentSlot: ScopeSlot = NOOP_VOID
     private dialogSlot: ScopeSlot = NOOP_VOID
 
@@ -23,10 +23,16 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
         LOG.info('Finalized')
     }
 
-    public override async applyParameters(uri: FlipIntent, initialization: boolean, last: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        last: boolean
+    ): Promise<boolean> {
+        const keys = new SubstriptionsKeys(this.app, intent)
+
         if (initialization) {
-            this.parentSlot = uri.getScopeSlot(AttrIds.parentSlot)
-            this.dialogSlot = uri.getScopeSlot(AttrIds.dialogSlot)
+            this.parentSlot = keys.parentSlot
+            this.dialogSlot = keys.dialogSlot
 
             this.scope.onItemClicked = this.onItemClicked.bind(this)
             this.scope.sites = await tutorialService.fetchSubscribleSites()
@@ -45,15 +51,9 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
 
     @action()
     protected async onItemClicked(item: SiteItemType) {
-        await this.flip(Places.subscriptionsDetail, {
-            params: {
-                [ParamIds.SiteId]: item.id
-            },
-            attrs: {
-                // Helping performance (avoid a unneeded service fetch)
-                [AttrIds.subscriptionsDetail_item]: item
-            }
-        })
+        const targetKeys = new SubstriptionsDetailKeys(this.app)
+        targetKeys.siteId = item.id
+        targetKeys.item = item
+        await targetKeys.flip()
     }
-
 }

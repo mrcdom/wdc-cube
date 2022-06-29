@@ -1,19 +1,15 @@
 import { Logger, CubePresenter, ScopeSlot, FlipIntent, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
-import { AttrIds } from '../../Constants'
+import { RestrictedKeys } from './Restricted.keys'
 import { RestrictedScope } from './Restricted.scopes'
 
 const LOG = Logger.get('RestrictedPresenter')
 
 export class RestrictedPresenter extends CubePresenter<MainPresenter, RestrictedScope> {
-
     private parentSlot: ScopeSlot = NOOP_VOID
 
-    private readonly detailSlot: ScopeSlot = scope => {
-        if (this.scope.detail !== scope) {
-            this.scope.detail = scope
-            this.update()
-        }
+    private readonly detailSlot: ScopeSlot = (scope) => {
+        this.scope.detail = scope
     }
 
     public constructor(app: MainPresenter) {
@@ -25,21 +21,26 @@ export class RestrictedPresenter extends CubePresenter<MainPresenter, Restricted
         LOG.info('Finalized')
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean, last: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        last: boolean
+    ): Promise<boolean> {
+        const keys = new RestrictedKeys(this.app, intent)
+
         if (initialization) {
-            this.parentSlot = intent.getScopeSlot(AttrIds.parentSlot)
+            this.parentSlot = keys.parentSlot
             LOG.info('Initialized')
         }
 
         if (last) {
             this.detailSlot(undefined)
         } else {
-            intent.setScopeSlot(AttrIds.parentSlot, this.detailSlot)
+            keys.parentSlot = this.detailSlot
         }
 
         this.parentSlot(this.scope)
 
         return true
     }
-
 }

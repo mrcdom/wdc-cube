@@ -9,7 +9,8 @@ import {
     SingletonServices,
     NOOP_PROMISE_VOID
 } from 'wdc-cube'
-import { Places, AttrIds } from '../Constants'
+import { Places } from '../Constants'
+import { MainKeys } from './Main.keys'
 import { MainScope, BodyScope, AlertScope, IDialogScope } from './Main.scopes'
 
 const LOG = Logger.get('MainPresenter')
@@ -62,8 +63,10 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         initialization: boolean,
         last?: boolean
     ): Promise<boolean> {
+        const keys  = new MainKeys(this, intent)
+
         if (initialization) {
-            await this.intializeState()
+            await this.intializeState(keys)
 
             try {
                 const targetUri = this.newIntentFromString(this.historyManager.location)
@@ -80,14 +83,14 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         if (last) {
             this.bodySlot(undefined)
         } else {
-            intent.setScopeSlot(AttrIds.parentSlot, this.bodySlot)
-            intent.setScopeSlot(AttrIds.dialogSlot, this.dialogSlot)
+            keys.parentSlot = this.bodySlot
+            keys.dialogSlot = this.dialogSlot
         }
 
         return true
     }
 
-    private async intializeState() {
+    private async intializeState(keys: MainKeys) {
         this.stopServices = await SingletonServices.start()
 
         this.scope.onHome = this.onHome.bind(this)
@@ -100,7 +103,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
         this.scope.body = this.bodyScope
 
-        LOG.info('Initialized')
+        LOG.info(`Initialized(${keys.toString()})`)
     }
 
     // :: Helper API
@@ -122,11 +125,11 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
     // :: View Actions
 
-    protected async setBodySlot(scope: Scope | undefined | null) {
+    protected setBodySlot(scope: Scope | undefined | null) {
         this.scope.body = scope ?? this.bodyScope
     }
 
-    protected async setDialogSlot(scope: Scope | undefined | null) {
+    protected setDialogSlot(scope: Scope | undefined | null) {
         if (this.scope.dialog !== scope) {
             this.scope.dialog = scope as IDialogScope
 

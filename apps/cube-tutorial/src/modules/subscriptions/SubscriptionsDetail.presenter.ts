@@ -1,7 +1,8 @@
 import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
-import { AttrIds, ParamIds, Places } from '../../Constants'
+import { Places } from '../../Constants'
 import { TutorialService, SiteItemType } from '../../services/TutorialService'
+import { SubstriptionsDetailKeys } from './SubscriptionsDetail.keys'
 import { SubscriptionsDetailScope } from './SubscriptionsDetail.scopes'
 
 const LOG = Logger.get('SubscriptionsDetailPresenter')
@@ -9,10 +10,10 @@ const LOG = Logger.get('SubscriptionsDetailPresenter')
 // @Inject
 const tutorialService = TutorialService.INSTANCE
 
-const eMailRegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+const eMailRegExp =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
 export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, SubscriptionsDetailScope> {
-
     private dialogSlot: ScopeSlot = NOOP_VOID
 
     private item?: SiteItemType
@@ -32,7 +33,9 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
     }
 
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
-        const paramSiteId = intent.getParameterAsNumberOrDefault(ParamIds.SiteId, this.item?.id ?? -1)
+        const keys = new SubstriptionsDetailKeys(this.app, intent)
+
+        const paramSiteId = keys.siteId ?? this.item?.id ?? -1
 
         if (initialization) {
             this.previousIntent = this.app.newFlipIntent(this.app.lastPlace)
@@ -45,9 +48,9 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             this.scope.onEmailChanged = this.handleEmailChanged.bind(this)
             this.scope.onSubscribe = this.onSubscribe.bind(this)
 
-            this.dialogSlot = intent.getScopeSlot(AttrIds.dialogSlot)
+            this.dialogSlot = keys.dialogSlot
 
-            let siteItem = intent.attributes.get(AttrIds.subscriptionsDetail_item) as SiteItemType | undefined
+            let siteItem = keys.item
             if (!siteItem) {
                 siteItem = await tutorialService.fetchSiteItem(paramSiteId)
             }
@@ -68,7 +71,8 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
     }
 
     public override publishParameters(intent: FlipIntent): void {
-        intent.setParameter(ParamIds.SiteId, this.item?.id)
+        const keys = new SubstriptionsDetailKeys(this.app, intent)
+        keys.siteId = this.item?.id
     }
 
     @action()
@@ -112,5 +116,4 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             await this.flip(Places.subscriptions)
         }
     }
-
 }
