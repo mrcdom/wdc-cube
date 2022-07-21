@@ -10,7 +10,7 @@ export function ViewSlot({ scope, optional = true, view, ...props }) {
         if (ctor) {
             return React.createElement(ctor, { scope, ...props });
         }
-        return (_jsx("div", { className: props.className, style: props.style, children: 'View({scope.constructor.name}) not found!' }));
+        return (_jsx("div", { className: props.className, style: props.style, children: `View(${scope.constructor.name}) not found!` }));
     }
     else if (!optional) {
         return _jsx("div", { className: props.className, style: props.style });

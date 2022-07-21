@@ -77,7 +77,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
             } catch (caught) {
                 this.unexpected('Navigation from history', caught)
             }
-            this.update()
         }
 
         if (last) {

@@ -37,7 +37,7 @@ export function ViewSlot<P extends IFactoryProps, S extends Scope>({
 
         return (
             <div className={props.className} style={props.style}>
-                {'View({scope.constructor.name}) not found!'}
+                {`View(${scope.constructor.name}) not found!`}
             </div>
         )
     } else if (!optional) {
