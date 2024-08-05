@@ -10,7 +10,7 @@ export type FieldMetadata = {
     type: unknown
 }
 
-const COPY_INITIAL_VALUES_ACTION = Symbol('wdc-cube:initializeValues')
+const COPY_INITIAL_VALUES_ACTION: symbol = Symbol('wdc-cube:initializeValues')
 
 export function Observable<T extends { new (...args: any[]): object }>(ctor: T) {
     let init = (prototype: GenericObject, fields: FieldMetadata[]) => {
@@ -22,8 +22,10 @@ export function Observable<T extends { new (...args: any[]): object }>(ctor: T) 
             actions.push(`Reflect.deleteProperty(this, '${field.key}');`)
             actions.push(`this.${field.key} = v${index};`)
         }
-        prototype[COPY_INITIAL_VALUES_ACTION] = new Function(actions.join('\n'))
-        init = NOOP_VOID
+        const copyInitialValuesAction = new Function(actions.join('\n'))
+        prototype[COPY_INITIAL_VALUES_ACTION] = copyInitialValuesAction
+        init = () => copyInitialValuesAction;
+        return copyInitialValuesAction
     }
 
     const observableScopeClass = class extends ctor {
@@ -33,8 +35,8 @@ export function Observable<T extends { new (...args: any[]): object }>(ctor: T) 
 
             const fields = me[Observable.PROPERTY_OBSERVERS_METADATA] as FieldMetadata[]
             if (fields) {
-                init(observableScopeClass.prototype, fields)
-                Reflect.apply(observableScopeClass.prototype[COPY_INITIAL_VALUES_ACTION], this, [])
+                const copyInitialValues = init(observableScopeClass.prototype as unknown as GenericObject, fields)
+                copyInitialValues.call(this)
             }
         }
     }

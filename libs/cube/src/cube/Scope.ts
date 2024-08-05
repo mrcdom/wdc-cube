@@ -1,5 +1,6 @@
 import { Logger } from '../utils/Logger'
 import { NOOP_VOID } from '../utils/EmptyFunctions'
+import { ScopeUpdateManager } from './Presenter'
 
 const LOG = Logger.get('Scope')
 
@@ -20,6 +21,22 @@ export interface IScope {
 
 export abstract class Scope implements IScope {
     // Class
+
+    public static property<T>(me: Scope, v: T) {
+        let currentVal = v
+        return ((...args: unknown[]) => {
+            if (args.length > 0) {
+                const newVal: T = args[0] as T
+                if (newVal !== currentVal) {
+                    const oldVal = currentVal
+                    currentVal = newVal
+                    me.update()
+                    return oldVal
+                }
+            }
+            return currentVal
+        }) as (v?: T) => T
+    }
 
     public static readonly SYNC_ACTION = syncAction
     public static readonly SYNC_ACTION_BOOLEAN: (p: boolean) => void = syncAction
@@ -58,6 +75,10 @@ export abstract class Scope implements IScope {
     }
 
     // API
+
+    public updateAsRoot() {
+        return (this.update = ScopeUpdateManager.newUpdateRoot(this))
+    }
 
     public forceUpdate: () => void = NOOP_VOID
 

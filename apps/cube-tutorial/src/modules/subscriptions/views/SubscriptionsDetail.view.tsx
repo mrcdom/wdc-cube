@@ -18,7 +18,7 @@ export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailS
 
   const onClose = useCallback(scope.onClose, [scope.onClose])
   const onSubscribe = useCallback(scope.onSubscribe, [scope.onSubscribe])
-  const onEmailChanged = useCallback(event => { scope.onEmailChanged(event.target.value) }, [scope.onEmailChanged])
+  const onEmailChanged = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => { scope.onEmailChanged(event.target.value) }, [scope.onEmailChanged])
 
   return <>
     <DialogTitle>Subscribe</DialogTitle>

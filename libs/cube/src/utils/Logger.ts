@@ -174,6 +174,8 @@ export const Logger = (function () {
                 setErrorEnabled: ILogger_setErrorEnabled
             }
 
+            logger.caught = ILogger_caught.bind(logger)
+
             __instanceMap.set(name, logger)
         }
 

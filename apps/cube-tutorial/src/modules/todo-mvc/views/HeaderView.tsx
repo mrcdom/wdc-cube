@@ -21,7 +21,7 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
 
     // Actions
     const onChange = useCallback(() => actions.onSyncInputChange(getCurrentFieldText()), [actions.onSyncInputChange, getCurrentFieldText])
-    const onInputKeyDown = useCallback(e => actions.onSyncInputKeyDown(e), [actions.onSyncInputKeyDown])
+    const onInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => actions.onSyncInputKeyDown(e), [actions.onSyncInputKeyDown])
     const onToggleAll = useCallback(() => actions.onToggleAll(), [actions.onToggleAll])
 
     // Render

@@ -3,4 +3,4 @@ export { SubscriptionsPresenter } from './Subscriptions.presenter'
 export { SubscriptionsDetailScope } from './SubscriptionsDetail.scopes'
 export { SubscriptionsDetailPresenter } from './SubscriptionsDetail.presenter'
 
-export type { SiteItemType } from '../../services/TutorialService'
+export { type SiteItemType } from '../../services/TutorialService'

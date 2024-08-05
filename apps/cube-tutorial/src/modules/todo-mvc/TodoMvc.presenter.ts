@@ -14,7 +14,7 @@ import {
     FooterScope,
     ItemScope,
     ShowingOptions,
-    KeyDownEvent
+    type KeyDownEvent
 } from './TodoMvc.scopes'
 
 const LOG = Logger.get('TodoMvcPresenter')

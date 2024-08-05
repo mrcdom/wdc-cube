@@ -1,6 +1,6 @@
 import { Places, ParamIds, AttrIds } from '../../Constants'
 import { MainKeys } from '../../main/Main.keys'
-import { SiteItemType } from '../../services/TutorialService'
+import { type SiteItemType } from '../../services/TutorialService'
 
 export class SubstriptionsDetailKeys extends MainKeys {
     get place() {

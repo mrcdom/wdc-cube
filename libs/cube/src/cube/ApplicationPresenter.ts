@@ -102,13 +102,15 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
     public async kickStart(safePlace: Place) {
         let intent = this.newIntentFromString(this.historyManager.location)
         try {
-            await this.applyParameters(intent, true, intent.place === safePlace)
-        } catch (caught) {
-            // Intent could have been changed, so redirect to a safe place
-            intent = intent.redirect(safePlace)
-        }
+            this.applyParameters(intent.redirect(this.rootPlace), true, true)
 
-        if (intent.place !== safePlace) {
+            if (intent.place !== this.rootPlace) {
+                intent.attributes.clear()
+                await this.flipToIntent(intent)
+            }
+        } catch (caught) {
+            // Redirect to a safe place
+            intent = intent.redirect(safePlace)
             intent.attributes.clear()
             await this.flipToIntent(intent)
         }

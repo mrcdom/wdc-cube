@@ -1,7 +1,7 @@
 import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../../main/Main.presenter'
 import { Places } from '../../Constants'
-import { TutorialService, SiteItemType } from '../../services/TutorialService'
+import { TutorialService, type SiteItemType } from '../../services/TutorialService'
 import { SubstriptionsDetailKeys } from './SubscriptionsDetail.keys'
 import { SubscriptionsDetailScope } from './SubscriptionsDetail.scopes'
 

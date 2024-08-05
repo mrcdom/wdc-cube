@@ -12,15 +12,15 @@
     "test": "jest"
   },
   "dependencies": {
-    "@aws-sdk/util-utf8-browser": "^3.55.0",
+    "@aws-sdk/util-utf8-browser": "^3.259.0",
     "install": "^0.13.0",
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
-    "@types/jest": "27.5.0",
-    "@types/lodash": "4.14.179",
+    "@types/jest": "29.5.12",
+    "@types/lodash": "4.14.194",
     "ansi-regex": "6.0.1",
-    "ts-jest": "^28.0.2"
+    "ts-jest": "^29.1.0"
   }
 }

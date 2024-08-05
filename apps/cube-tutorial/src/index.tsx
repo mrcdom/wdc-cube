@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { PageHistoryManager } from 'wdc-cube-react'
 import { registerServices } from './services'
 import { MainPresenter } from './main'
@@ -32,4 +32,8 @@ function App() {
     return <MainView scope={presenter.scope} />
 }
 
-ReactDOM.render(<App />, document.getElementById('root'))
+const container = document.getElementById('root')
+if (container) {
+    const root = createRoot(container)
+    root.render(<App />)
+}

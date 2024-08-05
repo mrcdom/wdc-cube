@@ -123,6 +123,13 @@ type ScopeUpdateConfig = {
 }
 
 export class ScopeUpdateManager implements IUpdateManager {
+    static newUpdateRoot(scope: Scope) {
+        var mgr = new ScopeUpdateManager(scope)
+        return (optionalScope?: Scope) => mgr.update(optionalScope)
+    }
+
+    // :: Instance
+
     private readonly __scope: Scope
 
     private readonly __dirtyScopes: Map<ScopeConstructor, Map<Scope, boolean>>

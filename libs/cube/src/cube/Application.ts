@@ -126,6 +126,13 @@ export class Application implements IPresenterOwner {
         }
     }
 
+    public forEachPresenter(callbackfn: (value: ICubePresenter) => void, thisArg?: unknown) {
+        const me = thisArg ?? this
+        this.__presenterMap.forEach((presenter) => {
+            callbackfn.call(me, presenter)
+        })
+    }
+
     public newFlipIntent(place: Place): FlipIntent {
         const intent = new FlipIntent(place)
         intent.populateAttributes(this.__flipContext?.targetIntent.attributes)

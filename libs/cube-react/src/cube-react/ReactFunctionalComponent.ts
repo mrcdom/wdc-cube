@@ -10,16 +10,20 @@ function doUpdate(this: Scope, setValue: React.Dispatch<React.SetStateAction<num
     setValue(value + 1)
 }
 
-export function bindUpdate<S extends Scope>(react: ReactType, scope: S) {
+export function bindUpdate<S extends Scope>(reactRef: unknown, scope: S) {
+    const react = reactRef as ReactType
     const [value, setValue] = react.useState(0)
 
     scope.forceUpdate = doUpdate.bind(scope, setValue, value)
 
     react.useEffect(() => {
+        scope.forceUpdate = doUpdate.bind(scope, setValue, value)
         return () => {
             scope.forceUpdate = NOOP_VOID
         }
     }, [])
+
+    return scope
 }
 
 type IApplication<S extends Scope> = Application & {

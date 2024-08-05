@@ -3,14 +3,17 @@ const LOG = Logger.get('React.FC');
 function doUpdate(setValue, value) {
     setValue(value + 1);
 }
-export function bindUpdate(react, scope) {
+export function bindUpdate(reactRef, scope) {
+    const react = reactRef;
     const [value, setValue] = react.useState(0);
     scope.forceUpdate = doUpdate.bind(scope, setValue, value);
     react.useEffect(() => {
+        scope.forceUpdate = doUpdate.bind(scope, setValue, value);
         return () => {
             scope.forceUpdate = NOOP_VOID;
         };
     }, []);
+    return scope;
 }
 export function getOrCreateApplication(react, factory) {
     const [app, setApp] = react.useState(null);

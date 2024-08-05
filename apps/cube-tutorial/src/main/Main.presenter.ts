@@ -5,7 +5,7 @@ import {
     FlipIntent,
     Scope,
     action,
-    AlertSeverity,
+    type AlertSeverity,
     SingletonServices,
     NOOP_PROMISE_VOID
 } from 'wdc-cube'

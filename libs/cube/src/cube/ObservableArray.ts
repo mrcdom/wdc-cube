@@ -1,117 +1,142 @@
 import { Scope } from './Scope'
 
 export class ObservableArray<T> implements RelativeIndexable<T>, Iterable<T> {
-    private __scope: Scope
-    private __items: Array<T>
+    #scope: Scope
+    #items: Array<T>
 
     constructor(scope: Scope, items?: T[]) {
-        this.__scope = scope
-        this.__items = items ?? []
+        this.#scope = scope
+        this.#items = items ?? []
     }
 
-    public [Symbol.iterator]() {
-        return this.__items[Symbol.iterator]()
+    #update() {
+        this.#scope.update(this.#scope)
     }
 
-    public keys() {
-        return this.__items.keys()
+    [Symbol.iterator]() {
+        return this.#items[Symbol.iterator]()
     }
 
-    public values() {
-        return this.__items.values()
+    keys() {
+        return this.#items.keys()
     }
 
-    public get length() {
-        return this.__items.length
+    values() {
+        return this.#items.values()
     }
 
-    public set length(value: number) {
-        if (this.__items.length !== value) {
-            this.__items.length = value
-            this.__scope.update(this.__scope)
+    get length() {
+        return this.#items.length
+    }
+
+    set length(value: number) {
+        if (this.#items.length !== value) {
+            this.#items.length = value
+            this.#update()
         }
     }
 
-    public at(index: number) {
-        return this.__items.at(index)
+    at(index: number) {
+        return this.#items.at(index)
     }
 
-    public get(idx: number) {
-        return this.__items[idx]
+    get(idx: number) {
+        return this.#items[idx]
     }
 
-    public set(idx: number, value: T) {
-        const old = this.__items[idx]
+    set(idx: number, value: T) {
+        const old = this.#items[idx]
         if (old !== value) {
-            this.__items[idx] = value
-            this.__scope.update(this.__scope)
+            this.#items[idx] = value
+            this.#update()
         }
     }
 
-    public push(value: T) {
-        this.__items.push(value)
-        this.__scope.update(this.__scope)
+    push(value: T) {
+        this.#items.push(value)
+        this.#update()
     }
 
-    public assign(array: T[]) {
-        this.length = array.length
+    assign(array: T[]) {
+        let changed = false
+
+        if (this.#items.length !== array.length) {
+            this.#items.length = array.length
+            changed = true
+        }
+
         for (let i = 0; i < array.length; i++) {
-            this.set(i, array[i])
+            const old = this.#items[i]
+            const value = array[i]
+            if (old !== value) {
+                this.#items[i] = value
+                changed = true
+            }
+        }
+
+        if (changed) {
+            this.#update()
         }
     }
 
-    public filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown): T[] {
-        return this.__items.filter(predicate, thisArg)
+    filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: unknown): T[] {
+        return this.#items.filter(predicate, thisArg)
     }
 
-    public map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: unknown): U[] {
-        return this.__items.map(callbackfn, thisArg)
+    map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: unknown): U[] {
+        return this.#items.map(callbackfn, thisArg)
     }
 
-    public reduce<U>(
+    reduce<U>(
         callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U,
         initialValue: U
     ): U {
-        return this.__items.reduce(callbackfn, initialValue)
+        return this.#items.reduce(callbackfn, initialValue)
     }
 
-    public findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: unknown): number {
-        return this.__items.findIndex(predicate, thisArg)
+    findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: unknown): number {
+        return this.#items.findIndex(predicate, thisArg)
     }
 
-    public removeByIndex(index: number) {
-        const oldLength = this.__items.length
-        this.__items.splice(index, 1)
-        if (oldLength !== this.__items.length) {
-            this.__scope.update(this.__scope)
+    removeByIndex(index: number) {
+        const oldLength = this.#items.length
+        this.#items.splice(index, 1)
+        if (oldLength !== this.#items.length) {
+            this.#update()
             return true
         }
         return false
     }
 
-    public removeByCriteria(predicate: (value: T, index: number) => boolean, thisArg?: unknown) {
+    removeByCriteria(predicate: (value: T, index: number) => boolean, thisArg?: unknown) {
+        if (!thisArg) {
+            thisArg = window
+        }
         const items = [] as T[]
         let changed = false
-        for (let i = 0; i < this.__items.length; i++) {
-            const value = this.__items[i]
+        for (let i = 0; i < this.#items.length; i++) {
+            const value = this.#items[i]
             if (predicate.call(thisArg, value, i)) {
-                items.push(value)
-            } else {
                 changed = true
+            } else {
+                items.push(value)
             }
         }
         if (changed) {
-            this.__items = items
-            this.__scope.update(this.__scope)
+            this.#items = items
+            this.#update()
         }
+
+        return changed
     }
 
-    public join(separator?: string): string {
-        return this.__items.join(separator)
+    join(separator?: string): string {
+        return this.#items.join(separator)
     }
 
-    public sort(compareFn?: (a: T, b: T) => number) {
-        this.__items.sort(compareFn)
+    sort(compareFn?: (a: T, b: T) => number) {
+        this.#items.sort(compareFn)
+        this.#update()
         return this
     }
 }

@@ -1,4 +1,4 @@
-import { AlertSeverity, Observable, observe, Scope } from 'wdc-cube'
+import { type AlertSeverity, Observable, observe, Scope } from 'wdc-cube'
 
 export type IDialogScope = Scope & { onClose: () => Promise<void> }
 

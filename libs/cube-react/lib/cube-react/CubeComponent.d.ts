@@ -1,7 +1,7 @@
 import React from 'react';
 import { Scope } from 'wdc-cube';
 import { ReactComponent } from './ReactComponent';
-export declare type CubeComponentProps<S extends Scope> = {
+export type CubeComponentProps<S extends Scope> = {
     key?: React.Key;
     className?: string;
     style?: React.CSSProperties;

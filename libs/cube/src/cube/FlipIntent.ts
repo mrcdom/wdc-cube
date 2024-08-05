@@ -282,7 +282,7 @@ export class FlipIntent extends Object {
     }
 
     public setScopeSlot(slotId: string, slot: ScopeSlot | undefined | null) {
-        if(slot) {
+        if (slot) {
             this.attributes.set(slotId, slot)
         } else {
             this.attributes.delete(slotId)

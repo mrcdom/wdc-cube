@@ -1,6 +1,6 @@
 import { Observable, observe, Scope } from 'wdc-cube'
 
-import type { SiteItemType } from '../../services/TutorialService'
+import { type SiteItemType } from '../../services/TutorialService'
 
 @Observable
 export class SubscriptionsScope extends Scope {
