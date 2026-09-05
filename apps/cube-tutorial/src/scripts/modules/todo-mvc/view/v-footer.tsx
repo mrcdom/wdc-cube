@@ -1,66 +1,65 @@
-import React, { useCallback } from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
+import { classToFComponent, type FCClassContext, type IViewProps } from 'wdc-cube-react'
 import Css from './todo-mvc.module.scss'
-import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { FooterScope, ShowingOptions } from '../todo-mvc.scope'
 
 const LOG = Logger.get('TodoMvc.FooterView')
 
 type FooterViewProps = IViewProps & { scope: FooterScope }
 
-export const FooterView = function ({ className, style, scope, scope: { actions } }: FooterViewProps) {
-    LOG.debug('update')
+class FooterViewClass implements FCClassContext<FooterViewProps> {
+    scope!: FooterScope
 
-    bindUpdate(React, scope)
+    private readonly onClearCompleted = () => this.scope.actions.onClearCompleted()
+    private readonly onShowAll = () => this.scope.actions.onShowAll()
+    private readonly onShowActives = () => this.scope.actions.onShowActives()
+    private readonly onShowCompleteds = () => this.scope.actions.onShowCompleteds()
 
-    const onClearCompleted = useCallback(actions.onClearCompleted, [actions.onClearCompleted])
-    const onShowAll = useCallback(actions.onShowAll, [actions.onShowAll])
-    const onShowActives = useCallback(actions.onShowActives, [actions.onShowActives])
-    const onShowCompleteds = useCallback(actions.onShowCompleteds, [actions.onShowCompleteds])
+    render({ className, style }: FooterViewProps) {
+        LOG.debug('update')
 
-    let clearButton = <></>
+        const scope = this.scope
 
-    if (scope.clearButtonVisible) {
-        clearButton = (
-            <button className={Css.clearCompleted} onClick={onClearCompleted}>
-                Clear completed
-            </button>
+        return (
+            <footer className={clsx(className, Css.footer)} style={style}>
+                <span className={Css.todoCount}>
+                    <strong>{scope.count}</strong> {scope.activeTodoWord} left
+                </span>
+                <ul className={Css.filters}>
+                    <li>
+                        <a
+                            className={clsx(scope.showing == ShowingOptions.ALL ? Css.selected : undefined)}
+                            onClick={this.onShowAll}
+                        >
+                            All
+                        </a>
+                    </li>{' '}
+                    <li>
+                        <a
+                            className={clsx(scope.showing == ShowingOptions.ACTIVE ? Css.selected : undefined)}
+                            onClick={this.onShowActives}
+                        >
+                            Active
+                        </a>
+                    </li>{' '}
+                    <li>
+                        <a
+                            className={clsx(scope.showing == ShowingOptions.COMPLETED ? Css.selected : undefined)}
+                            onClick={this.onShowCompleteds}
+                        >
+                            Completed
+                        </a>
+                    </li>
+                </ul>
+                {scope.clearButtonVisible ? (
+                    <button className={Css.clearCompleted} onClick={this.onClearCompleted}>
+                        Clear completed
+                    </button>
+                ) : null}
+            </footer>
         )
     }
-
-    return (
-        <footer className={clsx(className, Css.footer)} style={style}>
-            <span className={Css.todoCount}>
-                <strong>{scope.count}</strong> {scope.activeTodoWord} left
-            </span>
-            <ul className={Css.filters}>
-                <li>
-                    <a
-                        className={clsx(scope.showing == ShowingOptions.ALL ? Css.selected : undefined)}
-                        onClick={onShowAll}
-                    >
-                        All
-                    </a>
-                </li>{' '}
-                <li>
-                    <a
-                        className={clsx(scope.showing == ShowingOptions.ACTIVE ? Css.selected : undefined)}
-                        onClick={onShowActives}
-                    >
-                        Active
-                    </a>
-                </li>{' '}
-                <li>
-                    <a
-                        className={clsx(scope.showing == ShowingOptions.COMPLETED ? Css.selected : undefined)}
-                        onClick={onShowCompleteds}
-                    >
-                        Completed
-                    </a>
-                </li>
-            </ul>
-            {clearButton}
-        </footer>
-    )
 }
+
+export const FooterView = classToFComponent<FooterViewProps>(FooterViewClass)

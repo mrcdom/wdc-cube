@@ -1,70 +1,80 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { bindUpdate, IViewProps } from 'wdc-cube-react'
+import { classToFComponent, CubeRefObject, type FCClassContext, type IViewProps } from 'wdc-cube-react'
 import Css from './todo-mvc.module.scss'
-import { ItemScope } from '../todo-mvc.scope'
+import { ItemScope, type KeyDownEvent } from '../todo-mvc.scope'
 
 const LOG = Logger.get('TodoMvc.ItemView')
 
 type ItemViewProps = IViewProps & { scope: ItemScope }
 
-export function ItemView({ className, style, scope, scope: { actions } }: ItemViewProps) {
-    LOG.debug('update')
+class ItemViewClass implements FCClassContext<ItemViewProps> {
+    scope!: ItemScope
 
-    bindUpdate(React, scope)
+    private readonly editTextField = new CubeRefObject<HTMLInputElement>()
 
-    const editTextField = useRef<HTMLInputElement>(null)
-    const [editText, setEditText] = useState(scope.title)
+    private readonly getCurrentEditText = () => this.editTextField.current?.value ?? ''
 
-    const getCurrentEditText = useCallback(() => editTextField.current?.value ?? '', [editTextField])
-
-    const onDestroy = useCallback(actions.onDestroy, [actions.onDestroy])
-    const onToggle = useCallback(actions.onToggle, [actions.onToggle])
-    const onEdit = useCallback(actions.onEdit, [actions.onEdit])
-    const onBlur = useCallback(actions.onBlur.bind(undefined, getCurrentEditText), [actions.onBlur, getCurrentEditText])
-    const onKeyDown = useCallback(actions.onKeyDown.bind(undefined, getCurrentEditText), [
-        actions.onKeyDown,
-        getCurrentEditText
-    ])
-    const onChange = useCallback(() => setEditText(getCurrentEditText()), [setEditText, getCurrentEditText])
-
-    React.useEffect(() => {
-        const node = editTextField.current
+    // Ref de callback no lugar do efeito com dependencia em scope.editing: o
+    // React a invoca exatamente quando o campo de edicao entra e sai do DOM.
+    private readonly onEditFieldRef = (node: HTMLInputElement | null) => {
+        this.editTextField.current = node
         if (node) {
             node.focus()
             node.setSelectionRange(node.value.length, node.value.length)
         }
-    }, [scope.editing])
+    }
 
-    return (
-        <li
-            className={clsx(
-                className,
-                Css.view,
-                scope.completed ? Css.completed : '',
-                scope.editing ? Css.editing : ''
-            )}
-            style={style}
-        >
-            {scope.editing ? (
-                <>
+    private readonly onDestroy = () => this.scope.actions.onDestroy()
+    private readonly onToggle = () => this.scope.actions.onToggle()
+    private readonly onEdit = () => this.scope.actions.onEdit()
+    private readonly onBlur = () => this.scope.actions.onBlur(this.getCurrentEditText)
+    private readonly onKeyDown = (event: KeyDownEvent) => this.scope.actions.onKeyDown(this.getCurrentEditText, event)
+
+    render({ className, style }: ItemViewProps) {
+        LOG.debug('update')
+
+        const scope = this.scope
+
+        return (
+            <li
+                className={clsx(
+                    className,
+                    Css.view,
+                    scope.completed ? Css.completed : '',
+                    scope.editing ? Css.editing : ''
+                )}
+                style={style}
+            >
+                {scope.editing ? (
+                    // As chaves distintas impedem o React de reaproveitar o mesmo no
+                    // DOM entre o checkbox (controlado) e este campo (nao-controlado).
+                    // De quebra, remontar faz defaultValue partir do titulo corrente
+                    // a cada entrada em edicao.
                     <input
-                        ref={editTextField}
+                        key="edit"
+                        ref={this.onEditFieldRef}
                         className={Css.edit}
-                        value={editText}
-                        onBlur={onBlur}
-                        onChange={onChange}
-                        onKeyDown={onKeyDown}
+                        defaultValue={scope.title}
+                        onBlur={this.onBlur}
+                        onKeyDown={this.onKeyDown}
                     />
-                </>
-            ) : (
-                <>
-                    <input className={Css.toggle} type="checkbox" checked={scope.completed} onChange={onToggle} />
-                    <label onDoubleClick={onEdit}>{scope.title}</label>
-                    <button className={Css.destroy} onClick={onDestroy} />
-                </>
-            )}
-        </li>
-    )
+                ) : (
+                    <React.Fragment key="view">
+                        <input
+                            className={Css.toggle}
+                            type="checkbox"
+                            checked={scope.completed}
+                            onChange={this.onToggle}
+                        />
+                        <label onDoubleClick={this.onEdit}>{scope.title}</label>
+                        <button className={Css.destroy} onClick={this.onDestroy} />
+                    </React.Fragment>
+                )}
+            </li>
+        )
+    }
 }
+
+export const ItemView = classToFComponent<ItemViewProps>(ItemViewClass)

@@ -1,20 +1,25 @@
-import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { bindUpdate, IViewProps } from 'wdc-cube-react'
+import { classToFComponent, type FCClassContext, type IViewProps } from 'wdc-cube-react'
 import { ClockScope } from '../todo-mvc.scope'
 import Css from './todo-mvc.module.scss'
 
 const LOG = Logger.get('TodoMvc.ClockScope')
 
-export function ClockView({ className, style, scope }: IViewProps & { scope: ClockScope }) {
-    bindUpdate(React, scope)
+type ClockViewProps = IViewProps & { scope: ClockScope }
 
-    LOG.debug('update')
+class ClockViewClass implements FCClassContext<ClockViewProps> {
+    scope!: ClockScope
 
-    return (
-        <li className={clsx(className, Css.clock)} style={style}>
-            <div>{scope.date.toLocaleTimeString()}</div>
-        </li>
-    )
+    render({ className, style }: ClockViewProps) {
+        LOG.debug('update')
+
+        return (
+            <li className={clsx(className, Css.clock)} style={style}>
+                <div>{this.scope.date.toLocaleTimeString()}</div>
+            </li>
+        )
+    }
 }
+
+export const ClockView = classToFComponent<ClockViewProps>(ClockViewClass)

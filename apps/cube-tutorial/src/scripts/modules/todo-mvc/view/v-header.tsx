@@ -1,73 +1,77 @@
-import React, { useRef, useId, useCallback } from 'react'
+import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { bindUpdate, IViewProps } from 'wdc-cube-react'
+import { classToFComponent, CubeRefObject, type FCClassContext, type IViewProps } from 'wdc-cube-react'
 import Css from './todo-mvc.module.scss'
 import { HeaderScope } from '../todo-mvc.scope'
 
 const LOG = Logger.get('TodoMvc.HeaderView')
 
+let nextInputId = 0
+
 type HeaderViewProps = IViewProps & { scope: HeaderScope }
 
-export const HeaderView = function ({ className, style, scope, scope: { actions } }: HeaderViewProps) {
-    LOG.debug('update')
+class HeaderViewClass implements FCClassContext<HeaderViewProps> {
+    scope!: HeaderScope
 
-    bindUpdate(React, scope)
+    private readonly inputField = new CubeRefObject<HTMLInputElement>()
+    private readonly inputId = `todo-toggle-all-${nextInputId++}`
 
-    const inputField = useRef<HTMLInputElement>(null)
-    const inputUuid = useId()
-    const getCurrentFieldText = useCallback(() => inputField.current?.value ?? '', [inputField])
+    private getCurrentFieldText() {
+        return this.inputField.current?.value ?? ''
+    }
+
+    private readonly onChange = () => this.scope.actions.onSyncInputChange(this.getCurrentFieldText())
+
+    private readonly onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) =>
+        this.scope.actions.onSyncInputKeyDown(e)
+
+    private readonly onToggleAll = () => this.scope.actions.onToggleAll()
 
     // O campo e NAO-controlado de proposito. O escopo atualiza a view de forma
     // assincrona (CallbackManager, ~16ms), enquanto o React restaura o valor de
     // inputs controlados ao fim de cada evento — o que apagaria cada tecla antes
     // do escopo chegar. Aqui o DOM manda enquanto se digita, o escopo espelha,
-    // e este efeito so empurra para o DOM quando quem mudou foi o presenter
+    // e este gancho so empurra para o DOM quando quem mudou foi o presenter
     // (por exemplo ao limpar o campo no Enter/Escape).
-    React.useEffect(() => {
-        const node = inputField.current
-        if (node && node.value !== scope.inputValue) {
-            node.value = scope.inputValue
+    onAfterRender() {
+        const node = this.inputField.current
+        if (node && node.value !== this.scope.inputValue) {
+            node.value = this.scope.inputValue
         }
-    })
+    }
 
-    // Actions
-    const onChange = useCallback(
-        () => actions.onSyncInputChange(getCurrentFieldText()),
-        [actions.onSyncInputChange, getCurrentFieldText]
-    )
-    const onInputKeyDown = useCallback(
-        (e: React.KeyboardEvent<HTMLInputElement>) => actions.onSyncInputKeyDown(e),
-        [actions.onSyncInputKeyDown]
-    )
-    const onToggleAll = useCallback(() => actions.onToggleAll(), [actions.onToggleAll])
+    render({ className, style }: HeaderViewProps) {
+        LOG.debug('update')
 
-    // Render
-    return (
-        <header className={clsx(className)} style={style}>
-            <div className={Css.headerInputPane}>
-                <>
+        const scope = this.scope
+
+        return (
+            <header className={clsx(className)} style={style}>
+                <div className={Css.headerInputPane}>
                     <input
-                        id={inputUuid}
+                        id={this.inputId}
                         className={Css.toggleAll}
                         type="checkbox"
-                        onChange={onToggleAll}
+                        onChange={this.onToggleAll}
                         checked={!scope.allItemsCompleted}
                     />
-                    <label htmlFor={inputUuid} style={{ opacity: scope.toggleButtonVisible ? 1 : 0 }}>
+                    <label htmlFor={this.inputId} style={{ opacity: scope.toggleButtonVisible ? 1 : 0 }}>
                         Mark all as complete
                     </label>
-                </>
-                <input
-                    ref={inputField}
-                    className={Css.newTodo}
-                    placeholder="What needs to be done?"
-                    onKeyDown={onInputKeyDown}
-                    autoFocus={true}
-                    onChange={onChange}
-                    defaultValue={scope.inputValue}
-                />
-            </div>
-        </header>
-    )
+                    <input
+                        ref={this.inputField}
+                        className={Css.newTodo}
+                        placeholder="What needs to be done?"
+                        onKeyDown={this.onInputKeyDown}
+                        autoFocus={true}
+                        onChange={this.onChange}
+                        defaultValue={scope.inputValue}
+                    />
+                </div>
+            </header>
+        )
+    }
 }
+
+export const HeaderView = classToFComponent<HeaderViewProps>(HeaderViewClass)

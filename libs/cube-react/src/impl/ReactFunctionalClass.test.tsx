@@ -152,6 +152,28 @@ describe('classToFComponent', () => {
         expect(chamadas).toEqual([true, false])
     })
 
+    it('chama onAfterRender depois de cada render, com o DOM pronto', () => {
+        type Props = { texto: string }
+        const vistos: string[] = []
+
+        class Sample implements FCClassContext<Props> {
+            onAfterRender() {
+                // le do DOM: prova que roda depois da commit
+                vistos.push(container.textContent ?? '')
+            }
+            render({ texto }: Props) {
+                return <span>{texto}</span>
+            }
+        }
+
+        const View = classToFComponent<Props>(Sample)
+
+        render(<View texto="um" />)
+        render(<View texto="dois" />)
+
+        expect(vistos).toEqual(['um', 'dois'])
+    })
+
     it('chama onAttach na montagem e onDetach na desmontagem', () => {
         const eventos: string[] = []
 

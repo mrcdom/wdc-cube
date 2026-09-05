@@ -1,22 +1,25 @@
-import React from 'react'
-import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { bindUpdate, IViewProps, ViewSlot } from 'wdc-cube-react'
+import { classToFComponent, type FCClassContext, type IViewProps, ViewSlot } from 'wdc-cube-react'
 import { RestrictedScope } from '../restricted.scope'
 import Css from './restricted.module.scss'
+import clsx from 'clsx'
 
 const LOG = Logger.get('RestrictedView')
 
 type RestrictedViewProps = IViewProps & { scope: RestrictedScope }
 
-export function RestrictedView({ scope, className, ...props }: RestrictedViewProps) {
-    LOG.debug('update')
+class RestrictedViewClass implements FCClassContext<RestrictedViewProps> {
+    scope!: RestrictedScope
 
-    bindUpdate(React, scope)
+    render({ className, ...props }: RestrictedViewProps) {
+        LOG.debug('update')
 
-    return (
-        <div className={clsx(className, Css.restrictedView)} {...props}>
-            <ViewSlot scope={scope} />
-        </div>
-    )
+        return (
+            <div className={clsx(className, Css.restrictedView)} {...props}>
+                <ViewSlot scope={this.scope} />
+            </div>
+        )
+    }
 }
+
+export const RestrictedView = classToFComponent<RestrictedViewProps>(RestrictedViewClass)

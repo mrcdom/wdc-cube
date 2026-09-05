@@ -1,7 +1,6 @@
-import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { bindUpdate, ViewSlot, IViewProps } from 'wdc-cube-react'
+import { classToFComponent, type FCClassContext, type IViewProps, ViewSlot } from 'wdc-cube-react'
 import Css from './todo-mvc.module.scss'
 import { MainScope } from '../todo-mvc.scope'
 import { ItemView } from './v-item'
@@ -11,19 +10,23 @@ const LOG = Logger.get('TodoMvc.MainView')
 
 type MainViewProps = IViewProps & { scope: MainScope }
 
-export const MainView = function ({ className, style, scope }: MainViewProps) {
-    LOG.debug('update')
+class MainViewClass implements FCClassContext<MainViewProps> {
+    scope!: MainScope
 
-    bindUpdate(React, scope)
+    render({ className, style }: MainViewProps) {
+        LOG.debug('update')
 
-    return (
-        <section className={clsx(className, Css.main)} style={style}>
-            <ul className={Css.todoList}>
-                <ViewSlot scope={scope.clock} view={ClockView} />
-                {scope.items.map((todo) => (
-                    <ViewSlot key={todo.id} scope={todo} view={ItemView} />
-                ))}
-            </ul>
-        </section>
-    )
+        return (
+            <section className={clsx(className, Css.main)} style={style}>
+                <ul className={Css.todoList}>
+                    <ViewSlot scope={this.scope.clock} view={ClockView} />
+                    {this.scope.items.map((todo) => (
+                        <ViewSlot key={todo.id} scope={todo} view={ItemView} />
+                    ))}
+                </ul>
+            </section>
+        )
+    }
 }
+
+export const MainView = classToFComponent<MainViewProps>(MainViewClass)

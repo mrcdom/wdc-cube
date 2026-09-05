@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import DialogActions from '@mui/material/DialogActions'
@@ -6,51 +6,54 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { Logger } from 'wdc-cube'
-import { bindUpdate } from 'wdc-cube-react'
+import { classToFComponent, type FCClassContext } from 'wdc-cube-react'
 import { SubscriptionsDetailScope } from '../subscriptions-detail.scope'
 
 const LOG = Logger.get('SubscriptionsDetailView')
 
-export function SubscriptionsDetailView({ scope }: { scope: SubscriptionsDetailScope }) {
-    bindUpdate(React, scope)
+type SubscriptionsDetailViewProps = { scope: SubscriptionsDetailScope }
 
-    LOG.debug('update')
+class SubscriptionsDetailViewClass implements FCClassContext<SubscriptionsDetailViewProps> {
+    scope!: SubscriptionsDetailScope
 
-    const onClose = useCallback(scope.onClose, [scope.onClose])
-    const onSubscribe = useCallback(scope.onSubscribe, [scope.onSubscribe])
-    const onEmailChanged = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            scope.onEmailChanged(event.target.value)
-        },
-        [scope.onEmailChanged]
-    )
+    private readonly onClose = () => this.scope.onClose()
+    private readonly onSubscribe = () => this.scope.onSubscribe()
+    private readonly onEmailChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        this.scope.onEmailChanged(event.target.value)
+    }
 
-    return (
-        <>
-            <DialogTitle>Subscribe</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    To subscribe to this website({scope.email}), please enter your email address here. We will send
-                    updates occasionally.
-                </DialogContentText>
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    id="name"
-                    label="Email Address"
-                    type="email"
-                    fullWidth
-                    onChange={onEmailChanged}
-                />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} color="primary">
-                    Cancel
-                </Button>
-                <Button onClick={onSubscribe} color="primary">
-                    Subscribe
-                </Button>
-            </DialogActions>
-        </>
-    )
+    render() {
+        LOG.debug('update')
+
+        return (
+            <>
+                <DialogTitle>Subscribe</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        To subscribe to this website({this.scope.email}), please enter your email address here. We will
+                        send updates occasionally.
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label="Email Address"
+                        type="email"
+                        fullWidth
+                        onChange={this.onEmailChanged}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.onClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={this.onSubscribe} color="primary">
+                        Subscribe
+                    </Button>
+                </DialogActions>
+            </>
+        )
+    }
 }
+
+export const SubscriptionsDetailView = classToFComponent<SubscriptionsDetailViewProps>(SubscriptionsDetailViewClass)

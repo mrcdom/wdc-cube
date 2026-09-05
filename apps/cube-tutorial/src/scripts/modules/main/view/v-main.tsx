@@ -1,8 +1,7 @@
-import React, { useCallback } from 'react'
 import clsx from 'clsx'
 
 import { Logger } from 'wdc-cube'
-import { ViewSlot, bindUpdate } from 'wdc-cube-react'
+import { classToFComponent, type FCClassContext, ViewSlot } from 'wdc-cube-react'
 
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -23,21 +22,22 @@ export type MainViewProps = {
     scope: MainScope
 }
 
-export function MainView({ className, scope }: MainViewProps) {
-    bindUpdate(React, scope)
+class MainViewClass implements FCClassContext<MainViewProps> {
+    scope!: MainScope
 
-    LOG.debug('update')
+    private readonly onHome = () => this.scope.onHome()
+    private readonly onOpenTodos = () => this.scope.onOpenTodos()
+    private readonly onOpenSuscriptions = () => this.scope.onOpenSuscriptions()
+    private readonly onLogin = () => this.scope.onLogin()
+    private readonly onCloseDialog = () => this.scope.dialog?.onClose()
+    private readonly onCloseAlert = () => this.scope.alert?.onClose()
 
-    // Read: https://dmitripavlutin.com/dont-overuse-react-usecallback/
-    const onHome = useCallback(scope.onHome, [scope.onHome])
-    const onOpenTodos = useCallback(scope.onOpenTodos, [scope.onOpenTodos])
-    const onOpenSuscriptions = useCallback(scope.onOpenSuscriptions, [scope.onOpenSuscriptions])
-    const onLogin = useCallback(scope.onLogin, [scope.onLogin])
-    const onCloseDialog = useCallback(() => scope.dialog?.onClose(), [scope.dialog?.onClose])
-    const onCloseAlert = useCallback(() => scope.alert?.onClose(), [scope.alert?.onClose])
+    render({ className }: MainViewProps) {
+        LOG.debug('update')
 
-    return (
-        <>
+        const scope = this.scope
+
+        return (
             <div className={clsx(className, Css.mainView)}>
                 <AppBar position="static">
                     <Toolbar>
@@ -47,16 +47,16 @@ export function MainView({ className, scope }: MainViewProps) {
                         <Typography variant="h6" className={Css.appBarTitle}>
                             Cube Framework (Tutorial Example)
                         </Typography>
-                        <Button color="inherit" onClick={onHome}>
+                        <Button color="inherit" onClick={this.onHome}>
                             Home
                         </Button>
-                        <Button color="inherit" onClick={onOpenTodos}>
+                        <Button color="inherit" onClick={this.onOpenTodos}>
                             Todos
                         </Button>
-                        <Button color="inherit" onClick={onOpenSuscriptions}>
+                        <Button color="inherit" onClick={this.onOpenSuscriptions}>
                             Subscriptions
                         </Button>
-                        <Button color="inherit" onClick={onLogin}>
+                        <Button color="inherit" onClick={this.onLogin}>
                             Login
                         </Button>
                     </Toolbar>
@@ -64,14 +64,16 @@ export function MainView({ className, scope }: MainViewProps) {
 
                 <ViewSlot className={Css.body} scope={scope.body} optional={false} />
 
-                <Dialog open={!!scope.dialog} onClose={onCloseDialog} aria-labelledby="form-dialog-title">
+                <Dialog open={!!scope.dialog} onClose={this.onCloseDialog} aria-labelledby="form-dialog-title">
                     <ViewSlot scope={scope.dialog} />
                 </Dialog>
 
-                <Dialog open={!!scope.alert} onClose={onCloseAlert} aria-labelledby="form-dialog-title">
+                <Dialog open={!!scope.alert} onClose={this.onCloseAlert} aria-labelledby="form-dialog-title">
                     <ViewSlot scope={scope.alert} view={AlertView} />
                 </Dialog>
             </div>
-        </>
-    )
+        )
+    }
 }
+
+export const MainView = classToFComponent<MainViewProps>(MainViewClass)

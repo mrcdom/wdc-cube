@@ -20,6 +20,9 @@ export type FCClassContext<P> = {
     onAttach?: (props: P) => void
     onDetach?: (props: P) => void
 
+    /** Chamado depois de cada render, com o DOM ja atualizado. */
+    onAfterRender?: (props: P) => void
+
     render(props: P): React.ReactNode
 }
 
@@ -63,6 +66,11 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
                 memo.onDetach?.(props)
             }
         }, ZERO_DEPS)
+
+        // Sem lista de dependencias de proposito: roda apos cada render.
+        react.useEffect(() => {
+            memo.onAfterRender?.(props)
+        })
 
         return memo.render(props)
     }

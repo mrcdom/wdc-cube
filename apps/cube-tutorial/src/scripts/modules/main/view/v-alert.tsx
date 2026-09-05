@@ -1,4 +1,3 @@
-import React, { useCallback } from 'react'
 import clsx from 'clsx'
 import Button from '@mui/material/Button'
 import Alert from '@mui/material/Alert'
@@ -6,7 +5,7 @@ import AlertTitle from '@mui/material/AlertTitle'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContentText from '@mui/material/DialogContentText'
 import { Logger } from 'wdc-cube'
-import { bindUpdate, IViewProps } from 'wdc-cube-react'
+import { classToFComponent, type FCClassContext, type IViewProps } from 'wdc-cube-react'
 import { AlertScope } from '../main.scope'
 import Css from './main.module.scss'
 
@@ -16,24 +15,31 @@ export type AlertViewProps = IViewProps & {
     scope: AlertScope
 }
 
-export function AlertView({ scope, className, ...props }: AlertViewProps) {
-    bindUpdate(React, scope)
+class AlertViewClass implements FCClassContext<AlertViewProps> {
+    scope!: AlertScope
 
-    LOG.debug('update')
+    // Metodos de instancia sao estaveis por construcao: dispensam useCallback
+    private readonly onClose = () => this.scope.onClose()
 
-    const onClose = useCallback(scope.onClose, [scope.onClose])
+    render({ className, ...props }: AlertViewProps) {
+        LOG.debug('update')
 
-    return (
-        <>
-            <Alert className={clsx(className, Css.alertPane)} severity={scope.severity} {...props}>
-                <AlertTitle>{scope.title}</AlertTitle>
-                <DialogContentText>{scope.message}</DialogContentText>
-            </Alert>
-            <DialogActions>
-                <Button onClick={onClose} color="primary">
-                    Close
-                </Button>
-            </DialogActions>
-        </>
-    )
+        const scope = this.scope
+
+        return (
+            <>
+                <Alert className={clsx(className, Css.alertPane)} severity={scope.severity} {...props}>
+                    <AlertTitle>{scope.title}</AlertTitle>
+                    <DialogContentText>{scope.message}</DialogContentText>
+                </Alert>
+                <DialogActions>
+                    <Button onClick={this.onClose} color="primary">
+                        Close
+                    </Button>
+                </DialogActions>
+            </>
+        )
+    }
 }
+
+export const AlertView = classToFComponent<AlertViewProps>(AlertViewClass)
