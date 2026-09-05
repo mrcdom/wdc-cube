@@ -6,7 +6,7 @@
  */
 
 import React from 'react'
-import { NOOP_VOID, Scope } from 'wdc-cube'
+import { Logger, NOOP_VOID, Scope } from 'wdc-cube'
 
 export type FCClassContext<P> = {
     /**
@@ -32,9 +32,18 @@ const Attrs = {
 
 const ZERO_DEPS: React.DependencyList = []
 
+const LOG = Logger.get('React.FCClass')
+
 export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, optReact?: typeof React): React.FC<P> {
     const react = optReact ?? React
     const memoFactory = (props: P) => new ctor(props)
+
+    // Decidido uma vez por classe, e nao a cada render. As regras de hooks exigem
+    // que a sequencia seja estavel dentro de UM componente; componentes distintos
+    // podem chamar conjuntos distintos. Como `classToFComponent` produz um
+    // componente por classe, e a forma da classe ja esta definida aqui, quem nao
+    // declara `onAfterRender` nao paga por um efeito que roda a cada render.
+    const hasAfterRender = typeof ctor.prototype.onAfterRender === 'function'
 
     return (props: P) => {
         const memo = react.useMemo(() => memoFactory(props), ZERO_DEPS)
@@ -46,6 +55,12 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
 
         const ctxRec = memo as unknown as Record<string | symbol, unknown>
         if (ctxRec[Attrs.initialized] !== true) {
+            if (!hasAfterRender && typeof memo.onAfterRender === 'function') {
+                LOG.warn(
+                    `${ctor.name}.onAfterRender foi definido como campo de instancia e sera ignorado. ` +
+                        'Declare-o como metodo da classe para que o framework o detecte.'
+                )
+            }
             memo.onSyncState?.(props, true)
             ctxRec[Attrs.initialized] = true
         } else {
@@ -67,10 +82,12 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
             }
         }, ZERO_DEPS)
 
-        // Sem lista de dependencias de proposito: roda apos cada render.
-        react.useEffect(() => {
-            memo.onAfterRender?.(props)
-        })
+        if (hasAfterRender) {
+            // Sem lista de dependencias de proposito: roda apos cada render.
+            react.useEffect(() => {
+                memo.onAfterRender?.(props)
+            })
+        }
 
         return memo.render(props)
     }

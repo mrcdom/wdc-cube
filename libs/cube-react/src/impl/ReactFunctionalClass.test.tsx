@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { Scope } from 'wdc-cube'
+import { Logger, Scope } from 'wdc-cube'
 
 import { classToFComponent, type FCClassContext } from './ReactFunctionalClass'
 
@@ -172,6 +172,81 @@ describe('classToFComponent', () => {
         render(<View texto="dois" />)
 
         expect(vistos).toEqual(['um', 'dois'])
+    })
+
+    it('nao registra o efeito pos-render em classes que nao declaram onAfterRender', () => {
+        // Conta os useEffect atraves do React injetado por optReact
+        function contarEfeitos() {
+            let chamadas = 0
+            const espiao = {
+                ...React,
+                useEffect: (...args: Parameters<typeof React.useEffect>) => {
+                    chamadas++
+                    return React.useEffect(...args)
+                }
+            } as unknown as typeof React
+            return {
+                espiao,
+                get chamadas() {
+                    return chamadas
+                }
+            }
+        }
+
+        class Sem implements FCClassContext<Record<string, never>> {
+            render() {
+                return <span>sem</span>
+            }
+        }
+
+        class Com implements FCClassContext<Record<string, never>> {
+            onAfterRender() {
+                // NOOP
+            }
+            render() {
+                return <span>com</span>
+            }
+        }
+
+        const sem = contarEfeitos()
+        const ViewSem = classToFComponent<Record<string, never>>(Sem, sem.espiao)
+        render(<ViewSem />)
+        render(<ViewSem />)
+
+        const com = contarEfeitos()
+        const ViewCom = classToFComponent<Record<string, never>>(Com, com.espiao)
+        render(<ViewCom />)
+        render(<ViewCom />)
+
+        // 2 renders: sem onAfterRender paga 1 efeito por render; com, paga 2
+        expect(sem.chamadas).toBe(2)
+        expect(com.chamadas).toBe(4)
+    })
+
+    it('avisa quando onAfterRender e campo de instancia, em vez de ignorar em silencio', () => {
+        // O Logger faz bind de console.warn ao ser criado, entao trocar
+        // console.warn depois nao teria efeito: troca-se o metodo do logger.
+        const avisos: string[] = []
+        const log = Logger.get('React.FCClass')
+        const originalWarn = log.warn
+        log.warn = (...args: unknown[]) => avisos.push(args.join(' '))
+
+        try {
+            class Sample implements FCClassContext<Record<string, never>> {
+                // definido como campo: nao aparece no prototype
+                onAfterRender = () => undefined
+                render() {
+                    return <span>x</span>
+                }
+            }
+
+            const View = classToFComponent<Record<string, never>>(Sample)
+            render(<View />)
+        } finally {
+            log.warn = originalWarn
+        }
+
+        expect(avisos.join(' ')).toContain('onAfterRender')
     })
 
     it('chama onAttach na montagem e onDetach na desmontagem', () => {
