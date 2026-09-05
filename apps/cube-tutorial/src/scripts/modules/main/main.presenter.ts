@@ -4,7 +4,6 @@ import {
     HistoryManager,
     FlipIntent,
     Scope,
-    action,
     type AlertSeverity,
     SingletonServices,
     NOOP_PROMISE_VOID
@@ -92,12 +91,12 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     private async intializeState(keys: MainKeys) {
         this.stopServices = await SingletonServices.start()
 
-        this.scope.onHome = this.onHome.bind(this)
-        this.scope.onOpenTodos = this.onOpenTodos.bind(this)
-        this.scope.onOpenSuscriptions = this.onOpenSuscriptions.bind(this)
-        this.scope.onLogin = this.onOpenLogin.bind(this)
+        this.scope.onHome = this.action(this.onHome)
+        this.scope.onOpenTodos = this.action(this.onOpenTodos)
+        this.scope.onOpenSuscriptions = this.action(this.onOpenSuscriptions)
+        this.scope.onLogin = this.action(this.onOpenLogin)
 
-        this.bodyScope.onOpenAlert = this.onOpenAlert.bind(this)
+        this.bodyScope.onOpenAlert = this.action(this.onOpenAlert)
         this.bodyScope.update = this.update
 
         this.scope.body = this.bodyScope
@@ -117,7 +116,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         alertScope.severity = severity
         alertScope.title = title
         alertScope.message = message
-        alertScope.onClose = this.onCloseAlert.bind(this, onClose)
+        alertScope.onClose = this.action(this.onCloseAlert.bind(this, onClose))
         alertScope.update = this.update
         this.scope.alert = alertScope
     }
@@ -138,7 +137,6 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         }
     }
 
-    @action()
     protected async onCloseAlert(onClose?: () => Promise<void>) {
         this.scope.alert = undefined
         if (onClose) {
@@ -146,27 +144,22 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         }
     }
 
-    @action()
     protected async onHome() {
         await this.flip(this.rootPlace)
     }
 
-    @action()
     protected async onOpenTodos() {
         await this.flip(Places.todos)
     }
 
-    @action()
     protected async onOpenSuscriptions() {
         await this.flip(Places.subscriptions)
     }
 
-    @action()
     protected async onOpenLogin() {
         this.alert('info', 'Working in progress...', 'No implementation to this action, yet.')
     }
 
-    @action()
     protected async onOpenAlert(severity: AlertSeverity) {
         LOG.info('onAlert clicked')
         this.alert(severity, 'Some title', 'Some message', async () => {

@@ -2,7 +2,7 @@
  * Based on https://todomvc.com/examples/react
  */
 
-import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, ObservableArray, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, ScopeSlot, FlipIntent, ObservableArray, NOOP_VOID } from 'wdc-cube'
 import { TutorialService } from '../../services/TutorialService'
 import { MainPresenter } from '../main/main.presenter'
 import { TodoMvcKeys } from './todo-mvc.key'
@@ -43,20 +43,26 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     private clockUpdateHandler?: NodeJS.Timeout
 
+    // Nao e ligada a nenhum escopo, mas precisa da guarda por ser
+    // disparada a partir de onHeaderSyncInputKeyDown
+    private readonly addItem = this.action(this.onAddItem)
+
     public constructor(app: MainPresenter) {
         super(app, new TodoMvcScope())
 
         this.itemScopes = new ObservableArray<ItemScope>(this.mainScope)
 
         // Bind Events
+        // onSyncInputChange/onSyncInputKeyDown nao sao acoes: apenas espelham o
+        // estado do campo, sem disparar update nem historico
         this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
         this.headerScope.actions.onSyncInputKeyDown = this.onHeaderSyncInputKeyDown.bind(this)
-        this.headerScope.actions.onToggleAll = this.onToggleAll.bind(this)
+        this.headerScope.actions.onToggleAll = this.action(this.onToggleAll)
 
-        this.footerScope.actions.onClearCompleted = this.onClearCompleted.bind(this)
-        this.footerScope.actions.onShowAll = this.onShowAll.bind(this)
-        this.footerScope.actions.onShowActives = this.onShowActives.bind(this)
-        this.footerScope.actions.onShowCompleteds = this.onShowCompleteds.bind(this)
+        this.footerScope.actions.onClearCompleted = this.action(this.onClearCompleted)
+        this.footerScope.actions.onShowAll = this.action(this.onShowAll)
+        this.footerScope.actions.onShowActives = this.action(this.onShowActives)
+        this.footerScope.actions.onShowCompleteds = this.action(this.onShowCompleteds)
 
         this.headerScope.update = this.update
         this.mainScope.update = this.update
@@ -152,11 +158,11 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     private bindItemScopeActions(item: ItemScope) {
         item.update = this.update
-        item.actions.onToggle = this.onItemToggle.bind(this, item)
-        item.actions.onEdit = this.onItemEdit.bind(this, item)
-        item.actions.onKeyDown = this.onItemKeyDown.bind(this, item)
-        item.actions.onBlur = this.onItemBlur.bind(this, item)
-        item.actions.onDestroy = this.onItemDestroy.bind(this, item)
+        item.actions.onToggle = this.action(this.onItemToggle.bind(this, item))
+        item.actions.onEdit = this.action(this.onItemEdit.bind(this, item))
+        item.actions.onKeyDown = this.action(this.onItemKeyDown.bind(this, item))
+        item.actions.onBlur = this.action(this.onItemBlur.bind(this, item))
+        item.actions.onDestroy = this.action(this.onItemDestroy.bind(this, item))
     }
 
     protected async handleClockUpdate() {
@@ -184,11 +190,10 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.headerScope.inputValue = ''
 
         if (trimVal) {
-            this.onAddItem(trimVal)
+            this.addItem(trimVal)
         }
     }
 
-    @action()
     protected onAddItem(value: string) {
         const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
 
@@ -200,7 +205,6 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.itemScopes.push(todoScope)
     }
 
-    @action()
     protected async onToggleAll() {
         let numOfCompletedTasks = 0
         for (const itemScope of this.itemScopes) {
@@ -216,35 +220,26 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         }
     }
 
-    @action()
     protected async onClearCompleted() {
         this.itemScopes.removeByCriteria((item) => !item.completed)
     }
 
-    @action()
     protected async onShowAll() {
         this.footerScope.showing = ShowingOptions.ALL
-        this.updateHistory()
     }
 
-    @action()
     protected async onShowActives() {
         this.footerScope.showing = ShowingOptions.ACTIVE
-        this.updateHistory()
     }
 
-    @action()
     protected async onShowCompleteds() {
         this.footerScope.showing = ShowingOptions.COMPLETED
-        this.updateHistory()
     }
 
-    @action()
     protected async onItemToggle(item: ItemScope) {
         item.completed = !item.completed
     }
 
-    @action()
     protected async onItemEdit(item: ItemScope) {
         for (const otherItem of this.itemScopes) {
             if (otherItem !== item) {
@@ -255,12 +250,10 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         item.editing = true
     }
 
-    @action()
     protected async onItemBlur(item: ItemScope, getValue: () => string) {
         this.saveItem(item, getValue())
     }
 
-    @action()
     protected async onItemKeyDown(item: ItemScope, getValue: () => string, event: KeyDownEvent) {
         if (event.code === 'Escape') {
             this.cancelItem(item)
@@ -269,7 +262,6 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         }
     }
 
-    @action()
     protected async onItemDestroy(item: ItemScope) {
         this.destroy(item)
     }

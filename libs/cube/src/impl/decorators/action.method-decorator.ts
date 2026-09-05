@@ -9,6 +9,21 @@ import _isFunction from 'lodash/isFunction'
 
 import { type IPresenter, actionOnCatch, actionOnFinally, isPromiseLike } from '../IPresenter'
 
+/**
+ * Envolve o metodo do presenter com a guarda de acao (tratamento de erro,
+ * update automatico e atualizacao do historico).
+ *
+ * @deprecated Prefira criar a guarda no momento de ligar o metodo ao escopo,
+ * com `Presenter#action`:
+ *
+ * ```ts
+ * this.scope.onSave = this.action(this.onSave)
+ * ```
+ *
+ * Essa forma deixa explicito, no ponto da ligacao, o que e acao e o que nao e,
+ * e permite guardar funcoes que nao sao metodos da propria classe
+ * (`this.action(fn, outroPresenter)`).
+ */
 export function action() {
     return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
         if (_isFunction(descriptor.value)) {

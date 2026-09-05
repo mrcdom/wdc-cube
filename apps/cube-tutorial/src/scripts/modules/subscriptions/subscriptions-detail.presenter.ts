@@ -1,4 +1,4 @@
-import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, ScopeSlot, FlipIntent, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../main/main.presenter'
 import { Places } from '../RouteConsts'
 import { TutorialService, type SiteItemType } from '../../services/TutorialService'
@@ -44,9 +44,12 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
                 throw new Error('No site id provided')
             }
 
-            this.scope.onClose = this.onClose.bind(this)
+            this.scope.onClose = this.action(this.onClose)
+            this.scope.onSubscribe = this.action(this.onSubscribe)
+
+            // handleEmailChanged nao e uma acao: so espelha o valor digitado,
+            // sem disparar update nem historico
             this.scope.onEmailChanged = this.handleEmailChanged.bind(this)
-            this.scope.onSubscribe = this.onSubscribe.bind(this)
 
             this.dialogSlot = keys.dialogSlot
 
@@ -75,12 +78,10 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
         keys.siteId = this.item?.id
     }
 
-    @action()
     protected async onClose() {
         await this.close()
     }
 
-    @action()
     protected async onSubscribe() {
         const siteId = this.item?.id
         if (!siteId) {

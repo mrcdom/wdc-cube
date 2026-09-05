@@ -1,4 +1,4 @@
-import { Logger, CubePresenter, ScopeSlot, FlipIntent, action, NOOP_VOID } from 'wdc-cube'
+import { Logger, CubePresenter, ScopeSlot, FlipIntent, NOOP_VOID } from 'wdc-cube'
 import { MainPresenter } from '../main/main.presenter'
 import { TutorialService, type SiteItemType } from '../../services/TutorialService'
 import { SubstriptionsKeys } from './subscriptions.key'
@@ -34,7 +34,7 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
             this.parentSlot = keys.parentSlot
             this.dialogSlot = keys.dialogSlot
 
-            this.scope.onItemClicked = this.onItemClicked.bind(this)
+            this.scope.onItemClicked = this.action(this.onItemClicked)
             this.scope.sites = await tutorialService.fetchSubscribleSites()
 
             LOG.info('Initialized')
@@ -49,7 +49,6 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
         return true
     }
 
-    @action()
     protected async onItemClicked(item: SiteItemType) {
         const targetKeys = new SubstriptionsDetailKeys(this.app)
         targetKeys.siteId = item.id
