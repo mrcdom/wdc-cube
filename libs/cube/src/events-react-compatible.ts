@@ -1,3 +1,10 @@
+/**
+ * Copyright © 2025 WeDoCode Consultoria e Soluções Avançadas LTDA. All rights reserved.
+ *
+ * Author: Marcelo Domingos
+ * Source: https://github.com/mrcdom/wdc-cube
+ */
+
 export type BaseEvent<T = unknown> = {
     readonly type: string
     readonly target: T

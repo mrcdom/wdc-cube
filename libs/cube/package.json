@@ -1,26 +1,37 @@
 {
   "name": "wdc-cube",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "description": "Cube architecture core - presenter/scope/place navigation framework",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
-  "types": "lib/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrcdom/wdc-cube.git",
+    "directory": "libs/cube"
+  },
+  "type": "module",
+  "sideEffects": false,
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": ["lib", "README.md"],
   "scripts": {
-    "compile": "tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint . --ext .tsx --ext .ts",
-    "lint:fix": "eslint . --ext .tsx --ext .ts --fix",
-    "test": "jest"
+    "compile": "tsc -b",
+    "build": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/util-utf8-browser": "^3.259.0",
-    "install": "^0.13.0",
     "lodash": "^4.17.21",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
-    "@types/lodash": "4.14.194",
-    "ansi-regex": "6.0.1",
-    "ts-jest": "^29.1.0"
+    "@types/lodash": "^4.17.20",
+    "vitest": "^3.2.4"
   }
 }

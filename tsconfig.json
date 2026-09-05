@@ -1,25 +1,27 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "target": "ES2019",
+    "composite": true,
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "verbatimModuleSyntax": false,
     "declaration": true,
-    "experimentalDecorators": true,
+    "declarationMap": true,
     "sourceMap": true,
     "removeComments": true,
+    "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
-    "composite": true,
-    "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "allowJs": true,
-    "baseUrl": "./libs"
+    "noUncheckedSideEffectImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true
   }
 }

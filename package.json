@@ -1,47 +1,28 @@
 {
   "name": "cube-workspaces",
   "private": true,
+  "packageManager": "pnpm@11.3.0+sha512.2c403d6594527287672b1f7056343a1f7c3634036a67ffabfcc2b3d7595d843768f8787148d1b57cf7956c90606bbd192857c363af19e96d2d0ec9ec5741d215",
   "scripts": {
-    "clean": "rimraf \"{libs,apps}/**/{lib,coverage,dist,build,node_modules,*.tsbuildinfo,.scannerwork,junit.xml,test-report.xml}\"",
+    "clean": "rimraf \"{libs,apps}/**/{lib,coverage,dist,build,*.tsbuildinfo,.scannerwork,junit.xml,test-report.xml}\"",
     "compile": "tsc -b tsconfig.build.json",
-    "format": "prettier --write \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/*/src/**/*.{ts,tsx,yml}\" \"apps/*/*.yml\"",
-    "format:check": "npm run format -- --check",
-    "test": "lerna run test",
-    "build": "npm run compile --workspaces --if-present && npm run build --workspaces --if-present",
-    "install-apps": "node ./scripts/dependence-install.js apps"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,md,yml,json}": [
-      "prettier --write --check",
-      "git add"
-    ]
+    "build": "pnpm run compile && pnpm -r --if-present run build",
+    "test": "pnpm -r --if-present run test",
+    "lint": "eslint .",
+    "start": "pnpm --filter wdc-cube-tutorial run start",
+    "format": "prettier --write \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/*/src/**/*.{ts,tsx,yml}\"",
+    "format:check": "prettier --check \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/*/src/**/*.{ts,tsx,yml}\"",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "@types/node": "20.14.10",
-    "@typescript-eslint/eslint-plugin": "8.0.1",
-    "@typescript-eslint/parser": "8.0.1",
-    "@typescript-eslint/typescript-estree": "8.0.1",
-    "eslint": "8.57.0",
-    "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-prettier": "5.2.1",
-    "eslint-plugin-react": "7.35.0",
-    "lerna": "8.1.8",
-    "lint-staged": "15.2.8",
-    "prettier": "3.3.3",
-    "rewire": "7.0.0",
+    "@eslint/js": "9.35.0",
+    "@types/node": "22.15.29",
+    "eslint": "9.35.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react": "7.37.5",
+    "globals": "16.4.0",
+    "prettier": "3.6.2",
     "rimraf": "6.0.1",
-    "typescript": "5.5.4"
-  },
-  "workspaces": [
-    "libs/cube",
-    "libs/cube-react"
-  ],
-  "dependencies": {
-    "assert": "^2.0.0",
-    "cache-manager": "^4.1.0",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.13.2",
-    "wdc-cube": "file:libs/cube",
-    "wdc-cube-react": "file:libs/cube-react"
+    "typescript": "5.9.2",
+    "typescript-eslint": "8.44.0"
   }
 }
