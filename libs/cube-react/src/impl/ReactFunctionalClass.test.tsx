@@ -110,6 +110,56 @@ describe('classToFComponent', () => {
         expect(scope.forceUpdate).not.toBe(ligado)
     })
 
+    it('desliga o escopo corrente quando props.scope mudou depois da montagem', () => {
+        type Props = { scope: SampleScope }
+
+        class Sample implements FCClassContext<Props> {
+            scope!: SampleScope
+            render() {
+                return <span>{this.scope.label}</span>
+            }
+        }
+
+        const View = classToFComponent<Props>(Sample)
+        const primeiro = new SampleScope()
+        const segundo = new SampleScope()
+
+        render(<View scope={primeiro} />)
+        render(<View scope={segundo} />)
+        const ligadoNoSegundo = segundo.forceUpdate
+
+        render(<div />)
+        expect(segundo.forceUpdate).not.toBe(ligadoNoSegundo)
+    })
+
+    it('nao se deixa enganar por uma classe que reatribui this.scope', () => {
+        type Props = { scope: SampleScope }
+        const intruso = new SampleScope()
+        const ligadoNoIntruso = intruso.forceUpdate
+
+        class Sample implements FCClassContext<Props> {
+            scope!: SampleScope
+            render() {
+                const texto = this.scope.label
+                // uso indevido: sobrescreve o campo que o framework preencheu
+                this.scope = intruso
+                return <span>{texto}</span>
+            }
+        }
+
+        const View = classToFComponent<Props>(Sample)
+        const real = new SampleScope()
+
+        render(<View scope={real} />)
+        const ligadoNoReal = real.forceUpdate
+        render(<div />)
+
+        // o escopo de verdade foi desligado...
+        expect(real.forceUpdate).not.toBe(ligadoNoReal)
+        // ...e o intruso, que nunca foi ligado, ficou intacto
+        expect(intruso.forceUpdate).toBe(ligadoNoIntruso)
+    })
+
     it('sobrevive a props.scope indo de indefinido para definido', () => {
         // Regressao: com o useEffect dentro de um if, a contagem de hooks mudava
         // entre estes dois renders e o React lancava

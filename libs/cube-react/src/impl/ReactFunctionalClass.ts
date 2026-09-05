@@ -30,7 +30,8 @@ export type FCClassContext<P> = {
 // com campos do usuario nem custar hooks adicionais.
 const Attrs = {
     initialized: Symbol('initialized'),
-    forceUpdate: Symbol('forceUpdate')
+    forceUpdate: Symbol('forceUpdate'),
+    boundScope: Symbol('boundScope')
 }
 
 const ZERO_DEPS: React.DependencyList = []
@@ -60,7 +61,6 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
         const ctxRec = memo as unknown as Record<string | symbol, unknown>
 
         const [, setValue] = react.useState(0)
-        const scopeRef = react.useRef<Scope | undefined>(undefined)
 
         if (ctxRec[Attrs.initialized] !== true) {
             if (!hasAfterRender && typeof memo.onAfterRender === 'function') {
@@ -82,7 +82,10 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
 
         const scope = props_getScope(props)
         memo.scope = scope
-        scopeRef.current = scope
+        // Copia interna: `memo.scope` e publico e a classe do usuario pode
+        // reatribui-lo, o que faria a limpeza desligar o escopo errado —
+        // e um escopo desligado por engano para de redesenhar.
+        ctxRec[Attrs.boundScope] = scope
         if (scope) {
             // Atribuicao simples: o antigo `.bind` por render existia so porque
             // o contador era lido do render corrente. Com a forma funcional de
@@ -95,7 +98,7 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
         react.useEffect(() => {
             memo.onAttach?.(props)
             return () => {
-                static_unbindUpdate(scopeRef.current)
+                static_unbindUpdate(ctxRec[Attrs.boundScope] as Scope | undefined)
                 memo.onDetach?.(props)
             }
         }, ZERO_DEPS)
