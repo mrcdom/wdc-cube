@@ -1,35 +1,27 @@
 {
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "allowJs": true,
-    "incremental": true,
-    "target": "ESNext",
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "declaration": true,
     "experimentalDecorators": true,
-    "sourceMap": true,
-    "removeComments": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
-    "composite": true,
-    "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": false,
-    "outDir": "./build",
-    "baseUrl": "./",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
     "paths": {
-      "src/*": ["./src/*"],
-      "process": ["./node_modules/process"]
+      "@/*": ["./src/scripts/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "build"]
+  "include": ["src", "vite.config.ts"]
 }

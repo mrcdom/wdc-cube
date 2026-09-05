@@ -1,9 +1,17 @@
-export { ReactComponent } from './cube-react/ReactComponent'
-export { bindUpdate, getOrCreateApplication } from './cube-react/ReactFunctionalComponent'
-export { CubeComponent } from './cube-react/CubeComponent'
-export { ViewFactory, ViewSlot } from './cube-react/ViewFactory'
-export { PageHistoryManager } from './cube-react/PageHistoryManager'
-export { CubeRefObject } from './cube-react/CubeRefObject'
+/**
+ * Copyright © 2025 WeDoCode Consultoria e Soluções Avançadas LTDA. All rights reserved.
+ *
+ * Author: Marcelo Domingos
+ * Source: https://github.com/mrcdom/wdc-cube
+ */
 
-export type { CubeComponentProps } from './cube-react/CubeComponent'
-export type { IViewProps } from './cube-react/ViewFactory'
+export { ReactComponent } from './impl/ReactComponent'
+export { bindUpdate, getOrCreateApplication } from './impl/ReactFunctionalComponent'
+export { CubeComponent } from './impl/CubeComponent'
+export { ViewFactory, ViewSlot } from './impl/ViewFactory'
+export { PageHistoryManager } from './impl/PageHistoryManager'
+export { CubeRefObject } from './impl/CubeRefObject'
+export { classToFComponent, FCClass, type FCClassContext, type ScopeOf } from './impl/ReactFunctionalClass'
+
+export type { CubeComponentProps } from './impl/CubeComponent'
+export type { IViewProps } from './impl/ViewFactory'

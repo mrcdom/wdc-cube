@@ -1,0 +1,39 @@
+.mainView {
+    display: flex;
+    flex-Direction: column;
+    margin: 10px;
+    align-self: stretch;
+    flex-grow: 1;
+}
+
+.appBarMenuButton {
+    margin-right: 2;
+}
+
+.appBarTitle {
+    flex-grow: 1
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-self: stretch;
+    margin-top: 10px
+}
+
+.bodyView {
+    border: dashed;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.bodyView .buttonPane {
+    margin-left: 10px;
+}
+
+.alertPane {
+    margin-top: 20;
+    margin-left: 20;
+    margin-right: 20;
+}

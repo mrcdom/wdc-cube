@@ -1,0 +1,18 @@
+packages:
+  - libs/cube
+  - libs/cube-react
+  - apps/cube-tutorial
+
+allowBuilds:
+  # Native bundler used by Vite.
+  esbuild: true
+  # Optional native dependency of `sass`, used only by its CLI --watch mode.
+  # Vite is what watches files here, so there is no reason to build it.
+  '@parcel/watcher': false
+
+
+peerDependencyRules:
+  allowedVersions:
+    # eslint-plugin-react still declares support only up to eslint 9.7, but it
+    # works with 10 (`pnpm lint` passes). Drop this once the plugin widens its range.
+    'eslint-plugin-react>eslint': '10'

@@ -1,6 +1,21 @@
 .claude
+.DS_Store
+
+# Dependencies
 node_modules
-/libs/cube/lib
-libs/cube/tsconfig.tsbuildinfo
-/libs/cube/tsconfig.tsbuildinfo
-/libs/cube-react/tsconfig.tsbuildinfo
+
+# Build output
+lib
+dist
+build
+coverage
+*.tsbuildinfo
+
+# Lock files from other package managers (this project uses pnpm)
+package-lock.json
+yarn.lock
+
+# Logs and caches
+*.log
+.eslintcache
+.vite

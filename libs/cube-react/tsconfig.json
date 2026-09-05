@@ -2,12 +2,12 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
+    "types": [],
     "jsx": "react-jsx",
     "rootDir": "src",
     "outDir": "lib"
   },
-  "exclude": [
-    "node_modules",
-    "lib"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "lib", "src/**/*.test.ts", "src/**/*.test.tsx"],
+  "references": [{ "path": "../cube" }]
 }

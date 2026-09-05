@@ -1,26 +1,48 @@
 {
   "name": "wdc-cube-react",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "description": "React bindings for the Cube architecture",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
-  "types": "lib/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrcdom/wdc-cube.git",
+    "directory": "libs/cube-react"
+  },
+  "type": "module",
+  "sideEffects": false,
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "scripts": {
-    "compile": "tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint . --ext .tsx --ext .ts",
-    "lint:fix": "eslint . --ext .tsx --ext .ts --fix"
+    "compile": "tsc -b",
+    "build": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "dependencies": {
     "history": "^5.3.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "wdc-cube": "workspace:*"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
-    "@types/lodash": "4.14.194",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
-    "eslint-plugin-react": "^7.32.2",
-    "ansi-regex": "6.0.1"
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "jsdom": "^30.0.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "vitest": "^5.0.0"
   }
 }
