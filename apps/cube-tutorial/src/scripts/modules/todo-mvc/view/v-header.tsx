@@ -18,6 +18,19 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
     const inputUuid = useId()
     const getCurrentFieldText = useCallback(() => inputField.current?.value ?? '', [inputField])
 
+    // O campo e NAO-controlado de proposito. O escopo atualiza a view de forma
+    // assincrona (CallbackManager, ~16ms), enquanto o React restaura o valor de
+    // inputs controlados ao fim de cada evento — o que apagaria cada tecla antes
+    // do escopo chegar. Aqui o DOM manda enquanto se digita, o escopo espelha,
+    // e este efeito so empurra para o DOM quando quem mudou foi o presenter
+    // (por exemplo ao limpar o campo no Enter/Escape).
+    React.useEffect(() => {
+        const node = inputField.current
+        if (node && node.value !== scope.inputValue) {
+            node.value = scope.inputValue
+        }
+    })
+
     // Actions
     const onChange = useCallback(
         () => actions.onSyncInputChange(getCurrentFieldText()),
@@ -52,7 +65,7 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
                     onKeyDown={onInputKeyDown}
                     autoFocus={true}
                     onChange={onChange}
-                    value={scope.inputValue}
+                    defaultValue={scope.inputValue}
                 />
             </div>
         </header>
