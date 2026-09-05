@@ -9,3 +9,10 @@ allowBuilds:
   # Dependencia nativa opcional do `sass`, usada so pelo modo --watch do CLI.
   # Quem observa arquivos aqui e o Vite, entao nao ha por que compila-la.
   '@parcel/watcher': false
+
+
+peerDependencyRules:
+  allowedVersions:
+    # O eslint-plugin-react ainda declara ate eslint 9.7, mas funciona com o 10
+    # (o `pnpm lint` passa). Removido quando o plugin atualizar a faixa.
+    'eslint-plugin-react>eslint': '10'

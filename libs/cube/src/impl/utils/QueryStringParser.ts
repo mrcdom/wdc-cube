@@ -104,18 +104,18 @@ export class QueryStringParser {
             let ix = 0
             let ox = 0
             let key: string | null = null
-            let value: string | null = null
             while (ix < data.length) {
                 const c = data[ix++]
                 switch (String.fromCharCode(c)) {
-                    case '&':
-                        value = encoding.decode(data.subarray(0, ox))
+                    case '&': {
+                        const value = encoding.decode(data.subarray(0, ox))
                         if (key != null) {
                             this.putMapEntry(params, key, value)
                             key = null
                         }
                         ox = 0
                         break
+                    }
                     case '=':
                         if (key == null) {
                             key = encoding.decode(data.subarray(0, ox))
@@ -136,8 +136,7 @@ export class QueryStringParser {
             }
             // The last value does not end in '&'. So save it now.
             if (key != null) {
-                value = encoding.decode(data.subarray(0, ox))
-                this.putMapEntry(params, key, value)
+                this.putMapEntry(params, key, encoding.decode(data.subarray(0, ox)))
             }
         }
     }

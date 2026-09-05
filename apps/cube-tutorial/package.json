@@ -13,8 +13,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.2",
-    "@mui/material": "^7.3.2",
+    "@mui/icons-material": "^9.4.0",
+    "@mui/material": "^9.4.0",
     "clsx": "^2.1.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -24,9 +24,9 @@
   "devDependencies": {
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "@vitejs/plugin-react": "^5.0.2",
-    "sass": "^1.93.2",
-    "typescript": "5.9.2",
-    "vite": "^7.1.5"
+    "@vitejs/plugin-react": "^6.1.1",
+    "sass": "^1.104.0",
+    "typescript": "6.0.3",
+    "vite": "^8.2.2"
   }
 }

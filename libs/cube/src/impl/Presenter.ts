@@ -296,7 +296,8 @@ export class ScopeUpdateManager implements IUpdateManager {
 
     private selectiveScopeUpdate(): number {
         let updateCount = 0
-        let changesCount = 0
+        // sem inicializador: o corpo do do-while zera antes de qualquer leitura
+        let changesCount: number
         let sourceDirtyScopes = this.__dirtyScopes
         do {
             changesCount = 0

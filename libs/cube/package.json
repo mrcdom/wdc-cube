@@ -19,7 +19,10 @@
       "default": "./lib/index.js"
     }
   },
-  "files": ["lib", "README.md"],
+  "files": [
+    "lib",
+    "README.md"
+  ],
   "scripts": {
     "compile": "tsc -b",
     "build": "tsc -b",
@@ -32,6 +35,6 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20",
-    "vitest": "^3.2.4"
+    "vitest": "^5.0.0"
   }
 }
