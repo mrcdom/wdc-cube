@@ -44,7 +44,7 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
 
     // Render
     return (
-        <header className={clsx(Css.header, className)} style={style}>
+        <header className={clsx(className)} style={style}>
             <div className={Css.headerInputPane}>
                 <>
                     <input
