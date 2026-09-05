@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext, type IViewProps } from 'wdc-cube-react'
+import { classToFComponent, FCClass, type IViewProps } from 'wdc-cube-react'
 import { ClockScope } from '../todo-mvc.scope'
 import Css from './todo-mvc.module.scss'
 
@@ -8,9 +8,7 @@ const LOG = Logger.get('TodoMvc.ClockScope')
 
 type ClockViewProps = IViewProps & { scope: ClockScope }
 
-class ClockViewClass implements FCClassContext<ClockViewProps> {
-    scope!: ClockScope
-
+class ClockViewClass extends FCClass<ClockViewProps> {
     render({ className, style }: ClockViewProps) {
         LOG.debug('update')
 
@@ -22,4 +20,4 @@ class ClockViewClass implements FCClassContext<ClockViewProps> {
     }
 }
 
-export const ClockView = classToFComponent<ClockViewProps>(ClockViewClass)
+export const ClockView = classToFComponent(ClockViewClass)

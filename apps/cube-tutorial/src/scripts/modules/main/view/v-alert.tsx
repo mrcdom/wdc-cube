@@ -5,7 +5,7 @@ import AlertTitle from '@mui/material/AlertTitle'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContentText from '@mui/material/DialogContentText'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext, type IViewProps } from 'wdc-cube-react'
+import { classToFComponent, FCClass, type IViewProps } from 'wdc-cube-react'
 import { AlertScope } from '../main.scope'
 import Css from './main.module.scss'
 
@@ -15,9 +15,7 @@ export type AlertViewProps = IViewProps & {
     scope: AlertScope
 }
 
-class AlertViewClass implements FCClassContext<AlertViewProps> {
-    scope!: AlertScope
-
+class AlertViewClass extends FCClass<AlertViewProps> {
     // Metodos de instancia sao estaveis por construcao: dispensam useCallback
     private readonly onClose = () => this.scope.onClose()
 
@@ -42,4 +40,4 @@ class AlertViewClass implements FCClassContext<AlertViewProps> {
     }
 }
 
-export const AlertView = classToFComponent<AlertViewProps>(AlertViewClass)
+export const AlertView = classToFComponent(AlertViewClass)

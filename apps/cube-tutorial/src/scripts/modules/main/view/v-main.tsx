@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext, ViewSlot } from 'wdc-cube-react'
+import { classToFComponent, FCClass, ViewSlot } from 'wdc-cube-react'
 
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -22,9 +22,7 @@ export type MainViewProps = {
     scope: MainScope
 }
 
-class MainViewClass implements FCClassContext<MainViewProps> {
-    scope!: MainScope
-
+class MainViewClass extends FCClass<MainViewProps> {
     private readonly onHome = () => this.scope.onHome()
     private readonly onOpenTodos = () => this.scope.onOpenTodos()
     private readonly onOpenSuscriptions = () => this.scope.onOpenSuscriptions()
@@ -76,4 +74,4 @@ class MainViewClass implements FCClassContext<MainViewProps> {
     }
 }
 
-export const MainView = classToFComponent<MainViewProps>(MainViewClass)
+export const MainView = classToFComponent(MainViewClass)

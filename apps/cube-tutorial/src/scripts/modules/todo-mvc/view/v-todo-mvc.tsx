@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext, type IViewProps, ViewSlot } from 'wdc-cube-react'
+import { classToFComponent, FCClass, type IViewProps, ViewSlot } from 'wdc-cube-react'
 import { TodoMvcScope } from '../todo-mvc.scope'
 import Css from './todo-mvc.module.scss'
 
@@ -12,9 +12,7 @@ const LOG = Logger.get('TodoMvc.View')
 
 type TodoMvcViewProps = IViewProps & { scope: TodoMvcScope }
 
-class TodoMvcViewClass implements FCClassContext<TodoMvcViewProps> {
-    scope!: TodoMvcScope
-
+class TodoMvcViewClass extends FCClass<TodoMvcViewProps> {
     render({ className, style }: TodoMvcViewProps) {
         LOG.debug('update')
 
@@ -33,4 +31,4 @@ class TodoMvcViewClass implements FCClassContext<TodoMvcViewProps> {
     }
 }
 
-export const TodoMvcView = classToFComponent<TodoMvcViewProps>(TodoMvcViewClass)
+export const TodoMvcView = classToFComponent(TodoMvcViewClass)

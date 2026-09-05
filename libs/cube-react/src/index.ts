@@ -11,7 +11,7 @@ export { CubeComponent } from './impl/CubeComponent'
 export { ViewFactory, ViewSlot } from './impl/ViewFactory'
 export { PageHistoryManager } from './impl/PageHistoryManager'
 export { CubeRefObject } from './impl/CubeRefObject'
-export { classToFComponent, type FCClassContext } from './impl/ReactFunctionalClass'
+export { classToFComponent, FCClass, type FCClassContext, type ScopeOf } from './impl/ReactFunctionalClass'
 
 export type { CubeComponentProps } from './impl/CubeComponent'
 export type { IViewProps } from './impl/ViewFactory'

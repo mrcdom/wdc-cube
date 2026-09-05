@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext, type IViewProps, ViewSlot } from 'wdc-cube-react'
+import { classToFComponent, FCClass, type IViewProps, ViewSlot } from 'wdc-cube-react'
 import Css from './todo-mvc.module.scss'
 import { MainScope } from '../todo-mvc.scope'
 import { ItemView } from './v-item'
@@ -10,9 +10,7 @@ const LOG = Logger.get('TodoMvc.MainView')
 
 type MainViewProps = IViewProps & { scope: MainScope }
 
-class MainViewClass implements FCClassContext<MainViewProps> {
-    scope!: MainScope
-
+class MainViewClass extends FCClass<MainViewProps> {
     render({ className, style }: MainViewProps) {
         LOG.debug('update')
 
@@ -29,4 +27,4 @@ class MainViewClass implements FCClassContext<MainViewProps> {
     }
 }
 
-export const MainView = classToFComponent<MainViewProps>(MainViewClass)
+export const MainView = classToFComponent(MainViewClass)

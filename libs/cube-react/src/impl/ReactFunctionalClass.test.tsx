@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Logger, Scope } from 'wdc-cube'
 
-import { classToFComponent, type FCClassContext } from './ReactFunctionalClass'
+import { classToFComponent, FCClass, type FCClassContext } from './ReactFunctionalClass'
 
 class SampleScope extends Scope {
     label = 'inicial'
@@ -26,6 +26,34 @@ afterEach(() => {
 function render(element: React.ReactNode) {
     React.act(() => root.render(element))
 }
+
+describe('FCClass', () => {
+    type Props = { scope: SampleScope }
+
+    it('traz scope declarado e tipado a partir das props, sem repeticao na view', () => {
+        class Sample extends FCClass<Props> {
+            // nenhuma declaracao de `scope` aqui: vem da base
+            private texto() {
+                // tipado como SampleScope: `label` so existe nele
+                return this.scope.label.toUpperCase()
+            }
+            render() {
+                return <span>{this.texto()}</span>
+            }
+        }
+
+        // P inferido: sem parametro de tipo explicito
+        const View = classToFComponent(Sample)
+        const scope = new SampleScope()
+
+        render(<View scope={scope} />)
+        expect(container.textContent).toBe('INICIAL')
+
+        scope.label = 'trocado'
+        React.act(() => scope.forceUpdate())
+        expect(container.textContent).toBe('TROCADO')
+    })
+})
 
 describe('classToFComponent', () => {
     it('permite que render devolva null', () => {

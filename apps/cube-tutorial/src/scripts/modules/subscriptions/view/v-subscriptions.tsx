@@ -1,7 +1,7 @@
 import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext, type IViewProps } from 'wdc-cube-react'
+import { classToFComponent, FCClass, type IViewProps } from 'wdc-cube-react'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
@@ -13,9 +13,7 @@ const LOG = Logger.get('SubscriptionsView')
 
 type SubscriptionsViewProps = IViewProps & { scope: SubscriptionsScope }
 
-class SubscriptionsViewClass implements FCClassContext<SubscriptionsViewProps> {
-    scope!: SubscriptionsScope
-
+class SubscriptionsViewClass extends FCClass<SubscriptionsViewProps> {
     render({ className, ...props }: SubscriptionsViewProps) {
         LOG.debug('update')
 
@@ -42,4 +40,4 @@ class SubscriptionsViewClass implements FCClassContext<SubscriptionsViewProps> {
     }
 }
 
-export const SubscriptionsView = classToFComponent<SubscriptionsViewProps>(SubscriptionsViewClass)
+export const SubscriptionsView = classToFComponent(SubscriptionsViewClass)

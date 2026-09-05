@@ -1,7 +1,7 @@
 import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, CubeRefObject, type FCClassContext, type IViewProps } from 'wdc-cube-react'
+import { classToFComponent, FCClass, CubeRefObject, type IViewProps } from 'wdc-cube-react'
 import Css from './todo-mvc.module.scss'
 import { HeaderScope } from '../todo-mvc.scope'
 
@@ -11,9 +11,7 @@ let nextInputId = 0
 
 type HeaderViewProps = IViewProps & { scope: HeaderScope }
 
-class HeaderViewClass implements FCClassContext<HeaderViewProps> {
-    scope!: HeaderScope
-
+class HeaderViewClass extends FCClass<HeaderViewProps> {
     private readonly inputField = new CubeRefObject<HTMLInputElement>()
     private readonly inputId = `todo-toggle-all-${nextInputId++}`
 
@@ -74,4 +72,4 @@ class HeaderViewClass implements FCClassContext<HeaderViewProps> {
     }
 }
 
-export const HeaderView = classToFComponent<HeaderViewProps>(HeaderViewClass)
+export const HeaderView = classToFComponent(HeaderViewClass)

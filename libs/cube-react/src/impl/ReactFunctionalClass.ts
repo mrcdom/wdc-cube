@@ -8,13 +8,21 @@
 import React from 'react'
 import { Logger, NOOP_VOID, Scope } from 'wdc-cube'
 
+/**
+ * Tipo do escopo, derivado das props: `ScopeOf<{ scope: TodoScope }>` e `TodoScope`.
+ * Props sem `scope` caem no tipo base.
+ */
+export type ScopeOf<P> = P extends { scope: infer S } ? S : Scope | undefined
+
 export type FCClassContext<P> = {
     /**
      * Preenchido pelo framework antes de cada `render`, espelhando `props.scope`.
-     * Declare-o com o tipo concreto do seu escopo para usá-lo nos demais métodos
-     * da classe sem precisar receber `props` em todos eles.
+     *
+     * `implements` apenas verifica, nao injeta membros: uma classe que use
+     * `this.scope` precisa declara-lo. Para nao repetir a declaracao, estenda
+     * {@link FCClass}, que ja a traz — e com o tipo certo, derivado das props.
      */
-    scope?: Scope
+    scope?: ScopeOf<P>
 
     onSyncState?: (props: P, initial: boolean) => void
     onAttach?: (props: P) => void
@@ -28,6 +36,19 @@ export type FCClassContext<P> = {
 
 // Estado interno guardado na propria instancia, sob simbolos, para nao colidir
 // com campos do usuario nem custar hooks adicionais.
+/**
+ * Base opcional para views escritas como classe. Traz `scope` ja declarado e
+ * tipado a partir das props, dispensando a declaracao em cada view.
+ *
+ * Quem precisar de outra classe base continua podendo usar `implements
+ * FCClassContext<P>` e declarar `scope` a mao.
+ */
+export abstract class FCClass<P> implements FCClassContext<P> {
+    scope!: ScopeOf<P>
+
+    abstract render(props: P): React.ReactNode
+}
+
 const Attrs = {
     initialized: Symbol('initialized'),
     forceUpdate: Symbol('forceUpdate'),
@@ -81,7 +102,7 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
         }
 
         const scope = props_getScope(props)
-        memo.scope = scope
+        memo.scope = scope as ScopeOf<P>
         // Copia interna: `memo.scope` e publico e a classe do usuario pode
         // reatribui-lo, o que faria a limpeza desligar o escopo errado —
         // e um escopo desligado por engano para de redesenhar.

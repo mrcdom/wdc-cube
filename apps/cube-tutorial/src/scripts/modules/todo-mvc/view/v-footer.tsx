@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext, type IViewProps } from 'wdc-cube-react'
+import { classToFComponent, FCClass, type IViewProps } from 'wdc-cube-react'
 import Css from './todo-mvc.module.scss'
 import { FooterScope, ShowingOptions } from '../todo-mvc.scope'
 
@@ -8,9 +8,7 @@ const LOG = Logger.get('TodoMvc.FooterView')
 
 type FooterViewProps = IViewProps & { scope: FooterScope }
 
-class FooterViewClass implements FCClassContext<FooterViewProps> {
-    scope!: FooterScope
-
+class FooterViewClass extends FCClass<FooterViewProps> {
     private readonly onClearCompleted = () => this.scope.actions.onClearCompleted()
     private readonly onShowAll = () => this.scope.actions.onShowAll()
     private readonly onShowActives = () => this.scope.actions.onShowActives()
@@ -62,4 +60,4 @@ class FooterViewClass implements FCClassContext<FooterViewProps> {
     }
 }
 
-export const FooterView = classToFComponent<FooterViewProps>(FooterViewClass)
+export const FooterView = classToFComponent(FooterViewClass)

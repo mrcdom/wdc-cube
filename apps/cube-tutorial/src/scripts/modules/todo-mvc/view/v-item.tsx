@@ -1,7 +1,7 @@
 import React from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, CubeRefObject, type FCClassContext, type IViewProps } from 'wdc-cube-react'
+import { classToFComponent, FCClass, CubeRefObject, type IViewProps } from 'wdc-cube-react'
 import Css from './todo-mvc.module.scss'
 import { ItemScope, type KeyDownEvent } from '../todo-mvc.scope'
 
@@ -9,9 +9,7 @@ const LOG = Logger.get('TodoMvc.ItemView')
 
 type ItemViewProps = IViewProps & { scope: ItemScope }
 
-class ItemViewClass implements FCClassContext<ItemViewProps> {
-    scope!: ItemScope
-
+class ItemViewClass extends FCClass<ItemViewProps> {
     private readonly editTextField = new CubeRefObject<HTMLInputElement>()
 
     private readonly getCurrentEditText = () => this.editTextField.current?.value ?? ''
@@ -77,4 +75,4 @@ class ItemViewClass implements FCClassContext<ItemViewProps> {
     }
 }
 
-export const ItemView = classToFComponent<ItemViewProps>(ItemViewClass)
+export const ItemView = classToFComponent(ItemViewClass)

@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext, type IViewProps } from 'wdc-cube-react'
+import { classToFComponent, FCClass, type IViewProps } from 'wdc-cube-react'
 import { BodyScope } from '../main.scope'
 import Css from './main.module.scss'
 
@@ -10,9 +10,7 @@ const LOG = Logger.get('Main.BodyView')
 
 type BodyViewProps = IViewProps & { scope: BodyScope }
 
-class BodyViewClass implements FCClassContext<BodyViewProps> {
-    scope!: BodyScope
-
+class BodyViewClass extends FCClass<BodyViewProps> {
     private readonly onOpenInfo = () => this.scope.onOpenAlert('info')
     private readonly onOpenSuccess = () => this.scope.onOpenAlert('success')
     private readonly onOpenWarning = () => this.scope.onOpenAlert('warning')
@@ -35,4 +33,4 @@ class BodyViewClass implements FCClassContext<BodyViewProps> {
     }
 }
 
-export const BodyView = classToFComponent<BodyViewProps>(BodyViewClass)
+export const BodyView = classToFComponent(BodyViewClass)

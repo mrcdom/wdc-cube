@@ -6,16 +6,14 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { Logger } from 'wdc-cube'
-import { classToFComponent, type FCClassContext } from 'wdc-cube-react'
+import { classToFComponent, FCClass } from 'wdc-cube-react'
 import { SubscriptionsDetailScope } from '../subscriptions-detail.scope'
 
 const LOG = Logger.get('SubscriptionsDetailView')
 
 type SubscriptionsDetailViewProps = { scope: SubscriptionsDetailScope }
 
-class SubscriptionsDetailViewClass implements FCClassContext<SubscriptionsDetailViewProps> {
-    scope!: SubscriptionsDetailScope
-
+class SubscriptionsDetailViewClass extends FCClass<SubscriptionsDetailViewProps> {
     private readonly onClose = () => this.scope.onClose()
     private readonly onSubscribe = () => this.scope.onSubscribe()
     private readonly onEmailChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -56,4 +54,4 @@ class SubscriptionsDetailViewClass implements FCClassContext<SubscriptionsDetail
     }
 }
 
-export const SubscriptionsDetailView = classToFComponent<SubscriptionsDetailViewProps>(SubscriptionsDetailViewClass)
+export const SubscriptionsDetailView = classToFComponent(SubscriptionsDetailViewClass)
