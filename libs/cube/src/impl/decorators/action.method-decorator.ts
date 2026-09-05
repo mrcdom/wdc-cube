@@ -10,19 +10,19 @@ import _isFunction from 'lodash/isFunction'
 import { type IPresenter, actionOnCatch, actionOnFinally, isPromiseLike } from '../IPresenter'
 
 /**
- * Envolve o metodo do presenter com a guarda de acao (tratamento de erro,
- * update automatico e atualizacao do historico).
+ * Wraps a presenter method with the action guard: error reporting, automatic
+ * update and history refresh.
  *
- * @deprecated Prefira criar a guarda no momento de ligar o metodo ao escopo,
- * com `Presenter#action`:
+ * @deprecated Prefer building the guard where the method is attached to the
+ * scope, with `Presenter#action`:
  *
  * ```ts
  * this.scope.onSave = this.action(this.onSave)
  * ```
  *
- * Essa forma deixa explicito, no ponto da ligacao, o que e acao e o que nao e,
- * e permite guardar funcoes que nao sao metodos da propria classe
- * (`this.action(fn, outroPresenter)`).
+ * That form makes it visible at the binding site which handlers are guarded and
+ * which are not, and it can guard functions that are not methods of the class
+ * itself (`this.action(fn, otherPresenter)`).
  */
 export function action() {
     return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -46,14 +46,14 @@ function actionFn(impl: (...args: unknown[]) => Promise<void>) {
         try {
             const result = impl.call(this, ...args) as unknown
 
-            // Acao assincrona
+            // Asynchronous action
             if (isPromiseLike(result)) {
                 return (result as Promise<void>)
                     .catch((caught) => actionOnCatch(this, fnName, caught))
                     .finally(() => actionOnFinally(this))
             }
 
-            // Acao sincrona
+            // Synchronous action
             actionOnFinally(this)
             return Promise.resolve()
         } catch (caught) {

@@ -26,12 +26,12 @@ class HeaderViewClass extends FCClass<HeaderViewProps> {
 
     private readonly onToggleAll = () => this.scope.actions.onToggleAll()
 
-    // O campo e NAO-controlado de proposito. O escopo atualiza a view de forma
-    // assincrona (CallbackManager, ~16ms), enquanto o React restaura o valor de
-    // inputs controlados ao fim de cada evento — o que apagaria cada tecla antes
-    // do escopo chegar. Aqui o DOM manda enquanto se digita, o escopo espelha,
-    // e este gancho so empurra para o DOM quando quem mudou foi o presenter
-    // (por exemplo ao limpar o campo no Enter/Escape).
+    // The field is UNCONTROLLED on purpose. Scopes update the view
+    // asynchronously (CallbackManager, ~16ms), while React restores the value of
+    // controlled inputs at the end of every event — which would erase each
+    // keystroke before the scope caught up. Here the DOM leads while typing and
+    // the scope mirrors it; this hook only pushes into the DOM when the presenter
+    // is the one changing it, such as clearing the field on Enter or Escape.
     onAfterRender() {
         const node = this.inputField.current
         if (node && node.value !== this.scope.inputValue) {

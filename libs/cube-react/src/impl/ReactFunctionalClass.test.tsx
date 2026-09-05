@@ -6,7 +6,7 @@ import { Logger, Scope } from 'wdc-cube'
 import { classToFComponent, FCClass, type FCClassContext } from './ReactFunctionalClass'
 
 class SampleScope extends Scope {
-    label = 'inicial'
+    label = 'initial'
 }
 
 let container: HTMLDivElement
@@ -30,63 +30,63 @@ function render(element: React.ReactNode) {
 describe('FCClass', () => {
     type Props = { scope: SampleScope }
 
-    it('traz scope declarado e tipado a partir das props, sem repeticao na view', () => {
+    it('brings scope declared and typed from the props, with no repetition in the view', () => {
         class Sample extends FCClass<Props> {
-            // nenhuma declaracao de `scope` aqui: vem da base
-            private texto() {
-                // tipado como SampleScope: `label` so existe nele
+            // no `scope` declaration here: it comes from the base
+            private text() {
+                // typed as SampleScope: `label` only exists there
                 return this.scope.label.toUpperCase()
             }
             render() {
-                return <span>{this.texto()}</span>
+                return <span>{this.text()}</span>
             }
         }
 
-        // P inferido: sem parametro de tipo explicito
+        // P inferred: no explicit type argument
         const View = classToFComponent(Sample)
         const scope = new SampleScope()
 
         render(<View scope={scope} />)
-        expect(container.textContent).toBe('INICIAL')
+        expect(container.textContent).toBe('INITIAL')
 
-        scope.label = 'trocado'
+        scope.label = 'swapped'
         React.act(() => scope.forceUpdate())
-        expect(container.textContent).toBe('TROCADO')
+        expect(container.textContent).toBe('SWAPPED')
     })
 })
 
 describe('classToFComponent', () => {
-    it('permite que render devolva null', () => {
-        type Props = { visivel: boolean }
+    it('lets render return null', () => {
+        type Props = { visible: boolean }
 
         class Sample implements FCClassContext<Props> {
-            render({ visivel }: Props) {
-                return visivel ? <span>conteudo</span> : null
+            render({ visible }: Props) {
+                return visible ? <span>content</span> : null
             }
         }
 
         const View = classToFComponent(Sample)
 
-        render(<View visivel={true} />)
-        expect(container.textContent).toBe('conteudo')
+        render(<View visible={true} />)
+        expect(container.textContent).toBe('content')
 
-        render(<View visivel={false} />)
+        render(<View visible={false} />)
         expect(container.textContent).toBe('')
     })
 
-    it('atribui props.scope na instancia antes do render', () => {
+    it('assigns props.scope onto the instance before render', () => {
         type Props = { scope: SampleScope }
 
         class Sample implements FCClassContext<Props> {
             scope!: SampleScope
 
-            // le de this.scope, sem que o render tenha atribuido nada
-            private texto() {
+            // reads from this.scope, without render having assigned anything
+            private text() {
                 return this.scope.label
             }
 
             render() {
-                return <span>{this.texto()}</span>
+                return <span>{this.text()}</span>
             }
         }
 
@@ -94,10 +94,10 @@ describe('classToFComponent', () => {
         const scope = new SampleScope()
 
         render(<View scope={scope} />)
-        expect(container.textContent).toBe('inicial')
+        expect(container.textContent).toBe('initial')
     })
 
-    it('liga scope.forceUpdate para redesenhar a partir do escopo', () => {
+    it('binds scope.forceUpdate so the scope can drive a redraw', () => {
         type Props = { scope: SampleScope }
 
         class Sample implements FCClassContext<Props> {
@@ -111,14 +111,14 @@ describe('classToFComponent', () => {
         const scope = new SampleScope()
 
         render(<View scope={scope} />)
-        expect(container.textContent).toBe('inicial')
+        expect(container.textContent).toBe('initial')
 
-        scope.label = 'alterado'
+        scope.label = 'changed'
         React.act(() => scope.forceUpdate())
-        expect(container.textContent).toBe('alterado')
+        expect(container.textContent).toBe('changed')
     })
 
-    it('desliga forceUpdate ao desmontar', () => {
+    it('releases forceUpdate on unmount', () => {
         type Props = { scope: SampleScope }
 
         class Sample implements FCClassContext<Props> {
@@ -132,13 +132,13 @@ describe('classToFComponent', () => {
         const scope = new SampleScope()
 
         render(<View scope={scope} />)
-        const ligado = scope.forceUpdate
+        const bound = scope.forceUpdate
 
         render(<div />)
-        expect(scope.forceUpdate).not.toBe(ligado)
+        expect(scope.forceUpdate).not.toBe(bound)
     })
 
-    it('desliga o escopo corrente quando props.scope mudou depois da montagem', () => {
+    it('releases the current scope when props.scope changed after mounting', () => {
         type Props = { scope: SampleScope }
 
         class Sample implements FCClassContext<Props> {
@@ -149,29 +149,29 @@ describe('classToFComponent', () => {
         }
 
         const View = classToFComponent<Props>(Sample)
-        const primeiro = new SampleScope()
-        const segundo = new SampleScope()
+        const first = new SampleScope()
+        const second = new SampleScope()
 
-        render(<View scope={primeiro} />)
-        render(<View scope={segundo} />)
-        const ligadoNoSegundo = segundo.forceUpdate
+        render(<View scope={first} />)
+        render(<View scope={second} />)
+        const boundOnSecond = second.forceUpdate
 
         render(<div />)
-        expect(segundo.forceUpdate).not.toBe(ligadoNoSegundo)
+        expect(second.forceUpdate).not.toBe(boundOnSecond)
     })
 
-    it('nao se deixa enganar por uma classe que reatribui this.scope', () => {
+    it('is not misdirected by a class that reassigns this.scope', () => {
         type Props = { scope: SampleScope }
-        const intruso = new SampleScope()
-        const ligadoNoIntruso = intruso.forceUpdate
+        const impostor = new SampleScope()
+        const boundOnImpostor = impostor.forceUpdate
 
         class Sample implements FCClassContext<Props> {
             scope!: SampleScope
             render() {
-                const texto = this.scope.label
-                // uso indevido: sobrescreve o campo que o framework preencheu
-                this.scope = intruso
-                return <span>{texto}</span>
+                const text = this.scope.label
+                // misuse: overwrites the field the framework filled in
+                this.scope = impostor
+                return <span>{text}</span>
             }
         }
 
@@ -179,43 +179,43 @@ describe('classToFComponent', () => {
         const real = new SampleScope()
 
         render(<View scope={real} />)
-        const ligadoNoReal = real.forceUpdate
+        const boundOnReal = real.forceUpdate
         render(<div />)
 
-        // o escopo de verdade foi desligado...
-        expect(real.forceUpdate).not.toBe(ligadoNoReal)
-        // ...e o intruso, que nunca foi ligado, ficou intacto
-        expect(intruso.forceUpdate).toBe(ligadoNoIntruso)
+        // the real scope was released...
+        expect(real.forceUpdate).not.toBe(boundOnReal)
+        // ...and the impostor, never bound, was left untouched
+        expect(impostor.forceUpdate).toBe(boundOnImpostor)
     })
 
-    it('sobrevive a props.scope indo de indefinido para definido', () => {
-        // Regressao: com o useEffect dentro de um if, a contagem de hooks mudava
-        // entre estes dois renders e o React lancava
+    it('survives props.scope going from undefined to defined', () => {
+        // Regression: with useEffect inside an if, the hook count changed between
+        // these two renders and React threw
         // "Rendered more hooks than during the previous render".
         type Props = { scope?: SampleScope }
 
         class Sample implements FCClassContext<Props> {
             render({ scope }: Props) {
-                return <span>{scope ? scope.label : 'sem escopo'}</span>
+                return <span>{scope ? scope.label : 'no scope'}</span>
             }
         }
 
         const View = classToFComponent(Sample)
 
         render(<View />)
-        expect(container.textContent).toBe('sem escopo')
+        expect(container.textContent).toBe('no scope')
 
         render(<View scope={new SampleScope()} />)
-        expect(container.textContent).toBe('inicial')
+        expect(container.textContent).toBe('initial')
     })
 
-    it('chama onSyncState com initial=true so no primeiro render', () => {
+    it('calls onSyncState with initial=true only on the first render', () => {
         type Props = { n: number }
-        const chamadas: boolean[] = []
+        const calls: boolean[] = []
 
         class Sample implements FCClassContext<Props> {
             onSyncState(_props: Props, initial: boolean) {
-                chamadas.push(initial)
+                calls.push(initial)
             }
             render({ n }: Props) {
                 return <span>{n}</span>
@@ -227,91 +227,91 @@ describe('classToFComponent', () => {
         render(<View n={1} />)
         render(<View n={2} />)
 
-        expect(chamadas).toEqual([true, false])
+        expect(calls).toEqual([true, false])
     })
 
-    it('chama onAfterRender depois de cada render, com o DOM pronto', () => {
-        type Props = { texto: string }
-        const vistos: string[] = []
+    it('calls onAfterRender after every render, with the DOM committed', () => {
+        type Props = { text: string }
+        const seen: string[] = []
 
         class Sample implements FCClassContext<Props> {
             onAfterRender() {
-                // le do DOM: prova que roda depois da commit
-                vistos.push(container.textContent ?? '')
+                // reads the DOM: proves it runs after the commit
+                seen.push(container.textContent ?? '')
             }
-            render({ texto }: Props) {
-                return <span>{texto}</span>
+            render({ text }: Props) {
+                return <span>{text}</span>
             }
         }
 
         const View = classToFComponent<Props>(Sample)
 
-        render(<View texto="um" />)
-        render(<View texto="dois" />)
+        render(<View text="one" />)
+        render(<View text="two" />)
 
-        expect(vistos).toEqual(['um', 'dois'])
+        expect(seen).toEqual(['one', 'two'])
     })
 
-    it('nao registra o efeito pos-render em classes que nao declaram onAfterRender', () => {
-        // Conta os useEffect atraves do React injetado por optReact
-        function contarEfeitos() {
-            let chamadas = 0
-            const espiao = {
+    it('does not register the after-render effect for classes without onAfterRender', () => {
+        // Counts useEffect calls through the React injected via optReact
+        function countEffects() {
+            let calls = 0
+            const spy = {
                 ...React,
                 useEffect: (...args: Parameters<typeof React.useEffect>) => {
-                    chamadas++
+                    calls++
                     return React.useEffect(...args)
                 }
             } as unknown as typeof React
             return {
-                espiao,
-                get chamadas() {
-                    return chamadas
+                spy,
+                get calls() {
+                    return calls
                 }
             }
         }
 
-        class Sem implements FCClassContext<Record<string, never>> {
+        class Without implements FCClassContext<Record<string, never>> {
             render() {
-                return <span>sem</span>
+                return <span>without</span>
             }
         }
 
-        class Com implements FCClassContext<Record<string, never>> {
+        class With_ implements FCClassContext<Record<string, never>> {
             onAfterRender() {
                 // NOOP
             }
             render() {
-                return <span>com</span>
+                return <span>with</span>
             }
         }
 
-        const sem = contarEfeitos()
-        const ViewSem = classToFComponent<Record<string, never>>(Sem, sem.espiao)
-        render(<ViewSem />)
-        render(<ViewSem />)
+        const without = countEffects()
+        const ViewWithout = classToFComponent<Record<string, never>>(Without, without.spy)
+        render(<ViewWithout />)
+        render(<ViewWithout />)
 
-        const com = contarEfeitos()
-        const ViewCom = classToFComponent<Record<string, never>>(Com, com.espiao)
-        render(<ViewCom />)
-        render(<ViewCom />)
+        const with_ = countEffects()
+        const ViewWith = classToFComponent<Record<string, never>>(With_, with_.spy)
+        render(<ViewWith />)
+        render(<ViewWith />)
 
-        // 2 renders: sem onAfterRender paga 1 efeito por render; com, paga 2
-        expect(sem.chamadas).toBe(2)
-        expect(com.chamadas).toBe(4)
+        // 2 renders: without onAfterRender costs 1 effect per render; with it, 2
+        expect(without.calls).toBe(2)
+        expect(with_.calls).toBe(4)
     })
 
-    it('avisa quando onAfterRender e campo de instancia, em vez de ignorar em silencio', () => {
-        // O Logger faz bind de console.warn ao ser criado, entao trocar
-        // console.warn depois nao teria efeito: troca-se o metodo do logger.
-        const avisos: string[] = []
+    it('warns when onAfterRender is an instance field, instead of ignoring it silently', () => {
+        // The Logger binds console.warn when it is created, so replacing
+        // console.warn afterwards would have no effect: swap the logger's method.
+        const warnings: string[] = []
         const log = Logger.get('React.FCClass')
         const originalWarn = log.warn
-        log.warn = (...args: unknown[]) => avisos.push(args.join(' '))
+        log.warn = (...args: unknown[]) => warnings.push(args.join(' '))
 
         try {
             class Sample implements FCClassContext<Record<string, never>> {
-                // definido como campo: nao aparece no prototype
+                // defined as a field: does not appear on the prototype
                 onAfterRender = () => undefined
                 render() {
                     return <span>x</span>
@@ -324,18 +324,18 @@ describe('classToFComponent', () => {
             log.warn = originalWarn
         }
 
-        expect(avisos.join(' ')).toContain('onAfterRender')
+        expect(warnings.join(' ')).toContain('onAfterRender')
     })
 
-    it('chama onAttach na montagem e onDetach na desmontagem', () => {
-        const eventos: string[] = []
+    it('calls onAttach on mount and onDetach on unmount', () => {
+        const events: string[] = []
 
         class Sample implements FCClassContext<Record<string, never>> {
             onAttach() {
-                eventos.push('attach')
+                events.push('attach')
             }
             onDetach() {
-                eventos.push('detach')
+                events.push('detach')
             }
             render() {
                 return <span>x</span>
@@ -345,9 +345,9 @@ describe('classToFComponent', () => {
         const View = classToFComponent(Sample)
 
         render(<View />)
-        expect(eventos).toEqual(['attach'])
+        expect(events).toEqual(['attach'])
 
         render(<div />)
-        expect(eventos).toEqual(['attach', 'detach'])
+        expect(events).toEqual(['attach', 'detach'])
     })
 })

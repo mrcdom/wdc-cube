@@ -19,8 +19,8 @@ export default tseslint.config(
             }
         },
         settings: {
-            // Fixo em vez de 'detect': o react nao e dependencia da raiz do
-            // workspace, entao a deteccao falha e o plugin avisa a cada execucao.
+            // Pinned rather than 'detect': react is not a dependency of the
+            // workspace root, so detection fails and the plugin warns on every run.
             react: { version: '19.1' }
         },
         plugins: { react },

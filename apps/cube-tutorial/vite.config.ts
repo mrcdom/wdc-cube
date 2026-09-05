@@ -4,8 +4,8 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig(({ mode }) => ({
     plugins: [react()],
-    // O Logger do wdc-cube liga debug/info quando NODE_ENV === 'development'.
-    // Sem isto, `process` nao existe no browser e os dois ficam desligados.
+    // wdc-cube's Logger enables debug/info when NODE_ENV === 'development'.
+    // Without this, `process` does not exist in the browser and both stay off.
     define: {
         'process.env.NODE_ENV': JSON.stringify(mode)
     },

@@ -14,8 +14,8 @@ class ItemViewClass extends FCClass<ItemViewProps> {
 
     private readonly getCurrentEditText = () => this.editTextField.current?.value ?? ''
 
-    // Ref de callback no lugar do efeito com dependencia em scope.editing: o
-    // React a invoca exatamente quando o campo de edicao entra e sai do DOM.
+    // A ref callback instead of an effect keyed on scope.editing: React invokes
+    // it exactly when the edit field enters and leaves the DOM.
     private readonly onEditFieldRef = (node: HTMLInputElement | null) => {
         this.editTextField.current = node
         if (node) {
@@ -46,10 +46,10 @@ class ItemViewClass extends FCClass<ItemViewProps> {
                 style={style}
             >
                 {scope.editing ? (
-                    // As chaves distintas impedem o React de reaproveitar o mesmo no
-                    // DOM entre o checkbox (controlado) e este campo (nao-controlado).
-                    // De quebra, remontar faz defaultValue partir do titulo corrente
-                    // a cada entrada em edicao.
+                    // The distinct keys stop React from reusing one DOM node for
+                    // both the checkbox (controlled) and this field (uncontrolled).
+                    // Remounting also makes defaultValue start from the current
+                    // title on each entry into edit mode.
                     <input
                         key="edit"
                         ref={this.onEditFieldRef}

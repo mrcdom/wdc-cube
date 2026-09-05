@@ -16,7 +16,7 @@ export type AlertViewProps = IViewProps & {
 }
 
 class AlertViewClass extends FCClass<AlertViewProps> {
-    // Metodos de instancia sao estaveis por construcao: dispensam useCallback
+    // Instance methods are stable by construction: no useCallback needed
     private readonly onClose = () => this.scope.onClose()
 
     render({ className, ...props }: AlertViewProps) {

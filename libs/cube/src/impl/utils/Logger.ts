@@ -95,8 +95,8 @@ function ILogger_caught(this: ILogger, error: unknown): void {
 declare const process: { env?: Record<string, string | undefined> } | undefined
 
 function isDevelopmentEnv(): boolean {
-    // `process` nao existe em runtime de browser puro; bundlers costumam
-    // substituir a expressao inteira em tempo de build.
+    // `process` does not exist in a plain browser runtime; bundlers usually
+    // replace the whole expression at build time.
     return typeof process !== 'undefined' && process.env?.NODE_ENV === 'development'
 }
 

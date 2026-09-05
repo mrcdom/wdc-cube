@@ -9,18 +9,19 @@ import React from 'react'
 import { Logger, NOOP_VOID, Scope } from 'wdc-cube'
 
 /**
- * Tipo do escopo, derivado das props: `ScopeOf<{ scope: TodoScope }>` e `TodoScope`.
- * Props sem `scope` caem no tipo base.
+ * The scope type, read out of the props: `ScopeOf<{ scope: TodoScope }>` is
+ * `TodoScope`. Props without a `scope` fall back to the base type.
  */
 export type ScopeOf<P> = P extends { scope: infer S } ? S : Scope | undefined
 
 export type FCClassContext<P> = {
     /**
-     * Preenchido pelo framework antes de cada `render`, espelhando `props.scope`.
+     * Filled in by the framework before every `render`, mirroring `props.scope`.
      *
-     * `implements` apenas verifica, nao injeta membros: uma classe que use
-     * `this.scope` precisa declara-lo. Para nao repetir a declaracao, estenda
-     * {@link FCClass}, que ja a traz — e com o tipo certo, derivado das props.
+     * `implements` only checks a class, it never contributes members: a class
+     * that uses `this.scope` has to declare it. To avoid repeating that
+     * declaration, extend {@link FCClass}, which brings it already typed from
+     * the props.
      */
     scope?: ScopeOf<P>
 
@@ -28,20 +29,18 @@ export type FCClassContext<P> = {
     onAttach?: (props: P) => void
     onDetach?: (props: P) => void
 
-    /** Chamado depois de cada render, com o DOM ja atualizado. */
+    /** Called after every render, with the DOM already committed. */
     onAfterRender?: (props: P) => void
 
     render(props: P): React.ReactNode
 }
 
-// Estado interno guardado na propria instancia, sob simbolos, para nao colidir
-// com campos do usuario nem custar hooks adicionais.
 /**
- * Base opcional para views escritas como classe. Traz `scope` ja declarado e
- * tipado a partir das props, dispensando a declaracao em cada view.
+ * Optional base for views written as classes. Brings `scope` already declared
+ * and typed from the props, so views do not redeclare it.
  *
- * Quem precisar de outra classe base continua podendo usar `implements
- * FCClassContext<P>` e declarar `scope` a mao.
+ * A class that needs a different base can still use `implements
+ * FCClassContext<P>` and declare `scope` by hand.
  */
 export abstract class FCClass<P> implements FCClassContext<P> {
     scope!: ScopeOf<P>
@@ -49,6 +48,8 @@ export abstract class FCClass<P> implements FCClassContext<P> {
     abstract render(props: P): React.ReactNode
 }
 
+// Internal state kept on the instance itself, under symbols, so it neither
+// collides with the user's own fields nor costs extra hooks.
 const Attrs = {
     initialized: Symbol('initialized'),
     forceUpdate: Symbol('forceUpdate'),
@@ -64,16 +65,16 @@ const LOG = Logger.get('React.FCClass')
 export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, optReact?: typeof React): React.FC<P> {
     const react = optReact ?? React
 
-    // Decidido uma vez por classe, e nao a cada render. As regras de hooks exigem
-    // que a sequencia seja estavel dentro de UM componente; componentes distintos
-    // podem chamar conjuntos distintos. Como `classToFComponent` produz um
-    // componente por classe, e a forma da classe ja esta definida aqui, quem nao
-    // declara `onAfterRender` nao paga por um efeito que roda a cada render.
+    // Decided once per class rather than on every render. The hook rules require
+    // a stable sequence within ONE component; different components may call
+    // different sets. Since `classToFComponent` produces one component per class,
+    // and the class's shape is already known here, a class that does not declare
+    // `onAfterRender` does not pay for an effect that runs after every render.
     const hasAfterRender = typeof ctor.prototype.onAfterRender === 'function'
 
     return (props: P) => {
-        // useRef em vez de useMemo: nao aloca a closure da fabrica a cada render
-        // e da identidade estavel de fato (useMemo pode descartar o valor).
+        // useRef rather than useMemo: no factory closure allocated per render,
+        // and a genuinely stable identity (useMemo may discard its value).
         const instanceRef = react.useRef<FCClassContext<P> | undefined>(undefined)
         if (instanceRef.current === undefined) {
             instanceRef.current = new ctor(props)
@@ -86,13 +87,13 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
         if (ctxRec[Attrs.initialized] !== true) {
             if (!hasAfterRender && typeof memo.onAfterRender === 'function') {
                 LOG.warn(
-                    `${ctor.name}.onAfterRender foi definido como campo de instancia e sera ignorado. ` +
-                        'Declare-o como metodo da classe para que o framework o detecte.'
+                    `${ctor.name}.onAfterRender was defined as an instance field and will be ignored. ` +
+                        'Declare it as a class method so the framework can detect it.'
                 )
             }
 
-            // Criada uma unica vez: `setValue` e estavel entre renders, entao
-            // uma unica funcao serve para toda a vida do componente.
+            // Created once: `setValue` is stable across renders, so a single
+            // function serves for the component's whole lifetime.
             ctxRec[Attrs.forceUpdate] = () => setValue(INCREMENT)
 
             memo.onSyncState?.(props, true)
@@ -103,19 +104,19 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
 
         const scope = props_getScope(props)
         memo.scope = scope as ScopeOf<P>
-        // Copia interna: `memo.scope` e publico e a classe do usuario pode
-        // reatribui-lo, o que faria a limpeza desligar o escopo errado —
-        // e um escopo desligado por engano para de redesenhar.
+        // Internal copy: `memo.scope` is public and the user's class can reassign
+        // it, which would make cleanup release the wrong scope — and a scope
+        // released by mistake stops redrawing.
         ctxRec[Attrs.boundScope] = scope
         if (scope) {
-            // Atribuicao simples: o antigo `.bind` por render existia so porque
-            // o contador era lido do render corrente. Com a forma funcional de
-            // setValue, uma unica funcao serve para toda a vida do componente.
+            // A plain assignment: the old per-render `.bind` existed only to carry
+            // the counter read from that render. With the functional form of
+            // setValue, one function serves for the component's whole lifetime.
             scope.forceUpdate = ctxRec[Attrs.forceUpdate] as () => void
         }
 
-        // Sempre chamado: um useEffect condicional mudaria a contagem de hooks
-        // entre renders assim que props.scope saisse de indefinido para definido.
+        // Always called: a conditional useEffect would change the hook count
+        // between renders as soon as props.scope went from undefined to defined.
         react.useEffect(() => {
             memo.onAttach?.(props)
             return () => {
@@ -125,7 +126,7 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
         }, ZERO_DEPS)
 
         if (hasAfterRender) {
-            // Sem lista de dependencias de proposito: roda apos cada render.
+            // Deliberately without a dependency list: runs after every render.
             react.useEffect(() => {
                 memo.onAfterRender?.(props)
             })

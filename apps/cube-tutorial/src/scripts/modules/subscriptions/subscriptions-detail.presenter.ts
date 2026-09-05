@@ -47,8 +47,8 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             this.scope.onClose = this.action(this.onClose)
             this.scope.onSubscribe = this.action(this.onSubscribe)
 
-            // handleEmailChanged nao e uma acao: so espelha o valor digitado,
-            // sem disparar update nem historico
+            // handleEmailChanged is not an action: it only mirrors the typed
+            // value, without triggering an update or a history entry
             this.scope.onEmailChanged = this.handleEmailChanged.bind(this)
 
             this.dialogSlot = keys.dialogSlot

@@ -69,7 +69,7 @@ export class TodoMvcScope extends Scope {
     @observe() main?: MainScope
     @observe() footer?: FooterScope
 
-    /** Verdadeiro quando a lista veio do gerador de 1000 itens. */
+    /** True when the list came from the 1000-item generator. */
     @observe() stressMode = false
 
     readonly actions = {

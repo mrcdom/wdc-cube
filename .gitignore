@@ -1,21 +1,21 @@
 .claude
 .DS_Store
 
-# Dependências
+# Dependencies
 node_modules
 
-# Saídas de build
+# Build output
 lib
 dist
 build
 coverage
 *.tsbuildinfo
 
-# Lock files de outros gerenciadores (o projeto usa pnpm)
+# Lock files from other package managers (this project uses pnpm)
 package-lock.json
 yarn.lock
 
-# Logs e caches
+# Logs and caches
 *.log
 .eslintcache
 .vite

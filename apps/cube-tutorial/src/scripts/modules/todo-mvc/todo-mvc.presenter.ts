@@ -43,8 +43,8 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     private clockUpdateHandler?: NodeJS.Timeout
 
-    // Nao e ligada a nenhum escopo, mas precisa da guarda por ser
-    // disparada a partir de onHeaderSyncInputKeyDown
+    // Not attached to any scope, but it still needs the guard because it is
+    // triggered from within onHeaderSyncInputKeyDown
     private readonly addItem = this.action(this.onAddItem)
 
     public constructor(app: MainPresenter) {
@@ -53,8 +53,8 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.itemScopes = new ObservableArray<ItemScope>(this.mainScope)
 
         // Bind Events
-        // onSyncInputChange/onSyncInputKeyDown nao sao acoes: apenas espelham o
-        // estado do campo, sem disparar update nem historico
+        // onSyncInputChange/onSyncInputKeyDown are not actions: they only mirror
+        // the field's state, without triggering an update or a history entry
         this.headerScope.actions.onSyncInputChange = this.onHeaderSyncInputChange.bind(this)
         this.headerScope.actions.onSyncInputKeyDown = this.onHeaderSyncInputKeyDown.bind(this)
         this.headerScope.actions.onToggleAll = this.action(this.onToggleAll)
@@ -209,9 +209,9 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     /**
-     * Alterna entre a lista de exemplo e o gerador de 1000 itens. Navega por
-     * intent em vez de mexer no estado direto, entao a URL passa a refletir o
-     * modo e recarregar a pagina mantem onde se estava.
+     * Switches between the sample list and the 1000-item generator. It navigates
+     * through an intent rather than mutating state directly, so the mode lands in
+     * the URL and reloading the page keeps you where you were.
      */
     protected async onToggleStress() {
         const keys = new TodoMvcKeys(this.app)

@@ -80,15 +80,15 @@ export function mkAction<T extends (...args: any[]) => any>(me: IPresenter, fn: 
         try {
             const result = fn.call(me, ...args) as unknown
 
-            // Acao assincrona: encadeia para que a rejeicao seja tratada aqui
-            // e o chamador nao receba uma promise rejeitada sem handler
+            // Asynchronous action: chained so the rejection is handled here and
+            // the caller is not left holding a rejected promise with no handler
             if (isPromiseLike(result)) {
                 return (result as Promise<unknown>)
                     .catch((caught) => actionOnCatch(me, fnName, caught))
                     .finally(() => actionOnFinally(me))
             }
 
-            // Acao sincrona
+            // Synchronous action
             actionOnFinally(me)
             return result
         } catch (caught) {
