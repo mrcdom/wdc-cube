@@ -5,14 +5,22 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import React, { JSX } from 'react'
+import React from 'react'
 import { NOOP_VOID, Scope } from 'wdc-cube'
 
 export type FCClassContext<P> = {
+    /**
+     * Preenchido pelo framework antes de cada `render`, espelhando `props.scope`.
+     * Declare-o com o tipo concreto do seu escopo para usá-lo nos demais métodos
+     * da classe sem precisar receber `props` em todos eles.
+     */
+    scope?: Scope
+
     onSyncState?: (props: P, initial: boolean) => void
     onAttach?: (props: P) => void
     onDetach?: (props: P) => void
-    render(props: P): JSX.Element
+
+    render(props: P): React.ReactNode
 }
 
 const Attrs = {
@@ -24,9 +32,14 @@ const ZERO_DEPS: React.DependencyList = []
 export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, optReact?: typeof React): React.FC<P> {
     const react = optReact ?? React
     const memoFactory = (props: P) => new ctor(props)
+
     return (props: P) => {
         const memo = react.useMemo(() => memoFactory(props), ZERO_DEPS)
         const [value, setValue] = react.useState(0)
+
+        // Guarda o escopo corrente para que a limpeza desligue o certo, mesmo
+        // que props.scope tenha mudado depois da montagem.
+        const scopeRef = react.useRef<Scope | undefined>(undefined)
 
         const ctxRec = memo as unknown as Record<string | symbol, unknown>
         if (ctxRec[Attrs.initialized] !== true) {
@@ -37,17 +50,19 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
         }
 
         const scope = props_getScope(props)
-        if (scope || memo.onAttach || memo.onDetach) {
-            static_bindUpdate(scope, setValue, value)
-            react.useEffect(() => {
-                static_bindUpdate(scope, setValue, value)
-                memo.onAttach?.(props)
-                return () => {
-                    static_unbindUpdate(scope)
-                    memo.onDetach?.(props)
-                }
-            }, ZERO_DEPS)
-        }
+        memo.scope = scope
+        scopeRef.current = scope
+        static_bindUpdate(scope, setValue, value)
+
+        // Sempre chamado: um useEffect condicional mudaria a contagem de hooks
+        // entre renders assim que props.scope saisse de indefinido para definido.
+        react.useEffect(() => {
+            memo.onAttach?.(props)
+            return () => {
+                static_unbindUpdate(scopeRef.current)
+                memo.onDetach?.(props)
+            }
+        }, ZERO_DEPS)
 
         return memo.render(props)
     }

@@ -50,7 +50,7 @@ Run from the workspace root:
 ```bash
 pnpm compile        # tsc -b: builds libs/* into their lib/ folders
 pnpm build          # compile + each workspace's own build
-pnpm test           # vitest (libs/cube)
+pnpm test           # vitest (libs/cube and libs/cube-react)
 pnpm lint           # eslint (flat config, whole workspace)
 pnpm format         # prettier --write
 pnpm format:check   # prettier --check
