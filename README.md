@@ -109,6 +109,34 @@ The `@action()` decorator does the same thing and still works, but the form abov
 makes it visible at the binding site which handlers are guarded and which are
 deliberately not.
 
+## Conventions
+
+These are recommendations, not lint rules. Where the code already disagrees,
+prefer the convention for new code rather than rewriting what is there.
+
+**Prefer named exports for components.** React itself takes no side — its docs
+say "do what works best for you", and note only that anonymous defaults like
+`export default () => {}` hurt debugging. The reason to pick one here is
+consistency: with a default export the name is invented at each import site, so
+nothing stops the same component from being imported under two names, or a name
+from drifting away from its file. A named export has to match, which is also
+what makes rename, find-references and auto-import reliable. Both published
+packages already export only named symbols.
+
+Two cases legitimately need a default export: a Next.js route file, and
+`React.lazy(() => import('./x'))` — and even that one takes a wrapper:
+
+```ts
+const X = lazy(() => import('./v-x').then((m) => ({ default: m.XView })))
+```
+
+**Write views as classes over `FCClass`.** `classToFComponent` memoises the
+instance for the component's lifetime, so methods are stable references and
+handlers need no `useCallback`. `FCClass<P>` already declares `scope`, typed
+from the props, so views do not redeclare it.
+
+**Guard actions at the binding site**, as shown above.
+
 ## License
 
 MIT © WeDoCode Consultoria e Soluções Avançadas LTDA
