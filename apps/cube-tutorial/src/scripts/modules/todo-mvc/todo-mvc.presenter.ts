@@ -64,6 +64,8 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         this.footerScope.actions.onShowActives = this.action(this.onShowActives)
         this.footerScope.actions.onShowCompleteds = this.action(this.onShowCompleteds)
 
+        this.scope.actions.onToggleStress = this.action(this.onToggleStress)
+
         this.headerScope.update = this.update
         this.mainScope.update = this.update
         this.footerScope.update = this.update
@@ -124,6 +126,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
         if (force || uriUserId !== this.userId) {
             this.userId = uriUserId
+            this.scope.stressMode = this.userId < 0
 
             if (this.userId < 0) {
                 this.mainScope.clock = this.clockScope
@@ -203,6 +206,18 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         todoScope.completed = false
         this.bindItemScopeActions(todoScope)
         this.itemScopes.push(todoScope)
+    }
+
+    /**
+     * Alterna entre a lista de exemplo e o gerador de 1000 itens. Navega por
+     * intent em vez de mexer no estado direto, entao a URL passa a refletir o
+     * modo e recarregar a pagina mantem onde se estava.
+     */
+    protected async onToggleStress() {
+        const keys = new TodoMvcKeys(this.app)
+        keys.userId = this.userId < 0 ? 0 : -1
+        keys.showing = this.footerScope.showing
+        await keys.flip()
     }
 
     protected async onToggleAll() {

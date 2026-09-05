@@ -307,3 +307,32 @@
     justify-content: center;
     padding: 10px;
 }
+
+.info {
+    margin: 16px auto 0;
+    color: #bfbfbf;
+    font-size: 12px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    text-align: center;
+
+    p {
+        line-height: 1.4;
+        margin: 4px 0;
+    }
+}
+
+.stressToggle {
+    margin-top: 6px;
+    padding: 4px 10px;
+    border: 1px solid rgba(175, 47, 47, 0.2);
+    border-radius: 3px;
+    background: none;
+    color: #af5b5e;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+
+    &:hover {
+        border-color: rgba(175, 47, 47, 0.45);
+    }
+}

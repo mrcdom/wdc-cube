@@ -68,4 +68,11 @@ export class TodoMvcScope extends Scope {
     @observe() header?: HeaderScope
     @observe() main?: MainScope
     @observe() footer?: FooterScope
+
+    /** Verdadeiro quando a lista veio do gerador de 1000 itens. */
+    @observe() stressMode = false
+
+    readonly actions = {
+        onToggleStress: Scope.ASYNC_ACTION
+    }
 }

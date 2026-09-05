@@ -13,8 +13,12 @@ const LOG = Logger.get('TodoMvc.View')
 type TodoMvcViewProps = IViewProps & { scope: TodoMvcScope }
 
 class TodoMvcViewClass extends FCClass<TodoMvcViewProps> {
+    private readonly onToggleStress = () => this.scope.actions.onToggleStress()
+
     render({ className, style }: TodoMvcViewProps) {
         LOG.debug('update')
+
+        const stressMode = this.scope.stressMode
 
         return (
             <div className={clsx(className, Css.todoMvcView)} style={style}>
@@ -25,6 +29,17 @@ class TodoMvcViewClass extends FCClass<TodoMvcViewProps> {
                         <ViewSlot scope={this.scope.main} view={MainView} optional />
                         <ViewSlot scope={this.scope.footer} view={FooterView} optional />
                     </div>
+
+                    <footer className={Css.info}>
+                        <p>
+                            {stressMode
+                                ? 'Stress mode: 1000 generated items and a clock ticking every second.'
+                                : 'Showing a small sample list.'}
+                        </p>
+                        <button className={Css.stressToggle} onClick={this.onToggleStress}>
+                            {stressMode ? 'Back to the sample list' : 'Run the stress test'}
+                        </button>
+                    </footer>
                 </div>
             </div>
         )

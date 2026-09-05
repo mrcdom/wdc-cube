@@ -20,16 +20,18 @@ Or from this directory: `pnpm dev`, `pnpm build`, `pnpm preview`, `pnpm typechec
 Data comes from `TutorialService`, an in-memory mock registered as a singleton —
 there is no back end to run.
 
-Useful while working on the framework: **`#/todos?todo-uid=-1`** loads 1000 items
-and a clock that ticks every second, which is what exercises the update
-debouncing and the `hint()` given to the update manager.
+The **Run the stress test** button under the todo list swaps the sample data for
+1000 generated items and a clock ticking every second, which is what exercises
+the update debouncing and the `hint()` given to the update manager. It navigates
+rather than mutating state, so the mode lands in the URL (`?todo-uid=-1`) and
+survives a reload.
 
 ## What each module demonstrates
 
 | Module | What to look at |
 | --- | --- |
 | [main](src/scripts/modules/main) | The application shell. `MainPresenter` extends `ApplicationPresenter`: it owns the root scope, the body and dialog slots, and the global `alert()` used by every other presenter. |
-| [todo-mvc](src/scripts/modules/todo-mvc) | The busiest module. Nested scopes (header, main, footer, per-item), `ObservableArray` for the item list, `onBeforeScopeUpdate()` computing derived state in one pass, update hints for debouncing, and a filter that round-trips through the URL (`?todo-showing=1`). |
+| [todo-mvc](src/scripts/modules/todo-mvc) | The busiest module. Nested scopes (header, main, footer, per-item), `ObservableArray` for the item list, `onBeforeScopeUpdate()` computing derived state in one pass, update hints for debouncing, and filters and the stress toggle round-tripping through the URL (`?todo-showing=1`, `?todo-uid=-1`). |
 | [subscriptions](src/scripts/modules/subscriptions) | Two places, one nested in the other. The detail place renders into the shell's *dialog* slot instead of the body, and carries a parameter (`?site-id=1`) so the dialog survives a reload. |
 | [restricted](src/scripts/modules/restricted) | The smallest presenter, showing slot chaining: it receives a parent slot and offers its own to whatever is deeper in the tree. |
 

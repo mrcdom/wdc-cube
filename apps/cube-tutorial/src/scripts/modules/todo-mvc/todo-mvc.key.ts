@@ -9,7 +9,7 @@ export enum ShowingOptions {
 
 export class TodoMvcKeys extends MainKeys {
     get place() {
-        return Places.subscriptions
+        return Places.todos
     }
 
     // :: userId
