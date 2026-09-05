@@ -26,17 +26,21 @@ export type FCClassContext<P> = {
     render(props: P): React.ReactNode
 }
 
+// Estado interno guardado na propria instancia, sob simbolos, para nao colidir
+// com campos do usuario nem custar hooks adicionais.
 const Attrs = {
-    initialized: Symbol('initialized')
+    initialized: Symbol('initialized'),
+    forceUpdate: Symbol('forceUpdate')
 }
 
 const ZERO_DEPS: React.DependencyList = []
+
+const INCREMENT = (value: number) => value + 1
 
 const LOG = Logger.get('React.FCClass')
 
 export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, optReact?: typeof React): React.FC<P> {
     const react = optReact ?? React
-    const memoFactory = (props: P) => new ctor(props)
 
     // Decidido uma vez por classe, e nao a cada render. As regras de hooks exigem
     // que a sequencia seja estavel dentro de UM componente; componentes distintos
@@ -46,14 +50,18 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
     const hasAfterRender = typeof ctor.prototype.onAfterRender === 'function'
 
     return (props: P) => {
-        const memo = react.useMemo(() => memoFactory(props), ZERO_DEPS)
-        const [value, setValue] = react.useState(0)
+        // useRef em vez de useMemo: nao aloca a closure da fabrica a cada render
+        // e da identidade estavel de fato (useMemo pode descartar o valor).
+        const instanceRef = react.useRef<FCClassContext<P> | undefined>(undefined)
+        if (instanceRef.current === undefined) {
+            instanceRef.current = new ctor(props)
+        }
+        const memo = instanceRef.current
+        const ctxRec = memo as unknown as Record<string | symbol, unknown>
 
-        // Guarda o escopo corrente para que a limpeza desligue o certo, mesmo
-        // que props.scope tenha mudado depois da montagem.
+        const [, setValue] = react.useState(0)
         const scopeRef = react.useRef<Scope | undefined>(undefined)
 
-        const ctxRec = memo as unknown as Record<string | symbol, unknown>
         if (ctxRec[Attrs.initialized] !== true) {
             if (!hasAfterRender && typeof memo.onAfterRender === 'function') {
                 LOG.warn(
@@ -61,6 +69,11 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
                         'Declare-o como metodo da classe para que o framework o detecte.'
                 )
             }
+
+            // Criada uma unica vez: `setValue` e estavel entre renders, entao
+            // uma unica funcao serve para toda a vida do componente.
+            ctxRec[Attrs.forceUpdate] = () => setValue(INCREMENT)
+
             memo.onSyncState?.(props, true)
             ctxRec[Attrs.initialized] = true
         } else {
@@ -70,7 +83,12 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
         const scope = props_getScope(props)
         memo.scope = scope
         scopeRef.current = scope
-        static_bindUpdate(scope, setValue, value)
+        if (scope) {
+            // Atribuicao simples: o antigo `.bind` por render existia so porque
+            // o contador era lido do render corrente. Com a forma funcional de
+            // setValue, uma unica funcao serve para toda a vida do componente.
+            scope.forceUpdate = ctxRec[Attrs.forceUpdate] as () => void
+        }
 
         // Sempre chamado: um useEffect condicional mudaria a contagem de hooks
         // entre renders assim que props.scope saisse de indefinido para definido.
@@ -93,8 +111,6 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
     }
 }
 
-type NumValueSetter = React.Dispatch<React.SetStateAction<number>>
-
 function props_getScope(props: unknown) {
     const propsRec = props as unknown as Record<string, unknown>
     if (propsRec.scope instanceof Scope) {
@@ -102,18 +118,8 @@ function props_getScope(props: unknown) {
     }
 }
 
-function static_bindUpdate(scope: Scope | undefined, setValue: NumValueSetter, value: number) {
-    if (scope) {
-        scope.forceUpdate = scope_forceUpdate.bind(scope, setValue, value)
-    }
-}
-
 function static_unbindUpdate(scope: Scope | undefined) {
     if (scope) {
         scope.forceUpdate = NOOP_VOID
     }
-}
-
-function scope_forceUpdate(this: Scope, setValue: NumValueSetter, value: number) {
-    setValue(value + 1)
 }
