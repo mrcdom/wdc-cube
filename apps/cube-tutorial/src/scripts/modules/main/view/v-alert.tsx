@@ -25,7 +25,7 @@ export function AlertView({ scope, className, ...props }: AlertViewProps) {
 
     return (
         <>
-            <Alert className={clsx(className, Css.AlertPane)} severity={scope.severity} {...props}>
+            <Alert className={clsx(className, Css.alertPane)} severity={scope.severity} {...props}>
                 <AlertTitle>{scope.title}</AlertTitle>
                 <DialogContentText>{scope.message}</DialogContentText>
             </Alert>

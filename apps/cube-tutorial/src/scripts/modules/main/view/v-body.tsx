@@ -23,7 +23,7 @@ export function BodyView({ scope, className, ...props }: BodyViewProps) {
 
     return (
         <>
-            <div className={clsx(className, Css.BodyView)} {...props}>
+            <div className={clsx(className, Css.bodyView)} {...props}>
                 <h3>Alert examples</h3>
                 <ButtonGroup className={Css.buttonPane} color="primary" aria-label="outlined primary button group">
                     <Button onClick={onOpenInfo}>info</Button>

@@ -19,10 +19,10 @@ export const TodoMvcView = function ({ className, style, scope }: TodoMvcViewPro
     bindUpdate(React, scope)
 
     return (
-        <div className={clsx(className, Css.TodoMvcView)} style={style}>
+        <div className={clsx(className, Css.todoMvcView)} style={style}>
             <div className={Css.body}>
                 <h1>todos</h1>
-                <div className={Css.todoapp}>
+                <div className={Css.todoApp}>
                     <ViewSlot scope={scope.header} view={HeaderView} optional />
                     <ViewSlot scope={scope.main} view={MainView} optional />
                     <ViewSlot scope={scope.footer} view={FooterView} optional />

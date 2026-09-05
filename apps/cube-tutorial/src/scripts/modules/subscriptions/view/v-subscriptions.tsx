@@ -31,7 +31,7 @@ export function SubscriptionsView({ scope, className, ...props }: SubscriptionsV
     }
 
     return (
-        <div className={clsx(className, Css.SubscriptionView)} {...props}>
+        <div className={clsx(className, Css.subscriptionsView)} {...props}>
             <h1>Sites you can subscribe to...</h1>
             <List component="nav" aria-label="main mailbox folders">
                 {itemArray}

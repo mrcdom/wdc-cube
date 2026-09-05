@@ -1,4 +1,4 @@
-.MainView {
+.mainView {
     display: flex;
     flex-Direction: column;
     margin: 10px;
@@ -6,7 +6,7 @@
     flex-grow: 1;
 }
 
-.Title {
+.title {
     padding: 10px;
 }
 
@@ -18,7 +18,7 @@
     flex-grow: 1
 }
 
-.Body {
+.body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -26,17 +26,17 @@
     margin-top: 10px
 }
 
-.BodyView {
+.bodyView {
     border: dashed;
     padding: 10px;
     border-radius: 5px;
 }
 
-.BodyView .buttonPane {
+.bodyView .buttonPane {
     margin-left: 10px;
 }
 
-.AlertPane {
+.alertPane {
     margin-top: 20;
     margin-left: 20;
     margin-right: 20;

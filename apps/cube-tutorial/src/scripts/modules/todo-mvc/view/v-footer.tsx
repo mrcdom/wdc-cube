@@ -23,7 +23,7 @@ export const FooterView = function ({ className, style, scope, scope: { actions 
 
     if (scope.clearButtonVisible) {
         clearButton = (
-            <button className={Css['clear-completed']} onClick={onClearCompleted}>
+            <button className={Css.clearCompleted} onClick={onClearCompleted}>
                 Clear completed
             </button>
         )
@@ -31,7 +31,7 @@ export const FooterView = function ({ className, style, scope, scope: { actions 
 
     return (
         <footer className={clsx(className, Css.footer)} style={style}>
-            <span className={Css['todo-count']}>
+            <span className={Css.todoCount}>
                 <strong>{scope.count}</strong> {scope.activeTodoWord} left
             </span>
             <ul className={Css.filters}>

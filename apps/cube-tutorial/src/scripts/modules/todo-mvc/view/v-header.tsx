@@ -49,7 +49,7 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
                 <>
                     <input
                         id={inputUuid}
-                        className={Css['toggle-all']}
+                        className={Css.toggleAll}
                         type="checkbox"
                         onChange={onToggleAll}
                         checked={!scope.allItemsCompleted}
@@ -60,7 +60,7 @@ export const HeaderView = function ({ className, style, scope, scope: { actions 
                 </>
                 <input
                     ref={inputField}
-                    className={Css['new-todo']}
+                    className={Css.newTodo}
                     placeholder="What needs to be done?"
                     onKeyDown={onInputKeyDown}
                     autoFocus={true}

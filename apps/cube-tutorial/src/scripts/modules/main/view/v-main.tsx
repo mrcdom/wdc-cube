@@ -38,7 +38,7 @@ export function MainView({ className, scope }: MainViewProps) {
 
     return (
         <>
-            <div className={clsx(className, Css.MainView)}>
+            <div className={clsx(className, Css.mainView)}>
                 <AppBar position="static">
                     <Toolbar>
                         <IconButton edge="start" className={Css.appBarMenuButton} color="inherit" aria-label="menu">
@@ -62,7 +62,7 @@ export function MainView({ className, scope }: MainViewProps) {
                     </Toolbar>
                 </AppBar>
 
-                <ViewSlot className={Css.Body} scope={scope.body} optional={false} />
+                <ViewSlot className={Css.body} scope={scope.body} optional={false} />
 
                 <Dialog open={!!scope.dialog} onClose={onCloseDialog} aria-labelledby="form-dialog-title">
                     <ViewSlot scope={scope.dialog} />

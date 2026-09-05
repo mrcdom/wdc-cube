@@ -15,7 +15,7 @@ export function RestrictedView({ scope, className, ...props }: RestrictedViewPro
     bindUpdate(React, scope)
 
     return (
-        <div className={clsx(className, Css.View)} {...props}>
+        <div className={clsx(className, Css.restrictedView)} {...props}>
             <ViewSlot scope={scope} />
         </div>
     )
