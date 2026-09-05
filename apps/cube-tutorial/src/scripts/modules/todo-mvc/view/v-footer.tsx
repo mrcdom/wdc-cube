@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
-import Css from './todo-mvc.module.css'
+import Css from './todo-mvc.module.scss'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { FooterScope, ShowingOptions } from '../todo-mvc.scope'
 

@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps, ViewSlot } from 'wdc-cube-react'
 import { TodoMvcScope } from '../todo-mvc.scope'
-import Css from './todo-mvc.module.css'
+import Css from './todo-mvc.module.scss'
 
 import { HeaderView } from './v-header'
 import { MainView } from './v-main'

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react'
 import clsx from 'clsx'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
-import Css from './todo-mvc.module.css'
+import Css from './todo-mvc.module.scss'
 import { ItemScope } from '../todo-mvc.scope'
 
 const LOG = Logger.get('TodoMvc.ItemView')

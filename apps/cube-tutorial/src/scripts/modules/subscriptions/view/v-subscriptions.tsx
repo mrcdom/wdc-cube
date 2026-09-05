@@ -7,7 +7,7 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import { SubscriptionsScope } from '../subscriptions.scope'
-import Css from './subscriptions.module.css'
+import Css from './subscriptions.module.scss'
 
 const LOG = Logger.get('SubscriptionsView')
 

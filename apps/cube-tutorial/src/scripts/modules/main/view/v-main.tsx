@@ -12,7 +12,7 @@ import Dialog from '@mui/material/Dialog'
 import Button from '@mui/material/Button'
 import MenuIcon from '@mui/icons-material/Menu'
 
-import Css from './main.module.css'
+import Css from './main.module.scss'
 import { MainScope } from '../main.scope'
 import { AlertView } from './v-alert'
 

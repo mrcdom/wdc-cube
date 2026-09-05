@@ -1,7 +1,7 @@
 # cube-tutorial
 
 A runnable example of the [Cube architecture](../../README.md), built with Vite,
-React 19 and MUI 7. It exists to show how `Place`, `Presenter` and `Scope` fit
+React 19, MUI 7 and SCSS. It exists to show how `Place`, `Presenter` and `Scope` fit
 together in a real application, and it doubles as the manual test bed for the
 framework.
 
@@ -52,9 +52,10 @@ src/scripts/
             view/
                 index.ts          registerViews for this module
                 v-*.tsx           one file per view
+                *.module.scss     styles, scoped per file
     services/                   TutorialService, registered as a singleton
     shared/                     helpers shared across modules
-    styles/                     global CSS
+    styles/                     global stylesheet
 ```
 
 Views are prefixed `v-` and named after what they render, so a module's `view/`

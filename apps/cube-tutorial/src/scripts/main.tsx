@@ -2,7 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { PageHistoryManager } from 'wdc-cube-react'
 
-import './styles/index.css'
+import './styles/index.scss'
 
 import { registerServices } from './services'
 import { initialize as initializeRoutes } from './modules/Routes'

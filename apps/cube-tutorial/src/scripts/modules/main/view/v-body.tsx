@@ -5,7 +5,7 @@ import ButtonGroup from '@mui/material/ButtonGroup'
 import { Logger } from 'wdc-cube'
 import { bindUpdate, IViewProps } from 'wdc-cube-react'
 import { BodyScope } from '../main.scope'
-import Css from './main.module.css'
+import Css from './main.module.scss'
 
 const LOG = Logger.get('Main.BodyView')
 

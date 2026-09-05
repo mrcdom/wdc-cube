@@ -3,5 +3,9 @@ packages:
   - libs/cube-react
   - apps/cube-tutorial
 
-onlyBuiltDependencies:
-  - esbuild
+allowBuilds:
+  # Bundler nativo usado pelo Vite.
+  esbuild: true
+  # Dependencia nativa opcional do `sass`, usada so pelo modo --watch do CLI.
+  # Quem observa arquivos aqui e o Vite, entao nao ha por que compila-la.
+  '@parcel/watcher': false
