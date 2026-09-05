@@ -1,3 +1,4 @@
+.claude
 node_modules
 /libs/cube/lib
 libs/cube/tsconfig.tsbuildinfo
