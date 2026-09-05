@@ -5,8 +5,6 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { Place } from './Place'
 import { FlipIntent, ValidParamTypes } from './FlipIntent'
 import { Scope, ScopeConstructor } from './Scope'
@@ -73,39 +71,46 @@ export interface ICubePresenter extends IPresenter {
     flipToIntentString(sIntent: string): Promise<void>
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export function mkAction<T extends (...args: any[]) => any>(me: IPresenter, fn: T): T {
     const fnName = `${me.constructor.name}.${fn.name}`
 
-    const actionFn: T = (function (...args: any[]) {
-        let isNonPromise = true
+    const actionFn = function (...args: any[]) {
         try {
-            const result = fn.call(me, ...args)
+            const result = fn.call(me, ...args) as unknown
 
-            if (result && (result as Promise<void>).catch && (result as Promise<unknown>).finally) {
-                isNonPromise = false
-                const resultPromise = result as Promise<void>
-                resultPromise.catch(e => action_onCatch(me, fnName, e))
-                resultPromise.finally(() => action_onFinally(me))
+            // Acao assincrona: encadeia para que a rejeicao seja tratada aqui
+            // e o chamador nao receba uma promise rejeitada sem handler
+            if (isPromiseLike(result)) {
+                return (result as Promise<unknown>)
+                    .catch((caught) => actionOnCatch(me, fnName, caught))
+                    .finally(() => actionOnFinally(me))
             }
 
+            // Acao sincrona
+            actionOnFinally(me)
             return result
-        } catch (e) {
-            isNonPromise && action_onCatch(me, fnName, e)
-        } finally {
-            isNonPromise && action_onFinally(me)
+        } catch (caught) {
+            actionOnCatch(me, fnName, caught)
+            actionOnFinally(me)
+            return undefined
         }
-    } as unknown) as T
+    }
 
-    return actionFn
+    return actionFn as unknown as T
 }
 
-// :: internal
+export function isPromiseLike(value: unknown): value is Promise<unknown> {
+    const candidate = value as Promise<unknown> | undefined
+    return !!candidate && typeof candidate.then === 'function' && typeof candidate.finally === 'function'
+}
 
-function action_onCatch(me: IPresenter, name: string, caught: unknown) {
+export function actionOnCatch(me: IPresenter, name: string, caught: unknown) {
     me.unexpected(`During execution of ${name} action`, caught)
 }
 
-function action_onFinally(me: IPresenter) {
+export function actionOnFinally(me: IPresenter) {
     const updateManager = me.updateManager
     if (updateManager.isAutoUpdateEnabled()) {
         me.updateIfNotDirty(me.scope)

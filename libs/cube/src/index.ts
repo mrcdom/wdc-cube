@@ -32,4 +32,3 @@ export type { IPresenter, ICubePresenter, IPresenterOwner, IUpdateManager, Alert
 
 // :: Conveniencias
 export * as events from './events-react-compatible'
-

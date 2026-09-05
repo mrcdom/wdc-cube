@@ -7,7 +7,7 @@
 
 import _isFunction from 'lodash/isFunction'
 
-import { type IPresenter, mkAction } from '../IPresenter'
+import { type IPresenter, actionOnCatch, actionOnFinally, isPromiseLike } from '../IPresenter'
 
 export function action() {
     return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -25,36 +25,26 @@ export function action() {
 }
 
 function actionFn(impl: (...args: unknown[]) => Promise<void>) {
-    function onCatch(this: IPresenter, caught: unknown) {
-        this.unexpected(`During execution of ${impl.name} action`, caught)
-    }
-
-    function onFinally(this: IPresenter) {
-        const updateManager = this.updateManager
-        if (updateManager.isAutoUpdateEnabled()) {
-            this.updateIfNotDirty(this.scope)
-            updateManager.emitBeforeScopeUpdate()
-        }
-        this.updateHistory()
-    }
-
     return function (this: IPresenter, ...args: unknown[]): Promise<void> {
+        const fnName = `${this.constructor.name}.${impl.name}`
+
         try {
             const result = impl.call(this, ...args) as unknown
 
-            // Result is a valid promise
-            if (result && (result as Promise<void>).catch && (result as Promise<unknown>).finally) {
-                return (result as Promise<void>).catch(onCatch.bind(this)).finally(onFinally.bind(this))
+            // Acao assincrona
+            if (isPromiseLike(result)) {
+                return (result as Promise<void>)
+                    .catch((caught) => actionOnCatch(this, fnName, caught))
+                    .finally(() => actionOnFinally(this))
             }
-            // Otherwhise, is a synchronous action
-            else {
-                onFinally.call(this)
-                return result as Promise<void>
-            }
+
+            // Acao sincrona
+            actionOnFinally(this)
+            return Promise.resolve()
         } catch (caught) {
-            // Will only be actioned on sincronus actions
-            onCatch.call(this, caught)
-            return Promise.resolve(void 0)
+            actionOnCatch(this, fnName, caught)
+            actionOnFinally(this)
+            return Promise.resolve()
         }
     }
 }

@@ -63,7 +63,7 @@ export class Place {
     }
 
     public contains(other: Place) {
-        for(let i = 0; i < other.path.length; i++) {
+        for (let i = 0; i < other.path.length; i++) {
             const a = this.path[i]
             const b = other.path[i]
             if (a !== b) {

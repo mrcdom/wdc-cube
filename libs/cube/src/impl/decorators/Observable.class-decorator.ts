@@ -30,7 +30,7 @@ export function Observable<T extends { new (...args: any[]): object }>(ctor: T) 
         }
         const copyInitialValuesAction = new Function(actions.join('\n'))
         prototype[COPY_INITIAL_VALUES_ACTION] = copyInitialValuesAction
-        init = () => copyInitialValuesAction;
+        init = () => copyInitialValuesAction
         return copyInitialValuesAction
     }
 

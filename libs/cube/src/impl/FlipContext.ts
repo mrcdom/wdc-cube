@@ -40,7 +40,7 @@ export class FlipContext {
     }
 
     public set targetIntent(intent: FlipIntent) {
-        let cycleCount = (this.__cycleDetectionMap.get(intent.place.pathName) ?? 0) + 1
+        const cycleCount = (this.__cycleDetectionMap.get(intent.place.pathName) ?? 0) + 1
         if (cycleCount > 5) {
             throw new Error(
                 'Dectected a navigation cycle between ' +

@@ -10,14 +10,10 @@ type ILoggerMethodType = (context: string, ...data: unknown[]) => void
 export interface ILogger {
     get context(): string
 
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
     info: ILoggerMethodType
 
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
     warn: ILoggerMethodType
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
     error: ILoggerMethodType
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
     debug: ILoggerMethodType
 
     isDebugEnabled(): boolean

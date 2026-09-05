@@ -30,10 +30,10 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
 
         const ctxRec = memo as unknown as Record<string | symbol, unknown>
         if (ctxRec[Attrs.initialized] !== true) {
-            memo.onSyncState && memo.onSyncState(props, true)
+            memo.onSyncState?.(props, true)
             ctxRec[Attrs.initialized] = true
         } else {
-            memo.onSyncState && memo.onSyncState(props, false)
+            memo.onSyncState?.(props, false)
         }
 
         const scope = props_getScope(props)
@@ -41,10 +41,10 @@ export function classToFComponent<P>(ctor: new (props: P) => FCClassContext<P>, 
             static_bindUpdate(scope, setValue, value)
             react.useEffect(() => {
                 static_bindUpdate(scope, setValue, value)
-                memo.onAttach && memo.onAttach(props)
+                memo.onAttach?.(props)
                 return () => {
                     static_unbindUpdate(scope)
-                    memo.onDetach && memo.onDetach(props)
+                    memo.onDetach?.(props)
                 }
             }, ZERO_DEPS)
         }

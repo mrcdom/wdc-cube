@@ -110,6 +110,7 @@ export class Presenter<S extends Scope, OWNER extends IPresenterOwner = IPresent
 
     public readonly update = this.doUpdate.bind(this)
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public action<P extends IPresenter, T extends (...args: any[]) => any>(fn: T, owner: P | null = null): T {
         return mkAction(this, (owner ? fn.bind(owner) : fn.bind(this)) as T)
     }
@@ -137,7 +138,7 @@ type ScopeUpdateConfig = {
 
 export class ScopeUpdateManager implements IUpdateManager {
     static newUpdateRoot(scope: Scope) {
-        var mgr = new ScopeUpdateManager(scope)
+        const mgr = new ScopeUpdateManager(scope)
         return (optionalScope?: Scope) => mgr.update(optionalScope)
     }
 
@@ -356,4 +357,3 @@ export class ScopeUpdateManager implements IUpdateManager {
         }
     }
 }
-

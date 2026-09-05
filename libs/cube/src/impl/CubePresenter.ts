@@ -114,6 +114,7 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
 
     public readonly update = this.doUpdate.bind(this)
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public action<P extends IPresenter, T extends (...args: any[]) => any>(fn: T, owner: P | null = null): T {
         return mkAction(this, (owner ? fn.bind(owner) : fn.bind(this)) as T)
     }
