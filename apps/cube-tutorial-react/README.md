@@ -67,38 +67,32 @@ view layer, so module names line up on both sides of the split —
 
 ## The patterns worth copying
 
-**Keys wrap intent parameters.** Rather than reading raw strings from a
-`FlipIntent`, each module has a `*.key.ts` class in the core exposing typed
-properties:
-
-```ts
-const keys = new TodoMvcKeys(this.app, intent)
-keys.showing = ShowingOptions.ACTIVE   // writes ParamIds.TodoShowing
-await keys.flip()                      // navigates
-```
-
-Parameter names live in one place (`RouteConsts.ts`), so the short URL keys can
-change without touching presenters.
-
-**Scopes are observable state, not components.** A scope declares `@observe()`
-fields; assigning to one schedules a view update. Views never hold application
-state — they render a scope and call its actions.
+The patterns that shape presenters, scopes and keys belong to the core and are
+described in [its README](../cube-tutorial-core/README.md#the-patterns-worth-copying).
+What is specific to this package:
 
 **Views resolve through the catalog.** `ViewFactory.register(SomeScope, SomeView)`
 pairs a scope class with a component, and `<ViewSlot scope={...} />` renders
 whatever scope currently sits in a slot. That is what lets a presenter place a
-child anywhere without knowing which component will draw it.
+child anywhere without knowing which component will draw it — and what a second
+view technology has to provide an equivalent of.
 
-**Actions are guarded at binding time.** Handlers exposed on a scope are wrapped
-with `this.action(...)`, which reports failures, updates the scope and refreshes
-the URL:
+**Views are classes over `FCClass`.** The instance is memoised for the
+component's lifetime, so handlers written as arrow-function fields are stable by
+construction and no `useCallback` is needed. `FCClass<P>` already declares
+`scope`, typed from the props, so views do not redeclare it:
 
 ```ts
-this.scope.onOpenTodos = this.action(this.onOpenTodos)
-```
+class ItemViewClass extends FCClass<ItemViewProps> {
+    private readonly onToggle = () => this.scope.actions.onToggle()
 
-Methods deliberately left unguarded — the ones that only mirror what the user is
-typing — keep a plain `bind` and say so in a comment.
+    render({ className }: ItemViewProps) {
+        return <li className={className}>{this.scope.title}</li>
+    }
+}
+
+export const ItemView = classToFComponent(ItemViewClass)
+```
 
 ## Notes
 
