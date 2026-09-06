@@ -3,6 +3,11 @@
 The half of the [tutorial](../cube-tutorial-react/README.md) that does not draw
 anything: places, keys, presenters, scopes and services.
 
+The concepts it is built from — places, presenters, scopes, intents, slots and
+the update pipeline — are described in
+[The Cube architecture](../../docs/architecture.md). This package is that
+document made concrete; reading them side by side is the fastest way in.
+
 It depends on `wdc-cube` and nothing else — no React, no view library, no `.tsx`.
 That is the point: it is what a second example in another view technology would
 reuse unchanged, and it keeps the architecture's central claim honest, since a
@@ -49,6 +54,11 @@ exist under one setup — `ReturnType<typeof setInterval>` rather than `number` 
 `NodeJS.Timeout`, for instance.
 
 ## The patterns worth copying
+
+Each of these has a section in
+[The Cube architecture](../../docs/architecture.md); what follows is how they
+look in this code.
+
 
 **Keys wrap intent parameters.** Rather than reading raw strings from a
 `FlipIntent`, each module has a `*.key.ts` class exposing typed properties:

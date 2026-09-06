@@ -91,6 +91,11 @@ because scope names repeat across modules.
 
 ## How the pieces fit
 
+A short tour follows; [The Cube architecture](docs/architecture.md) covers the
+same ground in depth — the navigation lifecycle, presenter reuse and release,
+slots, the update pipeline and hints, and what a new view technology has to
+provide.
+
 A minimal picture of one navigation:
 
 ```

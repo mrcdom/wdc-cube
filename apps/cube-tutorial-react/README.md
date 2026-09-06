@@ -36,6 +36,9 @@ survives a reload.
 Cube decides *what* changed; React decides *what to do about it*. The two halves
 meet at exactly one function.
 
+For the other side of that boundary — how presenters, places and the update
+pipeline work — see [The Cube architecture](../../docs/architecture.md).
+
 ### How a scope change reaches the DOM
 
 A presenter never calls React. It assigns to a scope field, and the chain runs
