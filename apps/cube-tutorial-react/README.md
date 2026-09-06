@@ -153,7 +153,7 @@ The modules below are split across the two packages: the presenter and scope in
 | [main](../cube-tutorial-core/src/modules/main) | The application shell. `MainPresenter` extends `ApplicationPresenter`: it owns the root scope, the body and dialog slots, and the global `alert()` used by every other presenter. |
 | [todo-mvc](../cube-tutorial-core/src/modules/todo-mvc) | The busiest module. Nested scopes (header, main, footer, per-item), `ObservableArray` for the item list, `onBeforeScopeUpdate()` computing derived state in one pass, update hints for debouncing, and filters and the stress toggle round-tripping through the URL (`?todo-showing=1`, `?todo-uid=-1`). |
 | [subscriptions](../cube-tutorial-core/src/modules/subscriptions) | Two places, one nested in the other. The detail place renders into the shell's *dialog* slot instead of the body, and carries a parameter (`?site-id=1`) so the dialog survives a reload. |
-| [restricted](../cube-tutorial-core/src/modules/restricted) | The smallest presenter, showing slot chaining: it receives a parent slot and offers its own to whatever is deeper in the tree. |
+| [restricted](../cube-tutorial-core/src/modules/restricted) | The smallest presenter, showing slot chaining: it receives a parent slot and offers its own to whatever is deeper in the tree. Nothing is nested under it yet, so `#/restricted` renders the empty case. |
 
 ## Folder layout
 
