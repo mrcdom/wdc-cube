@@ -53,15 +53,17 @@ src/scripts/
     main.tsx                    bootstraps services, views, routes, React root
     modules/
         ViewCatalog.ts          registers every scope→view pair
-        <module>/view/
+        <module>/
             index.ts              registerViews for this module
             v-*.tsx               one file per view
             *.module.scss         styles, scoped per file
     styles/                     global stylesheet
 ```
 
-Views are prefixed `v-` and named after what they render, so a module's `view/`
-folder reads as a list of screens.
+Views are prefixed `v-` and named after what they render, so a module folder
+reads as a list of screens. There is no `view/` level: the whole package is the
+view layer, so module names line up on both sides of the split —
+`./modules/todo-mvc` here holds what `wdc-cube-tutorial-core/todo-mvc` drives.
 
 ## The patterns worth copying
 

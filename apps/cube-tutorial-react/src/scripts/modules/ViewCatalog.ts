@@ -1,9 +1,9 @@
 import { ViewFactory } from 'wdc-cube-react'
 
-import { registerViews as registerMainViews } from './main/view'
-import { registerViews as registerTodoMvcViews } from './todo-mvc/view'
-import { registerViews as registerSubscriptionsViews } from './subscriptions/view'
-import { registerViews as registerRestrictedViews } from './restricted/view'
+import { registerViews as registerMainViews } from './main'
+import { registerViews as registerTodoMvcViews } from './todo-mvc'
+import { registerViews as registerSubscriptionsViews } from './subscriptions'
+import { registerViews as registerRestrictedViews } from './restricted'
 
 export function registerAllViews() {
     const rv = ViewFactory.register

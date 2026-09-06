@@ -7,7 +7,7 @@ import './styles/index.scss'
 import { initializeRoutes, registerServices } from 'wdc-cube-tutorial-core'
 import { MainPresenter } from 'wdc-cube-tutorial-core/main'
 import { registerAllViews } from './modules/ViewCatalog'
-import { MainView } from './modules/main/view'
+import { MainView } from './modules/main'
 
 registerServices()
 registerAllViews()

@@ -82,7 +82,8 @@ Both libraries compile to `lib/` and declare `exports`, `files` and
 
 The example is split in two so the framework's own separation is visible in the
 file tree: `cube-tutorial-core` holds the places, presenters and scopes and never
-imports React, while `cube-tutorial-react` holds only views and the bootstrap.
+imports React, while `cube-tutorial-react` holds only views and the bootstrap, with no `view/` level
+since the whole package is the view layer.
 Adding an example in another view technology means writing a second package
 alongside `cube-tutorial-react`, with the core untouched. The core is consumed as
 source — its `exports` point at `.ts` files — and exposes one subpath per module,
