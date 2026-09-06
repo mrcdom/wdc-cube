@@ -11,21 +11,17 @@
   },
   "type": "module",
   "sideEffects": false,
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
-    }
+    ".": "./src/index.ts"
   },
   "files": [
-    "lib",
+    "src",
     "README.md"
   ],
   "scripts": {
-    "compile": "tsc -b",
-    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },

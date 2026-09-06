@@ -4,14 +4,18 @@ packages:
   - libs/cube-angular
   - apps/cube-tutorial-core
   - apps/cube-tutorial-react
+  - apps/cube-tutorial-angular
 
 allowBuilds:
   # Native bundler used by Vite.
   esbuild: true
+  # Angular's build cache. Optional — it falls back to an in-memory cache — but
+  # building these is what makes rebuilds fast.
+  lmdb: true
+  msgpackr-extract: true
   # Optional native dependency of `sass`, used only by its CLI --watch mode.
   # Vite is what watches files here, so there is no reason to build it.
   '@parcel/watcher': false
-
 
 peerDependencyRules:
   allowedVersions:

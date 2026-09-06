@@ -5,7 +5,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import _isFunction from 'lodash/isFunction'
+import { isFunction } from '../utils/TypeGuards'
 
 import { type IPresenter, actionOnCatch, actionOnFinally, isPromiseLike } from '../IPresenter'
 
@@ -26,7 +26,7 @@ import { type IPresenter, actionOnCatch, actionOnFinally, isPromiseLike } from '
  */
 export function action() {
     return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
-        if (_isFunction(descriptor.value)) {
+        if (isFunction(descriptor.value)) {
             const instrumentedMethod = actionFn(descriptor.value)
 
             Object.defineProperty(instrumentedMethod, 'name', {

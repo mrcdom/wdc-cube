@@ -1,0 +1,146 @@
+.main-view {
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    align-self: stretch;
+    flex-grow: 1;
+}
+
+.app-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #1976d2;
+    color: #fff;
+
+    button {
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        text-transform: uppercase;
+        cursor: pointer;
+        padding: 6px 8px;
+
+        &:hover {
+            background-color: #ffffff1f;
+            border-radius: 4px;
+        }
+    }
+}
+
+.menu-button {
+    font-size: 20px;
+}
+
+.app-bar-title {
+    flex-grow: 1;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-self: stretch;
+    margin-top: 10px;
+}
+
+.body-view {
+    border: dashed;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.button-pane {
+    display: flex;
+
+    button {
+        padding: 6px 14px;
+        border: 1px solid rgba(25, 118, 210, 0.5);
+        background: none;
+        color: #1976d2;
+        font: inherit;
+        text-transform: uppercase;
+        cursor: pointer;
+
+        &:not(:first-child) {
+            border-left: 0;
+        }
+
+        &:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        &:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+    }
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: #00000080;
+}
+
+.dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 300px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 11px 15px #0003;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 4px;
+
+    p {
+        margin: 4px 0 0;
+    }
+
+    &.alert-info {
+        background-color: #e5f6fd;
+        color: #014361;
+    }
+    &.alert-success {
+        background-color: #edf7ed;
+        color: #1e4620;
+    }
+    &.alert-warning {
+        background-color: #fff4e5;
+        color: #663c00;
+    }
+    &.alert-error {
+        background-color: #fdeded;
+        color: #5f2120;
+    }
+}
+
+.alert-title {
+    display: block;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px;
+
+    button {
+        border: 0;
+        background: none;
+        color: #1976d2;
+        font: inherit;
+        text-transform: uppercase;
+        cursor: pointer;
+        padding: 6px 8px;
+    }
+}

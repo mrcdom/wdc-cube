@@ -9,9 +9,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "types": [],
-    "isolatedModules": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "strict": true,
@@ -19,22 +17,17 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "noEmit": false,
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "rootDir": "src",
-    "outDir": "lib",
-    "incremental": true
+    "skipLibCheck": true
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "typeCheckHostBindings": true
   },
   "include": [
-    "src"
+    "src/**/*.ts",
+    "../../libs/cube-angular/src/**/*.ts"
   ],
-  "references": [
-    {
-      "path": "../../libs/cube"
-    }
+  "files": [
+    "src/main.ts"
   ]
 }

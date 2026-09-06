@@ -5,8 +5,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import _isFunction from 'lodash/isFunction'
-import _isObject from 'lodash/isObject'
+import { isFunction, isObject } from './utils/TypeGuards'
 import { Place, PlaceCreator } from './Place'
 import { NOOP_VOID } from './utils/EmptyFunctions'
 
@@ -34,11 +33,11 @@ export class CubeBuilder {
 
 function doBuild(parent: Place, path: string, routers: Record<string, unknown>) {
     const placeCreator = routers.presenter as PlaceCreator | undefined
-    if (placeCreator && _isFunction(placeCreator)) {
+    if (placeCreator && isFunction(placeCreator)) {
         const place = placeCreator(path, parent)
 
         for (const [key, value] of Object.entries(routers)) {
-            if (key !== 'presenter' && _isObject(value)) {
+            if (key !== 'presenter' && isObject(value)) {
                 doBuild(place, path + '/' + key, value as Record<string, unknown>)
             }
         }

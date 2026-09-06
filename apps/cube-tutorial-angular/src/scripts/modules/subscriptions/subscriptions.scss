@@ -1,0 +1,73 @@
+.subscriptions-view {
+    display: flex;
+    flex-direction: column;
+    border: dashed;
+    padding: 10px;
+    border-radius: 5px;
+
+    nav ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    nav button {
+        display: block;
+        width: 100%;
+        padding: 8px 16px;
+        border: 0;
+        background: none;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #0000000a;
+        }
+    }
+}
+
+.dialog-title {
+    margin: 0;
+    padding: 16px 24px;
+    font-size: 20px;
+}
+
+.dialog-content {
+    padding: 0 24px;
+
+    label {
+        display: block;
+        margin-top: 12px;
+        font-size: 12px;
+        color: #1976d2;
+    }
+
+    input {
+        display: block;
+        width: 100%;
+        margin-top: 4px;
+        padding: 8px;
+        border: 1px solid #1976d2;
+        border-radius: 4px;
+        font: inherit;
+        color: initial;
+    }
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px;
+
+    button {
+        border: 0;
+        background: none;
+        color: #1976d2;
+        font: inherit;
+        text-transform: uppercase;
+        cursor: pointer;
+        padding: 6px 8px;
+    }
+}

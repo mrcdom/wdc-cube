@@ -8,7 +8,7 @@
       "path": "libs/cube-react"
     },
     {
-      "path": "libs/cube-angular"
+      "path": "apps/cube-tutorial-core"
     }
   ]
 }
