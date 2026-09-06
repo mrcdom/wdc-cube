@@ -39,7 +39,17 @@ importers:
         specifier: 8.69.0
         version: 8.69.0(eslint@10.9.1)(typescript@6.0.3)
 
-  apps/cube-tutorial:
+  apps/cube-tutorial-core:
+    dependencies:
+      wdc-cube:
+        specifier: workspace:*
+        version: link:../../libs/cube
+    devDependencies:
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  apps/cube-tutorial-react:
     dependencies:
       '@emotion/react':
         specifier: ^11.14.0
@@ -68,6 +78,9 @@ importers:
       wdc-cube-react:
         specifier: workspace:*
         version: link:../../libs/cube-react
+      wdc-cube-tutorial-core:
+        specifier: workspace:*
+        version: link:../cube-tutorial-core
     devDependencies:
       '@types/react':
         specifier: ^19.1.13

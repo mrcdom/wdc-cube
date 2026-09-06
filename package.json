@@ -7,8 +7,9 @@
     "compile": "tsc -b tsconfig.build.json",
     "build": "pnpm run compile && pnpm -r --if-present run build",
     "test": "pnpm -r --if-present run test",
+    "typecheck": "pnpm -r --if-present run typecheck",
     "lint": "eslint .",
-    "start": "pnpm --filter wdc-cube-tutorial run start",
+    "start": "pnpm --filter wdc-cube-tutorial-react run start",
     "format": "prettier --write \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/*/src/**/*.{ts,tsx,yml}\"",
     "format:check": "prettier --check \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/*/src/**/*.{ts,tsx,yml}\"",
     "lint:fix": "eslint . --fix"

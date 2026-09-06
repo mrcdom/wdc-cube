@@ -22,11 +22,12 @@ This repository holds the framework and a tutorial application that exercises it
 
 ## Packages
 
-| Path                                     | Package          | What it is                                                                                                                                                                                                       |
-| ---------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [libs/cube](libs/cube)                   | `wdc-cube`       | The framework core: `Place`, `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Scope`, `FlipIntent`, `CubeBuilder`, plus utilities (`Logger`, `SingletonServices`, `ObservableArray`). No React dependency. |
-| [libs/cube-react](libs/cube-react)       | `wdc-cube-react` | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `bindUpdate` and `classToFComponent` to connect a scope to a component, `PageHistoryManager` to drive the URL.                          |
-| [apps/cube-tutorial](apps/cube-tutorial) | —                | A runnable example. See its [README](apps/cube-tutorial/README.md).                                                                                                                                              |
+| Path                                                 | Package                  | What it is                                                                                                                                                                                                       |
+| ---------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [libs/cube](libs/cube)                               | `wdc-cube`               | The framework core: `Place`, `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Scope`, `FlipIntent`, `CubeBuilder`, plus utilities (`Logger`, `SingletonServices`, `ObservableArray`). No React dependency. |
+| [libs/cube-react](libs/cube-react)                   | `wdc-cube-react`         | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `bindUpdate` and `classToFComponent` to connect a scope to a component, `PageHistoryManager` to drive the URL.                          |
+| [apps/cube-tutorial-core](apps/cube-tutorial-core)   | `wdc-cube-tutorial-core` | The view-agnostic half of the example: places, keys, presenters, scopes and services. Depends on `wdc-cube` only, so a view written in any technology can drive it.                                              |
+| [apps/cube-tutorial-react](apps/cube-tutorial-react) | —                        | The React view layer over that core, and the runnable app. See its [README](apps/cube-tutorial-react/README.md).                                                                                                 |
 
 ## Requirements
 
@@ -68,7 +69,8 @@ libs/cube/src/
 libs/cube-react/src/
     index.ts            public API
     impl/               implementation
-apps/cube-tutorial/     example application
+apps/cube-tutorial-core/    example: everything that does not draw
+apps/cube-tutorial-react/   example: the React views and the app shell
 eslint.config.mjs       one flat config for the whole workspace
 .prettierrc.json        one formatting config for the whole workspace
 tsconfig.json           shared compiler options
@@ -77,6 +79,14 @@ tsconfig.build.json     project references used by `pnpm compile`
 
 Both libraries compile to `lib/` and declare `exports`, `files` and
 `sideEffects`, so they are publishable as-is. Build output is not tracked in git.
+
+The example is split in two so the framework's own separation is visible in the
+file tree: `cube-tutorial-core` holds the places, presenters and scopes and never
+imports React, while `cube-tutorial-react` holds only views and the bootstrap.
+Adding an example in another view technology means writing a second package
+alongside `cube-tutorial-react`, with the core untouched. The core is consumed as
+source — its `exports` point at `.ts` files — and exposes one subpath per module,
+because scope names repeat across modules.
 
 ## How the pieces fit
 
