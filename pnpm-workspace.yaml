@@ -1,6 +1,7 @@
 packages:
   - libs/cube
   - libs/cube-react
+  - libs/cube-angular
   - apps/cube-tutorial-core
   - apps/cube-tutorial-react
 

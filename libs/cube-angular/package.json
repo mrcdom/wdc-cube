@@ -1,13 +1,13 @@
 {
-  "name": "wdc-cube-react",
+  "name": "wdc-cube-angular",
   "version": "1.1.0",
-  "description": "React bindings for the Cube architecture",
+  "description": "Angular bindings for the Cube architecture",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/mrcdom/wdc-cube.git",
-    "directory": "libs/cube-react"
+    "directory": "libs/cube-angular"
   },
   "type": "module",
   "sideEffects": false,
@@ -30,18 +30,20 @@
     "test:watch": "vitest"
   },
   "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0"
   },
   "dependencies": {
     "wdc-cube": "workspace:*"
   },
   "devDependencies": {
-    "@types/react": "^19.1.13",
-    "@types/react-dom": "^19.1.9",
+    "@angular/common": "^22.1.5",
+    "@angular/compiler": "^22.1.5",
+    "@angular/core": "^22.1.5",
+    "@angular/platform-browser": "^22.1.5",
     "jsdom": "^30.0.1",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "vitest": "^5.0.0"
+    "rxjs": "^7.8.2",
+    "vitest": "^5.0.0",
+    "zone.js": "~0.16.0"
   }
 }

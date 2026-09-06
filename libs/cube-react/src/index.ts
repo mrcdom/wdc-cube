@@ -9,7 +9,6 @@ export { ReactComponent } from './impl/ReactComponent'
 export { bindUpdate, getOrCreateApplication } from './impl/ReactFunctionalComponent'
 export { CubeComponent } from './impl/CubeComponent'
 export { ViewFactory, ViewSlot } from './impl/ViewFactory'
-export { PageHistoryManager } from './impl/PageHistoryManager'
 export { CubeRefObject } from './impl/CubeRefObject'
 export { classToFComponent, FCClass, type FCClassContext, type ScopeOf } from './impl/ReactFunctionalClass'
 

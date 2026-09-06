@@ -1,6 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { PageHistoryManager } from 'wdc-cube-react'
+import { PageHistoryManager } from 'wdc-cube'
 
 import './styles/index.scss'
 
