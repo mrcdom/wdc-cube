@@ -22,12 +22,14 @@ This repository holds the framework and a tutorial application that exercises it
 
 ## Packages
 
-| Path                                                 | Package                  | What it is                                                                                                                                                                                                       |
-| ---------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [libs/cube](libs/cube)                               | `wdc-cube`               | The framework core: `Place`, `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Scope`, `FlipIntent`, `CubeBuilder`, plus utilities (`Logger`, `SingletonServices`, `ObservableArray`). No React dependency. |
-| [libs/cube-react](libs/cube-react)                   | `wdc-cube-react`         | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `bindUpdate` and `classToFComponent` to connect a scope to a component, `PageHistoryManager` to drive the URL.                          |
-| [apps/cube-tutorial-core](apps/cube-tutorial-core)   | `wdc-cube-tutorial-core` | The view-agnostic half of the example: places, keys, presenters, scopes and services. Depends on `wdc-cube` only, so a view written in any technology can drive it.                                              |
-| [apps/cube-tutorial-react](apps/cube-tutorial-react) | —                        | The React view layer over that core, and the runnable app. See its [README](apps/cube-tutorial-react/README.md).                                                                                                 |
+| Path                                                     | Package                  | What it is                                                                                                                                                                                                       |
+| -------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [libs/cube](libs/cube)                                   | `wdc-cube`               | The framework core: `Place`, `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Scope`, `FlipIntent`, `CubeBuilder`, plus utilities (`Logger`, `SingletonServices`, `ObservableArray`). No React dependency. |
+| [libs/cube-react](libs/cube-react)                       | `wdc-cube-react`         | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `bindUpdate` and `classToFComponent` to connect a scope to a component, `PageHistoryManager` to drive the URL.                          |
+| [apps/cube-tutorial-core](apps/cube-tutorial-core)       | `wdc-cube-tutorial-core` | The view-agnostic half of the example: places, keys, presenters, scopes and services. Depends on `wdc-cube` only, so a view written in any technology can drive it.                                              |
+| [apps/cube-tutorial-react](apps/cube-tutorial-react)     | —                        | The React view layer over that core, and the runnable app. See its [README](apps/cube-tutorial-react/README.md).                                                                                                 |
+| [libs/cube-angular](libs/cube-angular)                   | `wdc-cube-angular`       | Angular bindings: `bindScope` to answer `scope.forceUpdate()`, `ViewFactory` and the `*cubeViewSlot` directive to resolve a scope to a component.                                                                |
+| [apps/cube-tutorial-angular](apps/cube-tutorial-angular) | —                        | The same core driven by Angular instead, so the two apps differ only in the binding. See its [README](apps/cube-tutorial-angular/README.md).                                                                     |
 
 ## Requirements
 
@@ -41,7 +43,8 @@ This repository holds the framework and a tutorial application that exercises it
 corepack enable pnpm     # once per machine
 pnpm install
 pnpm compile             # builds the two libraries
-pnpm start               # runs the tutorial at http://localhost:3000
+pnpm start               # runs the React tutorial at http://localhost:3000
+pnpm start:angular       # runs the Angular tutorial at http://localhost:3001
 ```
 
 ## Commands
@@ -55,7 +58,8 @@ pnpm test           # vitest (libs/cube and libs/cube-react)
 pnpm lint           # eslint (flat config, whole workspace)
 pnpm format         # prettier --write
 pnpm format:check   # prettier --check
-pnpm start          # dev server for the tutorial app
+pnpm start          # dev server for the React tutorial (port 3000)
+pnpm start:angular  # dev server for the Angular tutorial (port 3001)
 pnpm clean          # removes lib/, dist/, build/, coverage/, *.tsbuildinfo
 ```
 
@@ -71,6 +75,7 @@ libs/cube-react/src/
     impl/               implementation
 apps/cube-tutorial-core/    example: everything that does not draw
 apps/cube-tutorial-react/   example: the React views and the app shell
+apps/cube-tutorial-angular/ example: the same core, drawn by Angular
 eslint.config.mjs       one flat config for the whole workspace
 .prettierrc.json        one formatting config for the whole workspace
 tsconfig.json           shared compiler options
@@ -84,8 +89,8 @@ The example is split in two so the framework's own separation is visible in the
 file tree: `cube-tutorial-core` holds the places, presenters and scopes and never
 imports React, while `cube-tutorial-react` holds only views and the bootstrap, with no `view/` level
 since the whole package is the view layer.
-Adding an example in another view technology means writing a second package
-alongside `cube-tutorial-react`, with the core untouched. The core is consumed as
+`cube-tutorial-angular` is that same core drawn by Angular, and adding it needed
+no change to the core at all. The core is consumed as
 source — its `exports` point at `.ts` files — and exposes one subpath per module,
 because scope names repeat across modules.
 
