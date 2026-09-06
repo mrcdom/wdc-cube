@@ -31,6 +31,115 @@ the update debouncing and the `hint()` given to the update manager. It navigates
 rather than mutating state, so the mode lands in the URL (`?todo-uid=-1`) and
 survives a reload.
 
+## What React brings
+
+Cube decides *what* changed; React decides *what to do about it*. The two halves
+meet at exactly one function.
+
+### How a scope change reaches the DOM
+
+A presenter never calls React. It assigns to a scope field, and the chain runs
+itself:
+
+1. An `@observe()` field is assigned, or the presenter calls `update(scope)`
+2. `ScopeUpdateManager` records the scope as dirty — or, when the presenter's own
+   root scope changes, marks the whole subtree for update
+3. A flush is scheduled once through `CallbackManager`, on a ~16 ms timer, so a
+   burst of assignments collapses into one pass
+4. On flush, `onBeforeScopeUpdate` listeners run first — that is where derived
+   state is computed in one go — and then each dirty scope's `forceUpdate()` is
+   called
+5. `forceUpdate` is whatever the view bound to it. Here, `classToFComponent`
+   bound it to a `useState` counter, so calling it schedules a React re-render
+
+```
+presenter → scope field → dirty set → 16ms flush → scope.forceUpdate()
+                                                          ↓
+                                        setState → React reconciles → DOM
+```
+
+`scope.forceUpdate` is the whole contract. A scope carries no view type and no
+framework object, which is why `cube-tutorial-core` compiles without React at
+all — and why a different view technology only has to answer that one call.
+
+### What React contributes past that point
+
+**Reconciliation is the division of labour.** Cube's granularity is the scope: it
+knows *this scope changed*, not which of its fields. React's granularity is the
+element. So marking a scope dirty costs one diff of that component's output, and
+a change to a single field ends up as a single text-node write. Cube is spared
+having to track field-level dependencies.
+
+**The component tree mirrors the scope tree.** `ViewSlot` renders whatever
+component is registered for the scope currently sitting in a slot, so the tree of
+scopes a presenter assembles becomes a tree of components without either side
+naming the other.
+
+**Keys give list identity.** In `v-main.tsx` each item is rendered as
+`<ViewSlot key={todo.id} scope={todo} view={ItemView} />`. Reordering or removing
+items moves DOM nodes instead of rebuilding them, and each item's own state — the
+edit field, its focus — travels with it.
+
+**Batching absorbs the flush.** A flush may call `forceUpdate()` on many scopes;
+React coalesces those into one commit rather than one layout pass each.
+
+**`hint()` is Cube deferring to reconciliation.** The todo presenter registers
+`hint(ItemScope, mainScope, 10)`: if more than ten item scopes are dirty in the
+same flush, update the *list* scope instead of the items. Re-rendering one parent
+and letting React diff the children beats a thousand individual state updates —
+which is what the **Run the stress test** button exists to show.
+
+### The shape of a view
+
+Views are classes wrapped by `classToFComponent`. The instance is memoised for
+the component's lifetime, which is what makes the pattern worth its indirection:
+
+```ts
+class ItemViewClass extends FCClass<ItemViewProps> {
+    private readonly onToggle = () => this.scope.actions.onToggle()
+
+    render({ className }: ItemViewProps) {
+        return <li className={className}>{this.scope.title}</li>
+    }
+}
+
+export const ItemView = classToFComponent(ItemViewClass)
+```
+
+- **Handlers are stable by construction.** `onToggle` is created once, so its
+  identity never changes between renders. In React that identity is what decides
+  whether a child re-renders, so the usual `useCallback` and its dependency array
+  simply have no reason to exist here
+- **`this.scope` is refreshed before every render**, so a handler reads the
+  current scope rather than closing over the prop it saw when it was created —
+  the stale-closure problem the dependency arrays were guarding against
+- **Lifecycle maps onto hooks**: `onSyncState` runs before render, `onAttach` and
+  `onDetach` on mount and unmount, `onAfterRender` after the DOM is committed.
+  A class pays only for what it declares — the after-render effect is registered
+  only for classes that define `onAfterRender`, decided once per class
+
+### Where the fit is imperfect
+
+Worth knowing before writing views, and worth weighing when choosing another
+view technology.
+
+**Scope updates are asynchronous; React's controlled inputs are not.** React
+restores a controlled input's value at the end of every event, and the scope's
+new value only arrives on the next flush — so an `<input value={scope.field}>`
+loses keystrokes typed faster than the timer. The two fields whose value comes
+from a scope are uncontrolled for that reason, reading through a ref and letting
+the presenter push back only when it is the one changing them; the comment in
+[v-header.tsx](src/scripts/modules/todo-mvc/v-header.tsx) works through it.
+
+**A scope binds one component.** `forceUpdate` is a single slot, so two
+components rendering the same scope means the last one to render wins. Scopes are
+meant to be per-view.
+
+**The binding is written during render.** `classToFComponent` assigns
+`scope.forceUpdate` in the render body so it is live immediately, rather than
+after the commit. It works, but it is a mutation during render, which React's
+concurrent rendering discourages.
+
 ## What each module demonstrates
 
 The modules below are split across the two packages: the presenter and scope in
@@ -67,43 +176,29 @@ view layer, so module names line up on both sides of the split —
 
 ## The patterns worth copying
 
-**Keys wrap intent parameters.** Rather than reading raw strings from a
-`FlipIntent`, each module has a `*.key.ts` class in the core exposing typed
-properties:
-
-```ts
-const keys = new TodoMvcKeys(this.app, intent)
-keys.showing = ShowingOptions.ACTIVE   // writes ParamIds.TodoShowing
-await keys.flip()                      // navigates
-```
-
-Parameter names live in one place (`RouteConsts.ts`), so the short URL keys can
-change without touching presenters.
-
-**Scopes are observable state, not components.** A scope declares `@observe()`
-fields; assigning to one schedules a view update. Views never hold application
-state — they render a scope and call its actions.
+The patterns that shape presenters, scopes and keys belong to the core and are
+described in [its README](../cube-tutorial-core/README.md#the-patterns-worth-copying).
+What is specific to this package:
 
 **Views resolve through the catalog.** `ViewFactory.register(SomeScope, SomeView)`
 pairs a scope class with a component, and `<ViewSlot scope={...} />` renders
 whatever scope currently sits in a slot. That is what lets a presenter place a
-child anywhere without knowing which component will draw it.
+child anywhere without knowing which component will draw it — and what a second
+view technology has to provide an equivalent of.
 
-**Actions are guarded at binding time.** Handlers exposed on a scope are wrapped
-with `this.action(...)`, which reports failures, updates the scope and refreshes
-the URL:
+**Views are classes over `FCClass`.** The instance is memoised for the
+component's lifetime, so handlers written as arrow-function fields are stable by
+construction and no `useCallback` is needed. `FCClass<P>` already declares
+`scope`, typed from the props, so views do not redeclare it:
 
 ```ts
-this.scope.onOpenTodos = this.action(this.onOpenTodos)
+class ItemViewClass extends FCClass<ItemViewProps> {
+    private readonly onToggle = () => this.scope.actions.onToggle()
+
+    render({ className }: ItemViewProps) {
+        return <li className={className}>{this.scope.title}</li>
+    }
+}
+
+export const ItemView = classToFComponent(ItemViewClass)
 ```
-
-Methods deliberately left unguarded — the ones that only mirror what the user is
-typing — keep a plain `bind` and say so in a comment.
-
-## Notes
-
-The "What needs to be done?" field is intentionally **uncontrolled**
-(`defaultValue` plus an effect). Scope updates are asynchronous, and React
-restores the value of controlled inputs at the end of every event, which would
-erase each keystroke before the scope caught up. The comment in
-[v-header.tsx](src/scripts/modules/todo-mvc/view/v-header.tsx) explains it.

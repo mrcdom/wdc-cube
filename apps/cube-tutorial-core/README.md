@@ -47,3 +47,33 @@ Because the source is compiled by the consumer, its `tsconfig` decides which
 global types are in scope. Code here should therefore avoid spellings that only
 exist under one setup — `ReturnType<typeof setInterval>` rather than `number` or
 `NodeJS.Timeout`, for instance.
+
+## The patterns worth copying
+
+**Keys wrap intent parameters.** Rather than reading raw strings from a
+`FlipIntent`, each module has a `*.key.ts` class exposing typed properties:
+
+```ts
+const keys = new TodoMvcKeys(this.app, intent)
+keys.showing = ShowingOptions.ACTIVE   // writes ParamIds.TodoShowing
+await keys.flip()                      // navigates
+```
+
+Parameter names live in one place (`RouteConsts.ts`), so the short URL keys can
+change without touching presenters.
+
+**Scopes are observable state, not components.** A scope declares `@observe()`
+fields; assigning to one schedules a view update. A scope holds no view type and
+no framework object — which is why this package compiles without one, and why the
+same scope can drive views written in different technologies.
+
+**Actions are guarded at binding time.** Handlers exposed on a scope are wrapped
+with `this.action(...)`, which reports failures, updates the scope and refreshes
+the URL:
+
+```ts
+this.scope.onOpenTodos = this.action(this.onOpenTodos)
+```
+
+Methods deliberately left unguarded — the ones that only mirror what the user is
+typing — keep a plain `bind` and say so in a comment.
