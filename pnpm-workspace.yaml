@@ -1,7 +1,8 @@
 packages:
   - libs/cube
   - libs/cube-react
-  - apps/cube-tutorial
+  - apps/cube-tutorial-core
+  - apps/cube-tutorial-react
 
 allowBuilds:
   # Native bundler used by Vite.
