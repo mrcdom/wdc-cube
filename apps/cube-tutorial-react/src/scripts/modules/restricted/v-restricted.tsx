@@ -12,9 +12,19 @@ class RestrictedViewClass extends FCClass<RestrictedViewProps> {
     render({ className, ...props }: RestrictedViewProps) {
         LOG.debug('update')
 
+        const detail = this.scope.detail
+
         return (
             <div className={clsx(className, Css.restrictedView)} {...props}>
-                <ViewSlot scope={this.scope} />
+                {detail ? (
+                    // The slot this presenter offered to whatever place sits deeper
+                    // in the tree. Rendering this.scope here instead would resolve
+                    // back to this very view, since RestrictedScope is registered to
+                    // it — an unbounded recursion that takes the tab down with it.
+                    <ViewSlot scope={detail} />
+                ) : (
+                    <p>Nothing is nested under this place yet.</p>
+                )}
             </div>
         )
     }

@@ -2,6 +2,6 @@ import { Observable, observe, Scope } from 'wdc-cube'
 
 @Observable
 export class RestrictedScope extends Scope {
-    @observe() menu?: Scope | null
+    /** Filled by the slot this presenter hands to a deeper place. */
     @observe() detail?: Scope | null
 }
