@@ -37,11 +37,76 @@ export class AppAlertDialog extends AlertDialog {
         return [
             ...super.styles,
             css`
-                :host([variant='success']) {
-                    --mod-icon-color: var(
-                        --mod-alert-dialog-success-icon-color,
-                        var(--spectrum-alert-dialog-success-icon-color, var(--spectrum-positive-visual-color))
+                /*
+                 * Spectrum's own dials, all of them --mod-*. The defaults are
+                 * drawn for a dialog carrying a paragraph or two: 32px of
+                 * padding and 48px between the text and the buttons leave the
+                 * short messages this application shows adrift in white space,
+                 * and a 20px icon reads as decoration rather than as the thing
+                 * that says what kind of alert this is.
+                 */
+                :host {
+                    --mod-alert-dialog-padding: var(--spectrum-spacing-400);
+                    --mod-alert-dialog-description-to-buttons: var(--spectrum-spacing-400);
+                    --mod-alert-dialog-icon-size: var(--spectrum-workflow-icon-size-300);
+                    --mod-alert-dialog-title-font-size: var(--spectrum-heading-size-m);
+                }
+
+                /*
+                 * The severity, as one colour. Everything it tints reads from
+                 * here, so a dialog is coloured by what it is rather than by
+                 * four rules that have to be kept in step.
+                 */
+                :host([variant='information']) {
+                    --app-alert-dialog-accent-color: var(
+                        --mod-alert-dialog-information-icon-color,
+                        var(--spectrum-informative-visual-color)
                     );
+                }
+
+                :host([variant='success']) {
+                    --app-alert-dialog-accent-color: var(
+                        --mod-alert-dialog-success-icon-color,
+                        var(--spectrum-positive-visual-color)
+                    );
+                }
+
+                :host([variant='warning']) {
+                    --app-alert-dialog-accent-color: var(
+                        --mod-alert-dialog-warning-icon-color,
+                        var(--spectrum-alert-dialog-warning-icon-color)
+                    );
+                }
+
+                :host([variant='error']) {
+                    --app-alert-dialog-accent-color: var(
+                        --mod-alert-dialog-error-icon-color,
+                        var(--spectrum-alert-dialog-error-icon-color)
+                    );
+                }
+
+                /*
+                 * Named one by one rather than as :host([variant]): the two
+                 * variants this application never shows carry no accent, and
+                 * pointing these at a custom property that is not set would
+                 * leave the heading inheriting a colour instead of keeping its
+                 * own.
+                 */
+                :host([variant='information']),
+                :host([variant='success']),
+                :host([variant='warning']),
+                :host([variant='error']) {
+                    --mod-icon-color: var(--app-alert-dialog-accent-color);
+                    --mod-alert-dialog-title-color: var(--app-alert-dialog-accent-color);
+                }
+
+                /*
+                 * spectrum-two hides the rule under the heading — its system
+                 * token for it is transparent. Given back a colour, it is the
+                 * one part of the dialog wide enough to read as its theme.
+                 */
+                .divider {
+                    --spectrum-divider-background-color: var(--app-alert-dialog-accent-color, transparent);
                 }
 
                 /*
@@ -53,13 +118,6 @@ export class AppAlertDialog extends AlertDialog {
                 .grid {
                     flex: 1 1 auto;
                     min-inline-size: 0;
-                }
-
-                :host([variant='information']) {
-                    --mod-icon-color: var(
-                        --mod-alert-dialog-information-icon-color,
-                        var(--spectrum-alert-dialog-information-icon-color, var(--spectrum-informative-visual-color))
-                    );
                 }
             `
         ]
