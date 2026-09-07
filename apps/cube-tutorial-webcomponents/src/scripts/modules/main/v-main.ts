@@ -5,16 +5,13 @@ import Css from './main.module.scss'
 
 /** The application shell: a bar, a body slot, and the two modal layers. */
 export class MainView extends CubeElement<MainScope> {
-    private bodyHost!: HTMLElement
-    private bodySlot?: CubeViewSlot
+    private bodySlot!: CubeViewSlot
 
     private dialogBackdrop!: HTMLElement
-    private dialogHost!: HTMLElement
-    private dialogSlot?: CubeViewSlot
+    private dialogSlot!: CubeViewSlot
 
     private alertBackdrop!: HTMLElement
-    private alertHost!: HTMLElement
-    private alertSlot?: CubeViewSlot
+    private alertSlot!: CubeViewSlot
 
     protected declare(dom: Dom): void {
         dom.div((view) => {
@@ -34,7 +31,7 @@ export class MainView extends CubeElement<MainScope> {
                 this.navButton(dom, 'Login', () => this.scope.onLogin())
             })
 
-            this.bodyHost = dom.div((body) => (body.className = Css.body))
+            this.bodySlot = new CubeViewSlot(dom.div((body) => (body.className = Css.body)))
 
             this.dialogBackdrop = dom.div((backdrop) => {
                 backdrop.className = Css.backdrop
@@ -42,11 +39,13 @@ export class MainView extends CubeElement<MainScope> {
                 backdrop.addEventListener('click', () =>
                     this.safeAction('closeDialog', () => this.scope.dialog?.onClose())
                 )
-                this.dialogHost = dom.div((panel) => {
-                    panel.className = Css.dialog
-                    // Clicking the panel must not reach the backdrop behind it.
-                    panel.addEventListener('click', (event) => event.stopPropagation())
-                })
+                this.dialogSlot = new CubeViewSlot(
+                    dom.div((panel) => {
+                        panel.className = Css.dialog
+                        // Clicking the panel must not reach the backdrop behind it.
+                        panel.addEventListener('click', (event) => event.stopPropagation())
+                    })
+                )
             })
 
             this.alertBackdrop = dom.div((backdrop) => {
@@ -55,10 +54,12 @@ export class MainView extends CubeElement<MainScope> {
                 backdrop.addEventListener('click', () =>
                     this.safeAction('closeAlert', () => this.scope.alert?.onClose())
                 )
-                this.alertHost = dom.div((panel) => {
-                    panel.className = Css.dialog
-                    panel.addEventListener('click', (event) => event.stopPropagation())
-                })
+                this.alertSlot = new CubeViewSlot(
+                    dom.div((panel) => {
+                        panel.className = Css.dialog
+                        panel.addEventListener('click', (event) => event.stopPropagation())
+                    })
+                )
             })
         })
     }
@@ -73,21 +74,18 @@ export class MainView extends CubeElement<MainScope> {
     protected override onUpdate(): void {
         const scope = this.scope
 
-        this.bodySlot ??= new CubeViewSlot(this.bodyHost)
         this.bodySlot.setScope(scope.body)
 
-        this.dialogSlot ??= new CubeViewSlot(this.dialogHost)
         this.dialogSlot.setScope(scope.dialog)
         this.setVisible(this.dialogBackdrop, !!scope.dialog)
 
-        this.alertSlot ??= new CubeViewSlot(this.alertHost)
         this.alertSlot.setScope(scope.alert)
         this.setVisible(this.alertBackdrop, !!scope.alert)
     }
 
     protected override onRelease(): void {
-        this.bodySlot?.setScope(undefined)
-        this.dialogSlot?.setScope(undefined)
-        this.alertSlot?.setScope(undefined)
+        this.bodySlot.setScope(undefined)
+        this.dialogSlot.setScope(undefined)
+        this.alertSlot.setScope(undefined)
     }
 }

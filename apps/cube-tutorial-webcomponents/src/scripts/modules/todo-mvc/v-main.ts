@@ -13,8 +13,7 @@ import { ItemView } from './v-item'
  */
 export class TodoMainView extends CubeElement<MainScope> {
     private list!: HTMLUListElement
-    private clockHost!: HTMLElement
-    private clockSlot?: CubeViewSlot
+    private clockSlot!: CubeViewSlot
 
     // Keyed on the scope itself: a scope is one object for as long as it exists,
     // so a row that already had this todo keeps it — and keeps the editor that
@@ -28,13 +27,12 @@ export class TodoMainView extends CubeElement<MainScope> {
             section.className = Css.main
             this.list = dom.ul((ul) => {
                 ul.className = Css.todoList
-                this.clockHost = dom.span()
+                this.clockSlot = new CubeViewSlot(dom.span())
             })
         })
     }
 
     protected override onUpdate(): void {
-        this.clockSlot ??= new CubeViewSlot(this.clockHost)
         this.clockSlot.setScope(this.scope.clock)
 
         this.items.sync(
@@ -44,7 +42,7 @@ export class TodoMainView extends CubeElement<MainScope> {
     }
 
     protected override onRelease(): void {
-        this.clockSlot?.setScope(undefined)
+        this.clockSlot.setScope(undefined)
         this.items.clear()
     }
 }

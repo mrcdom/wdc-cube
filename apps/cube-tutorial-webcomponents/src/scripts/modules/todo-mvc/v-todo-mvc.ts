@@ -4,15 +4,12 @@ import { TodoMvcScope } from 'wdc-cube-tutorial-core/todo-mvc'
 import Css from './todo-mvc.module.scss'
 
 export class TodoMvcView extends CubeElement<TodoMvcScope> {
-    private headerHost!: HTMLElement
-    private mainHost!: HTMLElement
-    private footerHost!: HTMLElement
     private note!: HTMLParagraphElement
     private stressButton!: HTMLButtonElement
 
-    private headerSlot?: CubeViewSlot
-    private mainSlot?: CubeViewSlot
-    private footerSlot?: CubeViewSlot
+    private headerSlot!: CubeViewSlot
+    private mainSlot!: CubeViewSlot
+    private footerSlot!: CubeViewSlot
 
     protected declare(dom: Dom): void {
         dom.div((view) => {
@@ -25,9 +22,9 @@ export class TodoMvcView extends CubeElement<TodoMvcScope> {
 
                 dom.section((app) => {
                     app.className = Css.todoApp
-                    this.headerHost = dom.span()
-                    this.mainHost = dom.span()
-                    this.footerHost = dom.span()
+                    this.headerSlot = new CubeViewSlot(dom.span())
+                    this.mainSlot = new CubeViewSlot(dom.span())
+                    this.footerSlot = new CubeViewSlot(dom.span())
                 })
 
                 dom.footer((info) => {
@@ -47,10 +44,6 @@ export class TodoMvcView extends CubeElement<TodoMvcScope> {
     protected override onUpdate(): void {
         const scope = this.scope
 
-        this.headerSlot ??= new CubeViewSlot(this.headerHost)
-        this.mainSlot ??= new CubeViewSlot(this.mainHost)
-        this.footerSlot ??= new CubeViewSlot(this.footerHost)
-
         this.headerSlot.setScope(scope.header)
         this.mainSlot.setScope(scope.main)
         this.footerSlot.setScope(scope.footer)
@@ -65,8 +58,8 @@ export class TodoMvcView extends CubeElement<TodoMvcScope> {
     }
 
     protected override onRelease(): void {
-        this.headerSlot?.setScope(undefined)
-        this.mainSlot?.setScope(undefined)
-        this.footerSlot?.setScope(undefined)
+        this.headerSlot.setScope(undefined)
+        this.mainSlot.setScope(undefined)
+        this.footerSlot.setScope(undefined)
     }
 }
