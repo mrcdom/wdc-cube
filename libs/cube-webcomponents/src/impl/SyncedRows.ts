@@ -16,11 +16,19 @@ export type SyncedRowsOptions<T, R extends Element> = {
     assign?: (row: R, item: T) => void
 
     /**
-     * What identifies an item across updates. Defaults to the item itself, which
-     * is right when items are scopes: a scope is one object for as long as it
-     * exists, so it is already its own identity.
+     * What identifies an item across updates.
+     *
+     * Required, with no default, because getting it wrong is invisible: the list
+     * still reads correctly and only the state a row was holding goes to the
+     * wrong item. Whether the item is already its own identity depends on where
+     * it came from, and only the caller knows that.
+     *
+     * A scope usually is — one object for as long as the item exists, so
+     * `(scope) => scope` is right. Data fetched from a service usually is not:
+     * hand back a fresh object for the same row and every row is rebuilt, so key
+     * on the id instead.
      */
-    key?: (item: T) => unknown
+    key: (item: T) => unknown
 }
 
 /**
@@ -40,6 +48,7 @@ export type SyncedRowsOptions<T, R extends Element> = {
  *
  * ```ts
  * private readonly items = new SyncedRows<ItemScope, ItemView>({
+ *     key: (scope) => scope,
  *     create: () => new ItemView()
  * })
  *
@@ -59,7 +68,7 @@ export class SyncedRows<T, R extends Element> {
 
     public constructor(options: SyncedRowsOptions<T, R>) {
         this.create = options.create
-        this.keyOf = options.key ?? ((item) => item)
+        this.keyOf = options.key
         this.assign =
             options.assign ??
             ((row, item) => {
