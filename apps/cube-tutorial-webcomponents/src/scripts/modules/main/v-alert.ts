@@ -44,11 +44,10 @@ export class AlertView extends CubeElement<AlertScope> {
     private supportingText!: HTMLParagraphElement
 
     protected declare(dom: Dom): void {
-        this.icon = this.declareIcon(dom)
-
-        this.headline = dom.h3((heading) => {
-            heading.className = Css.dialogHeadline
-            heading.id = 'alert-headline'
+        dom.div((header) => {
+            header.className = Css.dialogHeader
+            this.icon = this.declareIcon(header)
+            this.headline = dom.h3((heading) => (heading.className = Css.dialogHeadline))
         })
 
         this.supportingText = dom.p((text) => (text.className = Css.dialogSupportingText))
@@ -74,9 +73,9 @@ export class AlertView extends CubeElement<AlertScope> {
 
     /**
      * Dom builds HTML elements; an SVG needs its own namespace, so this one is
-     * assembled by hand and handed to the tree.
+     * assembled by hand and appended to the element that holds it.
      */
-    private declareIcon(dom: Dom): SVGSVGElement {
+    private declareIcon(host: HTMLElement): SVGSVGElement {
         const svg = document.createElementNS(SVG_NS, 'svg')
         svg.setAttribute('viewBox', '0 0 24 24')
         svg.setAttribute('aria-hidden', 'true')
@@ -86,11 +85,7 @@ export class AlertView extends CubeElement<AlertScope> {
         this.iconPath.setAttribute('fill', 'currentColor')
         svg.appendChild(this.iconPath)
 
-        dom.div((host) => {
-            host.className = Css.dialogIconHost
-            host.appendChild(svg)
-        })
-
+        host.appendChild(svg)
         return svg
     }
 }

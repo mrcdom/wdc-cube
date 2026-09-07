@@ -72,42 +72,38 @@
     gap: 8px;
 }
 
-// A Material 3 basic dialog: an optional icon centred above the headline,
-// supporting text under it, and the actions at the end. The measurements are the
-// ones Angular Material emits for its own dialog — headline padding 6/24/13,
-// content 20/24, actions 16/24 — so the three apps agree on more than the idea.
-.dialogIconHost {
+// A Material 3 dialog, in the variant with no hero icon: the headline is
+// left-aligned and the severity icon sits beside it. The spacing is the
+// surface's own `gap` and nothing else — an earlier version added a padding to
+// every part on top of it, which is how 12px of separation became 26px.
+.dialogHeader {
     display: flex;
-    justify-content: center;
-    padding-top: 8px;
+    align-items: center;
+    gap: 12px;
 }
 
 .dialogIcon {
     width: 24px;
     height: 24px;
+    flex: none;
 }
 
 .dialogHeadline {
     margin: 0;
-    padding: 6px 0 13px;
     // headline-small
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 400;
-    line-height: 32px;
+    line-height: 28px;
     color: #1d1b20;
-    // Centred only when there is an icon above it, which here there always is.
-    text-align: center;
 }
 
 .dialogSupportingText {
     margin: 0;
-    padding-bottom: 4px;
     // body-medium
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0.25px;
     color: #49454f;
-    text-align: center;
 }
 
 // The severity is the icon's shape; the colour only reinforces it. Only `error`
