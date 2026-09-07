@@ -1,0 +1,112 @@
+# wdc-cube
+
+The core of the [Cube architecture](../../docs/architecture.md): places,
+intents, presenters, scopes, actions and the update pipeline.
+
+It has no view technology in it, and no dependency on one. A binding package
+supplies that — [`wdc-cube-react`](../cube-react/README.md),
+[`wdc-cube-angular`](../cube-angular/README.md), or none at all when a test
+drives the presenters directly with [`wdc-cube-test`](../cube-test/README.md).
+
+The architecture document explains how the pieces fit and is the place to start.
+This one is about the package: what it exports, and the few things worth knowing
+before reaching for them.
+
+## The shape of an application
+
+```ts
+class TodoPresenter extends CubePresenter<MainPresenter, TodoScope> {
+    public override async applyParameters(intent: FlipIntent, initialization: boolean) {
+        const keys = new TodoKeys(this.app, intent)
+
+        if (initialization) {
+            this.scope.actions.onClear = this.action(this.onClear)
+            this.parentSlot = keys.parentSlot
+        }
+
+        this.parentSlot(this.scope)
+        return true
+    }
+}
+```
+
+A presenter owns a scope and publishes it into the slot its parent offered.
+Navigation is a `FlipIntent` aimed at a `Place`; the address bar is derived from
+whatever state the presenters publish back, which is what makes deep links,
+reload and back/forward work without anyone handling them.
+
+## What is worth knowing
+
+**Updates are batched, not immediate.** `update()` marks a scope; `CallbackManager`
+flushes about sixteen milliseconds later, and only then does a view hear about
+it. Code that reads a scope straight after changing it reads it mid-flight. In a
+test, `settle()` from `wdc-cube-test` drains that queue instead of guessing at
+the timer.
+
+**A base update and a nested one are different things.** `update()` with no
+argument marks the presenter's own scope; `update(childScope)` marks one below
+it. Both are recorded, even together — a view that only refreshes what it was
+told about needs the nested ones, and a view that redraws whole subtrees ignores
+the extra notification harmlessly. `ScopeUpdateManager#hint()` is how a presenter
+tells the manager that a large list is better redrawn at its parent than item by
+item.
+
+**Actions are guarded, and swallow what they throw.** `this.action(fn)` wraps a
+method so it catches, reports through `unexpected()`, updates the scope and
+publishes history when it finishes. That means an action never rejects into its
+caller — convenient in a view, and a trap in a test, which should watch
+`unexpected` if it wants failures to be loud. `@action()` is the older decorator
+form of the same thing and still works.
+
+**Observed fields mark the scope for you.** `@Observable` on a scope class turns
+every `@observe()` field into an accessor that calls `update()` when the value
+actually changes — assigning the same value again does nothing. `ObservableArray`
+reports its own mutations the same way. So a presenter usually does not call
+`update()` by hand; it does so for state the decorators cannot see, such as a
+field it deliberately left plain. `@Observable` returns a subclass, which is why
+an instance introspects as `ObservableTodoScope` rather than `TodoScope` —
+`instanceof` still holds.
+
+**`ScopeUtils.bind(scope, source)`** wires every action-shaped name on a scope
+(`onSomething`) to the method of that name on the source, binding it, and warns
+for any it cannot find. It is the bulk alternative to assigning each action in
+`applyParameters`.
+
+**Registries do not collide.** `createViewRegistry(name)` builds a store keyed by
+a private symbol, so `wdc-cube-react` and `wdc-cube-angular` can each register a
+view for the same scope class without seeing each other. That is what lets one
+set of presenters drive two applications at once.
+
+## Exports
+
+| Group | What |
+| --- | --- |
+| Navigation | `Place`, `FlipIntent`, `CubeBuilder` (`build`, `lazyBuild`), `HistoryManager`, `PageHistoryManager` |
+| Presenters | `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Application` |
+| Scopes | `Scope`, `ObservableArray`, `ScopeUtils`, `@Observable`, `@observe` |
+| Updates | `CallbackManager`, `ScopeUpdateManager` |
+| Views | `createViewRegistry`, `ScopeSlot` |
+| Utilities | `Logger`, `SingletonServices`, `ReflectionUtils`, the `NOOP_*` constants |
+| Types | `IPresenter`, `ICubePresenter`, `IUpdateManager`, `AlertSeverity`, `IScope` |
+
+`PageHistoryManager` lives here rather than in a binding because it only needs
+`window.history` — no view technology is involved, and putting it in the React
+package would have made an Angular application depend on React through its peers.
+
+The `events` namespace re-exports DOM-event shapes (`TextChangeEvent`,
+`KeyPressEvent`, and so on) so a scope can accept an event without its module
+importing React's types. They are structural: a React `KeyboardEvent` and a
+native one both satisfy them.
+
+## Tests
+
+`Cube.test.ts` builds a small application — root, login, restricted, cart,
+product — and drives it through real navigations. It doubles as the most complete
+worked example in the repository, and reads as one.
+
+## Building it
+
+```bash
+pnpm compile        # from the workspace root; builds this and everything downstream
+pnpm test
+```
