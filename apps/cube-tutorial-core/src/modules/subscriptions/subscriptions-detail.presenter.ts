@@ -38,15 +38,13 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
         const paramSiteId = keys.siteId ?? this.item?.id ?? -1
 
         if (initialization) {
-            // lastPlace is the root place until the first flip commits, so on a
-            // cold start straight into this dialog — a reload, or a shared link
-            // — it names Home rather than anywhere the user has actually been.
-            // Taking it at face value made Cancel leave the module altogether.
-            // Only treat it as somewhere to return to when the user really was
-            // inside subscriptions; close() falls back to the list otherwise.
-            const lastPlace = this.app.lastPlace
-            if (lastPlace.contains(Places.subscriptions)) {
-                this.previousIntent = this.app.newFlipIntent(lastPlace)
+            // Only somewhere the user has actually been. On a cold start straight
+            // into this dialog — a reload, or a shared link — nothing has been
+            // visited yet and lastPlace would name the root place; taking that at
+            // face value made Cancel leave the module altogether. close() falls
+            // back to the list when there is nowhere to return to.
+            if (this.app.hasNavigated) {
+                this.previousIntent = this.app.newFlipIntent(this.app.lastPlace)
             }
 
             if (paramSiteId <= 0) {

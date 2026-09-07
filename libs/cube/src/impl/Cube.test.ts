@@ -666,3 +666,46 @@ it('Application :: token Navigation', async () => {
     expect(cart.initialized).toEqual(false)
     expect(product.initialized).toEqual(false)
 })
+
+it('Application :: hasNavigated separates the root place from nowhere yet', async () => {
+    const app = new TestApplication()
+    app.session.id = 1
+    app.session.active = true
+
+    // Nothing has been visited. lastPlace still answers, because everything
+    // inside the framework needs somewhere to resolve an intent against — but it
+    // is the root place standing in, not a place the user has been.
+    expect(app.hasNavigated).toEqual(false)
+    expect(app.lastPlace).toBe(app.rootPlace)
+
+    await app.flipToIntent(app.newFlipIntent(Places.RESTRICTED))
+
+    expect(app.hasNavigated).toEqual(true)
+    expect(app.lastPlace).toBe(Places.RESTRICTED)
+})
+
+it('Application :: hasNavigated stays false while the first flip is still running', async () => {
+    const app = new TestApplication()
+    app.session.id = 1
+    app.session.active = true
+
+    // What a presenter sees when a deep link builds it: it is initialised by the
+    // first flip, which has not committed a place yet. Reading lastPlace here and
+    // treating it as somewhere the user came from is the mistake this guards.
+    const seen: boolean[] = []
+    const applyParameters = RestrictedPresenter.prototype.applyParameters
+    RestrictedPresenter.prototype.applyParameters = function (intent, initialization, last) {
+        seen.push(app.hasNavigated)
+        return applyParameters.call(this, intent, initialization, last)
+    }
+
+    try {
+        await app.flipToIntent(app.newFlipIntent(Places.RESTRICTED))
+    } finally {
+        RestrictedPresenter.prototype.applyParameters = applyParameters
+    }
+
+    expect(seen.length).toBeGreaterThan(0)
+    expect(seen.every((value) => value === false)).toEqual(true)
+    expect(app.hasNavigated).toEqual(true)
+})
