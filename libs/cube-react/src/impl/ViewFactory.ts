@@ -6,7 +6,7 @@
  */
 
 import React from 'react'
-import { Scope, ScopeConstructor } from 'wdc-cube'
+import { createViewRegistry, Scope, ScopeConstructor } from 'wdc-cube'
 
 export type IViewProps = {
     className?: string
@@ -60,22 +60,17 @@ export function ViewSlot<P extends IFactoryProps, S extends Scope>({
     return null
 }
 
-const VIEW_PROP_SYM = Symbol('VIEW')
+const registry = createViewRegistry<IViewConstructor<IFactoryProps>>('wdc-cube-react:view')
 
 export class ViewFactory {
     // Static API
 
     public static register<P extends IFactoryProps>(scopeCtor: ScopeConstructor, viewCtor: IViewConstructor<P>): void {
-        const dynScopeCtor = scopeCtor as unknown as Record<string | symbol, unknown>
-        dynScopeCtor[VIEW_PROP_SYM] = viewCtor
+        registry.register(scopeCtor, viewCtor as IViewConstructor<IFactoryProps>)
     }
 
     public static get(scope?: Scope): IViewConstructor<IFactoryProps> | undefined {
-        if (scope && scope.constructor) {
-            const dynScopeCtor = scope.constructor as unknown as Record<string | symbol, unknown>
-            return dynScopeCtor[VIEW_PROP_SYM] as IViewConstructor<IFactoryProps> | undefined
-        }
-        return undefined
+        return registry.get(scope)
     }
 
     public static createView(scope?: Scope, props?: IViewProps): React.ReactElement {

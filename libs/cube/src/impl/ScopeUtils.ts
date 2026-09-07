@@ -5,7 +5,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import _isFunction from 'lodash/isFunction'
+import { isFunction } from './utils/TypeGuards'
 import { NOOP_PROMISE_VOID } from './utils/EmptyFunctions'
 import { Logger } from './utils/Logger'
 import { Scope } from './Scope'
@@ -37,7 +37,7 @@ export const ScopeUtils = {
         for (const name of Object.keys(target)) {
             if (isAnActionName(name)) {
                 const possibleAction = (source as Record<string, unknown>)[name]
-                if (_isFunction(possibleAction)) {
+                if (isFunction(possibleAction)) {
                     target[name] = (possibleAction as FunctionLike).bind(source)
                 } else {
                     target[name] = NOOP_PROMISE_VOID

@@ -1,0 +1,50 @@
+@use '@angular/material' as mat;
+
+html {
+    // Light only, like the React app. Following the system scheme would take
+    // more than a token swap: the todo-mvc module is the original TodoMVC
+    // stylesheet, a fixed light design that paints its card #fff and never
+    // gives an active item a text colour — under a dark scheme the browser
+    // default turns those labels white on that white card and they vanish.
+    color-scheme: light;
+
+    @include mat.theme(
+        (
+            color: mat.$azure-palette,
+            typography: Roboto,
+            density: 0
+        )
+    );
+
+    // Material 3 defines no success or warning role — the spec stops at
+    // primary, secondary, tertiary and error. Deriving these two from the
+    // palette made both come out the same pale blue, losing the distinction
+    // the severity is meant to carry, so they get their own colours.
+    --app-sys-success-container: #c8ecd0;
+    --app-sys-on-success-container: #08341a;
+    --app-sys-warning-container: #ffe2b8;
+    --app-sys-on-warning-container: #452b00;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
+  display: flex;
+}
+
+// The React app mounts into #root; Angular mounts into <app-root>.
+app-root {
+  display: flex;
+  align-self: stretch;
+  flex-grow: 1;
+}

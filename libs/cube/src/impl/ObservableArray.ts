@@ -116,9 +116,10 @@ export class ObservableArray<T> implements Iterable<T> {
     }
 
     removeByCriteria(predicate: (value: T, index: number) => boolean, thisArg?: unknown) {
-        if (!thisArg) {
-            thisArg = window
-        }
+        // No default for thisArg. It used to fall back to `window`, which threw
+        // outside a browser and made this the one method here that could not run
+        // headless — filter, map and findIndex all pass thisArg straight to the
+        // native call, where omitting it simply means the callback has no this.
         const items = [] as T[]
         let changed = false
         for (let i = 0; i < this.#items.length; i++) {

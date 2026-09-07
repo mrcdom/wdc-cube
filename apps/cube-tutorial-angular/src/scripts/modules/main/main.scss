@@ -1,0 +1,169 @@
+@use '@angular/material' as mat;
+
+// min-height: 0 on both of these: a column flex item defaults to min-height:auto,
+// which refuses to shrink below its content, so a tall page pushes the whole
+// shell past the viewport instead of letting the scroll container inside it
+// scroll. The React app never needs this because its scroll container is itself
+// the flex item, and overflow other than visible already resolves that minimum
+// to zero.
+.main-view {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+// Material 3 removed the `color` input mat-toolbar had under Material 2, and its
+// default toolbar is surface-coloured — on this palette close enough to the page
+// behind it that the bar stops reading as a bar at all. The React app's AppBar is
+// primary, so this asks for that explicitly, through the override mixins rather
+// than by naming the generated custom properties.
+.app-bar {
+    @include mat.toolbar-overrides(
+        (
+            container-background-color: var(--mat-sys-primary),
+            container-text-color: var(--mat-sys-on-primary)
+        )
+    );
+    @include mat.button-overrides(
+        (
+            text-label-text-color: var(--mat-sys-on-primary),
+            text-state-layer-color: var(--mat-sys-on-primary)
+        )
+    );
+    @include mat.icon-button-overrides(
+        (
+            icon-color: var(--mat-sys-on-primary),
+            state-layer-color: var(--mat-sys-on-primary)
+        )
+    );
+
+    box-shadow: var(--mat-sys-level2);
+    // Above the page content, so the shadow falls on it rather than under it.
+    // The modal layers below stack higher still: a scrim that left the bar
+    // uncovered would leave its buttons clickable behind the dialog.
+    position: relative;
+    z-index: 1;
+}
+
+.app-bar-title {
+    flex-grow: 1;
+    margin-left: 8px;
+}
+
+// A view seated in the body fills the body, the way it does in React — there
+// ViewSlot hands its class to the view, which merges it onto its own root, so
+// the body element and the view are one element and the question never comes up.
+// Angular's slot cannot reach into a component's template, so the wrapper stays
+// and this makes it a single-cell grid instead: the view's root is promoted to
+// be its item (the host in between is display: contents) and a grid item
+// stretches to its area on both axes by default. No per-view rule needed.
+.body {
+    display: grid;
+    flex-grow: 1;
+    align-self: stretch;
+    min-height: 0;
+    margin: 16px;
+}
+
+.body-view {
+    // The card fills the body; its own content is what sits at the top of it.
+    align-content: start;
+}
+
+.button-pane {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+// One scrim and one surface per modal layer, each stacked above the last, so an
+// alert raised from inside a dialog dims the dialog underneath it instead of
+// landing on it at the same depth. The app bar sits at 1.
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    background-color: color-mix(in srgb, var(--mat-sys-scrim) 32%, transparent);
+}
+
+.dialog {
+    position: fixed;
+    z-index: 3;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 320px;
+    max-width: 90vw;
+    padding: 8px;
+    // A deliberate step below Material's own dialog shape. The spec assigns
+    // dialogs corner-extra-large, 28px, and Angular Material's mat-dialog uses
+    // that same token — but it sizes the value for large surfaces, and these
+    // alerts are small: on a 336x151 box the 28px corners eat 37% of each
+    // vertical edge. corner-large keeps the shape reading as Material without
+    // rounding a small dialog into a lozenge.
+    border-radius: var(--mat-sys-corner-large);
+    background-color: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface);
+    // The theme's own elevation. `mat-elevation-z24` used to be here and did
+    // nothing: those classes exist only if mat.elevation-classes() is included,
+    // and mat.theme() does not include them — so both dialogs drew as flat
+    // rectangles with no edge at all.
+    box-shadow: var(--mat-sys-level3);
+}
+
+// The alert layer: a dialog can raise one, so it stacks above both.
+.alert-backdrop {
+    z-index: 4;
+}
+
+.alert-dialog {
+    z-index: 5;
+}
+
+.alert {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    border-radius: var(--mat-sys-corner-medium);
+
+    p {
+        margin: 4px 0 0;
+    }
+
+    // Info and error map onto roles the theme already defines. Success and
+    // warning have no Material 3 role, so they come from the custom tokens in
+    // styles/index.scss — see the note there.
+    &.alert-info {
+        background-color: var(--mat-sys-primary-container);
+        color: var(--mat-sys-on-primary-container);
+    }
+
+    &.alert-success {
+        background-color: var(--app-sys-success-container);
+        color: var(--app-sys-on-success-container);
+    }
+
+    &.alert-warning {
+        background-color: var(--app-sys-warning-container);
+        color: var(--app-sys-on-warning-container);
+    }
+
+    &.alert-error {
+        background-color: var(--mat-sys-error-container);
+        color: var(--mat-sys-on-error-container);
+    }
+}
+
+.alert-title {
+    display: block;
+    font: var(--mat-sys-title-medium);
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px;
+}

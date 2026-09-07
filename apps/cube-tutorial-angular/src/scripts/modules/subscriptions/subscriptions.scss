@@ -1,0 +1,27 @@
+.subscriptions-view {
+    // Fills the body like any other view seated there; its content is what
+    // sits at the top of it.
+    align-content: start;
+}
+
+.dialog-title {
+    margin: 0;
+    padding: 8px 16px;
+    font: var(--mat-sys-headline-small);
+}
+
+.dialog-content {
+    padding: 0 16px;
+}
+
+.email-field {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px;
+}

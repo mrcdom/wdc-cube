@@ -56,9 +56,30 @@ export class CallbackManager {
         }
     }
 
+    /**
+     * True while callbacks are waiting for the next frame. Only once-callbacks
+     * count: those bound with `bind` are permanent and never drain.
+     */
+    public get hasPendingCallbacks(): boolean {
+        return this.__onceCallbackMap.size > 0
+    }
+
+    /**
+     * Runs what is pending now, instead of on the next frame. Updates are
+     * batched on a timer, which a test cannot wait on without guessing; this
+     * gives it a way to settle the queue deliberately.
+     */
+    public flush(): void {
+        this.clearAnimationFrame()
+        this.onFlush()
+    }
+
     private clearAnimationFrame() {
         if (this.__animationFrameHandler) {
-            clearInterval(this.__animationFrameHandler)
+            // clearTimeout, not clearInterval: the handle comes from setTimeout.
+            // The two share an id space, so the old call worked, but only by
+            // accident.
+            clearTimeout(this.__animationFrameHandler)
             this.__animationFrameHandler = undefined
         }
     }

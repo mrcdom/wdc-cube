@@ -239,7 +239,10 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     protected async onClearCompleted() {
-        this.itemScopes.removeByCriteria((item) => !item.completed)
+        // removeByCriteria drops the items the predicate matches, so this has to
+        // match the completed ones. The negation here removed the active items
+        // instead, and had done so since the tutorial was first written.
+        this.itemScopes.removeByCriteria((item) => item.completed)
     }
 
     protected async onShowAll() {

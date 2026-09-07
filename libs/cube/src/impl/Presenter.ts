@@ -235,16 +235,17 @@ export class ScopeUpdateManager implements IUpdateManager {
     }
 
     readonly update = (optionalScope?: Scope) => {
-        if (!this.__baseScopeUpdateRequested) {
-            const scope = optionalScope ?? this.__scope
+        const scope = optionalScope ?? this.__scope
 
-            if (scope === this.__scope) {
-                this.__baseScopeUpdateRequested = true
-                this.__dirtyScopes.clear()
-                this.__cancelledScopes.clear()
-            } else {
-                this.pushScope(this.__dirtyScopes, scope)
-            }
+        if (scope === this.__scope) {
+            this.__baseScopeUpdateRequested = true
+        } else {
+            // Recorded even once a base update is pending. A base update used to
+            // discard these, on the assumption that redrawing the root redraws
+            // everything under it — true of React, but not of a view technology
+            // that only refreshes what it was told about. Nested scopes now get
+            // their own notification either way.
+            this.pushScope(this.__dirtyScopes, scope)
         }
 
         if (!this.__emittingOnBeforeScopeUpdate) {
@@ -276,8 +277,8 @@ export class ScopeUpdateManager implements IUpdateManager {
                     if (this.__baseScopeUpdateRequested) {
                         this.__scope.forceUpdate()
                     }
-                    // Use selective update
-                    else {
+
+                    if (this.__dirtyScopes.size > 0) {
                         this.selectiveScopeUpdate()
                     }
                 } catch (caught) {

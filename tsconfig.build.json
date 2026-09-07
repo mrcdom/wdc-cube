@@ -1,4 +1,17 @@
 {
   "files": [],
-  "references": [{ "path": "libs/cube" }, { "path": "libs/cube-react" }]
+  "references": [
+    {
+      "path": "libs/cube"
+    },
+    {
+      "path": "libs/cube-react"
+    },
+    {
+      "path": "libs/cube-test"
+    },
+    {
+      "path": "apps/cube-tutorial-core"
+    }
+  ]
 }

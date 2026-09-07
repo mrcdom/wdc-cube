@@ -6,7 +6,9 @@
  */
 
 import { History, createBrowserHistory, createHashHistory, Path } from 'history'
-import { Application, Place, HistoryManager } from 'wdc-cube'
+import { Application } from './Application'
+import { Place } from './Place'
+import { HistoryManager } from './HistoryManager'
 
 export class PageHistoryManager extends HistoryManager {
     private __debounceHandler?: number

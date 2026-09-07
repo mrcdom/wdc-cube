@@ -5,10 +5,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import _isBoolean from 'lodash/isBoolean'
-import _isNumber from 'lodash/isNumber'
-import _isString from 'lodash/isString'
-import _isArray from 'lodash/isArray'
+import { isBoolean, isNumber, isString } from './TypeGuards'
 
 export type PossibleParameterTypes = NumberConstructor | StringConstructor | BooleanConstructor
 
@@ -54,7 +51,7 @@ export class ReflectionUtils {
     }
 
     public static isArray(value: unknown): boolean {
-        return _isArray(value)
+        return Array.isArray(value)
     }
 
     public static isFunction(value: unknown): boolean {
@@ -81,15 +78,15 @@ export class ReflectionUtils {
 
     public static getType(item: unknown): PossibleParameterTypes | undefined {
         if (item !== undefined && item !== null) {
-            if (_isString(item)) {
+            if (isString(item)) {
                 return String
             }
 
-            if (_isNumber(item)) {
+            if (isNumber(item)) {
                 return Number
             }
 
-            if (_isBoolean(item)) {
+            if (isBoolean(item)) {
                 return Boolean
             }
         }
@@ -116,7 +113,7 @@ export class ReflectionUtils {
             return value
         }
 
-        if (_isNumber(value)) {
+        if (isNumber(value)) {
             if (clazz === Number) {
                 return value
             }
@@ -132,7 +129,7 @@ export class ReflectionUtils {
             return value
         }
 
-        if (_isString(value)) {
+        if (isString(value)) {
             if (clazz === String) {
                 return value
             }
@@ -150,7 +147,7 @@ export class ReflectionUtils {
             return s
         }
 
-        if (_isBoolean(value)) {
+        if (isBoolean(value)) {
             if (clazz === Boolean) {
                 return value
             }

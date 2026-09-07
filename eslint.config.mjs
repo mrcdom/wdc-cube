@@ -6,7 +6,15 @@ import globals from 'globals'
 
 export default tseslint.config(
     {
-        ignores: ['**/node_modules/**', '**/lib/**', '**/dist/**', '**/build/**', '**/coverage/**']
+        ignores: [
+            '**/node_modules/**',
+            '**/lib/**',
+            '**/dist/**',
+            '**/build/**',
+            '**/coverage/**',
+            // Angular's dev-server cache
+            '**/.angular/**'
+        ]
     },
     js.configs.recommended,
     ...tseslint.configs.recommended,
