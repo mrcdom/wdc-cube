@@ -1,14 +1,15 @@
 /**
- * Reusable pieces of view, in the shape the composition strategy expects: a
- * function that takes the `Dom` it should declare into, and hands back whatever
- * the caller needs to hold on to.
+ * The application's own widgets.
  *
- * These are not custom elements. A widget here has no scope and no lifecycle —
- * it is markup that repeated often enough to deserve a name, which is exactly
- * what the `components/` folder does in the SWT project this strategy came from.
+ * Every one is a custom element with a tag of its own, registered on import and
+ * reached through a factory on `AppDom` — `dom.panel(...)` beside `dom.div(...)`,
+ * which is how the SWT strategy this came from expresses its reusable pieces.
+ * Where Spectrum has the component, the widget extends it and changes only what
+ * this application needs; where it does not, the widget is a plain custom
+ * element whose host is the box, with its styles in a shadow root of its own.
  */
 export { AppDom, AppElement } from './AppDom'
-export { actionButton, type ActionButtonOptions } from './action-button'
+export { AppActionButton, type ActionButtonOptions } from './action-button'
 export { AppAlertDialog, type AppAlertDialogVariant } from './alert-dialog'
-export { modalLayer, type ModalLayer, type ModalLayerOptions } from './modal-layer'
-export { panel, type PanelOptions } from './panel'
+export { AppModalLayer, type ModalLayerOptions } from './modal-layer'
+export { AppPanel, type PanelOptions } from './panel'

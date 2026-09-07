@@ -2,15 +2,10 @@ import { CubeViewSlot, Dom, safeAction } from 'wdc-cube-webcomponents'
 
 import '@spectrum-web-components/underlay/sp-underlay.js'
 
-import Css from './widgets.module.scss'
+import styles from './modal-layer.scss?inline'
 
-export type ModalLayer = {
-    /** The layer. Shown and hidden by the view that owns it. */
-    readonly host: HTMLElement
-
-    /** What draws whatever scope is in the layer. */
-    readonly slot: CubeViewSlot
-}
+const SHEET = new CSSStyleSheet()
+SHEET.replaceSync(styles)
 
 export type ModalLayerOptions = {
     /** Names the dismissal in a failure report. */
@@ -26,35 +21,57 @@ export type ModalLayerOptions = {
 /**
  * A scrim with something centred over it, and a slot for whoever fills it.
  *
- * The scrim is Spectrum's `sp-underlay`, so it dims with the colour and the
- * opacity the rest of the system uses. It is `position: fixed` on its own, which
- * is why it does not enclose the panel: the layer around both is what centres
- * one over the other.
- *
  * The shell declares this twice, identically but for one class, and the part
  * that is easy to leave out is the `stopPropagation`: without it a click on the
  * panel reaches the scrim behind and dismisses what the user was reaching for.
+ *
+ * Whatever the slot draws stays in the light DOM — a view is only slotted into
+ * the surface, never moved inside this shadow root, so the application's own
+ * stylesheets go on reaching it.
  */
-export function modalLayer(dom: Dom, options: ModalLayerOptions): ModalLayer {
-    let slot!: CubeViewSlot
+export class AppModalLayer extends HTMLElement {
+    /** What draws whatever scope is in the layer. */
+    public readonly viewSlot: CubeViewSlot
 
-    const host = dom.div((layer) => {
-        layer.className = options.className ? `${Css.modalLayer} ${options.className}` : Css.modalLayer
-        layer.hidden = true
+    /** Names the dismissal in a failure report. */
+    public context = 'dismiss'
 
-        dom.element('sp-underlay', (underlay) => (underlay.open = true))
+    /** What clicking outside the panel does. */
+    public onDismiss: () => unknown = () => undefined
 
-        // Everything the layer holds is dismissed by clicking beside it, so the
-        // listener goes on the layer rather than on the scrim it covers.
-        layer.addEventListener('click', () => safeAction(options.context, options.onDismiss))
+    public constructor() {
+        super()
 
-        slot = new CubeViewSlot(
+        const root = this.attachShadow({ mode: 'open' })
+        root.adoptedStyleSheets = [SHEET]
+
+        Dom.render(root, (dom) => {
+            dom.element('sp-underlay', (underlay) => (underlay.open = true))
+
             dom.div((surface) => {
-                surface.className = Css.modalSurface
+                surface.className = 'surface'
+                // Without this a click inside the panel reaches the scrim and
+                // dismisses the very thing being clicked. Slotted content is
+                // part of this subtree once flattened, so the listener sees it.
                 surface.addEventListener('click', (event) => event.stopPropagation())
+                dom.append(document.createElement('slot'))
             })
-        )
-    })
+        })
 
-    return { host, slot }
+        this.addEventListener('click', () => safeAction(this.context, () => this.onDismiss()))
+
+        this.viewSlot = new CubeViewSlot(this)
+
+        // Not hidden here: a custom element constructor may not gain an
+        // attribute, and `hidden` is one. The shell hides it in the update that
+        // follows its own `declare`, in the same task, so it is never painted.
+    }
+}
+
+customElements.define('app-modal-layer', AppModalLayer)
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'app-modal-layer': AppModalLayer
+    }
 }

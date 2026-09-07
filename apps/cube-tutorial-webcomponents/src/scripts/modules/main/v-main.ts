@@ -1,7 +1,7 @@
 import { CubeViewSlot } from 'wdc-cube-webcomponents'
 import { MainScope } from 'wdc-cube-tutorial-core/main'
 
-import { AppElement, type AppDom } from '../../widgets'
+import { AppElement, type AppDom, type AppModalLayer } from '../../widgets'
 import '@spectrum-web-components/top-nav/sp-top-nav.js'
 import '@spectrum-web-components/top-nav/sp-top-nav-item.js'
 
@@ -11,11 +11,8 @@ import Css from './main.module.scss'
 export class MainView extends AppElement<MainScope> {
     private bodySlot!: CubeViewSlot
 
-    private dialogLayer!: HTMLElement
-    private dialogSlot!: CubeViewSlot
-
-    private alertLayer!: HTMLElement
-    private alertSlot!: CubeViewSlot
+    private dialogLayer!: AppModalLayer
+    private alertLayer!: AppModalLayer
 
     protected declare(dom: AppDom): void {
         dom.div((view) => {
@@ -43,21 +40,17 @@ export class MainView extends AppElement<MainScope> {
 
             this.bodySlot = new CubeViewSlot(dom.div((body) => (body.className = Css.body)))
 
-            const dialog = dom.modalLayer({
+            this.dialogLayer = dom.modalLayer({
                 context: 'closeDialog',
                 onDismiss: () => this.scope.dialog?.onClose()
             })
-            this.dialogLayer = dialog.host
-            this.dialogSlot = dialog.slot
 
             // Above the dialog, so an alert raised from inside one dims it.
-            const alert = dom.modalLayer({
+            this.alertLayer = dom.modalLayer({
                 context: 'closeAlert',
                 onDismiss: () => this.scope.alert?.onClose(),
                 className: Css.alertLayer
             })
-            this.alertLayer = alert.host
-            this.alertSlot = alert.slot
         })
     }
 
@@ -74,16 +67,16 @@ export class MainView extends AppElement<MainScope> {
 
         this.bodySlot.setScope(scope.body)
 
-        this.dialogSlot.setScope(scope.dialog)
+        this.dialogLayer.viewSlot.setScope(scope.dialog)
         this.setVisible(this.dialogLayer, !!scope.dialog)
 
-        this.alertSlot.setScope(scope.alert)
+        this.alertLayer.viewSlot.setScope(scope.alert)
         this.setVisible(this.alertLayer, !!scope.alert)
     }
 
     protected override onRelease(): void {
         this.bodySlot.setScope(undefined)
-        this.dialogSlot.setScope(undefined)
-        this.alertSlot.setScope(undefined)
+        this.dialogLayer.viewSlot.setScope(undefined)
+        this.alertLayer.viewSlot.setScope(undefined)
     }
 }

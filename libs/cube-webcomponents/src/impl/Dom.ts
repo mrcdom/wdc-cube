@@ -9,6 +9,14 @@
 export type Configure<E extends Element> = (element: E) => void
 
 /**
+ * Somewhere a tree can be declared into.
+ *
+ * An element, or the shadow root of one — a widget that owns its own box builds
+ * its inside there, and nothing else about declaring changes.
+ */
+export type DomRoot = Element | ShadowRoot
+
+/**
  * Declares a DOM tree by nesting.
  *
  * Every container takes a function, and whatever is declared inside that
@@ -32,19 +40,19 @@ export type Configure<E extends Element> = (element: E) => void
  * nothing in between.
  */
 export class Dom {
-    private parent: Element
+    private parent: DomRoot
 
     /**
      * Protected so an application can extend this with factory methods of its
      * own — `dom.actionButton(...)` reading beside `dom.div(...)` — which is how
      * the strategy this comes from expresses its reusable pieces.
      */
-    protected constructor(root: Element) {
+    protected constructor(root: DomRoot) {
         this.parent = root
     }
 
     /** A plain `Dom` declaring into `root`. A subclass provides its own. */
-    public static create(root: Element): Dom {
+    public static create(root: DomRoot): Dom {
         return new Dom(root)
     }
 
@@ -54,8 +62,8 @@ export class Dom {
      * outside a view gets the same `Dom` the view itself was given.
      */
     public static render<D extends Dom>(
-        this: { create(root: Element): D },
-        root: Element,
+        this: { create(root: DomRoot): D },
+        root: DomRoot,
         declare: (dom: D) => void
     ): void {
         declare(this.create(root))
