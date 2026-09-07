@@ -96,13 +96,19 @@ reads the `--mat-sys-*` custom properties it emits rather than naming colours:
 
 ```scss
 html {
-    color-scheme: light dark;
+    color-scheme: light;
     @include mat.theme((color: mat.$azure-palette, typography: Roboto, density: 0));
 }
 ```
 
-`color-scheme: light dark` means the theme emits `light-dark()` values, so the
-app follows the reader's system setting with no toggle and no second stylesheet.
+`color-scheme: light` pins the app to the light scheme, like the React app.
+Following the system setting is nearly free at the Material layer — the theme
+emits `light-dark()` values on its own — but not for the app as a whole: the
+todo-mvc module is the original TodoMVC stylesheet, a fixed light design that
+paints its card `#fff` and never gives an active item a text colour. Under a dark
+scheme the browser default turns those labels white on that white card and the
+active todos disappear. Supporting dark means reworking that stylesheet, not
+flipping a token.
 
 The app bar asks for `primary` explicitly, through `mat.toolbar-overrides()` and
 the matching button mixins rather than by naming the generated custom properties.
@@ -115,8 +121,7 @@ Two more places need more than the generated tokens:
 - **Alert severities.** Material 3 defines `primary`, `secondary`, `tertiary` and
   `error`, and no success or warning. Deriving those two from the palette made
   both come out the same pale blue, so `styles/index.scss` adds
-  `--app-sys-success-*` and `--app-sys-warning-*`, written with `light-dark()`
-  so they track the colour scheme the way Material's own tokens do.
+  `--app-sys-success-*` and `--app-sys-warning-*`.
 - **The todo-mvc stylesheet.** It is declared on that module's root component
   with `ViewEncapsulation.None`, and every rule is nested under
   `.todo-mvc-view`. Cube gives each scope its own component, and this stylesheet

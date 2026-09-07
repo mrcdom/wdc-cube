@@ -1,7 +1,12 @@
 @use '@angular/material' as mat;
 
 html {
-    color-scheme: light dark;
+    // Light only, like the React app. Following the system scheme would take
+    // more than a token swap: the todo-mvc module is the original TodoMVC
+    // stylesheet, a fixed light design that paints its card #fff and never
+    // gives an active item a text colour — under a dark scheme the browser
+    // default turns those labels white on that white card and they vanish.
+    color-scheme: light;
 
     @include mat.theme(
         (
@@ -14,13 +19,11 @@ html {
     // Material 3 defines no success or warning role — the spec stops at
     // primary, secondary, tertiary and error. Deriving these two from the
     // palette made both come out the same pale blue, losing the distinction
-    // the severity is meant to carry, so they get their own colours. They are
-    // written with light-dark() so they follow the colour scheme exactly the
-    // way mat.theme()'s own tokens do.
-    --app-sys-success-container: light-dark(#c8ecd0, #1d3a26);
-    --app-sys-on-success-container: light-dark(#08341a, #b0e8c2);
-    --app-sys-warning-container: light-dark(#ffe2b8, #4a3512);
-    --app-sys-on-warning-container: light-dark(#452b00, #ffdfae);
+    // the severity is meant to carry, so they get their own colours.
+    --app-sys-success-container: #c8ecd0;
+    --app-sys-on-success-container: #08341a;
+    --app-sys-warning-container: #ffe2b8;
+    --app-sys-on-warning-container: #452b00;
 }
 
 body {
