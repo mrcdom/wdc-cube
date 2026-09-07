@@ -19,10 +19,21 @@
     position: relative;
     z-index: 1;
 
-    // The widget's bare button darkens on hover, which is invisible here.
-    button:hover {
-        background: rgba(255, 255, 255, 0.12);
-    }
+    // sp-top-nav is built on tabs, and tabs expect a light ground. `--mod-tabs-*`
+    // are the hooks Spectrum publishes for exactly this: the component keeps its
+    // shape and only the colours move onto the brand bar the three view layers
+    // share.
+    --mod-tabs-color: rgba(255, 255, 255, 0.8);
+    --mod-tabs-color-hover: #fff;
+    --mod-tabs-color-selected: #fff;
+    --mod-tabs-color-key-focus: #fff;
+    --mod-tabs-focus-indicator-color: #fff;
+    --mod-tabs-divider-size: 0;
+
+    // No indicator: `MainScope` says which places exist, not which one is
+    // current, so an underline here would sit under Home whatever the user is
+    // looking at. React and Angular mark nothing either.
+    --mod-tabs-selection-indicator-color: transparent;
 }
 
 .appBarTitle {
@@ -37,7 +48,7 @@
     flex-grow: 1;
     align-self: stretch;
     min-height: 0;
-    margin: 16px;
+    margin: var(--spectrum-spacing-300);
 }
 
 
@@ -51,71 +62,19 @@
 
 // An alert can be raised from inside a dialog, so its scrim stacks above it —
 // otherwise the dialog underneath is never dimmed and the two read as one layer.
-.alertBackdrop {
+.alertLayer {
     z-index: 4;
 }
 
 
-.dialogTitle {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 500;
-}
-
-.dialogContent p {
-    margin: 0 0 12px;
-}
-
-.dialogActions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
-// A Material 3 dialog, in the variant with no hero icon: the headline is
-// left-aligned and the severity icon sits beside it. The spacing is the
-// surface's own `gap` and nothing else — an earlier version added a padding to
-// every part on top of it, which is how 12px of separation became 26px.
-.dialogHeader {
+// sp-dialog sizes and spaces the heading; all this adds is the severity icon
+// beside the words, on the line they already sit on.
+.dialogHeading {
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-
-
-.dialogHeadline {
-    margin: 0;
-    // headline-small
-    font-size: 22px;
-    font-weight: 400;
-    line-height: 28px;
-    color: #1d1b20;
+    gap: var(--spectrum-spacing-100);
 }
 
 .dialogSupportingText {
     margin: 0;
-    // body-medium
-    font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 0.25px;
-    color: #49454f;
-}
-
-// The severity is the icon's shape; the colour only reinforces it. Only `error`
-// gets a role of its own in Material 3 — the other three are conventions, so
-// they are stated here rather than pretended to be tokens.
-.alertInfo {
-    color: #0b57d0;
-}
-
-.alertSuccess {
-    color: #146c2e;
-}
-
-.alertWarning {
-    color: #8f5000;
-}
-
-.alertError {
-    color: #b3261e;
 }

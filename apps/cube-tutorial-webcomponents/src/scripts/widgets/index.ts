@@ -9,6 +9,6 @@
  */
 export { AppDom, AppElement } from './AppDom'
 export { actionButton, type ActionButtonOptions } from './action-button'
-export { icon, type Icon } from './icon'
+export { icon, ICONS, type Icon, type IconName } from './icon'
 export { modalLayer, type ModalLayer, type ModalLayerOptions } from './modal-layer'
 export { panel, type PanelOptions } from './panel'

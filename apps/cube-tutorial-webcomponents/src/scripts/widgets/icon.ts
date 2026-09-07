@@ -1,42 +1,53 @@
 import { Dom } from 'wdc-cube-webcomponents'
 
-import Css from './widgets.module.scss'
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-info.js'
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-checkmark-circle.js'
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-alert.js'
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-close-circle.js'
 
-const SVG_NS = 'http://www.w3.org/2000/svg'
+/** The workflow icons this application draws on, by the name a view asks for. */
+export const ICONS = {
+    info: 'sp-icon-info',
+    success: 'sp-icon-checkmark-circle',
+    warning: 'sp-icon-alert',
+    error: 'sp-icon-close-circle'
+} as const
 
-export type Icon = {
-    /** The `<svg>`, whose `class` carries whatever colours it. */
-    readonly element: SVGSVGElement
-
-    /** The `<path>`, whose `d` is the shape being drawn. */
-    readonly path: SVGPathElement
-}
+export type IconName = keyof typeof ICONS
 
 /**
- * A 24×24 icon drawn from path data.
+ * One of Spectrum's workflow icons.
  *
- * Drawn rather than pulled from an icon font, because this app carries no view
- * dependency at all and an icon font would be one. It fills with `currentColor`,
- * so whatever colours the element colours the icon.
- *
- * Both halves come back, and the caller changes them: an icon that varies does
- * so through the same guarded setters as everything else, rather than through a
- * second way of writing to the DOM hidden in here.
+ * Each is its own element, so changing which icon is shown means swapping the
+ * element rather than rewriting a path — which is why this hands back the host
+ * it was placed in, and `setIcon` does the swap.
  */
-export function icon(dom: Dom, path?: string): Icon {
-    const element = document.createElementNS(SVG_NS, 'svg')
-    element.setAttribute('viewBox', '0 0 24 24')
-    element.setAttribute('aria-hidden', 'true')
-    element.setAttribute('class', Css.icon)
+export type Icon = {
+    /** The element the icon lives inside. Swapping does not disturb it. */
+    readonly host: HTMLElement
 
-    const shape = document.createElementNS(SVG_NS, 'path')
-    shape.setAttribute('fill', 'currentColor')
-    if (path) {
-        shape.setAttribute('d', path)
+    /** Shows `name`, replacing whatever was there. Does nothing if unchanged. */
+    setIcon(name: IconName): void
+}
+
+export function icon(dom: Dom, name?: IconName): Icon {
+    const host = dom.span((element) => {
+        element.setAttribute('aria-hidden', 'true')
+    })
+
+    let current: IconName | undefined
+
+    const setIcon = (next: IconName) => {
+        if (next === current) {
+            return
+        }
+        current = next
+        host.replaceChildren(document.createElement(ICONS[next]))
     }
-    element.appendChild(shape)
 
-    dom.append(element)
+    if (name) {
+        setIcon(name)
+    }
 
-    return { element, path: shape }
+    return { host, setIcon }
 }

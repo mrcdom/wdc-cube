@@ -2,7 +2,7 @@ import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import type { Scope } from 'wdc-cube'
 
 import { actionButton, type ActionButtonOptions } from './action-button'
-import { icon, type Icon } from './icon'
+import { icon, type Icon, type IconName } from './icon'
 import { modalLayer, type ModalLayer, type ModalLayerOptions } from './modal-layer'
 import { panel, type PanelOptions } from './panel'
 
@@ -38,8 +38,8 @@ export class AppDom extends Dom {
         return modalLayer(this, options)
     }
 
-    public icon(path?: string): Icon {
-        return icon(this, path)
+    public icon(name?: IconName): Icon {
+        return icon(this, name)
     }
 }
 

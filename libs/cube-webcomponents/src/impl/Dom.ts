@@ -103,6 +103,10 @@ export class Dom {
         return this.container('h1', configure)
     }
 
+    public h2(configure?: Configure<HTMLHeadingElement>): HTMLHeadingElement {
+        return this.container('h2', configure)
+    }
+
     public h3(configure?: Configure<HTMLHeadingElement>): HTMLHeadingElement {
         return this.container('h3', configure)
     }

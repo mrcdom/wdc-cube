@@ -1,51 +1,52 @@
 import { SubscriptionsDetailScope } from 'wdc-cube-tutorial-core/subscriptions'
 
+import '@spectrum-web-components/button-group/sp-button-group.js'
+import '@spectrum-web-components/dialog/sp-dialog.js'
 import '@spectrum-web-components/field-label/sp-field-label.js'
 import '@spectrum-web-components/textfield/sp-textfield.js'
 
 import { AppElement, type AppDom } from '../../widgets'
-import MainCss from '../main/main.module.scss'
 import Css from './subscriptions.module.scss'
-
-/** A Spectrum field: an element with a value, whose own input is in shadow DOM. */
-type Field = HTMLElement & { value: string }
 
 export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope> {
     private blurb!: HTMLParagraphElement
-    private field!: Field
+    private field!: HTMLElementTagNameMap['sp-textfield']
 
     protected declare(dom: AppDom): void {
-        dom.h3((title) => {
-            title.className = MainCss.dialogTitle
-            title.textContent = 'Subscribe'
-        })
+        dom.element('sp-dialog', (dialog) => {
+            dialog.size = 's'
 
-        dom.div((content) => {
-            content.className = MainCss.dialogContent
+            dom.h2((heading) => {
+                heading.slot = 'heading'
+                heading.textContent = 'Subscribe'
+            })
+
             this.blurb = dom.p()
 
             dom.div((group) => {
                 group.className = Css.emailField
 
-                const label = dom.append(document.createElement('sp-field-label'))
-                label.setAttribute('for', 'subscribe-email')
-                label.textContent = 'Email Address'
+                dom.element('sp-field-label', (label) => {
+                    label.setAttribute('for', 'subscribe-email')
+                    label.textContent = 'Email Address'
+                })
 
-                this.field = dom.append(document.createElement('sp-textfield')) as Field
-                this.field.id = 'subscribe-email'
-                this.field.setAttribute('type', 'email')
-                this.field.addEventListener('input', () => this.scope.onEmailChanged(this.field.value))
+                this.field = dom.element('sp-textfield', (field) => {
+                    field.id = 'subscribe-email'
+                    field.type = 'email'
+                    field.addEventListener('input', () => this.scope.onEmailChanged(this.field.value))
+                })
             })
-        })
 
-        dom.div((actions) => {
-            actions.className = MainCss.dialogActions
-            dom.actionButton({ label: 'Cancel', context: 'onClose', onClick: () => this.scope.onClose() })
-            dom.actionButton({
-                label: 'Subscribe',
-                context: 'onSubscribe',
-                variant: 'accent',
-                onClick: () => this.scope.onSubscribe()
+            dom.element('sp-button-group', (buttons) => {
+                buttons.slot = 'button'
+                dom.actionButton({ label: 'Cancel', context: 'onClose', onClick: () => this.scope.onClose() })
+                dom.actionButton({
+                    label: 'Subscribe',
+                    context: 'onSubscribe',
+                    variant: 'accent',
+                    onClick: () => this.scope.onSubscribe()
+                })
             })
         })
     }

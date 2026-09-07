@@ -1,26 +1,31 @@
 import { SyncedRows } from 'wdc-cube-webcomponents'
 import { SubscriptionsScope, type SiteItemType } from 'wdc-cube-tutorial-core/subscriptions'
 
+import '@spectrum-web-components/sidenav/sp-sidenav.js'
+import '@spectrum-web-components/sidenav/sp-sidenav-item.js'
+
 import { AppDom, AppElement } from '../../widgets'
-import Css from './subscriptions.module.scss'
+
+type SideNav = HTMLElementTagNameMap['sp-sidenav']
+type SideNavItem = HTMLElementTagNameMap['sp-sidenav-item']
 
 export class SubscriptionsView extends AppElement<SubscriptionsScope> {
-    private list!: HTMLUListElement
+    private list!: SideNav
 
     /**
      * A site is data, not a scope, so it is not its own identity across updates —
      * the service could hand back a fresh object for the same site. The id is,
      * which is what keeps a row on the site it was showing.
      */
-    private readonly sites = new SyncedRows<SiteItemType, HTMLLIElement>({
+    private readonly sites = new SyncedRows<SiteItemType, SideNavItem>({
         key: (site) => site.id,
         create: () => this.newRow(),
         assign: (row, site) => {
-            const button = row.firstElementChild as HTMLButtonElement
             // The listener reads the site off the row, so replacing the data does
-            // not mean replacing the handler.
-            row.dataset.siteId = String(site.id)
-            this.setText(button, site.site)
+            // not mean replacing the handler. `value` is the item's own identity
+            // field, which is what sp-sidenav selects on.
+            this.setAttr(row, 'value', String(site.id))
+            this.setAttr(row, 'label', site.site)
         }
     })
 
@@ -29,10 +34,9 @@ export class SubscriptionsView extends AppElement<SubscriptionsScope> {
             heading: 'Sites you can subscribe to...',
             headingTag: 'h1',
             content: () => {
-                dom.div((view) => {
-                    view.className = Css.subscriptionsView
-                    this.list = dom.ul((list) => list.setAttribute('aria-label', 'Sites you can subscribe to'))
-                })
+                this.list = dom.element('sp-sidenav', (list) =>
+                    list.setAttribute('aria-label', 'Sites you can subscribe to')
+                )
             }
         })
     }
@@ -45,23 +49,24 @@ export class SubscriptionsView extends AppElement<SubscriptionsScope> {
         this.sites.clear()
     }
 
-    private newRow(): HTMLLIElement {
-        let row!: HTMLLIElement
+    private newRow(): SideNavItem {
+        let row!: SideNavItem
 
         AppDom.render(this.list, (dom) => {
-            row = dom.li(() => {
-                dom.button((button) => {
-                    button.addEventListener('click', () =>
-                        this.safeAction('onItemClicked', () => {
-                            const id = Number(row.dataset.siteId)
-                            const site = this.scope.sites.find((candidate) => candidate.id === id)
-                            if (site) {
-                                this.scope.onItemClicked(site)
-                            }
-                        })
-                    )
+            row = dom.element('sp-sidenav-item')
+
+            // Per item rather than on the sidenav's `change`: opening the same
+            // site twice in a row is an ordinary thing to do, and `change` only
+            // fires when the selection actually moves.
+            row.addEventListener('click', () =>
+                this.safeAction('onItemClicked', () => {
+                    const id = Number(row.value)
+                    const site = this.scope.sites.find((candidate) => candidate.id === id)
+                    if (site) {
+                        this.scope.onItemClicked(site)
+                    }
                 })
-            })
+            )
         })
 
         return row

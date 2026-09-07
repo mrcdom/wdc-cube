@@ -1,85 +1,51 @@
 // The one card shape the app uses: a bordered surface with a heading, whose
 // content sits at the top of it rather than stretching down. The body and the
 // subscriptions list each carried a private copy of these four rules.
+//
+// Spectrum has no component for a plain region of content — sp-card is an asset
+// card, with a preview and a footer — so this stays hand-written, out of the
+// tokens the components around it are already drawn from.
 .panel {
     align-content: start;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
+    border: 1px solid var(--spectrum-gray-300);
+    border-radius: var(--spectrum-corner-radius-medium-default);
+    padding: var(--spectrum-spacing-300);
 }
 
 .panelHeading {
-    margin: 0 0 12px;
+    margin: 0 0 var(--spectrum-spacing-200);
 
     &:is(h1) {
-        font-size: 28px;
+        font-size: var(--spectrum-heading-size-l);
     }
 }
 
-.button {
-    padding: 8px 16px;
-    border: 1px solid #c7c7c7;
-    border-radius: 20px;
-    background: #fff;
-    color: #0b57d0;
-    font: inherit;
-    cursor: pointer;
-
-    &:hover {
-        background: #f3f6fc;
-    }
-}
-
-.buttonPrimary {
-    background: #0b57d0;
-    border-color: #0b57d0;
-    color: #fff;
-
-    &:hover {
-        background: #0a4bb5;
-    }
-}
-
-// A button that reads as a label rather than a control: the app bar and the
-// todo footer both want one.
-.buttonBare {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    background: none;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-
-    &:hover {
-        background: rgba(0, 0, 0, 0.08);
-    }
-}
-
-.backdrop {
+// The layer centres the panel over the scrim. It draws nothing itself: the
+// dimming is sp-underlay's, and the surface is the dialog's.
+.modalLayer {
     position: fixed;
     inset: 0;
     z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.32);
 }
 
-.panelSurface {
-    min-width: 320px;
+// sp-underlay is fixed to the viewport, so it is beneath this without being
+// behind it in the tree; the stacking is what puts the panel on top.
+//
+// sp-dialog carries the layout of a dialog and not its surface — in Spectrum the
+// background, the rounding and the shadow belong to sp-dialog-base, which also
+// brings an overlay and a focus trap this layer already provides. So the surface
+// is stated here, out of the same tokens sp-dialog-base reads.
+.modalSurface {
+    position: relative;
+    z-index: 1;
     max-width: 90vw;
-    padding: 20px;
-    border-radius: 16px;
-    background: #f4f2f6;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+    max-height: 90vh;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.icon {
-    width: 24px;
-    height: 24px;
-    flex: none;
+    background: var(--spectrum-background-layer-2-color);
+    border-radius: var(--spectrum-corner-radius-large-default);
+    box-shadow: var(--spectrum-drop-shadow-emphasized-default-x) var(--spectrum-drop-shadow-emphasized-default-y)
+        var(--spectrum-drop-shadow-emphasized-default-blur) var(--spectrum-drop-shadow-emphasized-default-color);
 }

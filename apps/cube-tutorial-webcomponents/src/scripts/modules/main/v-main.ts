@@ -2,23 +2,26 @@ import { CubeViewSlot } from 'wdc-cube-webcomponents'
 import { MainScope } from 'wdc-cube-tutorial-core/main'
 
 import { AppElement, type AppDom } from '../../widgets'
+import '@spectrum-web-components/top-nav/sp-top-nav.js'
+import '@spectrum-web-components/top-nav/sp-top-nav-item.js'
+
 import Css from './main.module.scss'
 
 /** The application shell: a bar, a body slot, and the two modal layers. */
 export class MainView extends AppElement<MainScope> {
     private bodySlot!: CubeViewSlot
 
-    private dialogBackdrop!: HTMLElement
+    private dialogLayer!: HTMLElement
     private dialogSlot!: CubeViewSlot
 
-    private alertBackdrop!: HTMLElement
+    private alertLayer!: HTMLElement
     private alertSlot!: CubeViewSlot
 
     protected declare(dom: AppDom): void {
         dom.div((view) => {
             view.className = Css.mainView
 
-            dom.nav((bar) => {
+            dom.div((bar) => {
                 bar.className = Css.appBar
 
                 dom.span((title) => {
@@ -26,10 +29,16 @@ export class MainView extends AppElement<MainScope> {
                     title.textContent = 'Cube Framework (Tutorial Example)'
                 })
 
-                this.navButton(dom, 'Home', () => this.scope.onHome())
-                this.navButton(dom, 'Todos', () => this.scope.onOpenTodos())
-                this.navButton(dom, 'Subscriptions', () => this.scope.onOpenSuscriptions())
-                this.navButton(dom, 'Login', () => this.scope.onLogin())
+                // sp-top-nav marks the current item itself, from `selects` and
+                // the value of the item that was clicked; the presenter is what
+                // decides where the click goes.
+                dom.element('sp-top-nav', (nav) => {
+                    nav.quiet = true
+                    this.navItem(dom, 'Home', () => this.scope.onHome())
+                    this.navItem(dom, 'Todos', () => this.scope.onOpenTodos())
+                    this.navItem(dom, 'Subscriptions', () => this.scope.onOpenSuscriptions())
+                    this.navItem(dom, 'Login', () => this.scope.onLogin())
+                })
             })
 
             this.bodySlot = new CubeViewSlot(dom.div((body) => (body.className = Css.body)))
@@ -38,22 +47,26 @@ export class MainView extends AppElement<MainScope> {
                 context: 'closeDialog',
                 onDismiss: () => this.scope.dialog?.onClose()
             })
-            this.dialogBackdrop = dialog.backdrop
+            this.dialogLayer = dialog.host
             this.dialogSlot = dialog.slot
 
             // Above the dialog, so an alert raised from inside one dims it.
             const alert = dom.modalLayer({
                 context: 'closeAlert',
                 onDismiss: () => this.scope.alert?.onClose(),
-                className: Css.alertBackdrop
+                className: Css.alertLayer
             })
-            this.alertBackdrop = alert.backdrop
+            this.alertLayer = alert.host
             this.alertSlot = alert.slot
         })
     }
 
-    private navButton(dom: AppDom, label: string, action: () => unknown): void {
-        dom.actionButton({ label, onClick: action, context: `nav:${label}`, variant: 'quiet' })
+    private navItem(dom: AppDom, label: string, action: () => unknown): void {
+        dom.element('sp-top-nav-item', (item) => {
+            item.textContent = label
+            // No href: this is not a link, it is an action the presenter answers.
+            item.addEventListener('click', () => this.safeAction(`nav:${label}`, action))
+        })
     }
 
     protected override onUpdate(): void {
@@ -62,10 +75,10 @@ export class MainView extends AppElement<MainScope> {
         this.bodySlot.setScope(scope.body)
 
         this.dialogSlot.setScope(scope.dialog)
-        this.setVisible(this.dialogBackdrop, !!scope.dialog)
+        this.setVisible(this.dialogLayer, !!scope.dialog)
 
         this.alertSlot.setScope(scope.alert)
-        this.setVisible(this.alertBackdrop, !!scope.alert)
+        this.setVisible(this.alertLayer, !!scope.alert)
     }
 
     protected override onRelease(): void {
