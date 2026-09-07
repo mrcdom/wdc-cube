@@ -118,6 +118,18 @@ export class Dom {
         return node
     }
 
+    /**
+     * Puts a node that was built elsewhere into the tree.
+     *
+     * The methods above cover HTML, which is what a view is nearly always made
+     * of. Anything in another namespace — an SVG, most often — has to be created
+     * with `createElementNS` and cannot come from them, so this is the way in.
+     */
+    public append<N extends Node>(node: N): N {
+        this.parent.appendChild(node)
+        return node
+    }
+
     /** Any element with no method of its own. */
     public element<K extends keyof HTMLElementTagNameMap>(
         tag: K,

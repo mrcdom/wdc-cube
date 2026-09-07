@@ -2,7 +2,8 @@ import type { AlertSeverity } from 'wdc-cube'
 import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { AlertScope } from 'wdc-cube-tutorial-core/main'
 
-import { actionButton } from '../../widgets'
+import { actionButton, icon, type Icon } from '../../widgets'
+import WidgetCss from '../../widgets/widgets.module.scss'
 import Css from './main.module.scss'
 
 /**
@@ -35,18 +36,15 @@ const SEVERITIES: Record<AlertSeverity, { path: string; className: string }> = {
     }
 }
 
-const SVG_NS = 'http://www.w3.org/2000/svg'
-
 export class AlertView extends CubeElement<AlertScope> {
-    private icon!: SVGSVGElement
-    private iconPath!: SVGPathElement
+    private severityIcon!: Icon
     private headline!: HTMLHeadingElement
     private supportingText!: HTMLParagraphElement
 
     protected declare(dom: Dom): void {
         dom.div((header) => {
             header.className = Css.dialogHeader
-            this.icon = this.declareIcon(header)
+            this.severityIcon = icon(dom)
             this.headline = dom.h3((heading) => (heading.className = Css.dialogHeadline))
         })
 
@@ -62,30 +60,12 @@ export class AlertView extends CubeElement<AlertScope> {
         const scope = this.scope
         const severity = SEVERITIES[scope.severity] ?? SEVERITIES.info
 
-        this.setAttr(this.iconPath, 'd', severity.path)
-        // The class comes from the same lookup as the path, rather than from
-        // toggling each of the four in turn. `class` and not `className`: on an
-        // SVG element that property is an SVGAnimatedString, not a string.
-        this.setAttr(this.icon, 'class', `${Css.dialogIcon} ${severity.className}`)
+        // Both come from the same lookup. `class` and not `className`: on an SVG
+        // element that property is an SVGAnimatedString, not a string.
+        this.setAttr(this.severityIcon.path, 'd', severity.path)
+        this.setAttr(this.severityIcon.element, 'class', `${WidgetCss.icon} ${severity.className}`)
 
         this.setText(this.headline, scope.title ?? '')
         this.setText(this.supportingText, scope.message ?? '')
-    }
-
-    /**
-     * Dom builds HTML elements; an SVG needs its own namespace, so this one is
-     * assembled by hand and appended to the element that holds it.
-     */
-    private declareIcon(host: HTMLElement): SVGSVGElement {
-        const svg = document.createElementNS(SVG_NS, 'svg')
-        svg.setAttribute('viewBox', '0 0 24 24')
-        svg.setAttribute('aria-hidden', 'true')
-
-        this.iconPath = document.createElementNS(SVG_NS, 'path')
-        this.iconPath.setAttribute('fill', 'currentColor')
-        svg.appendChild(this.iconPath)
-
-        host.appendChild(svg)
-        return svg
     }
 }

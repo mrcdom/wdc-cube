@@ -8,5 +8,6 @@
  * what the `components/` folder does in the SWT project this strategy came from.
  */
 export { actionButton, type ActionButtonOptions } from './action-button'
+export { icon, type Icon } from './icon'
 export { modalLayer, type ModalLayer, type ModalLayerOptions } from './modal-layer'
 export { panel, type PanelOptions } from './panel'
