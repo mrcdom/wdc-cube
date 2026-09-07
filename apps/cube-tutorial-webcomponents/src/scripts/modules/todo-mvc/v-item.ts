@@ -48,7 +48,7 @@ export class ItemView extends CubeElement<ItemScope> {
 
         this.setClass(this.row, Css.completed, scope.completed)
         this.setClass(this.row, Css.editing, scope.editing)
-        this.toggle.checked = scope.completed
+        this.setChecked(this.toggle, scope.completed)
         this.setText(this.titleLabel, scope.title)
 
         if (scope.editing) {

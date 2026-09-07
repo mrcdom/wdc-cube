@@ -336,3 +336,9 @@
         border-color: rgba(175, 47, 47, 0.45);
     }
 }
+
+// The toggle-all label is hidden while the list is empty, but still occupies
+// its place — so opacity rather than display.
+.hidden {
+    opacity: 0;
+}

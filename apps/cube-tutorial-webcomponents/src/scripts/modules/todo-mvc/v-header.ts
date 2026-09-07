@@ -43,8 +43,9 @@ export class HeaderView extends CubeElement<HeaderScope> {
     }
 
     protected override onUpdate(): void {
-        this.toggleAll.checked = !this.scope.allItemsCompleted
-        this.toggleLabel.style.opacity = this.scope.toggleButtonVisible ? '1' : '0'
+        this.setChecked(this.toggleAll, !this.scope.allItemsCompleted)
+        // A class rather than an inline style, so the guarded setter covers it.
+        this.setClass(this.toggleLabel, Css.hidden, !this.scope.toggleButtonVisible)
         // Only when the two disagree, so a redraw never interrupts typing.
         this.setValue(this.field, this.scope.inputValue)
     }

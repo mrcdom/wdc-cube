@@ -62,7 +62,7 @@ export class AlertView extends CubeElement<AlertScope> {
         const scope = this.scope
         const severity = SEVERITIES[scope.severity] ?? SEVERITIES.info
 
-        this.iconPath.setAttribute('d', severity.path)
+        this.setAttr(this.iconPath, 'd', severity.path)
         for (const known of Object.values(SEVERITIES)) {
             this.setClass(this.icon, Css[known.className], known === severity)
         }

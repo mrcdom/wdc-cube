@@ -191,6 +191,30 @@ export abstract class CubeElement<S extends Scope = Scope> extends HTMLElement {
         }
     }
 
+    /**
+     * Sets an attribute, but only when it differs.
+     *
+     * Named `setAttr` rather than `setAttribute` on purpose: a view *is* an
+     * Element, so the obvious name would override the DOM's own method.
+     *
+     * The guard earns its keep on attributes the browser acts upon. Rewriting an
+     * SVG path's `d` invalidates its geometry, so an identical value still costs
+     * a re-parse; `class` and `style` the browser dedupes for you, but the point
+     * is that a view should not have to know which is which.
+     */
+    protected setAttr(element: Element, name: string, value: string): void {
+        if (element.getAttribute(name) !== value) {
+            element.setAttribute(name, value)
+        }
+    }
+
+    /** Checks or unchecks a box, only when that is not already so. */
+    protected setChecked(field: HTMLInputElement, checked: boolean): void {
+        if (field.checked !== checked) {
+            field.checked = checked
+        }
+    }
+
     /** Shows or hides, only when that is not already so. */
     protected setVisible(element: HTMLElement, visible: boolean): void {
         if (element.hidden === visible) {
