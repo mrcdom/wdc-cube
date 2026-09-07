@@ -5,7 +5,6 @@ import { ItemScope } from 'wdc-cube-tutorial-core/todo-mvc'
 @Component({
     selector: 'v-item',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './todo-mvc.scss',
     template: `
         <li class="view" [class.completed]="scope().completed" [class.editing]="scope().editing">
             @if (scope().editing) {

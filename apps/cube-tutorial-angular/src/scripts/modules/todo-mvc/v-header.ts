@@ -7,7 +7,6 @@ let nextInputId = 0
 @Component({
     selector: 'v-header',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './todo-mvc.scss',
     template: `
         <header>
             <div class="header-input-pane">

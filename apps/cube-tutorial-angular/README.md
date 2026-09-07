@@ -104,13 +104,25 @@ html {
 `color-scheme: light dark` means the theme emits `light-dark()` values, so the
 app follows the reader's system setting with no toggle and no second stylesheet.
 
-Two places need more than the generated tokens:
+The app bar asks for `primary` explicitly, through `mat.toolbar-overrides()` and
+the matching button mixins rather than by naming the generated custom properties.
+Material 3 dropped the `color` input `mat-toolbar` had under Material 2, and its
+default toolbar is surface-coloured — on this palette close enough to the page
+behind it that the bar stops reading as a bar.
+
+Two more places need more than the generated tokens:
 
 - **Alert severities.** Material 3 defines `primary`, `secondary`, `tertiary` and
   `error`, and no success or warning. Deriving those two from the palette made
   both come out the same pale blue, so `styles/index.scss` adds
   `--app-sys-success-*` and `--app-sys-warning-*`, written with `light-dark()`
   so they track the colour scheme the way Material's own tokens do.
+- **The todo-mvc stylesheet.** It is declared on that module's root component
+  with `ViewEncapsulation.None`, and every rule is nested under
+  `.todo-mvc-view`. Cube gives each scope its own component, and this stylesheet
+  is written across that split — `.todo-list li` has the list in one component
+  and the item in another, which emulated encapsulation will not let match. See
+  [wdc-cube-angular](../../libs/cube-angular/README.md#styles-that-cross-the-component-split).
 - **The flex chain.** `.main-view` and `.body` carry `min-height: 0`. A column
   flex item defaults to `min-height: auto` and refuses to shrink below its
   content, which pushes the shell past the viewport instead of letting the

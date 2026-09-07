@@ -12,7 +12,7 @@ import { MainScope } from 'wdc-cube-tutorial-core/main'
     styleUrl: './main.scss',
     template: `
         <div class="main-view">
-            <mat-toolbar color="primary">
+            <mat-toolbar class="app-bar">
                 <button mat-icon-button aria-label="menu"><mat-icon>menu</mat-icon></button>
                 <span class="app-bar-title">Cube Framework (Tutorial Example)</span>
                 <button mat-button (click)="scope().onHome()">Home</button>

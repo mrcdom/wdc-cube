@@ -5,7 +5,6 @@ import { FooterScope, ShowingOptions } from 'wdc-cube-tutorial-core/todo-mvc'
 @Component({
     selector: 'v-footer',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    styleUrl: './todo-mvc.scss',
     template: `
         <footer class="footer">
             <span class="todo-count">

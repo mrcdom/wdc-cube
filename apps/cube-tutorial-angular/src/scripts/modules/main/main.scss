@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 // min-height: 0 on both of these: a column flex item defaults to min-height:auto,
 // which refuses to shrink below its content, so a tall page pushes the whole
 // shell past the viewport instead of letting the scroll container inside it
@@ -10,6 +12,39 @@
     align-self: stretch;
     flex-grow: 1;
     min-height: 0;
+}
+
+// Material 3 removed the `color` input mat-toolbar had under Material 2, and its
+// default toolbar is surface-coloured — on this palette close enough to the page
+// behind it that the bar stops reading as a bar at all. The React app's AppBar is
+// primary, so this asks for that explicitly, through the override mixins rather
+// than by naming the generated custom properties.
+.app-bar {
+    @include mat.toolbar-overrides(
+        (
+            container-background-color: var(--mat-sys-primary),
+            container-text-color: var(--mat-sys-on-primary)
+        )
+    );
+    @include mat.button-overrides(
+        (
+            text-label-text-color: var(--mat-sys-on-primary),
+            text-state-layer-color: var(--mat-sys-on-primary)
+        )
+    );
+    @include mat.icon-button-overrides(
+        (
+            icon-color: var(--mat-sys-on-primary),
+            state-layer-color: var(--mat-sys-on-primary)
+        )
+    );
+
+    box-shadow: var(--mat-sys-level2);
+    // Above the page content, so the shadow falls on it rather than under it.
+    // The modal layers below stack higher still: a scrim that left the bar
+    // uncovered would leave its buttons clickable behind the dialog.
+    position: relative;
+    z-index: 1;
 }
 
 .app-bar-title {
@@ -39,11 +74,13 @@
 .backdrop {
     position: fixed;
     inset: 0;
+    z-index: 2;
     background-color: color-mix(in srgb, var(--mat-sys-scrim) 32%, transparent);
 }
 
 .dialog {
     position: fixed;
+    z-index: 3;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);

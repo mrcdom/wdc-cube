@@ -6,7 +6,6 @@ import { MainScope } from 'wdc-cube-tutorial-core/todo-mvc'
     selector: 'v-todo-main',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [CubeViewSlot],
-    styleUrl: './todo-mvc.scss',
     template: `
         <section class="main">
             <ul class="todo-list">

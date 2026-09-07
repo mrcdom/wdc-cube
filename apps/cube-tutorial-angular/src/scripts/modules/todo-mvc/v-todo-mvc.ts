@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@angular/core'
 import { bindScope, CubeViewSlot } from 'wdc-cube-angular'
 import { TodoMvcScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
@@ -7,6 +7,11 @@ import { TodoMvcScope } from 'wdc-cube-tutorial-core/todo-mvc'
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [CubeViewSlot],
     styleUrl: './todo-mvc.scss',
+    // The one stylesheet for the whole module, and the only component that
+    // carries it. See the note at the top of todo-mvc.scss: its rules reach
+    // across the component split Cube creates, which emulated encapsulation
+    // will not let them do.
+    encapsulation: ViewEncapsulation.None,
     template: `
         <div class="todo-mvc-view">
             <div class="body">

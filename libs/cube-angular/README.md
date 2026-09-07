@@ -68,6 +68,38 @@ stops being constrained by its parent. The slot therefore sets the host to
 markup where React would have put it. A view that wants a real box of its own
 takes it back with `:host { display: block !important }`.
 
+## Styles that cross the component split
+
+Cube gives each scope its own component, so a screen that was one stylesheet
+becomes several components — and any rule written across that split stops
+working. Angular's emulated encapsulation stamps the component's attribute on
+**every** compound in a selector, so `.todo-list li`, with the list in one
+component and the item in another, is rewritten to something no element matches.
+Nothing errors; the rules simply never apply.
+
+The fix is not to spread the stylesheet across the components that happen to own
+each element. Give it to the component at the top of the module, turn
+encapsulation off there, and nest everything under that component's own root
+class:
+
+```ts
+@Component({
+    styleUrl: './todo-mvc.scss',
+    encapsulation: ViewEncapsulation.None,
+    template: `<div class="todo-mvc-view">…</div>`
+})
+```
+
+```scss
+.todo-mvc-view {
+    .todo-list li { … }
+}
+```
+
+The rules are then global, which is what lets them reach across the split, and
+the single prefix is what keeps names as ordinary as `.body`, `.main` and
+`.footer` from leaking into the rest of the app.
+
 ## Registries do not collide
 
 Each binding package builds its own registry through `createViewRegistry` in
