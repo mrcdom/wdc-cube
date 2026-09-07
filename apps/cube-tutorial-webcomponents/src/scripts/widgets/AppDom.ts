@@ -1,8 +1,8 @@
-import { CubeElement, Dom } from 'wdc-cube-webcomponents'
+import { CubeElement, Dom, type Configure } from 'wdc-cube-webcomponents'
 import type { Scope } from 'wdc-cube'
 
 import { actionButton, type ActionButtonOptions } from './action-button'
-import { icon, type Icon, type IconName } from './icon'
+import { AppAlertDialog } from './alert-dialog'
 import { modalLayer, type ModalLayer, type ModalLayerOptions } from './modal-layer'
 import { panel, type PanelOptions } from './panel'
 
@@ -38,8 +38,8 @@ export class AppDom extends Dom {
         return modalLayer(this, options)
     }
 
-    public icon(name?: IconName): Icon {
-        return icon(this, name)
+    public alertDialog(configure?: Configure<AppAlertDialog>): AppAlertDialog {
+        return this.element('app-alert-dialog', configure)
     }
 }
 

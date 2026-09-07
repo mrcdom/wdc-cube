@@ -195,6 +195,12 @@ importers:
 
   apps/cube-tutorial-webcomponents:
     dependencies:
+      '@spectrum-web-components/alert-dialog':
+        specifier: ^1.12.2
+        version: 1.12.2
+      '@spectrum-web-components/base':
+        specifier: ^1.12.2
+        version: 1.12.2
       '@spectrum-web-components/button':
         specifier: ^1.12.2
         version: 1.12.2

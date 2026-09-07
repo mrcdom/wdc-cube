@@ -34,7 +34,6 @@ export class TodoMvcView extends AppElement<TodoMvcScope> {
                     this.stressButton = dom.actionButton({
                         label: '',
                         context: 'onToggleStress',
-                        variant: 'quiet',
                         onClick: () => this.scope.actions.onToggleStress()
                     })
                     this.stressButton.className = Css.stressToggle

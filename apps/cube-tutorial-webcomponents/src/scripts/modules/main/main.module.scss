@@ -67,14 +67,3 @@
 }
 
 
-// sp-dialog sizes and spaces the heading; all this adds is the severity icon
-// beside the words, on the line they already sit on.
-.dialogHeading {
-    display: flex;
-    align-items: center;
-    gap: var(--spectrum-spacing-100);
-}
-
-.dialogSupportingText {
-    margin: 0;
-}

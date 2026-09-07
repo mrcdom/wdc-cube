@@ -13,7 +13,7 @@ export type ActionButtonOptions = {
     context?: string
 
     /** Spectrum's own treatments: the accent one is what a dialog wants pressed. */
-    variant?: 'primary' | 'accent' | 'quiet'
+    variant?: 'primary' | 'accent'
 }
 
 /**
@@ -32,11 +32,8 @@ export function actionButton(dom: Dom, options: ActionButtonOptions): HTMLElemen
     button.textContent = options.label
 
     const variant = options.variant ?? 'primary'
-    button.setAttribute('variant', variant === 'accent' ? 'accent' : 'primary')
-    if (variant === 'quiet') {
-        button.setAttribute('treatment', 'outline')
-        button.setAttribute('static-color', 'white')
-    } else if (variant === 'primary') {
+    button.setAttribute('variant', variant)
+    if (variant === 'primary') {
         button.setAttribute('treatment', 'outline')
     }
 
