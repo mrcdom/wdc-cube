@@ -58,12 +58,14 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
                 'We will send updates occasionally.'
         )
 
-        // The same guard as everywhere else, but against the host's own value:
-        // an sp-textfield keeps its <input> in shadow DOM, so setValue cannot
-        // reach it and there is nothing to compare on this side.
-        const wanted = this.scope.email ?? ''
-        if (this.field.value !== wanted) {
-            this.field.value = wanted
-        }
+        // The field is not written here, and `scope.email` is not read.
+        //
+        // The presenter takes the typed value in `onEmailChanged` and keeps it
+        // to itself, without an update — deliberately, so that typing does not
+        // redraw the dialog. `scope.email` therefore stays undefined however
+        // much has been typed, and writing it back turned every update into a
+        // reset: raising the alert that says the address is wrong emptied the
+        // field the reader was about to correct. The React and Angular views
+        // leave their inputs uncontrolled for the same reason.
     }
 }
