@@ -1,5 +1,7 @@
-import { CubeElement, CubeViewSlot, Dom, SyncedRows } from 'wdc-cube-webcomponents'
+import { CubeViewSlot, SyncedRows } from 'wdc-cube-webcomponents'
 import { ItemScope, MainScope } from 'wdc-cube-tutorial-core/todo-mvc'
+
+import { AppElement, type AppDom } from '../../widgets'
 
 import Css from './todo-mvc.module.scss'
 import { ItemView } from './v-item'
@@ -11,7 +13,7 @@ import { ItemView } from './v-item'
  * scopes and it keeps one element per scope, reusing what is already there —
  * which is what an open editor in row three depends on.
  */
-export class TodoMainView extends CubeElement<MainScope> {
+export class TodoMainView extends AppElement<MainScope> {
     private list!: HTMLUListElement
     private clockSlot!: CubeViewSlot
 
@@ -23,7 +25,7 @@ export class TodoMainView extends CubeElement<MainScope> {
         create: () => new ItemView()
     })
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         dom.section((section) => {
             section.className = Css.main
             this.list = dom.ul((ul) => {

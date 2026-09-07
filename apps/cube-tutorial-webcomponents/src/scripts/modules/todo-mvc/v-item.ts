@@ -1,16 +1,17 @@
-import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { ItemScope } from 'wdc-cube-tutorial-core/todo-mvc'
+
+import { AppElement, type AppDom } from '../../widgets'
 
 import Css from './todo-mvc.module.scss'
 
 /** One todo row. A row is an element like any other, which is what makes syncList trivial. */
-export class ItemView extends CubeElement<ItemScope> {
+export class ItemView extends AppElement<ItemScope> {
     private row!: HTMLLIElement
     private toggle!: HTMLInputElement
     private titleLabel!: HTMLLabelElement
     private editor!: HTMLInputElement
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         this.row = dom.li((li) => {
             li.className = Css.view
 

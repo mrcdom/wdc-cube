@@ -1,14 +1,15 @@
-import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { HeaderScope } from 'wdc-cube-tutorial-core/todo-mvc'
+
+import { AppElement, type AppDom } from '../../widgets'
 
 import Css from './todo-mvc.module.scss'
 
-export class HeaderView extends CubeElement<HeaderScope> {
+export class HeaderView extends AppElement<HeaderScope> {
     private toggleAll!: HTMLInputElement
     private toggleLabel!: HTMLLabelElement
     private field!: HTMLInputElement
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         dom.header((header) => {
             header.className = Css.headerInputPane
 

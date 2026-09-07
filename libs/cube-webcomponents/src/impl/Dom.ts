@@ -34,13 +34,31 @@ export type Configure<E extends Element> = (element: E) => void
 export class Dom {
     private parent: Element
 
-    private constructor(root: Element) {
+    /**
+     * Protected so an application can extend this with factory methods of its
+     * own — `dom.actionButton(...)` reading beside `dom.div(...)` — which is how
+     * the strategy this comes from expresses its reusable pieces.
+     */
+    protected constructor(root: Element) {
         this.parent = root
     }
 
-    /** Declares into `root`, which becomes the parent of everything at the top level. */
-    public static render(root: Element, declare: (dom: Dom) => void): void {
-        declare(new Dom(root))
+    /** A plain `Dom` declaring into `root`. A subclass provides its own. */
+    public static create(root: Element): Dom {
+        return new Dom(root)
+    }
+
+    /**
+     * Declares into `root`, which becomes the parent of everything at the top
+     * level. Called on a subclass it builds that subclass, so a row declared
+     * outside a view gets the same `Dom` the view itself was given.
+     */
+    public static render<D extends Dom>(
+        this: { create(root: Element): D },
+        root: Element,
+        declare: (dom: D) => void
+    ): void {
+        declare(this.create(root))
     }
 
     // ========== CONTAINERS ==========

@@ -1,10 +1,10 @@
-import { CubeElement, Dom, SyncedRows } from 'wdc-cube-webcomponents'
+import { SyncedRows } from 'wdc-cube-webcomponents'
 import { SubscriptionsScope, type SiteItemType } from 'wdc-cube-tutorial-core/subscriptions'
 
-import { panel } from '../../widgets'
+import { AppDom, AppElement } from '../../widgets'
 import Css from './subscriptions.module.scss'
 
-export class SubscriptionsView extends CubeElement<SubscriptionsScope> {
+export class SubscriptionsView extends AppElement<SubscriptionsScope> {
     private list!: HTMLUListElement
 
     /**
@@ -24,8 +24,8 @@ export class SubscriptionsView extends CubeElement<SubscriptionsScope> {
         }
     })
 
-    protected declare(dom: Dom): void {
-        panel(dom, {
+    protected declare(dom: AppDom): void {
+        dom.panel({
             heading: 'Sites you can subscribe to...',
             headingTag: 'h1',
             content: () => {
@@ -48,7 +48,7 @@ export class SubscriptionsView extends CubeElement<SubscriptionsScope> {
     private newRow(): HTMLLIElement {
         let row!: HTMLLIElement
 
-        Dom.render(this.list, (dom) => {
+        AppDom.render(this.list, (dom) => {
             row = dom.li(() => {
                 dom.button((button) => {
                     button.addEventListener('click', () =>

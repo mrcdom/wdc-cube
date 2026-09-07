@@ -1,8 +1,8 @@
 import type { AlertSeverity } from 'wdc-cube'
-import { CubeElement, Dom } from 'wdc-cube-webcomponents'
+
 import { AlertScope } from 'wdc-cube-tutorial-core/main'
 
-import { actionButton, icon, type Icon } from '../../widgets'
+import { AppElement, type AppDom, type Icon } from '../../widgets'
 import WidgetCss from '../../widgets/widgets.module.scss'
 import Css from './main.module.scss'
 
@@ -36,15 +36,15 @@ const SEVERITIES: Record<AlertSeverity, { path: string; className: string }> = {
     }
 }
 
-export class AlertView extends CubeElement<AlertScope> {
+export class AlertView extends AppElement<AlertScope> {
     private severityIcon!: Icon
     private headline!: HTMLHeadingElement
     private supportingText!: HTMLParagraphElement
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         dom.div((header) => {
             header.className = Css.dialogHeader
-            this.severityIcon = icon(dom)
+            this.severityIcon = dom.icon()
             this.headline = dom.h3((heading) => (heading.className = Css.dialogHeadline))
         })
 
@@ -52,7 +52,7 @@ export class AlertView extends CubeElement<AlertScope> {
 
         dom.div((actions) => {
             actions.className = Css.dialogActions
-            actionButton(dom, { label: 'Close', context: 'onClose', onClick: () => this.scope.onClose() })
+            dom.actionButton({ label: 'Close', context: 'onClose', onClick: () => this.scope.onClose() })
         })
     }
 

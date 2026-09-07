@@ -1,11 +1,11 @@
-import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
+import { CubeViewSlot } from 'wdc-cube-webcomponents'
 import { MainScope } from 'wdc-cube-tutorial-core/main'
 
-import { actionButton, modalLayer } from '../../widgets'
+import { AppElement, type AppDom } from '../../widgets'
 import Css from './main.module.scss'
 
 /** The application shell: a bar, a body slot, and the two modal layers. */
-export class MainView extends CubeElement<MainScope> {
+export class MainView extends AppElement<MainScope> {
     private bodySlot!: CubeViewSlot
 
     private dialogBackdrop!: HTMLElement
@@ -14,7 +14,7 @@ export class MainView extends CubeElement<MainScope> {
     private alertBackdrop!: HTMLElement
     private alertSlot!: CubeViewSlot
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         dom.div((view) => {
             view.className = Css.mainView
 
@@ -34,7 +34,7 @@ export class MainView extends CubeElement<MainScope> {
 
             this.bodySlot = new CubeViewSlot(dom.div((body) => (body.className = Css.body)))
 
-            const dialog = modalLayer(dom, {
+            const dialog = dom.modalLayer({
                 context: 'closeDialog',
                 onDismiss: () => this.scope.dialog?.onClose()
             })
@@ -42,7 +42,7 @@ export class MainView extends CubeElement<MainScope> {
             this.dialogSlot = dialog.slot
 
             // Above the dialog, so an alert raised from inside one dims it.
-            const alert = modalLayer(dom, {
+            const alert = dom.modalLayer({
                 context: 'closeAlert',
                 onDismiss: () => this.scope.alert?.onClose(),
                 className: Css.alertBackdrop
@@ -52,8 +52,8 @@ export class MainView extends CubeElement<MainScope> {
         })
     }
 
-    private navButton(dom: Dom, label: string, action: () => unknown): void {
-        actionButton(dom, { label, onClick: action, context: `nav:${label}`, variant: 'bare' })
+    private navButton(dom: AppDom, label: string, action: () => unknown): void {
+        dom.actionButton({ label, onClick: action, context: `nav:${label}`, variant: 'bare' })
     }
 
     protected override onUpdate(): void {

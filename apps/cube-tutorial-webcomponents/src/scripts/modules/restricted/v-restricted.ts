@@ -1,13 +1,15 @@
-import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
+import { CubeViewSlot } from 'wdc-cube-webcomponents'
 import { RestrictedScope } from 'wdc-cube-tutorial-core/restricted'
+
+import { AppElement, type AppDom } from '../../widgets'
 
 import Css from './restricted.module.scss'
 
-export class RestrictedView extends CubeElement<RestrictedScope> {
+export class RestrictedView extends AppElement<RestrictedScope> {
     private empty!: HTMLParagraphElement
     private detailSlot!: CubeViewSlot
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         dom.div((view) => {
             view.className = Css.restrictedView
             this.empty = dom.p((text) => (text.textContent = 'Nothing is nested under this place yet.'))

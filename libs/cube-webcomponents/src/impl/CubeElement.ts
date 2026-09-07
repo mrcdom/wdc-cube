@@ -78,7 +78,7 @@ export function safeAction(context: string, action: () => unknown): void {
  * says what it should show, comparing before it writes. React would diff and
  * Angular would check bindings; here the view does it, which is the point.
  */
-export abstract class CubeElement<S extends Scope = Scope> extends HTMLElement {
+export abstract class CubeElement<S extends Scope = Scope, D extends Dom = Dom> extends HTMLElement {
     // A field here shares a namespace with every property HTMLElement already
     // has — `title`, `id`, `hidden`, `lang`, `style`. TypeScript catches the
     // collision, but the message points at the registration rather than the
@@ -118,7 +118,7 @@ export abstract class CubeElement<S extends Scope = Scope> extends HTMLElement {
     }
 
     /** Declares the element's children. Runs once, before the first update. */
-    protected abstract declare(dom: Dom): void
+    protected abstract declare(dom: D): void
 
     /** Pushes the scope's state into those children. Runs on every redraw. */
     protected onUpdate(): void {
@@ -159,14 +159,22 @@ export abstract class CubeElement<S extends Scope = Scope> extends HTMLElement {
         }
     }
 
+    /**
+     * The `Dom` this view declares into. Override to hand every view an
+     * application's own — one with factory methods for its widgets.
+     */
+    protected createDom(root: Element): D {
+        // Correct whenever D is left at its default; a view that narrows it
+        // overrides this, which is the only way to narrow it in the first place.
+        return Dom.create(root) as D
+    }
+
     private ensureDeclared(): void {
         if (this.declared) {
             return
         }
         this.declared = true
-        Dom.render(this, (dom) => {
-            this.declare(dom)
-        })
+        this.declare(this.createDom(this))
     }
 
     private releaseScope(): void {

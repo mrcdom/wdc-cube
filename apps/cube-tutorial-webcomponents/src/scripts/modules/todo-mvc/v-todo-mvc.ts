@@ -1,10 +1,10 @@
-import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
+import { CubeViewSlot } from 'wdc-cube-webcomponents'
 import { TodoMvcScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
-import { actionButton } from '../../widgets'
+import { AppElement, type AppDom } from '../../widgets'
 import Css from './todo-mvc.module.scss'
 
-export class TodoMvcView extends CubeElement<TodoMvcScope> {
+export class TodoMvcView extends AppElement<TodoMvcScope> {
     private note!: HTMLParagraphElement
     private stressButton!: HTMLButtonElement
 
@@ -12,7 +12,7 @@ export class TodoMvcView extends CubeElement<TodoMvcScope> {
     private mainSlot!: CubeViewSlot
     private footerSlot!: CubeViewSlot
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         dom.div((view) => {
             view.className = Css.todoMvcView
 
@@ -31,7 +31,7 @@ export class TodoMvcView extends CubeElement<TodoMvcScope> {
                 dom.footer((info) => {
                     info.className = Css.info
                     this.note = dom.p()
-                    this.stressButton = actionButton(dom, {
+                    this.stressButton = dom.actionButton({
                         label: '',
                         context: 'onToggleStress',
                         variant: 'bare',

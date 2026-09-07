@@ -1,15 +1,16 @@
-import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { FooterScope, ShowingOptions } from 'wdc-cube-tutorial-core/todo-mvc'
+
+import { AppElement, type AppDom } from '../../widgets'
 
 import Css from './todo-mvc.module.scss'
 
-export class FooterView extends CubeElement<FooterScope> {
+export class FooterView extends AppElement<FooterScope> {
     private count!: HTMLElement
     private word!: Text
     private clear!: HTMLButtonElement
     private readonly filters = new Map<ShowingOptions, HTMLAnchorElement>()
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         dom.footer((footer) => {
             footer.className = Css.footer
 
@@ -36,7 +37,7 @@ export class FooterView extends CubeElement<FooterScope> {
         })
     }
 
-    private filter(dom: Dom, showing: ShowingOptions, label: string, action: () => unknown): void {
+    private filter(dom: AppDom, showing: ShowingOptions, label: string, action: () => unknown): void {
         dom.li(() => {
             const link = dom.element('a', (anchor) => {
                 anchor.textContent = label

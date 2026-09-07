@@ -1,15 +1,14 @@
-import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { SubscriptionsDetailScope } from 'wdc-cube-tutorial-core/subscriptions'
 
-import { actionButton } from '../../widgets'
+import { AppElement, type AppDom } from '../../widgets'
 import MainCss from '../main/main.module.scss'
 import Css from './subscriptions.module.scss'
 
-export class SubscriptionsDetailView extends CubeElement<SubscriptionsDetailScope> {
+export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope> {
     private blurb!: HTMLParagraphElement
     private field!: HTMLInputElement
 
-    protected declare(dom: Dom): void {
+    protected declare(dom: AppDom): void {
         dom.h3((title) => {
             title.className = MainCss.dialogTitle
             title.textContent = 'Subscribe'
@@ -31,8 +30,8 @@ export class SubscriptionsDetailView extends CubeElement<SubscriptionsDetailScop
 
         dom.div((actions) => {
             actions.className = MainCss.dialogActions
-            actionButton(dom, { label: 'Cancel', context: 'onClose', onClick: () => this.scope.onClose() })
-            actionButton(dom, {
+            dom.actionButton({ label: 'Cancel', context: 'onClose', onClick: () => this.scope.onClose() })
+            dom.actionButton({
                 label: 'Subscribe',
                 context: 'onSubscribe',
                 variant: 'primary',

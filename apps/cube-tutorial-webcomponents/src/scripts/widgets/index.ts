@@ -7,6 +7,7 @@
  * it is markup that repeated often enough to deserve a name, which is exactly
  * what the `components/` folder does in the SWT project this strategy came from.
  */
+export { AppDom, AppElement } from './AppDom'
 export { actionButton, type ActionButtonOptions } from './action-button'
 export { icon, type Icon } from './icon'
 export { modalLayer, type ModalLayer, type ModalLayerOptions } from './modal-layer'
