@@ -19,7 +19,7 @@ class MainViewClass extends FCClass<MainViewProps> {
                 <ul className={Css.todoList}>
                     <ViewSlot scope={this.scope.clock} view={ClockView} />
                     {this.scope.items.map((todo) => (
-                        <ViewSlot key={todo.id} scope={todo} view={ItemView} />
+                        <ViewSlot key={String(todo.identity)} scope={todo} view={ItemView} />
                     ))}
                 </ul>
             </section>

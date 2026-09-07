@@ -37,6 +37,29 @@ describe('todo-mvc', () => {
         expect(active(harness)).toEqual(2)
     })
 
+    // The identity a view reconciles a list on. It lives on the scope because
+    // otherwise every view decides it separately — which is how this repository
+    // ended up with React keying on the id and one binding on the instance.
+    it('gives every item an identity that follows the data', async () => {
+        harness = await startTutorial('/todos')
+
+        const items = todos(harness).main!.items
+        const identities = items.map((item) => item.identity)
+
+        expect(identities).toEqual(items.map((item) => item.id))
+        expect(new Set(identities).size).toEqual(identities.length)
+    })
+
+    it('gives a newly added item an identity too', async () => {
+        harness = await startTutorial('/todos')
+
+        await type(harness, 'Write the tests')
+
+        const items = todos(harness).main!.items
+        const added = items.get(items.length - 1)
+        expect(added.identity).toEqual(added.id)
+    })
+
     it('adds what was typed and clears the field', async () => {
         harness = await startTutorial('/todos')
 

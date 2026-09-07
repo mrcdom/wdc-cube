@@ -15,11 +15,11 @@ export class TodoMainView extends CubeElement<MainScope> {
     private list!: HTMLUListElement
     private clockSlot!: CubeViewSlot
 
-    // The scope is its own identity: the presenter builds an ItemScope once and
-    // keeps it, so a row that already had this todo keeps it — and keeps the
-    // editor that may be open in it — even when the list around it changes.
+    // The presenter says what a row stands for; this only reads it. Keying on
+    // the instance would work today and would quietly stop working the day the
+    // presenter rebuilt a scope for the same todo.
     private readonly items = new SyncedRows<ItemScope, ItemView>({
-        key: (scope) => scope,
+        key: (scope) => scope.identity,
         create: () => new ItemView()
     })
 

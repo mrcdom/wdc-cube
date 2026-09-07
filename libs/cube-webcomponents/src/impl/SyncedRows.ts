@@ -106,6 +106,17 @@ export class SyncedRows<T, R extends Element> {
 
         for (const item of items) {
             const key = this.keyOf(item)
+
+            if (next.has(key)) {
+                // Two items claiming one identity collapses the list to a single
+                // row, silently. The usual cause is a key that was never set, so
+                // every item answers `undefined`.
+                throw new Error(
+                    `Two items share the key ${String(key)}. ` +
+                        'A key must identify exactly one item; check that it is being assigned.'
+                )
+            }
+
             const row = this.byKey.get(key) ?? this.create(item)
             this.assign(row, item)
             next.set(key, row)

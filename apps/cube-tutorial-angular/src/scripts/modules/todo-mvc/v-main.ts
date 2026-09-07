@@ -10,7 +10,7 @@ import { MainScope } from 'wdc-cube-tutorial-core/todo-mvc'
         <section class="main">
             <ul class="todo-list">
                 <ng-container *cubeViewSlot="scope().clock"></ng-container>
-                @for (todo of scope().items; track todo.id) {
+                @for (todo of scope().items; track todo.identity) {
                     <ng-container *cubeViewSlot="todo"></ng-container>
                 }
             </ul>
