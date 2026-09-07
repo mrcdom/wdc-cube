@@ -97,7 +97,13 @@
     min-width: 320px;
     max-width: 90vw;
     padding: 8px;
-    border-radius: var(--mat-sys-corner-extra-large);
+    // A deliberate step below Material's own dialog shape. The spec assigns
+    // dialogs corner-extra-large, 28px, and Angular Material's mat-dialog uses
+    // that same token — but it sizes the value for large surfaces, and these
+    // alerts are small: on a 336x151 box the 28px corners eat 37% of each
+    // vertical edge. corner-large keeps the shape reading as Material without
+    // rounding a small dialog into a lozenge.
+    border-radius: var(--mat-sys-corner-large);
     background-color: var(--mat-sys-surface-container-high);
     color: var(--mat-sys-on-surface);
     // The theme's own elevation. `mat-elevation-z24` used to be here and did
