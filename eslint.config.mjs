@@ -13,7 +13,9 @@ export default tseslint.config(
             '**/build/**',
             '**/coverage/**',
             // Angular's dev-server cache
-            '**/.angular/**'
+            '**/.angular/**',
+            // Scratch space: notes, downloads and temporary scripts, never source
+            '.claude/**'
         ]
     },
     js.configs.recommended,

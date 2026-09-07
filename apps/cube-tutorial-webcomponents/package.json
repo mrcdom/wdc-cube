@@ -1,0 +1,24 @@
+{
+  "name": "wdc-cube-tutorial-webcomponents",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Custom-element view layer for the tutorial: the same core, drawn by the platform alone.",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "wdc-cube": "workspace:*",
+    "wdc-cube-tutorial-core": "workspace:*",
+    "wdc-cube-webcomponents": "workspace:*"
+  },
+  "devDependencies": {
+    "sass": "^1.104.0",
+    "typescript": "6.0.3",
+    "vite": "^8.2.2"
+  }
+}

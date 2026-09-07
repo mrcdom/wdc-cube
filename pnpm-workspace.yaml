@@ -3,10 +3,12 @@ packages:
   - libs/cube-react
   - libs/cube-angular
   - libs/cube-test
+  - libs/cube-webcomponents
   - apps/cube-tutorial-core
   - apps/cube-tutorial-react
   - apps/cube-tutorial-angular
   - apps/cube-tutorial-test
+  - apps/cube-tutorial-webcomponents
 
 allowBuilds:
   # Native bundler used by Vite.

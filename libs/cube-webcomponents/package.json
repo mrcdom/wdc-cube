@@ -1,0 +1,31 @@
+{
+  "name": "wdc-cube-webcomponents",
+  "version": "1.1.0",
+  "description": "Custom-element bindings for the Cube architecture, with no framework underneath",
+  "author": "Marcelo Domingos <mrcdom@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrcdom/wdc-cube.git",
+    "directory": "libs/cube-webcomponents"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": ["lib", "README.md"],
+  "scripts": {
+    "compile": "tsc -b",
+    "build": "tsc -b",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "wdc-cube": "workspace:*"
+  }
+}
