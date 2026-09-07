@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core'
+import { MatButtonModule } from '@angular/material/button'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
 import { bindScope } from 'wdc-cube-angular'
 import { SubscriptionsDetailScope } from 'wdc-cube-tutorial-core/subscriptions'
 
 @Component({
     selector: 'v-subscriptions-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [MatButtonModule, MatFormFieldModule, MatInputModule],
     styleUrl: './subscriptions.scss',
     template: `
         <h2 class="dialog-title">Subscribe</h2>
@@ -13,14 +17,14 @@ import { SubscriptionsDetailScope } from 'wdc-cube-tutorial-core/subscriptions'
                 To subscribe to this website({{ scope().email }}), please enter your email address here. We will send
                 updates occasionally.
             </p>
-            <label>
-                Email Address
-                <input type="email" (input)="onEmailChanged($event)" />
-            </label>
+            <mat-form-field appearance="outline" class="email-field">
+                <mat-label>Email Address</mat-label>
+                <input matInput type="email" (input)="onEmailChanged($event)" />
+            </mat-form-field>
         </div>
         <div class="dialog-actions">
-            <button type="button" (click)="scope().onClose()">Cancel</button>
-            <button type="button" (click)="scope().onSubscribe()">Subscribe</button>
+            <button mat-button (click)="scope().onClose()">Cancel</button>
+            <button mat-button (click)="scope().onSubscribe()">Subscribe</button>
         </div>
     `
 })

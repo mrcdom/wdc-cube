@@ -21,8 +21,17 @@ const LOG = Logger.get('Angular.CubeViewSlot')
  * <ng-container *cubeViewSlot="scope.page()"></ng-container>
  * ```
  *
- * A structural directive rather than a wrapper component, so the rendered view
- * is the slot's only output and no host element is inserted around it.
+ * A structural directive rather than a wrapper component, so the slot itself
+ * adds nothing to the DOM.
+ *
+ * The component it creates still gets a host element — Angular always gives one,
+ * and React's binding has no equivalent. Left alone that element sits between
+ * the slot's parent and the view's own markup, which breaks any layout the two
+ * were meant to share: a flex child stops being a flex child, and a scroll
+ * container stops being constrained by its parent. So the host is set to
+ * `display: contents`, making it transparent to layout and putting the view's
+ * markup where React would have put it. A view that wants a real box of its own
+ * can take it back with `:host { display: block !important }`.
  */
 @Directive({
     selector: '[cubeViewSlot]'
@@ -59,6 +68,12 @@ export class CubeViewSlot {
             }
 
             this.rendered = this.container.createComponent(view)
+
+            // See the note on this class: the host element must not take part in
+            // layout, or the view's markup is separated from its parent's.
+            const host = this.rendered.location.nativeElement as HTMLElement
+            host.style.display = 'contents'
+
             // setInput rather than writing the property: it marks the created
             // view dirty, which a zoneless application needs in order to draw it.
             this.rendered.setInput('scope', scope)

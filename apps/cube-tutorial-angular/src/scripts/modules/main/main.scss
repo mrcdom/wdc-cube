@@ -1,44 +1,20 @@
+// min-height: 0 on both of these: a column flex item defaults to min-height:auto,
+// which refuses to shrink below its content, so a tall page pushes the whole
+// shell past the viewport instead of letting the scroll container inside it
+// scroll. The React app never needs this because its scroll container is itself
+// the flex item, and overflow other than visible already resolves that minimum
+// to zero.
 .main-view {
     display: flex;
     flex-direction: column;
-    margin: 10px;
     align-self: stretch;
     flex-grow: 1;
-}
-
-.app-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background-color: #1976d2;
-    color: #fff;
-
-    button {
-        border: 0;
-        background: none;
-        color: inherit;
-        font: inherit;
-        text-transform: uppercase;
-        cursor: pointer;
-        padding: 6px 8px;
-
-        &:hover {
-            background-color: #ffffff1f;
-            border-radius: 4px;
-        }
-    }
-}
-
-.menu-button {
-    font-size: 20px;
+    min-height: 0;
 }
 
 .app-bar-title {
     flex-grow: 1;
-    margin: 0;
-    font-size: 20px;
-    font-weight: 500;
+    margin-left: 8px;
 }
 
 .body {
@@ -46,45 +22,24 @@
     flex-direction: column;
     flex-grow: 1;
     align-self: stretch;
-    margin-top: 10px;
+    min-height: 0;
+    margin: 16px;
 }
 
 .body-view {
-    border: dashed;
-    padding: 10px;
-    border-radius: 5px;
+    align-self: flex-start;
 }
 
 .button-pane {
     display: flex;
-
-    button {
-        padding: 6px 14px;
-        border: 1px solid rgba(25, 118, 210, 0.5);
-        background: none;
-        color: #1976d2;
-        font: inherit;
-        text-transform: uppercase;
-        cursor: pointer;
-
-        &:not(:first-child) {
-            border-left: 0;
-        }
-
-        &:first-child {
-            border-radius: 4px 0 0 4px;
-        }
-
-        &:last-child {
-            border-radius: 0 4px 4px 0;
-        }
-    }
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .backdrop {
     position: fixed;
     inset: 0;
-    background-color: #00000080;
+    background-color: color-mix(in srgb, var(--mat-sys-scrim) 32%, transparent);
 }
 
 .dialog {
@@ -92,55 +47,56 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    min-width: 300px;
+    min-width: 320px;
+    max-width: 90vw;
     padding: 8px;
-    border-radius: 4px;
-    background-color: #fff;
-    box-shadow: 0 11px 15px #0003;
+    border-radius: var(--mat-sys-corner-extra-large);
+    background-color: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface);
 }
 
 .alert {
-    padding: 12px 16px;
-    border-radius: 4px;
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    border-radius: var(--mat-sys-corner-medium);
 
     p {
         margin: 4px 0 0;
     }
 
+    // Info and error map onto roles the theme already defines. Success and
+    // warning have no Material 3 role, so they come from the custom tokens in
+    // styles/index.scss — see the note there.
     &.alert-info {
-        background-color: #e5f6fd;
-        color: #014361;
+        background-color: var(--mat-sys-primary-container);
+        color: var(--mat-sys-on-primary-container);
     }
+
     &.alert-success {
-        background-color: #edf7ed;
-        color: #1e4620;
+        background-color: var(--app-sys-success-container);
+        color: var(--app-sys-on-success-container);
     }
+
     &.alert-warning {
-        background-color: #fff4e5;
-        color: #663c00;
+        background-color: var(--app-sys-warning-container);
+        color: var(--app-sys-on-warning-container);
     }
+
     &.alert-error {
-        background-color: #fdeded;
-        color: #5f2120;
+        background-color: var(--mat-sys-error-container);
+        color: var(--mat-sys-on-error-container);
     }
 }
 
 .alert-title {
     display: block;
+    font: var(--mat-sys-title-medium);
 }
 
 .dialog-actions {
     display: flex;
     justify-content: flex-end;
+    gap: 8px;
     padding: 8px;
-
-    button {
-        border: 0;
-        background: none;
-        color: #1976d2;
-        font: inherit;
-        text-transform: uppercase;
-        cursor: pointer;
-        padding: 6px 8px;
-    }
 }

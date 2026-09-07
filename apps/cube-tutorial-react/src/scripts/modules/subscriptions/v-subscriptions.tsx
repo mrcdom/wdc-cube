@@ -32,7 +32,7 @@ class SubscriptionsViewClass extends FCClass<SubscriptionsViewProps> {
         return (
             <div className={clsx(className, Css.subscriptionsView)} {...props}>
                 <h1>Sites you can subscribe to...</h1>
-                <List component="nav" aria-label="main mailbox folders">
+                <List component="nav" aria-label="Sites you can subscribe to">
                     {itemArray}
                 </List>
             </div>

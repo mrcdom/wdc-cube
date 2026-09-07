@@ -1,8 +1,8 @@
 # cube-tutorial-angular
 
 The Angular view layer of the [Cube architecture](../../docs/architecture.md)
-example, built with Angular 22 and SCSS. It doubles as the manual test bed for
-`wdc-cube-angular`.
+example, built with Angular 22, Angular Material and SCSS. It doubles as the
+manual test bed for `wdc-cube-angular`.
 
 It renders the very same presenters, scopes and services as
 [cube-tutorial-react](../cube-tutorial-react/README.md), taken unchanged from
@@ -10,9 +10,11 @@ It renders the very same presenters, scopes and services as
 by side shows what a view technology actually has to supply, because that is the
 only thing that differs between them.
 
-There is no component library here on purpose. The todo-mvc module is plain HTML
-and SCSS in the React app too, and keeping the rest that way makes the difference
-between the two apps the Cube binding rather than MUI versus Angular Material.
+The shell, the alerts and the subscriptions screens use Angular Material, which
+is the counterpart to the React app's MUI — the two apps then differ in their
+Cube binding rather than in whether they have a component library at all. The
+todo-mvc module stays plain HTML and SCSS in both, so at least one screen shows
+the binding with nothing else in the way.
 
 ## Running it
 
@@ -86,6 +88,36 @@ ng-packagr, since an Angular library cannot be built with plain `tsc`. And this
 app declares `history` and `reflect-metadata`, transitive dependencies of
 `wdc-cube`, because Angular's dev server resolves from a rewritten path that
 cannot reach them under pnpm's strict layout.
+
+## Theming
+
+`styles/index.scss` applies `mat.theme()` once, on `html`, and everything else
+reads the `--mat-sys-*` custom properties it emits rather than naming colours:
+
+```scss
+html {
+    color-scheme: light dark;
+    @include mat.theme((color: mat.$azure-palette, typography: Roboto, density: 0));
+}
+```
+
+`color-scheme: light dark` means the theme emits `light-dark()` values, so the
+app follows the reader's system setting with no toggle and no second stylesheet.
+
+Two places need more than the generated tokens:
+
+- **Alert severities.** Material 3 defines `primary`, `secondary`, `tertiary` and
+  `error`, and no success or warning. Deriving those two from the palette made
+  both come out the same pale blue, so `styles/index.scss` adds
+  `--app-sys-success-*` and `--app-sys-warning-*`, written with `light-dark()`
+  so they track the colour scheme the way Material's own tokens do.
+- **The flex chain.** `.main-view` and `.body` carry `min-height: 0`. A column
+  flex item defaults to `min-height: auto` and refuses to shrink below its
+  content, which pushes the shell past the viewport instead of letting the
+  scroll container inside it scroll — visible in the todo stress mode, where the
+  page is 20000px tall. React never needs this because its scroll container is
+  itself the flex item, and an overflow other than `visible` already resolves
+  that minimum to zero.
 
 ## Folder layout
 

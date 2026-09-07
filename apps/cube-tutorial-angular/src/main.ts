@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core'
+import { MatIconRegistry } from '@angular/material/icon'
 import { bootstrapApplication } from '@angular/platform-browser'
 import { PageHistoryManager } from 'wdc-cube'
 import { bindScope, CubeViewSlot } from 'wdc-cube-angular'
@@ -25,6 +26,10 @@ export class AppRoot {
     readonly rootScope = signal(this.presenter.scope)
 
     constructor() {
+        // index.html loads Material Symbols; mat-icon defaults to the older
+        // Material Icons font, and without this the ligature renders as text.
+        inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined')
+
         // The root scope has no parent slot to bind it, so the shell does it.
         bindScope(this.rootScope)
 

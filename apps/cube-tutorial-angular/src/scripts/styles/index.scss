@@ -1,3 +1,28 @@
+@use '@angular/material' as mat;
+
+html {
+    color-scheme: light dark;
+
+    @include mat.theme(
+        (
+            color: mat.$azure-palette,
+            typography: Roboto,
+            density: 0
+        )
+    );
+
+    // Material 3 defines no success or warning role — the spec stops at
+    // primary, secondary, tertiary and error. Deriving these two from the
+    // palette made both come out the same pale blue, losing the distinction
+    // the severity is meant to carry, so they get their own colours. They are
+    // written with light-dark() so they follow the colour scheme exactly the
+    // way mat.theme()'s own tokens do.
+    --app-sys-success-container: light-dark(#c8ecd0, #1d3a26);
+    --app-sys-on-success-container: light-dark(#08341a, #b0e8c2);
+    --app-sys-warning-container: light-dark(#ffe2b8, #4a3512);
+    --app-sys-on-warning-container: light-dark(#452b00, #ffdfae);
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -14,7 +39,8 @@ body {
   display: flex;
 }
 
-#root {
+// The React app mounts into #root; Angular mounts into <app-root>.
+app-root {
   display: flex;
   align-self: stretch;
   flex-grow: 1;

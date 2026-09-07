@@ -56,9 +56,17 @@ deciding what changed.
 the slot renders whichever one matches the scope currently in it. That is how a
 presenter places a child without naming the component that draws it.
 
-It is a **structural directive** rather than a wrapper component, so the rendered
-view is the slot's only output — no host element is inserted around it, matching
-what the React binding does.
+It is a **structural directive** rather than a wrapper component, so the slot
+itself adds nothing to the DOM.
+
+The component it renders still gets a host element — Angular always gives one,
+and React has no equivalent. Left alone that element sits between the slot's
+parent and the view's own markup and quietly breaks any layout the two were
+meant to share: a flex child stops being a flex child, and a scroll container
+stops being constrained by its parent. The slot therefore sets the host to
+`display: contents`, which keeps it out of the box tree and puts the view's
+markup where React would have put it. A view that wants a real box of its own
+takes it back with `:host { display: block !important }`.
 
 ## Registries do not collide
 
