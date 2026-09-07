@@ -78,6 +78,9 @@
     margin-top: 8px;
 }
 
+// One scrim and one surface per modal layer, each stacked above the last, so an
+// alert raised from inside a dialog dims the dialog underneath it instead of
+// landing on it at the same depth. The app bar sits at 1.
 .backdrop {
     position: fixed;
     inset: 0;
@@ -97,6 +100,20 @@
     border-radius: var(--mat-sys-corner-extra-large);
     background-color: var(--mat-sys-surface-container-high);
     color: var(--mat-sys-on-surface);
+    // The theme's own elevation. `mat-elevation-z24` used to be here and did
+    // nothing: those classes exist only if mat.elevation-classes() is included,
+    // and mat.theme() does not include them — so both dialogs drew as flat
+    // rectangles with no edge at all.
+    box-shadow: var(--mat-sys-level3);
+}
+
+// The alert layer: a dialog can raise one, so it stacks above both.
+.alert-backdrop {
+    z-index: 4;
+}
+
+.alert-dialog {
+    z-index: 5;
 }
 
 .alert {

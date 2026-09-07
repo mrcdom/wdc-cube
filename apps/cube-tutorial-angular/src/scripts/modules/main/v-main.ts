@@ -27,14 +27,14 @@ import { MainScope } from 'wdc-cube-tutorial-core/main'
 
             @if (scope().dialog) {
                 <div class="backdrop" (click)="scope().dialog?.onClose()"></div>
-                <div class="dialog mat-elevation-z24" role="dialog">
+                <div class="dialog" role="dialog">
                     <ng-container *cubeViewSlot="scope().dialog"></ng-container>
                 </div>
             }
 
             @if (scope().alert) {
-                <div class="backdrop" (click)="scope().alert?.onClose()"></div>
-                <div class="dialog mat-elevation-z24" role="dialog">
+                <div class="backdrop alert-backdrop" (click)="scope().alert?.onClose()"></div>
+                <div class="dialog alert-dialog" role="dialog">
                     <ng-container *cubeViewSlot="scope().alert"></ng-container>
                 </div>
             }
