@@ -1,4 +1,4 @@
-import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
+import { CubeElement, CubeViewSlot, Dom, SyncedRows } from 'wdc-cube-webcomponents'
 import { ItemScope, MainScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
 import Css from './todo-mvc.module.scss'
@@ -16,7 +16,12 @@ export class TodoMainView extends CubeElement<MainScope> {
     private clockHost!: HTMLElement
     private clockSlot?: CubeViewSlot
 
-    private readonly rows: ItemView[] = []
+    // Keyed on the scope itself: a scope is one object for as long as it exists,
+    // so a row that already had this todo keeps it — and keeps the editor that
+    // may be open in it — even when the list around it changes.
+    private readonly items = new SyncedRows<ItemScope, ItemView>({
+        create: () => new ItemView()
+    })
 
     protected declare(dom: Dom): void {
         dom.section((section) => {
@@ -32,16 +37,14 @@ export class TodoMainView extends CubeElement<MainScope> {
         this.clockSlot ??= new CubeViewSlot(this.clockHost)
         this.clockSlot.setScope(this.scope.clock)
 
-        this.syncList<ItemScope, ItemView>(
+        this.items.sync(
             this.list,
-            this.scope.items.map((item) => item),
-            this.rows,
-            () => new ItemView()
+            this.scope.items.map((item) => item)
         )
     }
 
     protected override onRelease(): void {
         this.clockSlot?.setScope(undefined)
-        this.rows.length = 0
+        this.items.clear()
     }
 }

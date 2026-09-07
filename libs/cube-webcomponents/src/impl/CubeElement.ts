@@ -202,34 +202,4 @@ export abstract class CubeElement<S extends Scope = Scope> extends HTMLElement {
             field.value = value
         }
     }
-
-    /**
-     * Keeps a container's children aligned with a list of items.
-     *
-     * Elements hold state — focus, selection, an open editor — so this reuses
-     * them: it removes what is no longer needed, adds what is missing, and hands
-     * every survivor its item. A row still on screen keeps its identity across an
-     * update, which is what lets an editor survive the list around it changing.
-     */
-    protected syncList<T extends Scope, R extends CubeElement<T>>(
-        container: Element,
-        items: readonly T[],
-        rows: R[],
-        create: () => R
-    ): void {
-        for (let index = rows.length - 1; index >= items.length; index--) {
-            const [row] = rows.splice(index, 1)
-            row.remove()
-        }
-
-        while (rows.length < items.length) {
-            const row = create()
-            rows.push(row)
-            container.appendChild(row)
-        }
-
-        for (let index = 0; index < items.length; index++) {
-            rows[index].scope = items[index]
-        }
-    }
 }

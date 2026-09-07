@@ -1,11 +1,27 @@
-import { CubeElement, Dom } from 'wdc-cube-webcomponents'
+import { CubeElement, Dom, SyncedRows } from 'wdc-cube-webcomponents'
 import { SubscriptionsScope, type SiteItemType } from 'wdc-cube-tutorial-core/subscriptions'
 
 import Css from './subscriptions.module.scss'
 
 export class SubscriptionsView extends CubeElement<SubscriptionsScope> {
     private list!: HTMLUListElement
-    private rows: { item: SiteItemType; element: HTMLLIElement; label: HTMLElement }[] = []
+
+    /**
+     * A site is data, not a scope, so it is not its own identity across updates —
+     * the service could hand back a fresh object for the same site. The id is,
+     * which is what keeps a row on the site it was showing.
+     */
+    private readonly sites = new SyncedRows<SiteItemType, HTMLLIElement>({
+        key: (site) => site.id,
+        create: () => this.newRow(),
+        assign: (row, site) => {
+            const button = row.firstElementChild as HTMLButtonElement
+            // The listener reads the site off the row, so replacing the data does
+            // not mean replacing the handler.
+            row.dataset.siteId = String(site.id)
+            this.setText(button, site.site)
+        }
+    })
 
     protected declare(dom: Dom): void {
         dom.div((view) => {
@@ -16,39 +32,27 @@ export class SubscriptionsView extends CubeElement<SubscriptionsScope> {
     }
 
     protected override onUpdate(): void {
-        const sites = this.scope.sites
-
-        // Same shape as syncList, by hand: these rows are not views of their own,
-        // because a site is not a scope.
-        for (let index = this.rows.length - 1; index >= sites.length; index--) {
-            const [row] = this.rows.splice(index, 1)
-            row.element.remove()
-        }
-
-        while (this.rows.length < sites.length) {
-            const row = this.addRow()
-            this.rows.push(row)
-        }
-
-        for (let index = 0; index < sites.length; index++) {
-            const row = this.rows[index]
-            row.item = sites[index]
-            this.setText(row.label, row.item.site)
-        }
+        this.sites.sync(this.list, this.scope.sites)
     }
 
-    private addRow() {
-        const row = { item: undefined as unknown as SiteItemType, element: null!, label: null! } as {
-            item: SiteItemType
-            element: HTMLLIElement
-            label: HTMLElement
-        }
+    protected override onRelease(): void {
+        this.sites.clear()
+    }
+
+    private newRow(): HTMLLIElement {
+        let row!: HTMLLIElement
 
         Dom.render(this.list, (dom) => {
-            row.element = dom.li(() => {
-                row.label = dom.button((button) => {
+            row = dom.li(() => {
+                dom.button((button) => {
                     button.addEventListener('click', () =>
-                        this.safeAction('onItemClicked', () => this.scope.onItemClicked(row.item))
+                        this.safeAction('onItemClicked', () => {
+                            const id = Number(row.dataset.siteId)
+                            const site = this.scope.sites.find((candidate) => candidate.id === id)
+                            if (site) {
+                                this.scope.onItemClicked(site)
+                            }
+                        })
                     )
                 })
             })
