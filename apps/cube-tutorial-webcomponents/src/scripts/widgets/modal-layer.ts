@@ -7,17 +7,6 @@ import styles from './modal-layer.scss?inline'
 const SHEET = new CSSStyleSheet()
 SHEET.replaceSync(styles)
 
-export type ModalLayerOptions = {
-    /** Names the dismissal in a failure report. */
-    context: string
-
-    /** What clicking outside the panel does. */
-    onDismiss: () => unknown
-
-    /** Stacks this layer above another. A dialog can raise an alert over itself. */
-    className?: string
-}
-
 /**
  * A scrim with something centred over it, and a slot for whoever fills it.
  *

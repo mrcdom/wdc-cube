@@ -9,7 +9,7 @@
  * element whose host is the box, with its styles in a shadow root of its own.
  */
 export { AppDom, AppElement } from './AppDom'
-export { AppActionButton, type ActionButtonOptions } from './action-button'
+export { AppActionButton } from './action-button'
 export { AppAlertDialog, type AppAlertDialogVariant } from './alert-dialog'
-export { AppModalLayer, type ModalLayerOptions } from './modal-layer'
-export { AppPanel, type PanelOptions } from './panel'
+export { AppModalLayer } from './modal-layer'
+export { AppPanel } from './panel'

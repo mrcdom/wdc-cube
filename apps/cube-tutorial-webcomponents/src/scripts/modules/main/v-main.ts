@@ -40,16 +40,16 @@ export class MainView extends AppElement<MainScope> {
 
             this.bodySlot = new CubeViewSlot(dom.div((body) => (body.className = Css.body)))
 
-            this.dialogLayer = dom.modalLayer({
-                context: 'closeDialog',
-                onDismiss: () => this.scope.dialog?.onClose()
+            this.dialogLayer = dom.modalLayer((layer) => {
+                layer.context = 'closeDialog'
+                layer.onDismiss = () => this.scope.dialog?.onClose()
             })
 
             // Above the dialog, so an alert raised from inside one dims it.
-            this.alertLayer = dom.modalLayer({
-                context: 'closeAlert',
-                onDismiss: () => this.scope.alert?.onClose(),
-                className: Css.alertLayer
+            this.alertLayer = dom.modalLayer((layer) => {
+                layer.className = Css.alertLayer
+                layer.context = 'closeAlert'
+                layer.onDismiss = () => this.scope.alert?.onClose()
             })
         })
     }

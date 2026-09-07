@@ -30,14 +30,12 @@ export class SubscriptionsView extends AppElement<SubscriptionsScope> {
     })
 
     protected declare(dom: AppDom): void {
-        dom.panel({
-            heading: 'Sites you can subscribe to...',
-            headingTag: 'h1',
-            content: () => {
-                this.list = dom.element('sp-sidenav', (list) =>
-                    list.setAttribute('aria-label', 'Sites you can subscribe to')
-                )
-            }
+        dom.panel(() => {
+            dom.h1((heading) => (heading.textContent = 'Sites you can subscribe to...'))
+
+            this.list = dom.element('sp-sidenav', (list) =>
+                list.setAttribute('aria-label', 'Sites you can subscribe to')
+            )
         })
     }
 

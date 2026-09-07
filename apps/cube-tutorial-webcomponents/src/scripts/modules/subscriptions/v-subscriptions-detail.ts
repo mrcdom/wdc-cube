@@ -40,12 +40,18 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
 
             dom.element('sp-button-group', (buttons) => {
                 buttons.slot = 'button'
-                dom.actionButton({ label: 'Cancel', context: 'onClose', onClick: () => this.scope.onClose() })
-                dom.actionButton({
-                    label: 'Subscribe',
-                    context: 'onSubscribe',
-                    variant: 'accent',
-                    onClick: () => this.scope.onSubscribe()
+
+                dom.actionButton((button) => {
+                    button.textContent = 'Cancel'
+                    button.context = 'onClose'
+                    button.action = () => this.scope.onClose()
+                })
+
+                dom.actionButton((button) => {
+                    button.textContent = 'Subscribe'
+                    button.context = 'onSubscribe'
+                    button.variant = 'accent'
+                    button.action = () => this.scope.onSubscribe()
                 })
             })
         })

@@ -29,11 +29,12 @@ export class AlertView extends AppElement<AlertScope> {
             this.supportingText = dom.p()
 
             // The dialog wraps this in an sp-button-group of its own.
-            dom.actionButton({
-                label: 'Close',
-                context: 'onClose',
-                onClick: () => this.scope.onClose()
-            }).slot = 'button'
+            dom.actionButton((button) => {
+                button.slot = 'button'
+                button.textContent = 'Close'
+                button.context = 'onClose'
+                button.action = () => this.scope.onClose()
+            })
         })
     }
 

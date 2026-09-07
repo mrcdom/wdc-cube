@@ -1,10 +1,10 @@
 import { CubeElement, Dom, type Configure, type DomRoot } from 'wdc-cube-webcomponents'
 import type { Scope } from 'wdc-cube'
 
-import { AppActionButton, type ActionButtonOptions } from './action-button'
+import { AppActionButton } from './action-button'
 import { AppAlertDialog } from './alert-dialog'
-import { AppModalLayer, type ModalLayerOptions } from './modal-layer'
-import { AppPanel, type PanelOptions } from './panel'
+import { AppModalLayer } from './modal-layer'
+import { AppPanel } from './panel'
 
 /**
  * The `Dom` this application declares into: the framework's, plus a factory for
@@ -14,10 +14,11 @@ import { AppPanel, type PanelOptions } from './panel'
  * here", and the widgets show up under `dom.` when you go looking. It is how the
  * SWT strategy this came from expresses its reusable pieces.
  *
- * Each widget is a custom element, so a factory only creates one and hands it
- * whatever the call site chose. Nothing about how a widget is built or behaves
- * lives here, which is what keeps this a directory of components rather than a
- * second place to look for them.
+ * Each widget is a custom element, so a factory only puts one in place and hands
+ * it back — its own type is what says how to configure it, and that happens at
+ * the call site like it does for every other element. Nothing about a widget
+ * lives here, which is what keeps this a way to reach the components rather than
+ * a second place to look for them.
  */
 export class AppDom extends Dom {
     public constructor(root: DomRoot) {
@@ -29,37 +30,20 @@ export class AppDom extends Dom {
         return new AppDom(root)
     }
 
-    public actionButton(options: ActionButtonOptions): AppActionButton {
-        return this.element('app-action-button', (button) => {
-            button.textContent = options.label
-            button.action = options.onClick
-            button.context = options.context
-
-            // Spectrum's default is accent, which is a page's one emphasised
-            // button; most of the buttons here are not that one.
-            button.variant = options.variant ?? 'primary'
-        })
+    public actionButton(configure?: Configure<AppActionButton>): AppActionButton {
+        return this.element('app-action-button', configure)
     }
 
     public alertDialog(configure?: Configure<AppAlertDialog>): AppAlertDialog {
         return this.element('app-alert-dialog', configure)
     }
 
-    public modalLayer(options: ModalLayerOptions): AppModalLayer {
-        return this.element('app-modal-layer', (layer) => {
-            layer.context = options.context
-            layer.onDismiss = options.onDismiss
-            if (options.className) {
-                layer.className = options.className
-            }
-        })
+    public modalLayer(configure?: Configure<AppModalLayer>): AppModalLayer {
+        return this.element('app-modal-layer', configure)
     }
 
-    public panel(options: PanelOptions): AppPanel {
-        return this.element('app-panel', () => {
-            this.element(options.headingTag ?? 'h3', (heading) => (heading.textContent = options.heading))
-            options.content?.(this)
-        })
+    public panel(configure?: Configure<AppPanel>): AppPanel {
+        return this.element('app-panel', configure)
     }
 }
 

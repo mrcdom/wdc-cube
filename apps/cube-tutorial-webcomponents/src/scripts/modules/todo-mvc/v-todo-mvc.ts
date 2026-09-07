@@ -31,12 +31,11 @@ export class TodoMvcView extends AppElement<TodoMvcScope> {
                 dom.footer((info) => {
                     info.className = Css.info
                     this.note = dom.p()
-                    this.stressButton = dom.actionButton({
-                        label: '',
-                        context: 'onToggleStress',
-                        onClick: () => this.scope.actions.onToggleStress()
+                    this.stressButton = dom.actionButton((button) => {
+                        button.className = Css.stressToggle
+                        button.context = 'onToggleStress'
+                        button.action = () => this.scope.actions.onToggleStress()
                     })
-                    this.stressButton.className = Css.stressToggle
                 })
             })
         })

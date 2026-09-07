@@ -2,20 +2,6 @@ import { Button } from '@spectrum-web-components/button'
 import type { PropertyValues } from '@spectrum-web-components/base'
 import { safeAction } from 'wdc-cube-webcomponents'
 
-export type ActionButtonOptions = {
-    /** What the button says. Also names the action in a failure report. */
-    label: string
-
-    /** What it does. Wrapped, so a throw is reported rather than lost. */
-    onClick: () => unknown
-
-    /** Overrides the name used in a failure report, when the label is not enough. */
-    context?: string
-
-    /** Spectrum's own treatments: the accent one is what a dialog wants pressed. */
-    variant?: 'primary' | 'accent'
-}
-
 /**
  * A button that runs an action.
  *
@@ -38,13 +24,25 @@ export class AppActionButton extends Button {
     public constructor() {
         super()
 
-        // Nothing here may touch an attribute: a custom element constructor that
-        // gains one cannot be upgraded, and a reflecting property is an
-        // attribute. The variant is settled in the factory, where the default
-        // that `ActionButtonOptions` documents is read.
         this.addEventListener('click', () =>
             safeAction(this.context ?? this.textContent?.trim() ?? 'action', () => this.action())
         )
+    }
+
+    public override connectedCallback(): void {
+        super.connectedCallback()
+
+        // Spectrum's default is accent, which is a page's one emphasised button;
+        // most of the buttons here are not that one.
+        //
+        // Not in the constructor: an element that gains an attribute there can
+        // never be upgraded, and `variant` reflects to one — the page fails to
+        // build with `NotSupportedError` and nothing says which line did it.
+        // Declaring appends before it configures, so a call site that chooses a
+        // variant does so after this and wins.
+        if (!this.hasAttribute('variant')) {
+            this.variant = 'primary'
+        }
     }
 
     protected override willUpdate(changed: PropertyValues): void {
