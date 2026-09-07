@@ -6,6 +6,7 @@ import MainCss from '../main/main.module.scss'
 import Css from './subscriptions.module.scss'
 
 export class SubscriptionsDetailView extends CubeElement<SubscriptionsDetailScope> {
+    private blurb!: HTMLParagraphElement
     private field!: HTMLInputElement
 
     protected declare(dom: Dom): void {
@@ -16,12 +17,7 @@ export class SubscriptionsDetailView extends CubeElement<SubscriptionsDetailScop
 
         dom.div((content) => {
             content.className = MainCss.dialogContent
-            dom.p(
-                (text) =>
-                    (text.textContent =
-                        'To subscribe to this website, please enter your email address here. ' +
-                        'We will send updates occasionally.')
-            )
+            this.blurb = dom.p()
 
             dom.label((label) => {
                 label.className = Css.emailField
@@ -46,6 +42,11 @@ export class SubscriptionsDetailView extends CubeElement<SubscriptionsDetailScop
     }
 
     protected override onUpdate(): void {
+        this.setText(
+            this.blurb,
+            `To subscribe to this website(${this.scope.site ?? ''}), please enter your email address here. ` +
+                'We will send updates occasionally.'
+        )
         this.setValue(this.field, this.scope.email ?? '')
     }
 }

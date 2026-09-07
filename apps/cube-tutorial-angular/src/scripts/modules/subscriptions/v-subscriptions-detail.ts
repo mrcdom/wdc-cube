@@ -14,7 +14,7 @@ import { SubscriptionsDetailScope } from 'wdc-cube-tutorial-core/subscriptions'
         <h2 class="dialog-title">Subscribe</h2>
         <div class="dialog-content">
             <p>
-                To subscribe to this website({{ scope().email }}), please enter your email address here. We will send
+                To subscribe to this website({{ scope().site }}), please enter your email address here. We will send
                 updates occasionally.
             </p>
             <mat-form-field appearance="outline" class="email-field">

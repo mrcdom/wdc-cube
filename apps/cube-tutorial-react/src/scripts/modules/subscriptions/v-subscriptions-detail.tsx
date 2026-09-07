@@ -28,7 +28,7 @@ class SubscriptionsDetailViewClass extends FCClass<SubscriptionsDetailViewProps>
                 <DialogTitle>Subscribe</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        To subscribe to this website({this.scope.email}), please enter your email address here. We will
+                        To subscribe to this website({this.scope.site}), please enter your email address here. We will
                         send updates occasionally.
                     </DialogContentText>
                     <TextField
