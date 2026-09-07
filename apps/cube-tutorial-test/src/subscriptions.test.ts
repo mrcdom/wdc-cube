@@ -53,9 +53,9 @@ describe('subscriptions', () => {
             expect(harness.history.token).toEqual('/subscriptions')
         })
 
-        // Regression. lastPlace is the root place until the first flip commits,
-        // so on a cold start the presenter read it as somewhere the user had
-        // been and Cancel left the module for Home.
+        // Regression. Nothing has been visited yet on a cold start, and the
+        // presenter used to read lastPlace — which falls back to the root place —
+        // as somewhere the user had been, so Cancel left the module for Home.
         it('returns to the list when the dialog was opened by address', async () => {
             harness = await startTutorial('/subscriptions/detail?site-id=2')
 

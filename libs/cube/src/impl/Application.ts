@@ -23,7 +23,7 @@ export class Application implements IPresenterOwner {
 
     private __rootPlace: Place
 
-    private __lastPlace: Place
+    private __lastPlace?: Place
 
     private __fragment?: string
 
@@ -37,7 +37,6 @@ export class Application implements IPresenterOwner {
 
     public constructor(rootPlace: Place, historyManager: HistoryManager) {
         this.__rootPlace = rootPlace
-        this.__lastPlace = rootPlace
         this.__historyManager = historyManager
         this.__presenterMap = new Map()
         this.__placeMap = new Map()
@@ -94,8 +93,28 @@ export class Application implements IPresenterOwner {
         return this.__rootPlace
     }
 
+    /**
+     * The place last flipped to, or the root place before anything has been.
+     *
+     * The fallback is what every caller inside the framework wants — somewhere
+     * to resolve an intent against — but it makes this useless for asking where
+     * the user came from, since it cannot tell "at the root" from "nowhere yet".
+     * Ask {@link hasNavigated} first when that distinction matters.
+     */
     public get lastPlace(): Place {
-        return this.__lastPlace
+        return this.__lastPlace ?? this.__rootPlace
+    }
+
+    /**
+     * Whether a flip has completed, which is to say whether {@link lastPlace}
+     * names somewhere the user has actually been.
+     *
+     * False while the application is starting, including for everything a deep
+     * link builds on the way in: a presenter initialised by that first flip is
+     * running before any place has been committed.
+     */
+    public get hasNavigated(): boolean {
+        return this.__lastPlace !== undefined
     }
 
     public get fragment(): string | undefined {
