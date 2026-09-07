@@ -155,6 +155,28 @@ The modules below are split across the two packages: the presenter and scope in
 | [subscriptions](../cube-tutorial-core/src/modules/subscriptions) | Two places, one nested in the other. The detail place renders into the shell's *dialog* slot instead of the body, and carries a parameter (`?site-id=1`) so the dialog survives a reload. |
 | [restricted](../cube-tutorial-core/src/modules/restricted) | The smallest presenter, showing slot chaining: it receives a parent slot and offers its own to whatever is deeper in the tree. Nothing is nested under it yet, so `#/restricted` renders the empty case. |
 
+## Tests
+
+`pnpm test` renders each view against a scope built by hand: does it paint what
+the scope says, and does it fire the actions it was handed. No presenter and no
+application — what those do is settled in
+[cube-tutorial-test](../cube-tutorial-test/README.md), and repeating it here
+would only make these fail for reasons that have nothing to do with the view.
+
+Actions are plain function properties, so a spy goes straight into one; there is
+nothing to mock. Rendering is plain `react-dom/client` and `React.act`, the way
+`wdc-cube-react` tests itself, and CSS modules resolve to their real names so an
+assertion can say `li.completed`.
+
+Two details of driving React from a test are commented in `src/test/render.tsx`:
+typing has to go through the prototype's own `value` setter, because React
+replaces that setter to track what it last saw and assigning through the
+replacement makes it conclude nothing changed; and `onBlur` listens for
+`focusout`, not `blur`.
+
+What these do not cover is appearance. The markup, the class names and the
+actions can all be right while the page renders unstyled — that needs a browser.
+
 ## Folder layout
 
 ```

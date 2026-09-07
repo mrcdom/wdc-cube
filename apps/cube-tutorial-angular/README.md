@@ -140,6 +140,29 @@ Two more places need more than the generated tokens:
   itself the flex item, and an overflow other than `visible` already resolves
   that minimum to zero.
 
+## Tests
+
+`pnpm test` renders each view against a scope built by hand: does it paint what
+the scope says, and does it fire the actions it was handed. No presenter and no
+application — what those do is settled in
+[cube-tutorial-test](../cube-tutorial-test/README.md).
+
+It runs through `@angular/build:unit-test` rather than vitest directly, and that
+is not a preference. Vitest's own transform leaves the decorators in place —
+`@(0, import_0.Component)(...)`, which is not valid syntax, since decorators are
+not in V8 — and downlevelling them would mean asking the transform for
+`experimentalDecorators`, which Angular 22 refuses in the real build. The CLI
+builder compiles components the way the application is compiled, so the tests run
+against what ships. Providers come from `src/test/providers.ts`, zoneless like
+the app.
+
+`zone.js` is a devDependency and is never executed: the test harness imports
+`zone.js/testing` behind a `typeof Zone !== 'undefined'` guard, and the import
+still has to resolve.
+
+What these do not cover is appearance — the failure that started this app's
+styling work had correct markup, correct class names and correct actions.
+
 ## Folder layout
 
 ```

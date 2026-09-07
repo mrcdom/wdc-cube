@@ -8,7 +8,9 @@
     "start": "ng serve",
     "dev": "ng serve",
     "build": "ng build",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "ng test",
+    "test:watch": "ng test --watch"
   },
   "dependencies": {
     "@angular/cdk": "^22.1.5",
@@ -29,7 +31,10 @@
     "@angular/build": "^22.1.7",
     "@angular/cli": "^22.1.7",
     "@angular/compiler-cli": "^22.1.5",
+    "jsdom": "^30.0.1",
     "sass": "^1.104.0",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "^5.0.0",
+    "zone.js": "~0.16.0"
   }
 }

@@ -45,6 +45,18 @@
             }
           },
           "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "cube-tutorial-angular:build",
+            "runner": "vitest",
+            "watch": false,
+            "providersFile": "src/test/providers.ts",
+            "include": [
+              "src/**/*.test.ts"
+            ]
+          }
         }
       }
     }
