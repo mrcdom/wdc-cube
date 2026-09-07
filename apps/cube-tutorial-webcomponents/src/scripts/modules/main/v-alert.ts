@@ -19,19 +19,19 @@ import Css from './main.module.scss'
 const SEVERITIES: Record<AlertSeverity, { path: string; className: string }> = {
     info: {
         path: 'M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
-        className: 'alertInfo'
+        className: Css.alertInfo
     },
     success: {
         path: 'M12 2a10 10 0 100 20 10 10 0 000-20zm-2 15l-5-5 1.4-1.4L10 14.2l7.6-7.6L19 8l-9 9z',
-        className: 'alertSuccess'
+        className: Css.alertSuccess
     },
     warning: {
         path: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z',
-        className: 'alertWarning'
+        className: Css.alertWarning
     },
     error: {
         path: 'M12 2a10 10 0 100 20 10 10 0 000-20zm5 13.6L15.6 17 12 13.4 8.4 17 7 15.6 10.6 12 7 8.4 8.4 7 12 10.6 15.6 7 17 8.4 13.4 12 17 15.6z',
-        className: 'alertError'
+        className: Css.alertError
     }
 }
 
@@ -63,9 +63,10 @@ export class AlertView extends CubeElement<AlertScope> {
         const severity = SEVERITIES[scope.severity] ?? SEVERITIES.info
 
         this.setAttr(this.iconPath, 'd', severity.path)
-        for (const known of Object.values(SEVERITIES)) {
-            this.setClass(this.icon, Css[known.className], known === severity)
-        }
+        // The class comes from the same lookup as the path, rather than from
+        // toggling each of the four in turn. `class` and not `className`: on an
+        // SVG element that property is an SVGAnimatedString, not a string.
+        this.setAttr(this.icon, 'class', `${Css.dialogIcon} ${severity.className}`)
 
         this.setText(this.headline, scope.title ?? '')
         this.setText(this.supportingText, scope.message ?? '')
@@ -79,7 +80,6 @@ export class AlertView extends CubeElement<AlertScope> {
         const svg = document.createElementNS(SVG_NS, 'svg')
         svg.setAttribute('viewBox', '0 0 24 24')
         svg.setAttribute('aria-hidden', 'true')
-        svg.classList.add(Css.dialogIcon)
 
         this.iconPath = document.createElementNS(SVG_NS, 'path')
         this.iconPath.setAttribute('fill', 'currentColor')
