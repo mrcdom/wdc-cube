@@ -6,6 +6,6 @@
  */
 
 export { Dom, type Configure } from './impl/Dom'
-export { CubeElement, onActionError, type ActionErrorHandler } from './impl/CubeElement'
+export { CubeElement, safeAction, onActionError, type ActionErrorHandler } from './impl/CubeElement'
 export { ViewFactory, CubeViewSlot, type ViewConstructor } from './impl/ViewFactory'
 export { SyncedRows, type SyncedRowsOptions } from './impl/SyncedRows'

@@ -2,6 +2,7 @@ import type { AlertSeverity } from 'wdc-cube'
 import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { AlertScope } from 'wdc-cube-tutorial-core/main'
 
+import { actionButton } from '../../widgets'
 import Css from './main.module.scss'
 
 /**
@@ -34,10 +35,7 @@ export class AlertView extends CubeElement<AlertScope> {
 
         dom.div((actions) => {
             actions.className = Css.dialogActions
-            dom.button((button) => {
-                button.textContent = 'Close'
-                button.addEventListener('click', () => this.safeAction('onClose', () => this.scope.onClose()))
-            })
+            actionButton(dom, { label: 'Close', context: 'onClose', onClick: () => this.scope.onClose() })
         })
     }
 

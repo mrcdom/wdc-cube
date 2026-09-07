@@ -1,6 +1,7 @@
 import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
 import { MainScope } from 'wdc-cube-tutorial-core/main'
 
+import { actionButton, modalLayer } from '../../widgets'
 import Css from './main.module.scss'
 
 /** The application shell: a bar, a body slot, and the two modal layers. */
@@ -33,42 +34,26 @@ export class MainView extends CubeElement<MainScope> {
 
             this.bodySlot = new CubeViewSlot(dom.div((body) => (body.className = Css.body)))
 
-            this.dialogBackdrop = dom.div((backdrop) => {
-                backdrop.className = Css.backdrop
-                backdrop.hidden = true
-                backdrop.addEventListener('click', () =>
-                    this.safeAction('closeDialog', () => this.scope.dialog?.onClose())
-                )
-                this.dialogSlot = new CubeViewSlot(
-                    dom.div((panel) => {
-                        panel.className = Css.dialog
-                        // Clicking the panel must not reach the backdrop behind it.
-                        panel.addEventListener('click', (event) => event.stopPropagation())
-                    })
-                )
+            const dialog = modalLayer(dom, {
+                context: 'closeDialog',
+                onDismiss: () => this.scope.dialog?.onClose()
             })
+            this.dialogBackdrop = dialog.backdrop
+            this.dialogSlot = dialog.slot
 
-            this.alertBackdrop = dom.div((backdrop) => {
-                backdrop.className = `${Css.backdrop} ${Css.alertBackdrop}`
-                backdrop.hidden = true
-                backdrop.addEventListener('click', () =>
-                    this.safeAction('closeAlert', () => this.scope.alert?.onClose())
-                )
-                this.alertSlot = new CubeViewSlot(
-                    dom.div((panel) => {
-                        panel.className = Css.dialog
-                        panel.addEventListener('click', (event) => event.stopPropagation())
-                    })
-                )
+            // Above the dialog, so an alert raised from inside one dims it.
+            const alert = modalLayer(dom, {
+                context: 'closeAlert',
+                onDismiss: () => this.scope.alert?.onClose(),
+                className: Css.alertBackdrop
             })
+            this.alertBackdrop = alert.backdrop
+            this.alertSlot = alert.slot
         })
     }
 
     private navButton(dom: Dom, label: string, action: () => unknown): void {
-        dom.button((button) => {
-            button.textContent = label
-            button.addEventListener('click', () => this.safeAction(`nav:${label}`, action))
-        })
+        actionButton(dom, { label, onClick: action, context: `nav:${label}`, variant: 'bare' })
     }
 
     protected override onUpdate(): void {

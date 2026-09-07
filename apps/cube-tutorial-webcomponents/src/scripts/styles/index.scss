@@ -41,11 +41,8 @@ body {
 //
 // These are element selectors, so a CSS module would not scope them anyway —
 // and the tags are the one naming space that is already global by design.
-v-main,
-v-body,
-v-todo-mvc,
-v-subscriptions,
-v-restricted {
+// The shell is the one that lays out: it is the flex column inside #root.
+v-main {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -53,7 +50,14 @@ v-restricted {
     align-self: stretch;
 }
 
-// These stand in for a fragment: they hold a slot's child and must not lay out.
+// Every other view is transparent to layout, so its own root becomes the child
+// of whatever the slot sits in. That is what lets a view seated in the body fill
+// the body — the body is a single-cell grid, and a grid item stretches — without
+// each view having to ask.
+v-body,
+v-todo-mvc,
+v-subscriptions,
+v-restricted,
 v-todo-header,
 v-todo-main,
 v-todo-footer,

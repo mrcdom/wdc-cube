@@ -24,6 +24,27 @@ export function onActionError(handler: ActionErrorHandler): void {
 }
 
 /**
+ * Runs a handler, reporting rather than throwing.
+ *
+ * Every listener goes through this. A handler that throws inside a DOM event
+ * becomes an unhandled error on window, which is a poor way to learn about a
+ * bug; the context name is what makes the report legible.
+ *
+ * A function rather than only a method, so a widget that is not a view — a
+ * button built by a helper — can wire a listener the same way.
+ */
+export function safeAction(context: string, action: () => unknown): void {
+    try {
+        const result = action()
+        if (result instanceof Promise) {
+            result.catch((caught: unknown) => reportActionError(context, caught))
+        }
+    } catch (caught) {
+        reportActionError(context, caught)
+    }
+}
+
+/**
  * A Cube view, which is also a custom element.
  *
  * Nothing is underneath this — no framework, no diff, no template compiler. The
@@ -151,22 +172,9 @@ export abstract class CubeElement<S extends Scope = Scope> extends HTMLElement {
 
     // ========== CONVENIENCES ==========
 
-    /**
-     * Runs a handler, reporting rather than throwing.
-     *
-     * Every listener goes through this. A handler that throws inside a DOM event
-     * becomes an unhandled error on window, which is a poor way to learn about a
-     * bug; the context name is what makes the report legible.
-     */
+    /** See the module-level {@link safeAction}; every listener goes through it. */
     protected safeAction(context: string, action: () => unknown): void {
-        try {
-            const result = action()
-            if (result instanceof Promise) {
-                result.catch((caught: unknown) => reportActionError(context, caught))
-            }
-        } catch (caught) {
-            reportActionError(context, caught)
-        }
+        safeAction(context, action)
     }
 
     /** Sets text, but only when it differs. */

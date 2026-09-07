@@ -1,14 +1,5 @@
+// The card and its heading come from the panel widget; what is left is the list.
 .subscriptionsView {
-    align-content: start;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-
-    h1 {
-        margin: 0 0 12px;
-        font-size: 28px;
-    }
-
     ul {
         list-style: none;
         margin: 0;
