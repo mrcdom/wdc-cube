@@ -34,6 +34,19 @@ body {
     display: none !important;
 }
 
+// sp-theme exists to put Spectrum's design tokens in scope, not to lay anything
+// out — and it renders as a block, so as a flex child of #root it sized itself
+// to its content and left the app in the left half of the window. The tokens are
+// custom properties, which inherit through the DOM rather than through the box
+// tree, so taking its box away costs nothing.
+//
+// This is the difference worth noticing: a wrapper that was never meant to be a
+// box needs this, while <sp-button> below is a component whose host *is* the
+// box and needs nothing.
+sp-theme {
+    display: contents;
+}
+
 // Custom elements are `display: inline` until told otherwise. This is the same
 // lesson the Angular app taught with its host elements, and the platform is
 // blunter about it: an element that lays out as inline text will not be a flex

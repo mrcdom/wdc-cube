@@ -1,12 +1,18 @@
 import { SubscriptionsDetailScope } from 'wdc-cube-tutorial-core/subscriptions'
 
+import '@spectrum-web-components/field-label/sp-field-label.js'
+import '@spectrum-web-components/textfield/sp-textfield.js'
+
 import { AppElement, type AppDom } from '../../widgets'
 import MainCss from '../main/main.module.scss'
 import Css from './subscriptions.module.scss'
 
+/** A Spectrum field: an element with a value, whose own input is in shadow DOM. */
+type Field = HTMLElement & { value: string }
+
 export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope> {
     private blurb!: HTMLParagraphElement
-    private field!: HTMLInputElement
+    private field!: Field
 
     protected declare(dom: AppDom): void {
         dom.h3((title) => {
@@ -18,13 +24,17 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
             content.className = MainCss.dialogContent
             this.blurb = dom.p()
 
-            dom.label((label) => {
-                label.className = Css.emailField
-                dom.span((caption) => (caption.textContent = 'Email Address'))
-                this.field = dom.input((input) => {
-                    input.type = 'email'
-                    input.addEventListener('input', () => this.scope.onEmailChanged(input.value))
-                })
+            dom.div((group) => {
+                group.className = Css.emailField
+
+                const label = dom.append(document.createElement('sp-field-label'))
+                label.setAttribute('for', 'subscribe-email')
+                label.textContent = 'Email Address'
+
+                this.field = dom.append(document.createElement('sp-textfield')) as Field
+                this.field.id = 'subscribe-email'
+                this.field.setAttribute('type', 'email')
+                this.field.addEventListener('input', () => this.scope.onEmailChanged(this.field.value))
             })
         })
 
@@ -34,7 +44,7 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
             dom.actionButton({
                 label: 'Subscribe',
                 context: 'onSubscribe',
-                variant: 'primary',
+                variant: 'accent',
                 onClick: () => this.scope.onSubscribe()
             })
         })
@@ -46,6 +56,13 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
             `To subscribe to this website(${this.scope.site ?? ''}), please enter your email address here. ` +
                 'We will send updates occasionally.'
         )
-        this.setValue(this.field, this.scope.email ?? '')
+
+        // The same guard as everywhere else, but against the host's own value:
+        // an sp-textfield keeps its <input> in shadow DOM, so setValue cannot
+        // reach it and there is nothing to compare on this side.
+        const wanted = this.scope.email ?? ''
+        if (this.field.value !== wanted) {
+            this.field.value = wanted
+        }
     }
 }

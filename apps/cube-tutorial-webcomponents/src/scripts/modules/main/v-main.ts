@@ -53,7 +53,7 @@ export class MainView extends AppElement<MainScope> {
     }
 
     private navButton(dom: AppDom, label: string, action: () => unknown): void {
-        dom.actionButton({ label, onClick: action, context: `nav:${label}`, variant: 'bare' })
+        dom.actionButton({ label, onClick: action, context: `nav:${label}`, variant: 'quiet' })
     }
 
     protected override onUpdate(): void {

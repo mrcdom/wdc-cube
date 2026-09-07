@@ -12,6 +12,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@spectrum-web-components/button": "^1.12.2",
+    "@spectrum-web-components/dialog": "^1.12.2",
+    "@spectrum-web-components/field-label": "^1.12.2",
+    "@spectrum-web-components/icon": "^1.12.2",
+    "@spectrum-web-components/icons-workflow": "^1.12.2",
+    "@spectrum-web-components/textfield": "^1.12.2",
+    "@spectrum-web-components/theme": "^1.12.2",
+    "@spectrum-web-components/underlay": "^1.12.2",
     "wdc-cube": "workspace:*",
     "wdc-cube-tutorial-core": "workspace:*",
     "wdc-cube-webcomponents": "workspace:*"

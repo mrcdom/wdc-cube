@@ -6,7 +6,7 @@ import Css from './todo-mvc.module.scss'
 
 export class TodoMvcView extends AppElement<TodoMvcScope> {
     private note!: HTMLParagraphElement
-    private stressButton!: HTMLButtonElement
+    private stressButton!: HTMLElement
 
     private headerSlot!: CubeViewSlot
     private mainSlot!: CubeViewSlot
@@ -34,7 +34,7 @@ export class TodoMvcView extends AppElement<TodoMvcScope> {
                     this.stressButton = dom.actionButton({
                         label: '',
                         context: 'onToggleStress',
-                        variant: 'bare',
+                        variant: 'quiet',
                         onClick: () => this.scope.actions.onToggleStress()
                     })
                     this.stressButton.className = Css.stressToggle

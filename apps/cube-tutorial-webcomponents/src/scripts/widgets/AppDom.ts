@@ -26,7 +26,7 @@ export class AppDom extends Dom {
         return new AppDom(root)
     }
 
-    public actionButton(options: ActionButtonOptions): HTMLButtonElement {
+    public actionButton(options: ActionButtonOptions): HTMLElement {
         return actionButton(this, options)
     }
 

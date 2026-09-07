@@ -1,5 +1,12 @@
 import './styles/index.scss'
 
+// Spectrum: the element that carries the design tokens, and the one system,
+// colour and scale this app asks for. Each is a separate module so an
+// application only pays for the combinations it uses.
+import '@spectrum-web-components/theme/sp-theme.js'
+import '@spectrum-web-components/theme/spectrum-two/theme-light.js'
+import '@spectrum-web-components/theme/spectrum-two/scale-medium.js'
+
 import { PageHistoryManager } from 'wdc-cube'
 import { onActionError, ViewFactory } from 'wdc-cube-webcomponents'
 import { initializeRoutes, Places, registerServices } from 'wdc-cube-tutorial-core'
@@ -25,7 +32,15 @@ async function start() {
     if (!root || !shell) {
         throw new Error('No view registered for the application scope')
     }
-    root.appendChild(shell)
+
+    // Every Spectrum component reads its tokens from an sp-theme above it, so
+    // the whole application lives inside one.
+    const theme = document.createElement('sp-theme')
+    theme.setAttribute('system', 'spectrum-two')
+    theme.setAttribute('color', 'light')
+    theme.setAttribute('scale', 'medium')
+    theme.appendChild(shell)
+    root.appendChild(theme)
 
     await presenter.kickStart(Places.main)
 }

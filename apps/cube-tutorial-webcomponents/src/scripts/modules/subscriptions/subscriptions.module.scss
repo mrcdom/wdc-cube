@@ -22,15 +22,14 @@
     }
 }
 
+// The field brings its own styling; what is left is how the label sits above it
+// and how wide the pair should be.
 .emailField {
     display: flex;
     flex-direction: column;
     gap: 4px;
 
-    input {
-        padding: 10px;
-        border: 1px solid #79747e;
-        border-radius: 4px;
-        font: inherit;
+    sp-textfield {
+        width: 100%;
     }
 }
