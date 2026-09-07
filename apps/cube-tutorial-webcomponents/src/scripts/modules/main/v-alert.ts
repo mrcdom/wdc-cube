@@ -60,10 +60,17 @@ export class AlertView extends CubeElement<AlertScope> {
         const scope = this.scope
         const severity = SEVERITIES[scope.severity] ?? SEVERITIES.info
 
-        // Both come from the same lookup. `class` and not `className`: on an SVG
-        // element that property is an SVGAnimatedString, not a string.
-        this.setAttr(this.severityIcon.path, 'd', severity.path)
-        this.setAttr(this.severityIcon.element, 'class', `${WidgetCss.icon} ${severity.className}`)
+        // Both come from the same lookup, so the severity itself is what says
+        // whether either changed — cheaper than asking the element, which has to
+        // serialise a path of some eighty characters to answer. `class` and not
+        // `className`: on an SVG element that property is an SVGAnimatedString.
+        this.setAttrByToken(this.severityIcon.path, 'd', scope.severity, severity.path)
+        this.setAttrByToken(
+            this.severityIcon.element,
+            'class',
+            scope.severity,
+            `${WidgetCss.icon} ${severity.className}`
+        )
 
         this.setText(this.headline, scope.title ?? '')
         this.setText(this.supportingText, scope.message ?? '')
