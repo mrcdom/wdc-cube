@@ -72,38 +72,59 @@
     gap: 8px;
 }
 
-.alert {
+// A Material 3 basic dialog: an optional icon centred above the headline,
+// supporting text under it, and the actions at the end. The measurements are the
+// ones Angular Material emits for its own dialog — headline padding 6/24/13,
+// content 20/24, actions 16/24 — so the three apps agree on more than the idea.
+.dialogIconHost {
     display: flex;
-    flex-direction: column;
-    padding: 16px;
-    border-radius: 12px;
-
-    p {
-        margin: 4px 0 0;
-    }
+    justify-content: center;
+    padding-top: 8px;
 }
 
+.dialogIcon {
+    width: 24px;
+    height: 24px;
+}
+
+.dialogHeadline {
+    margin: 0;
+    padding: 6px 0 13px;
+    // headline-small
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 32px;
+    color: #1d1b20;
+    // Centred only when there is an icon above it, which here there always is.
+    text-align: center;
+}
+
+.dialogSupportingText {
+    margin: 0;
+    padding-bottom: 4px;
+    // body-medium
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.25px;
+    color: #49454f;
+    text-align: center;
+}
+
+// The severity is the icon's shape; the colour only reinforces it. Only `error`
+// gets a role of its own in Material 3 — the other three are conventions, so
+// they are stated here rather than pretended to be tokens.
 .alertInfo {
-    background: #d7e3ff;
-    color: #00458f;
+    color: #0b57d0;
 }
 
 .alertSuccess {
-    background: #c8ecd0;
-    color: #08341a;
+    color: #146c2e;
 }
 
 .alertWarning {
-    background: #ffe2b8;
-    color: #452b00;
+    color: #8f5000;
 }
 
 .alertError {
-    background: #ffdad6;
-    color: #93000a;
-}
-
-.alertTitle {
-    display: block;
-    font-size: 16px;
+    color: #b3261e;
 }

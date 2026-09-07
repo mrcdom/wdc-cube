@@ -6,32 +6,52 @@ import { actionButton } from '../../widgets'
 import Css from './main.module.scss'
 
 /**
- * The class per severity, spelled out.
+ * The icon per severity, and the class that colours it.
  *
- * With CSS modules the name in the sheet is not the name in the DOM, so
- * `alert-${severity}` cannot be built by hand any more — which is the point of
- * modules, and the map is what replaces the concatenation.
+ * Material 3 has no coloured banner inside a dialog: a basic dialog is an
+ * optional icon, a headline, supporting text and the actions. The severity is
+ * what the icon says, which is why each one is a different shape rather than the
+ * same shape in a different colour.
+ *
+ * Drawn here rather than pulled from an icon font, so the app keeps its promise
+ * of having no view dependency at all.
  */
-const SEVERITY_CLASS: Record<AlertSeverity, string> = {
-    info: Css.alertInfo,
-    success: Css.alertSuccess,
-    warning: Css.alertWarning,
-    error: Css.alertError
+const SEVERITIES: Record<AlertSeverity, { path: string; className: string }> = {
+    info: {
+        path: 'M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
+        className: 'alertInfo'
+    },
+    success: {
+        path: 'M12 2a10 10 0 100 20 10 10 0 000-20zm-2 15l-5-5 1.4-1.4L10 14.2l7.6-7.6L19 8l-9 9z',
+        className: 'alertSuccess'
+    },
+    warning: {
+        path: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z',
+        className: 'alertWarning'
+    },
+    error: {
+        path: 'M12 2a10 10 0 100 20 10 10 0 000-20zm5 13.6L15.6 17 12 13.4 8.4 17 7 15.6 10.6 12 7 8.4 8.4 7 12 10.6 15.6 7 17 8.4 13.4 12 17 15.6z',
+        className: 'alertError'
+    }
 }
 
+const SVG_NS = 'http://www.w3.org/2000/svg'
+
 export class AlertView extends CubeElement<AlertScope> {
-    private alert!: HTMLDivElement
-    private titleText!: HTMLElement
-    private message!: HTMLParagraphElement
+    private icon!: SVGSVGElement
+    private iconPath!: SVGPathElement
+    private headline!: HTMLHeadingElement
+    private supportingText!: HTMLParagraphElement
 
     protected declare(dom: Dom): void {
-        this.alert = dom.div((box) => {
-            box.className = Css.alert
-            box.setAttribute('role', 'alert')
+        this.icon = this.declareIcon(dom)
 
-            this.titleText = dom.strong((strong) => (strong.className = Css.alertTitle))
-            this.message = dom.p()
+        this.headline = dom.h3((heading) => {
+            heading.className = Css.dialogHeadline
+            heading.id = 'alert-headline'
         })
+
+        this.supportingText = dom.p((text) => (text.className = Css.dialogSupportingText))
 
         dom.div((actions) => {
             actions.className = Css.dialogActions
@@ -41,12 +61,36 @@ export class AlertView extends CubeElement<AlertScope> {
 
     protected override onUpdate(): void {
         const scope = this.scope
+        const severity = SEVERITIES[scope.severity] ?? SEVERITIES.info
 
-        for (const [severity, className] of Object.entries(SEVERITY_CLASS)) {
-            this.setClass(this.alert, className, severity === scope.severity)
+        this.iconPath.setAttribute('d', severity.path)
+        for (const known of Object.values(SEVERITIES)) {
+            this.setClass(this.icon, Css[known.className], known === severity)
         }
 
-        this.setText(this.titleText, scope.title ?? '')
-        this.setText(this.message, scope.message ?? '')
+        this.setText(this.headline, scope.title ?? '')
+        this.setText(this.supportingText, scope.message ?? '')
+    }
+
+    /**
+     * Dom builds HTML elements; an SVG needs its own namespace, so this one is
+     * assembled by hand and handed to the tree.
+     */
+    private declareIcon(dom: Dom): SVGSVGElement {
+        const svg = document.createElementNS(SVG_NS, 'svg')
+        svg.setAttribute('viewBox', '0 0 24 24')
+        svg.setAttribute('aria-hidden', 'true')
+        svg.classList.add(Css.dialogIcon)
+
+        this.iconPath = document.createElementNS(SVG_NS, 'path')
+        this.iconPath.setAttribute('fill', 'currentColor')
+        svg.appendChild(this.iconPath)
+
+        dom.div((host) => {
+            host.className = Css.dialogIconHost
+            host.appendChild(svg)
+        })
+
+        return svg
     }
 }
