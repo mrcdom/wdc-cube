@@ -1,6 +1,8 @@
 import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { HeaderScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
+import Css from './todo-mvc.module.scss'
+
 export class HeaderView extends CubeElement<HeaderScope> {
     private toggleAll!: HTMLInputElement
     private toggleLabel!: HTMLLabelElement
@@ -8,13 +10,13 @@ export class HeaderView extends CubeElement<HeaderScope> {
 
     protected declare(dom: Dom): void {
         dom.header((header) => {
-            header.className = 'header-input-pane'
+            header.className = Css.headerInputPane
 
             const id = `toggle-all-${Math.random().toString(36).slice(2, 8)}`
 
             this.toggleAll = dom.input((input) => {
                 input.id = id
-                input.className = 'toggle-all'
+                input.className = Css.toggleAll
                 input.type = 'checkbox'
                 input.addEventListener('change', () =>
                     this.safeAction('onToggleAll', () => this.scope.actions.onToggleAll())
@@ -27,7 +29,7 @@ export class HeaderView extends CubeElement<HeaderScope> {
             })
 
             this.field = dom.input((input) => {
-                input.className = 'new-todo'
+                input.className = Css.newTodo
                 input.placeholder = 'What needs to be done?'
                 input.autofocus = true
                 input.addEventListener('input', () =>

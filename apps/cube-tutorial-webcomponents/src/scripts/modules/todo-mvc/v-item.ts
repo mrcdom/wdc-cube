@@ -1,6 +1,8 @@
 import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { ItemScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
+import Css from './todo-mvc.module.scss'
+
 /** One todo row. A row is an element like any other, which is what makes syncList trivial. */
 export class ItemView extends CubeElement<ItemScope> {
     private row!: HTMLLIElement
@@ -10,10 +12,10 @@ export class ItemView extends CubeElement<ItemScope> {
 
     protected declare(dom: Dom): void {
         this.row = dom.li((li) => {
-            li.className = 'view'
+            li.className = Css.view
 
             this.toggle = dom.input((input) => {
-                input.className = 'toggle'
+                input.className = Css.toggle
                 input.type = 'checkbox'
                 input.addEventListener('change', () => this.safeAction('onToggle', () => this.scope.actions.onToggle()))
             })
@@ -23,14 +25,14 @@ export class ItemView extends CubeElement<ItemScope> {
             })
 
             dom.button((button) => {
-                button.className = 'destroy'
+                button.className = Css.destroy
                 button.addEventListener('click', () =>
                     this.safeAction('onDestroy', () => this.scope.actions.onDestroy())
                 )
             })
 
             this.editor = dom.input((input) => {
-                input.className = 'edit'
+                input.className = Css.edit
                 input.addEventListener('blur', () =>
                     this.safeAction('onBlur', () => this.scope.actions.onBlur(() => input.value))
                 )
@@ -44,8 +46,8 @@ export class ItemView extends CubeElement<ItemScope> {
     protected override onUpdate(): void {
         const scope = this.scope
 
-        this.setClass(this.row, 'completed', scope.completed)
-        this.setClass(this.row, 'editing', scope.editing)
+        this.setClass(this.row, Css.completed, scope.completed)
+        this.setClass(this.row, Css.editing, scope.editing)
         this.toggle.checked = scope.completed
         this.setText(this.titleLabel, scope.title)
 

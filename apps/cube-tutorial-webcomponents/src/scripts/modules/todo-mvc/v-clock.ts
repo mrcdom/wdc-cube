@@ -1,12 +1,14 @@
 import { CubeElement, Dom } from 'wdc-cube-webcomponents'
 import { ClockScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
+import Css from './todo-mvc.module.scss'
+
 export class ClockView extends CubeElement<ClockScope> {
     private time!: HTMLDivElement
 
     protected declare(dom: Dom): void {
         dom.li((li) => {
-            li.className = 'clock'
+            li.className = Css.clock
             this.time = dom.div()
         })
     }

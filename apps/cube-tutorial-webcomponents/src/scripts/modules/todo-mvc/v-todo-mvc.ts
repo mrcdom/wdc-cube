@@ -1,6 +1,8 @@
 import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
 import { TodoMvcScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
+import Css from './todo-mvc.module.scss'
+
 export class TodoMvcView extends CubeElement<TodoMvcScope> {
     private headerHost!: HTMLElement
     private mainHost!: HTMLElement
@@ -14,25 +16,25 @@ export class TodoMvcView extends CubeElement<TodoMvcScope> {
 
     protected declare(dom: Dom): void {
         dom.div((view) => {
-            view.className = 'todo-mvc-view'
+            view.className = Css.todoMvcView
 
             dom.div((body) => {
-                body.className = 'body'
+                body.className = Css.body
 
                 dom.h1((title) => (title.textContent = 'todos'))
 
                 dom.section((app) => {
-                    app.className = 'todo-app'
+                    app.className = Css.todoApp
                     this.headerHost = dom.span()
                     this.mainHost = dom.span()
                     this.footerHost = dom.span()
                 })
 
                 dom.footer((info) => {
-                    info.className = 'info'
+                    info.className = Css.info
                     this.note = dom.p()
                     this.stressButton = dom.button((button) => {
-                        button.className = 'stress-toggle'
+                        button.className = Css.stressToggle
                         button.addEventListener('click', () =>
                             this.safeAction('onToggleStress', () => this.scope.actions.onToggleStress())
                         )

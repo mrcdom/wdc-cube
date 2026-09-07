@@ -1,6 +1,7 @@
 import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
 import { ItemScope, MainScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
+import Css from './todo-mvc.module.scss'
 import { ItemView } from './v-item'
 
 /**
@@ -19,9 +20,9 @@ export class TodoMainView extends CubeElement<MainScope> {
 
     protected declare(dom: Dom): void {
         dom.section((section) => {
-            section.className = 'main'
+            section.className = Css.main
             this.list = dom.ul((ul) => {
-                ul.className = 'todo-list'
+                ul.className = Css.todoList
                 this.clockHost = dom.span()
             })
         })

@@ -1,0 +1,163 @@
+.mainView {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.appBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 56px;
+    background: #005cbb;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    // Above the page so the shadow falls on it; the modal layers stack higher.
+    position: relative;
+    z-index: 1;
+
+    button {
+        background: none;
+        border: none;
+        color: inherit;
+        font: inherit;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 4px;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+    }
+}
+
+.appBarTitle {
+    flex-grow: 1;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+// A single-cell grid, so whatever the body slot renders fills it on both axes.
+.body {
+    display: grid;
+    flex-grow: 1;
+    align-self: stretch;
+    min-height: 0;
+    margin: 16px;
+}
+
+.bodyView {
+    align-content: start;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+
+    h3 {
+        margin: 0 0 12px;
+    }
+}
+
+.buttonPane {
+    display: flex;
+    gap: 8px;
+}
+
+.buttonPane button,
+.dialogActions button {
+    padding: 8px 16px;
+    border: 1px solid #c7c7c7;
+    border-radius: 20px;
+    background: #fff;
+    color: #0b57d0;
+    font: inherit;
+    cursor: pointer;
+}
+
+.dialogActions button.primary {
+    background: #0b57d0;
+    border-color: #0b57d0;
+    color: #fff;
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.32);
+}
+
+// An alert can be raised from inside a dialog, so its scrim stacks above it —
+// otherwise the dialog underneath is never dimmed and the two read as one layer.
+.alertBackdrop {
+    z-index: 4;
+}
+
+.dialog {
+    min-width: 320px;
+    max-width: 90vw;
+    padding: 20px;
+    border-radius: 16px;
+    background: #f4f2f6;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialogTitle {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.dialogContent p {
+    margin: 0 0 12px;
+}
+
+.dialogActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.alert {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border-radius: 12px;
+
+    p {
+        margin: 4px 0 0;
+    }
+}
+
+.alertInfo {
+    background: #d7e3ff;
+    color: #00458f;
+}
+
+.alertSuccess {
+    background: #c8ecd0;
+    color: #08341a;
+}
+
+.alertWarning {
+    background: #ffe2b8;
+    color: #452b00;
+}
+
+.alertError {
+    background: #ffdad6;
+    color: #93000a;
+}
+
+.alertTitle {
+    display: block;
+    font-size: 16px;
+}

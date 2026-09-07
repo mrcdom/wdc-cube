@@ -1,6 +1,8 @@
 import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
 import { RestrictedScope } from 'wdc-cube-tutorial-core/restricted'
 
+import Css from './restricted.module.scss'
+
 export class RestrictedView extends CubeElement<RestrictedScope> {
     private empty!: HTMLParagraphElement
     private detailHost!: HTMLElement
@@ -8,7 +10,7 @@ export class RestrictedView extends CubeElement<RestrictedScope> {
 
     protected declare(dom: Dom): void {
         dom.div((view) => {
-            view.className = 'restricted-view'
+            view.className = Css.restrictedView
             this.empty = dom.p((text) => (text.textContent = 'Nothing is nested under this place yet.'))
             // The slot this presenter offers to a deeper place. Passing its own
             // scope here would resolve back to this very view.

@@ -1,6 +1,8 @@
 import { CubeElement, CubeViewSlot, Dom } from 'wdc-cube-webcomponents'
 import { MainScope } from 'wdc-cube-tutorial-core/main'
 
+import Css from './main.module.scss'
+
 /** The application shell: a bar, a body slot, and the two modal layers. */
 export class MainView extends CubeElement<MainScope> {
     private bodyHost!: HTMLElement
@@ -16,13 +18,13 @@ export class MainView extends CubeElement<MainScope> {
 
     protected declare(dom: Dom): void {
         dom.div((view) => {
-            view.className = 'main-view'
+            view.className = Css.mainView
 
             dom.nav((bar) => {
-                bar.className = 'app-bar'
+                bar.className = Css.appBar
 
                 dom.span((title) => {
-                    title.className = 'app-bar-title'
+                    title.className = Css.appBarTitle
                     title.textContent = 'Cube Framework (Tutorial Example)'
                 })
 
@@ -32,29 +34,29 @@ export class MainView extends CubeElement<MainScope> {
                 this.navButton(dom, 'Login', () => this.scope.onLogin())
             })
 
-            this.bodyHost = dom.div((body) => (body.className = 'body'))
+            this.bodyHost = dom.div((body) => (body.className = Css.body))
 
             this.dialogBackdrop = dom.div((backdrop) => {
-                backdrop.className = 'backdrop'
+                backdrop.className = Css.backdrop
                 backdrop.hidden = true
                 backdrop.addEventListener('click', () =>
                     this.safeAction('closeDialog', () => this.scope.dialog?.onClose())
                 )
                 this.dialogHost = dom.div((panel) => {
-                    panel.className = 'dialog'
+                    panel.className = Css.dialog
                     // Clicking the panel must not reach the backdrop behind it.
                     panel.addEventListener('click', (event) => event.stopPropagation())
                 })
             })
 
             this.alertBackdrop = dom.div((backdrop) => {
-                backdrop.className = 'backdrop alert-backdrop'
+                backdrop.className = `${Css.backdrop} ${Css.alertBackdrop}`
                 backdrop.hidden = true
                 backdrop.addEventListener('click', () =>
                     this.safeAction('closeAlert', () => this.scope.alert?.onClose())
                 )
                 this.alertHost = dom.div((panel) => {
-                    panel.className = 'dialog alert-dialog'
+                    panel.className = Css.dialog
                     panel.addEventListener('click', (event) => event.stopPropagation())
                 })
             })
