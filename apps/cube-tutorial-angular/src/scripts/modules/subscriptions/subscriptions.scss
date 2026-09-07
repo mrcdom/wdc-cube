@@ -1,5 +1,7 @@
 .subscriptions-view {
-    align-self: flex-start;
+    // Fills the body like any other view seated there; its content is what
+    // sits at the top of it.
+    align-content: start;
 }
 
 .dialog-title {

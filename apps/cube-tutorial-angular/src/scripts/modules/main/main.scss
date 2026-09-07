@@ -52,9 +52,15 @@
     margin-left: 8px;
 }
 
+// A view seated in the body fills the body, the way it does in React — there
+// ViewSlot hands its class to the view, which merges it onto its own root, so
+// the body element and the view are one element and the question never comes up.
+// Angular's slot cannot reach into a component's template, so the wrapper stays
+// and this makes it a single-cell grid instead: the view's root is promoted to
+// be its item (the host in between is display: contents) and a grid item
+// stretches to its area on both axes by default. No per-view rule needed.
 .body {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     flex-grow: 1;
     align-self: stretch;
     min-height: 0;
@@ -62,7 +68,8 @@
 }
 
 .body-view {
-    align-self: flex-start;
+    // The card fills the body; its own content is what sits at the top of it.
+    align-content: start;
 }
 
 .button-pane {

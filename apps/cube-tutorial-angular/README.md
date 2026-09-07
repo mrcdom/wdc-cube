@@ -128,6 +128,10 @@ Two more places need more than the generated tokens:
   is written across that split — `.todo-list li` has the list in one component
   and the item in another, which emulated encapsulation will not let match. See
   [wdc-cube-angular](../../libs/cube-angular/README.md#styles-that-cross-the-component-split).
+- **The body slot.** `.body` is a single-cell grid, so a view seated in it
+  stretches to fill it on both axes — the way it does in React, where the slot
+  hands its class to the view and the two are one element. See
+  [wdc-cube-angular](../../libs/cube-angular/README.md#sizing-what-a-slot-renders).
 - **The flex chain.** `.main-view` and `.body` carry `min-height: 0`. A column
   flex item defaults to `min-height: auto` and refuses to shrink below its
   content, which pushes the shell past the viewport instead of letting the

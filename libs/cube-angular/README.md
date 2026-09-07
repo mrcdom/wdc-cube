@@ -68,6 +68,29 @@ stops being constrained by its parent. The slot therefore sets the host to
 markup where React would have put it. A view that wants a real box of its own
 takes it back with `:host { display: block !important }`.
 
+## Sizing what a slot renders
+
+React's `ViewSlot` takes a `className` and hands it to the view, which merges it
+onto its own root — so the slot element and the view are one element, and a view
+placed in a container that fills its parent fills it too. Angular's slot cannot
+reach into a component's template, so it cannot do that.
+
+What it does instead follows from the host being `display: contents`: because
+that host generates no box, the view's own root is **promoted** to be the flex or
+grid item of whatever the slot sits in. The container therefore still governs the
+view, and one rule where the slot lives is enough — no per-view opt-in:
+
+```scss
+// A single-cell grid: whatever the slot renders stretches to fill it on both
+// axes, since that is a grid item's default alignment.
+.body {
+    display: grid;
+}
+```
+
+A view that wants to sit at its natural size in such a container overrides its
+own `align-self` / `justify-self`, exactly as it would anywhere else.
+
 ## Styles that cross the component split
 
 Cube gives each scope its own component, so a screen that was one stylesheet
