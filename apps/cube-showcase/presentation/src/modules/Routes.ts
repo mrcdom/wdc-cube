@@ -2,6 +2,7 @@ import { CubeBuilder, Place } from 'wdc-cube'
 
 import { SignInPresenter } from './auth/auth.presenter'
 import { CyclesPresenter } from './cycles/cycles.presenter'
+import { DashboardPresenter } from './dashboard/dashboard.presenter'
 import { IssueDetailPresenter } from './issues/issue-detail.presenter'
 import { IssuesPresenter } from './issues/issues.presenter'
 import { ProjectsPresenter } from './projects/projects.presenter'
@@ -32,6 +33,10 @@ const prepare = CubeBuilder.lazyBuild({
 
         cycles: {
             presenter: Place.creator(CyclesPresenter, Places, 'cycles')
+        },
+
+        dashboard: {
+            presenter: Place.creator(DashboardPresenter, Places, 'dashboard')
         }
     }
 })

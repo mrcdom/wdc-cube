@@ -38,5 +38,6 @@ export const Places = {
     projects: Place.UNKNOWN,
     issues: Place.UNKNOWN,
     issueDetail: Place.UNKNOWN,
-    cycles: Place.UNKNOWN
+    cycles: Place.UNKNOWN,
+    dashboard: Place.UNKNOWN
 }

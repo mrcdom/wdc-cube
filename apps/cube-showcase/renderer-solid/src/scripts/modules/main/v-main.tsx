@@ -156,6 +156,7 @@ function ModalLayer(props: {
 
 const GLYPHS: Record<string, string> = {
     projects: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
+    dashboard: 'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',
     issues: 'M4 6h16M4 12h16M4 18h10',
     cycles: 'M21 12a9 9 0 1 1-3-6.7M21 3v6h-6',
     'sign-out': 'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3'

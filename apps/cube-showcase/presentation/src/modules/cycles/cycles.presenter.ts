@@ -2,6 +2,7 @@ import { CubePresenter, FlipIntent, Logger, NOOP_VOID, ScopeSlot } from 'wdc-cub
 
 import type { Cycle, Id } from '../../domain'
 import { ShowcaseService } from '../../services'
+import { DashboardKeys } from '../dashboard/dashboard.key'
 import { IssuesKeys } from '../issues/issues.key'
 import type { MainPresenter } from '../main/main.presenter'
 import { CyclesKeys } from './cycles.key'
@@ -51,6 +52,11 @@ export class CyclesPresenter extends CubePresenter<MainPresenter, CyclesScope> {
     private showNavigation() {
         const projectId = this.projectId
         this.app.setNavigation(this.scope.projectName, [
+            this.app.buildNavItem('Dashboard', 'dashboard', false, async () => {
+                const keys = new DashboardKeys(this.app)
+                keys.projectId = projectId
+                await keys.flip()
+            }),
             this.app.buildNavItem('Issues', 'issues', false, async () => {
                 const keys = new IssuesKeys(this.app)
                 keys.projectId = projectId

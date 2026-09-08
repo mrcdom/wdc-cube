@@ -2,7 +2,7 @@ import { CubePresenter, FlipIntent, Logger, NOOP_VOID, ScopeSlot } from 'wdc-cub
 
 import type { Project } from '../../domain'
 import { ShowcaseService } from '../../services'
-import { IssuesKeys } from '../issues/issues.key'
+import { DashboardKeys } from '../dashboard/dashboard.key'
 import type { MainPresenter } from '../main/main.presenter'
 import { ProjectsKeys } from './projects.key'
 import { ProjectCardScope, ProjectsScope } from './projects.scope'
@@ -74,7 +74,9 @@ export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScop
     }
 
     protected async onOpen(projectId: string) {
-        const keys = new IssuesKeys(this.app)
+        // A project opens on its dashboard: the numbers first, and every one of
+        // them a link into the list that explains it.
+        const keys = new DashboardKeys(this.app)
         keys.projectId = projectId
         await keys.flip()
     }

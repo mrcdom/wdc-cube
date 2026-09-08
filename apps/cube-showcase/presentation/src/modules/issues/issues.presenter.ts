@@ -14,6 +14,7 @@ import {
 } from '../../domain'
 import { ShowcaseService } from '../../services'
 import { CyclesKeys } from '../cycles/cycles.key'
+import { DashboardKeys } from '../dashboard/dashboard.key'
 import type { MainPresenter } from '../main/main.presenter'
 import { IssueDetailKeys } from './issue-detail.key'
 import { IssuesKeys, type IssueView } from './issues.key'
@@ -131,6 +132,11 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     private showNavigation(current: 'issues' | 'cycles') {
         const projectId = this.at.projectId!
         this.app.setNavigation(this.project?.name, [
+            this.app.buildNavItem('Dashboard', 'dashboard', false, async () => {
+                const keys = new DashboardKeys(this.app)
+                keys.projectId = projectId
+                await keys.flip()
+            }),
             this.app.buildNavItem('Issues', 'issues', current === 'issues', async () => {
                 const keys = new IssuesKeys(this.app)
                 keys.projectId = projectId
