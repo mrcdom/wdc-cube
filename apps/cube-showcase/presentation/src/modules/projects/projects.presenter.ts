@@ -56,6 +56,13 @@ export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScop
     }
 
     private async load() {
+        // Said rather than assumed. The scope happens to start `loading`, so
+        // this changes nothing on the first pass — but a retry, or any second
+        // call, would otherwise run with the cards from last time on screen and
+        // the last failure still printed above them.
+        this.scope.loading = true
+        this.scope.error = undefined
+
         try {
             // The people are already on their way down from `project`, so this
             // joins that request rather than making a second one.
@@ -63,7 +70,6 @@ export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScop
             const leadName = new Map(members.map((member) => [member.id, member.name]))
 
             this.scope.projects = projects.map((project) => this.buildCard(project, leadName.get(project.leadId) ?? ''))
-            this.scope.error = undefined
         } catch (caught) {
             this.scope.error = caught instanceof Error ? caught.message : 'Could not load the projects.'
         } finally {

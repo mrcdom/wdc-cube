@@ -31,7 +31,13 @@ export class CyclesPresenter extends CubePresenter<MainPresenter, CyclesScope> {
         const moved = this.projectId !== keys.projectId
         if (moved) {
             this.projectId = keys.projectId
+            // Both, and before the slot: what is handed over has to be a
+            // skeleton rather than the previous project's figures, and the
+            // previous project's failure is not news about this one. Clearing
+            // the error only on success left it printed above the new skeleton
+            // for as long as the load took.
             this.scope.loading = true
+            this.scope.error = undefined
         }
 
         // The slot first, so the skeleton is on screen while the request runs.
@@ -62,7 +68,6 @@ export class CyclesPresenter extends CubePresenter<MainPresenter, CyclesScope> {
                     now
                 )
             })
-            this.scope.error = undefined
         } catch (caught) {
             this.scope.error = caught instanceof Error ? caught.message : 'Could not load the cycles.'
         } finally {
