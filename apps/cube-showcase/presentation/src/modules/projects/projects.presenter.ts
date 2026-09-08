@@ -14,12 +14,17 @@ const service = ShowcaseService.INSTANCE
 
 export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScope> {
     private parentSlot: ScopeSlot = NOOP_VOID
+    private loaded = false
 
     public constructor(app: MainPresenter) {
         super(app, new ProjectsScope())
     }
 
-    public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
+    public override async applyParameters(
+        intent: FlipIntent,
+        initialization: boolean,
+        last?: boolean
+    ): Promise<boolean> {
         // The door first. A place behind it does not get to run and then
         // discover it should not have.
         if (!this.app.authenticated) {
@@ -31,14 +36,33 @@ export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScop
 
         if (initialization) {
             this.parentSlot = keys.parentSlot
-            this.app.setNavigation(undefined, [])
             LOG.info('Initialized')
         }
+
+        // `projects` is a segment on the way to a dashboard, an issue list or a
+        // set of cycles, and on those journeys this screen is not shown at all.
+        //
+        // A place that is only being passed through has nothing to put on screen
+        // and nothing to fetch. Filling the slot anyway put the project list up
+        // for the instant before the deeper place replaced it, and fetching
+        // anyway spent two requests on a page nobody was going to see — one of
+        // them for members the deeper place then asked for again.
+        //
+        // The list of issues does the opposite, and rightly: it *is* the backdrop
+        // its detail dialog opens over, so it fills its slot whether or not it is
+        // last. The difference is whether the deeper place stands on this one or
+        // merely came through it.
+        if (!last) {
+            return true
+        }
+
+        this.app.setNavigation(undefined, [])
 
         // The slot first, so the cards' skeleton is on screen while they load.
         this.parentSlot(this.scope)
 
-        if (initialization) {
+        if (!this.loaded) {
+            this.loaded = true
             await this.load()
         }
 
