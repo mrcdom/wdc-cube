@@ -20,6 +20,36 @@ import { BoardColumnScope, FilterOptionScope, FilterScope, IssueRowScope, Issues
 
 const LOG = Logger.get('Showcase.IssuesPresenter')
 
+/** Everything the issue list can be looking at, as this presenter holds it. */
+type Where = {
+    projectId?: Id
+    view: IssueView
+    state?: IssueState
+    priority?: IssuePriority
+    assigneeId?: Id
+    cycleId?: Id
+    search?: string
+    sort?: string
+    page: number
+}
+
+/**
+ * What {@link Where} looks like when nothing is hiding rows.
+ *
+ * Declared once and used twice: `Clear` moves to it, and the button only offers
+ * itself when the reader is somewhere else. Stating the list in both places is
+ * how they came to disagree — the button appeared for a search or a page that
+ * the handler then did not clear.
+ */
+const UNFILTERED: Partial<Where> = {
+    state: undefined,
+    priority: undefined,
+    assigneeId: undefined,
+    cycleId: undefined,
+    search: undefined,
+    page: 1
+}
+
 // @Inject
 const service = ShowcaseService.INSTANCE
 
@@ -27,10 +57,22 @@ const service = ShowcaseService.INSTANCE
  * The issue list, and the showcase's central argument.
  *
  * Everything the reader can change here — the filters, the page, whether they
- * are looking at a list or a board — is a parameter of this place. Changing one
- * is a navigation, so the address bar follows without being told, Back undoes
- * it, and a reload lands exactly where it was. `applyParameters` is where that
- * happens, and it is the only place that reads them.
+ * are looking at a list or a board — is a parameter of this place. So the
+ * address bar carries them, Back undoes them, and a reload lands exactly where
+ * it was.
+ *
+ * None of that is done by navigating. Pressing `Board` does not leave this
+ * place, so there is nothing to flip to: the presenter moves its own state and
+ * asks for the address to be written again. `updateHistory` rebuilds it by
+ * asking every live presenter what it is showing — `publishParameters`, below —
+ * and pushes it, which is what leaves Back working. Flipping to the place one
+ * is already standing on would walk the whole path from the root to arrive at
+ * the same conclusion.
+ *
+ * Where the state comes from is the only difference between the two ways in.
+ * `applyParameters` reads it from the URL — a link, a reload, a Back — and an
+ * action writes it directly. Both then run {@link refresh}, so there is one
+ * description of what being here means, not one per way of arriving.
  */
 export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     private parentSlot: ScopeSlot = NOOP_VOID
@@ -43,19 +85,9 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
      *
      * Held here rather than read back out of the scope, because it is what
      * `publishParameters` hands to the address bar: the URL is derived from
-     * this, and this is what a navigation set.
+     * this, and this is what an action or an arrival set.
      */
-    private at = {
-        projectId: undefined as Id | undefined,
-        view: 'list' as IssueView,
-        state: undefined as IssueState | undefined,
-        priority: undefined as IssuePriority | undefined,
-        assigneeId: undefined as Id | undefined,
-        cycleId: undefined as Id | undefined,
-        search: undefined as string | undefined,
-        sort: undefined as string | undefined,
-        page: 1
-    }
+    private at: Where = { view: 'list', page: 1 }
 
     /** The last query answered, so an identical re-entry does not refetch. */
     private lastQuery?: string
@@ -101,9 +133,32 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         // filling the slot last is what made it unreachable.
         this.parentSlot(this.scope)
 
-        await this.applyQuery(keys)
+        this.at = {
+            projectId: keys.projectId,
+            view: keys.view,
+            state: keys.state,
+            priority: keys.priority,
+            assigneeId: keys.assigneeId,
+            cycleId: keys.cycleId,
+            search: keys.search,
+            sort: keys.sort,
+            page: keys.page
+        }
+        await this.refresh()
 
         return true
+    }
+
+    /**
+     * A change to what this presenter is showing, which is not a journey.
+     *
+     * The address is written first and the rows are fetched after: where the
+     * reader is is already true, and does not wait on the server to say so.
+     */
+    private async go(change: Partial<Where>) {
+        this.at = { ...this.at, ...change }
+        this.updateHistory()
+        await this.refresh()
     }
 
     private bindActions() {
@@ -123,24 +178,13 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         return this.owner?.members ?? []
     }
 
-    private async applyQuery(keys: IssuesKeys) {
-        this.at = {
-            projectId: keys.projectId,
-            view: keys.view,
-            state: keys.state,
-            priority: keys.priority,
-            assigneeId: keys.assigneeId,
-            cycleId: keys.cycleId,
-            search: keys.search,
-            sort: keys.sort,
-            page: keys.page
-        }
-
+    /** What being at {@link at} means, however the reader got there. */
+    private async refresh() {
         this.scope.view = this.at.view
         this.scope.sortField = (this.at.sort ?? '').replace('-', '')
         this.scope.sortDescending = (this.at.sort ?? '').startsWith('-')
         this.scope.search = this.at.search ?? ''
-        this.buildFilters(keys)
+        this.buildFilters()
 
         const query = {
             state: this.at.state,
@@ -176,7 +220,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
 
             // Said again now that the people are here: the assignee filter has
             // names to offer, and the rows have someone to name.
-            this.buildFilters(keys)
+            this.buildFilters()
 
             this.scope.rows = page.items.map((issue) => this.buildRow(issue))
             this.scope.columns = this.buildColumns(this.scope.rows)
@@ -232,48 +276,41 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         })
     }
 
-    private buildFilters(keys: IssuesKeys) {
+    private buildFilters() {
         const filters = [
             this.buildFilter(
                 'Status',
-                keys.state,
+                this.at.state,
                 ISSUE_STATES,
                 (value) => STATE_LABELS[value],
-                (next) => {
-                    const target = this.here()
-                    target.state = next as IssueState | undefined
-                    target.page = 1
-                    return target
-                }
+                (next) => ({
+                    state: next as IssueState | undefined,
+                    page: 1
+                })
             ),
             this.buildFilter(
                 'Priority',
-                keys.priority,
+                this.at.priority,
                 ISSUE_PRIORITIES,
                 (value) => PRIORITY_LABELS[value],
-                (next) => {
-                    const target = this.here()
-                    target.priority = next as IssuePriority | undefined
-                    target.page = 1
-                    return target
-                }
+                (next) => ({ priority: next as IssuePriority | undefined, page: 1 })
             ),
             this.buildFilter(
                 'Assignee',
-                keys.assigneeId,
+                this.at.assigneeId,
                 this.members.map((member) => member.id),
                 (value) => this.members.find((member) => member.id === value)?.name ?? value,
-                (next) => {
-                    const target = this.here()
-                    target.assigneeId = next
-                    target.page = 1
-                    return target
-                }
+                (next) => ({ assigneeId: next, page: 1 })
             )
         ]
 
         this.scope.filters = filters
-        this.scope.anyFilterActive = keys.anyFilterActive
+        this.scope.anyFilterActive = this.anyFilterActive
+    }
+
+    /** Whether the reader is looking at less than everything. */
+    private get anyFilterActive(): boolean {
+        return (Object.keys(UNFILTERED) as (keyof Where)[]).some((key) => this.at[key] !== UNFILTERED[key])
     }
 
     private buildFilter<T extends string>(
@@ -281,7 +318,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         current: T | undefined,
         values: readonly T[],
         labelOf: (value: T) => string,
-        target: (next: string | undefined) => IssuesKeys
+        target: (next: string | undefined) => Partial<Where>
     ): FilterScope {
         const filter = new FilterScope()
         filter.identity = label
@@ -297,7 +334,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             scope.value = value
             scope.current = value === current
             scope.onSelect = this.action(async () => {
-                await target(value).flip()
+                await this.go(target(value))
             })
             scope.update = this.update
             return scope
@@ -305,21 +342,6 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
 
         filter.options = [option(`Any ${label.toLowerCase()}`, undefined), ...values.map((v) => option(labelOf(v), v))]
         return filter
-    }
-
-    /** A fresh intent standing where this presenter stands. */
-    private here(): IssuesKeys {
-        const target = new IssuesKeys(this.app)
-        target.projectId = this.at.projectId
-        target.view = this.at.view
-        target.state = this.at.state
-        target.priority = this.at.priority
-        target.assigneeId = this.at.assigneeId
-        target.cycleId = this.at.cycleId
-        target.search = this.at.search
-        target.sort = this.at.sort
-        target.page = this.at.page
-        return target
     }
 
     /**
@@ -351,27 +373,15 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     }
 
     protected async onSearchSubmitted() {
-        const target = this.here()
-        target.search = this.scope.search || undefined
-        target.page = 1
-        await target.flip()
+        await this.go({ search: this.scope.search || undefined, page: 1 })
     }
 
     protected async onShowView(view: IssueView) {
-        const target = this.here()
-        target.view = view
-        await target.flip()
+        await this.go({ view })
     }
 
     protected async onClearFilters() {
-        // From where this presenter stands, minus the filters. Building a fresh
-        // `IssuesKeys` instead looked like it started from nothing and did not:
-        // `newFlipIntent` asks every live presenter to publish onto it, this one
-        // included, so the intent came back holding the very filters the button
-        // exists to drop — and the flip landed on the place it was already on.
-        const target = this.here()
-        target.clearFilters()
-        await target.flip()
+        await this.go(UNFILTERED)
     }
 
     protected async onMovePage(delta: number) {
@@ -379,9 +389,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         if (page === this.at.page) {
             return
         }
-        const target = this.here()
-        target.page = page
-        await target.flip()
+        await this.go({ page })
     }
 
     /**
@@ -415,7 +423,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     }
 
     /**
-     * Ordering, which is a navigation like every other decision here.
+     * Ordering, which is a parameter like every other decision here.
      *
      * The table below is a third-party library that would happily keep this
      * state itself. It is told not to: the sort is a parameter of the place, so
@@ -423,10 +431,8 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
      */
     protected async onSort(field: string) {
         const current = this.at.sort
-        const target = this.here()
-        target.sort = current === field ? `-${field}` : current === `-${field}` ? undefined : field
-        target.page = 1
-        await target.flip()
+        const sort = current === field ? `-${field}` : current === `-${field}` ? undefined : field
+        await this.go({ sort, page: 1 })
     }
 
     protected async onOpenIssue(issue: Issue) {
