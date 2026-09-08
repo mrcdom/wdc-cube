@@ -187,7 +187,7 @@ navigates it, and asserts on presenter state and the resulting URL. If a
 presenter could not be tested that way, it would be holding view concerns it
 should not have.
 
-**The view is replaceable.** [cube-tutorial-core](../apps/cube-tutorial-core)
+**The view is replaceable.** [cube-tutorial/presentation](../apps/cube-tutorial/presentation)
 holds the example's places, presenters, scopes and services and does not import
 React — 24 files, all `.ts`, every external import from `wdc-cube`.
 [cube-tutorial-react](../apps/cube-tutorial-react) holds the views. A second view

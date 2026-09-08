@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["vite/client"],
+    "paths": { "@/*": ["./src/scripts/*"] }
+  },
+  "include": ["src", "vite.config.ts"],
+  "exclude": ["node_modules", "build"]
+}
