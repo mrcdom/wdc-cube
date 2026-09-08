@@ -58,14 +58,26 @@ export function Observable<T extends { new (...args: any[]): object }>(ctor: T) 
         instrumented = true
 
         // Independent of who instrumented: a field initialised in the
-        // constructor landed as an own property, so it is read back, removed,
-        // and written again through whatever accessor was just installed.
+        // constructor may have landed as an own property, shadowing the accessor
+        // just installed, so it is read back, removed, and written again through
+        // that accessor.
+        //
+        // Whether it landed there at all depends on how the class was compiled.
+        // Native class fields define an own property on every instance, so every
+        // instance needs this. Assignment semantics only reach the accessor once
+        // it exists, which is true from the second instance onwards — and then
+        // there is nothing to copy. The guard is what tells the two apart, and
+        // it is worth having: `delete` is what drops an object into V8's
+        // dictionary mode, so not running it is not only faster, it keeps the
+        // scope a fast object.
         const actions: string[] = []
         for (let index = 0; index < fields.length; index++) {
             const field = fields[index]
-            actions.push(`const v${index} = this.${field.key};`)
-            actions.push(`Reflect.deleteProperty(this, '${field.key}');`)
-            actions.push(`this.${field.key} = v${index};`)
+            actions.push(`if (Object.hasOwn(this, '${field.key}')) {`)
+            actions.push(`  const v${index} = this.${field.key};`)
+            actions.push(`  Reflect.deleteProperty(this, '${field.key}');`)
+            actions.push(`  this.${field.key} = v${index};`)
+            actions.push(`}`)
         }
         const copyInitialValuesAction = new Function(actions.join('\n'))
         prototype[COPY_INITIAL_VALUES_ACTION] = copyInitialValuesAction
