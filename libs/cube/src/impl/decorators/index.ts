@@ -7,5 +7,12 @@
  */
 
 export { action } from './action.method-decorator'
-export { Observable } from './Observable.class-decorator'
+export {
+    defaultInstrumentation,
+    Observable,
+    observedProperty,
+    type FieldMetadata,
+    type GenericObject,
+    type ScopeInstrumentation
+} from './Observable.class-decorator'
 export { observe } from './observe.field-decorator'

@@ -66,7 +66,7 @@ it headless before.
 ## What it does not cover
 
 The views. Whether a component paints the scope and fires the actions belongs to
-the React and Angular projects; appearance and layout belong to a browser. The
+the four `renderer-*` projects; appearance and layout belong to a browser. The
 todo-mvc module once rendered as completely unstyled markup while its markup,
 class names and actions were all correct — no assertion at this level, or at the
 view level, would have gone red.

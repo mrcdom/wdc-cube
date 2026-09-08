@@ -1,7 +1,7 @@
 # cube-tutorial/presentation
 
-The half of the [tutorial](../renderer-react/README.md) that does not draw
-anything: places, keys, presenters, scopes and services.
+The half of the tutorial that does not draw anything: places, keys, presenters,
+scopes and services. Four renderers sit beside it and share it unchanged.
 
 The concepts it is built from — places, presenters, scopes, intents, slots and
 the update pipeline — are described in
@@ -9,7 +9,7 @@ the update pipeline — are described in
 document made concrete; reading them side by side is the fastest way in.
 
 It depends on `wdc-cube` and nothing else — no React, no view library, no `.tsx`.
-That is the point: it is what a second example in another view technology would
+That is the point: it is what a renderer in another view technology would
 reuse unchanged, and it keeps the architecture's central claim honest, since a
 presenter that could not be separated from its view would not be one.
 
@@ -46,7 +46,7 @@ import { TodoMvcScope, ShowingOptions } from 'wdc-cube-tutorial-presentation/tod
 
 `MainPresenter` takes a `HistoryManager`, which is an abstraction from `wdc-cube`.
 The React app passes `PageHistoryManager`; another view layer passes its own.
-That injection is the only place the core touches the outside world.
+That injection is the only place this layer touches the outside world.
 
 Because the source is compiled by the consumer, its `tsconfig` decides which
 global types are in scope. Code here should therefore avoid spellings that only

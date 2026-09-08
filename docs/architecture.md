@@ -190,8 +190,9 @@ should not have.
 **The view is replaceable.** [cube-tutorial/presentation](../apps/cube-tutorial/presentation)
 holds the example's places, presenters, scopes and services and does not import
 React — 24 files, all `.ts`, every external import from `wdc-cube`.
-[cube-tutorial-react](../apps/cube-tutorial-react) holds the views. A second view
-technology is a third package, with the core untouched.
+[cube-tutorial/renderer-react](../apps/cube-tutorial/renderer-react) holds the
+views. There are now four of those — React, Angular, custom elements and SolidJS
+— and each was added with the presentation layer untouched.
 
 **The URL is not an afterthought.** Because navigation is expressed as intents
 and the address is derived from live state, deep-linking, reload and back/forward

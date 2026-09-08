@@ -28,15 +28,17 @@ This repository holds the framework and a tutorial application that exercises it
 | [libs/cube-react](libs/cube-react)                                           | `wdc-cube-react`          | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `classToFComponent` and `bindUpdate` to connect a scope to a component. See its [README](libs/cube-react/README.md).                                   |
 | [libs/cube-angular](libs/cube-angular)                                       | `wdc-cube-angular`        | Angular bindings: `bindScope` to answer `scope.forceUpdate()`, `ViewFactory` and the `*cubeViewSlot` directive to resolve a scope to a component.                                                                               |
 | [libs/cube-webc](libs/cube-webc)                                             | `wdc-cube-webc`           | Custom-element bindings: `CubeElement` is the view and the element at once, `Dom` declares a tree by nesting, `ViewFactory` maps a scope to a tag. No framework underneath. See its [README](libs/cube-webc/README.md).         |
+| [libs/cube-solid](libs/cube-solid)                                           | `wdc-cube-solid`          | SolidJS bindings: an instrumentation that gives every observed field a signal of its own, plus `ViewFactory`/`ViewSlot`. See its [README](libs/cube-solid/README.md).                                                           |
 | [libs/cube-test](libs/cube-test)                                             | `wdc-cube-test`           | Test helpers for driving a presentation layer with no view attached. See its [README](libs/cube-test/README.md).                                                                                                                |
 | [apps/cube-tutorial/presentation](apps/cube-tutorial/presentation)           | `…-tutorial-presentation` | The example, minus anything that draws: places, keys, presenters, scopes and services. Depends on `wdc-cube` only, so a renderer in any technology can drive it. See its [README](apps/cube-tutorial/presentation/README.md).   |
 | [apps/cube-tutorial/presentation-test](apps/cube-tutorial/presentation-test) | `…-presentation-test`     | That presentation layer exercised with nothing drawing it, beside the three projects that render it. See its [README](apps/cube-tutorial/presentation-test/README.md).                                                          |
 | [apps/cube-tutorial/renderer-react](apps/cube-tutorial/renderer-react)       | `…-renderer-react`        | The same presentation drawn by React and MUI, and a runnable app. See its [README](apps/cube-tutorial/renderer-react/README.md).                                                                                                |
 | [apps/cube-tutorial/renderer-angular](apps/cube-tutorial/renderer-angular)   | `…-renderer-angular`      | The same presentation drawn by Angular and Angular Material, so the two differ only in the binding. See its [README](apps/cube-tutorial/renderer-angular/README.md).                                                            |
-| [apps/cube-tutorial/renderer-webc](apps/cube-tutorial/renderer-webc)         | `…-renderer-webc`         | The same presentation drawn by custom elements and Spectrum Web Components — no framework underneath.                                                                                                                           |
+| [apps/cube-tutorial/renderer-webc](apps/cube-tutorial/renderer-webc)         | `…-renderer-webc`         | The same presentation drawn by custom elements and Spectrum Web Components — no framework underneath. See its [README](apps/cube-tutorial/renderer-webc/README.md).                                                             |
+| [apps/cube-tutorial/renderer-solid](apps/cube-tutorial/renderer-solid)       | `…-renderer-solid`        | The same presentation drawn by SolidJS: the component runs once and a signal per field wakes one expression. See its [README](apps/cube-tutorial/renderer-solid/README.md).                                                     |
 
 The tutorial packages are all prefixed `wdc-cube-tutorial-`, elided as `…` above.
-The five libraries are published; the tutorial projects are private.
+The six libraries are published; the tutorial projects are private.
 
 ## Requirements
 
@@ -49,10 +51,11 @@ The five libraries are published; the tutorial projects are private.
 ```bash
 corepack enable pnpm  # once per machine
 pnpm install
-pnpm compile          # builds the libraries and the tutorial core
+pnpm compile          # builds the libraries and the presentation layer
 pnpm start            # runs the React tutorial at http://localhost:3000
 pnpm start:angular    # runs the Angular tutorial at http://localhost:3001
 pnpm start:webc       # runs the custom-element tutorial at http://localhost:3002
+pnpm start:solid      # runs the SolidJS tutorial at http://localhost:3003
 ```
 
 ## Commands
@@ -69,6 +72,7 @@ pnpm format:check   # prettier --check
 pnpm start          # dev server for the React tutorial (port 3000)
 pnpm start:angular  # dev server for the Angular tutorial (port 3001)
 pnpm start:webc     # dev server for the custom-element tutorial (port 3002)
+pnpm start:solid    # dev server for the SolidJS tutorial (port 3003)
 pnpm clean          # removes lib/, dist/, build/, coverage/, *.tsbuildinfo
 ```
 
@@ -82,6 +86,7 @@ libs/cube/src/
 libs/cube-react/src/                React bindings
 libs/cube-angular/src/              Angular bindings
 libs/cube-webc/src/                 custom-element bindings
+libs/cube-solid/src/                SolidJS bindings
 libs/cube-test/src/                 test helpers, for a presentation layer with no view
 apps/cube-tutorial/                 one example, one folder per project
     presentation/                   places, keys, presenters, scopes, services
@@ -89,6 +94,7 @@ apps/cube-tutorial/                 one example, one folder per project
     renderer-react/                 the same presentation, drawn by React
     renderer-angular/               the same presentation, drawn by Angular
     renderer-webc/                  the same presentation, drawn by the platform alone
+    renderer-solid/                 the same presentation, drawn by SolidJS
 eslint.config.mjs                   one flat config for the whole workspace
 .prettierrc.json                    one formatting config for the whole workspace
 tsconfig.json                       shared compiler options
@@ -101,14 +107,15 @@ The libraries compile to `lib/` and declare `exports`, `files` and
 The example is split so that the framework's own separation is visible in the
 file tree, and the names sort by layer. `presentation/` holds the places,
 presenters and scopes and imports no view technology at all; `presentation-test/`
-drives it with nothing attached; the three `renderer-*/` projects hold only views
+drives it with nothing attached; the four `renderer-*/` projects hold only views
 and a bootstrap, with no `view/` level inside them since each package is entirely
 the view layer.
 
-Adding the second renderer, and the third, needed no change to the presentation
-layer — which is the claim the example exists to demonstrate. It is consumed as
-source — its `exports` point at `.ts` files — and exposes one subpath per module,
-because scope names repeat across modules.
+Adding the second renderer, the third and the fourth needed no change to the
+presentation layer — which is the claim the example exists to demonstrate. It
+compiles to `lib/` like the libraries do, and exposes one subpath per module —
+`wdc-cube-tutorial-presentation/todo-mvc` and the rest — because scope names
+repeat across modules.
 
 A second example, of a complete application, will sit beside `cube-tutorial/`
 under `apps/`, which is why the tutorial's projects are gathered in a folder of

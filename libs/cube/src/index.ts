@@ -17,7 +17,16 @@ export { Place, type PlaceCreator } from './impl/Place'
 export { FlipIntent } from './impl/FlipIntent'
 export { HistoryManager } from './impl/HistoryManager'
 export { PageHistoryManager } from './impl/PageHistoryManager'
-export { action, Observable, observe } from './impl/decorators'
+export {
+    action,
+    defaultInstrumentation,
+    Observable,
+    observe,
+    observedProperty,
+    type FieldMetadata,
+    type GenericObject,
+    type ScopeInstrumentation
+} from './impl/decorators'
 export { Application } from './impl/Application'
 export { Presenter } from './impl/Presenter'
 export { CubePresenter } from './impl/CubePresenter'

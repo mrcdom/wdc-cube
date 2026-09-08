@@ -1,0 +1,230 @@
+.mainView {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.appBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 56px;
+    background: #005cbb;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    // Above the page so the shadow falls on it; the modal layers stack higher.
+    position: relative;
+    z-index: 1;
+}
+
+.appBarTitle {
+    flex-grow: 1;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.navButton {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+}
+
+// A single-cell grid, so whatever the body slot renders fills it on both axes.
+.body {
+    display: grid;
+    flex-grow: 1;
+    align-self: stretch;
+    min-height: 0;
+    margin: 16px;
+}
+
+.panel {
+    align-content: start;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.panelHeading {
+    margin: 0 0 12px;
+}
+
+.buttonPane {
+    display: flex;
+    gap: 8px;
+}
+
+.button {
+    padding: 8px 16px;
+    border: 1px solid #c7c7c7;
+    border-radius: 20px;
+    background: #fff;
+    color: #0b57d0;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        background: #f3f6fc;
+    }
+}
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.32);
+}
+
+// Separate from the scrim, and above it: the dialog is centred on the layer
+// while the overlay stays a plain sheet of colour with nothing in it.
+.modalLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.modalLayer > * {
+    pointer-events: auto;
+}
+
+// An alert can be raised from inside a dialog, so its scrim stacks above it —
+// otherwise the dialog underneath is never dimmed and the two read as one layer.
+.alertLayer {
+    z-index: 4;
+
+    &.modalLayer {
+        z-index: 5;
+    }
+}
+
+.modalSurface {
+    min-width: 320px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 24px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialogHeading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+}
+
+// An alert says three things — how serious it is, what happened, and that you
+// have read it — and the severity is the one the reader takes in first. So it
+// carries the icon, the words of the title and the rule under them, rather than
+// hiding in a 24px glyph beside black text.
+.alert {
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+    max-width: 420px;
+}
+
+.alertInfo {
+    --alert-accent: #0b57d0;
+}
+.alertSuccess {
+    --alert-accent: #146c2e;
+}
+.alertWarning {
+    --alert-accent: #8f5000;
+}
+.alertError {
+    --alert-accent: #b3261e;
+}
+
+.alertHeading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--alert-accent);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 28px;
+    color: var(--alert-accent);
+}
+
+.alertIcon {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    color: var(--alert-accent);
+}
+
+.alertMessage {
+    margin: 0 0 24px;
+    font-size: 15px;
+    line-height: 22px;
+    color: #3c4043;
+}
+
+.alertActions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+// The dismissal is not the severity, and a button in the severity's colour
+// would read as though pressing it did something.
+.buttonQuiet {
+    padding: 8px 20px;
+    border: 1px solid #c7c7c7;
+    border-radius: 20px;
+    background: #fff;
+    color: #1f1f1f;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        background: #f5f5f5;
+    }
+}
+
+// The dialog moves focus inside itself as it opens, so this ring is the first
+// thing on screen: worth being the alert's colour rather than the browser's
+// default blue sitting in the middle of a red dialog.
+.button:focus-visible,
+.buttonQuiet:focus-visible {
+    outline: 2px solid var(--alert-accent, #0b57d0);
+    outline-offset: 2px;
+}
+
+.dialogText {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: #49454f;
+}
+
+.dialogActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}

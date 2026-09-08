@@ -5,7 +5,9 @@ intents, presenters, scopes, actions and the update pipeline.
 
 It has no view technology in it, and no dependency on one. A binding package
 supplies that — [`wdc-cube-react`](../cube-react/README.md),
-[`wdc-cube-angular`](../cube-angular/README.md), or none at all when a test
+[`wdc-cube-angular`](../cube-angular/README.md),
+[`wdc-cube-webc`](../cube-webc/README.md),
+[`wdc-cube-solid`](../cube-solid/README.md), or none at all when a test
 drives the presenters directly with [`wdc-cube-test`](../cube-test/README.md).
 
 The architecture document explains how the pieces fit and is the place to start.
@@ -73,7 +75,8 @@ for any it cannot find. It is the bulk alternative to assigning each action in
 `applyParameters`.
 
 **Registries do not collide.** `createViewRegistry(name)` builds a store keyed by
-a private symbol, so `wdc-cube-react` and `wdc-cube-angular` can each register a
+a private symbol, so `wdc-cube-react`, `wdc-cube-angular`, `wdc-cube-webc` and
+`wdc-cube-solid` can each register a
 view for the same scope class without seeing each other. That is what lets one
 set of presenters drive two applications at once.
 
