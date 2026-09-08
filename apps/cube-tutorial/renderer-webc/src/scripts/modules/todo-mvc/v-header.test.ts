@@ -131,6 +131,39 @@ describe('HeaderView', () => {
             expect(ui.get<HTMLInputElement>('input.newTodo').value).toEqual('')
         })
 
+        /**
+         * What `setValue` is actually for, and the two tests above do not prove
+         * it: the presenter mirrors what was typed, so writing the same value
+         * back changes nothing they can see. What a write changes in a browser is
+         * the caret — assigning to `value` puts it at the end, which would move it
+         * there while somebody is still mid-sentence.
+         *
+         * jsdom does not model that, measured rather than assumed: an assertion
+         * on `selectionStart` passes with the guard and without it. So this
+         * counts the writes instead. Less pretty, and it is the property the
+         * guard actually has.
+         */
+        it('does not write to the field when the scope already agrees', () => {
+            const scope = aHeader({ inputValue: 'Write the tests' })
+            ui = renderView('v-todo-header', scope)
+
+            const field = ui.get<HTMLInputElement>('input.newTodo')
+            const native = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')
+            let writes = 0
+            Object.defineProperty(field, 'value', {
+                configurable: true,
+                get: () => native?.get?.call(field),
+                set: (value: string) => {
+                    writes++
+                    native?.set?.call(field, value)
+                }
+            })
+
+            ui.act(() => scope.forceUpdate())
+
+            expect(writes).toBe(0)
+        })
+
         it('overwrites the field when the scope failed to keep up', () => {
             const scope = aHeader({ inputValue: 'from the presenter' })
             ui = renderView('v-todo-header', scope)

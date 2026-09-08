@@ -83,7 +83,7 @@ layout.
 
 ## Testing it
 
-40 view tests, in the same shape as the other three renderers: a scope built by
+41 view tests, in the same shape as the other three renderers: a scope built by
 hand, the view rendered, the DOM read back. Nothing boots a presenter — that is
 settled in [presentation-test](../presentation-test/README.md), and repeating it
 here would only make these fail for reasons that are not the view's. No mocks
@@ -108,7 +108,16 @@ once actually buys:
 - **`SyncedRows` matches by key** — a row whose site is still in the list keeps
   its node even when the service hands back a fresh object for it;
 - **`AppAlertDialog` really adds a variant** — `success` maps to `success`, which
-  is the half of the mapping Spectrum does not have.
+  is the half of the mapping Spectrum does not have;
+- **`setValue` does not write when the scope already agrees** — the guard that
+  keeps a redraw from moving the caret out from under somebody typing.
+
+Every one of them was checked against an injected defect rather than trusted for
+passing. Five defects, eight failures, and one that nothing caught: removing the
+`setValue` guard changed no assertion, because the presenter mirrors what was
+typed and writing the same value back looks identical. The test that pins it now
+counts writes, because jsdom does not model the caret moving — measured, not
+assumed.
 
 jsdom has no layout, so `vitest.setup.ts` supplies the observers Spectrum's Lit
 components reach for. They never report anything, and nothing here depends on
