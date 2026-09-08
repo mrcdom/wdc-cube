@@ -22,18 +22,21 @@ This repository holds the framework and a tutorial application that exercises it
 
 ## Packages
 
-| Path                                                               | Package                 | What it is                                                                                                                                                                                                                      |
-| ------------------------------------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [libs/cube](libs/cube)                                             | `wdc-cube`              | The framework core: `Place`, `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Scope`, `FlipIntent`, `CubeBuilder`, `PageHistoryManager`, plus utilities. No view technology in it. See its [README](libs/cube/README.md). |
-| [libs/cube-react](libs/cube-react)                                 | `wdc-cube-react`        | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `classToFComponent` and `bindUpdate` to connect a scope to a component. See its [README](libs/cube-react/README.md).                                   |
-| [apps/cube-tutorial/presentation](apps/cube-tutorial/presentation) | `wdc-cube-tutorial-app` | The view-agnostic half of the example: places, keys, presenters, scopes and services. Depends on `wdc-cube` only, so a view written in any technology can drive it.                                                             |
-| [apps/cube-tutorial/react](apps/cube-tutorial/react)               | —                       | The React view layer over that core, and the runnable app. See its [README](apps/cube-tutorial/react/README.md).                                                                                                                |
-| [libs/cube-angular](libs/cube-angular)                             | `wdc-cube-angular`      | Angular bindings: `bindScope` to answer `scope.forceUpdate()`, `ViewFactory` and the `*cubeViewSlot` directive to resolve a scope to a component.                                                                               |
-| [apps/cube-tutorial/angular](apps/cube-tutorial/angular)           | —                       | The same core driven by Angular instead, so the two apps differ only in the binding. See its [README](apps/cube-tutorial/angular/README.md).                                                                                    |
-| [libs/cube-webc](libs/cube-webc)                                   | `wdc-cube-webc`         | Custom-element bindings: `CubeElement` is the view and the element at once, `Dom` declares a tree by nesting, `ViewFactory` maps a scope to a tag. No framework underneath. See its [README](libs/cube-webc/README.md).         |
-| [libs/cube-test](libs/cube-test)                                   | `wdc-cube-test`         | Test helpers for driving a presentation layer with no view attached. See its [README](libs/cube-test/README.md).                                                                                                                |
-| [apps/cube-tutorial/webc](apps/cube-tutorial/webc)                 | —                       | The same core drawn by the platform alone, on port 3002.                                                                                                                                                                        |
-| [apps/cube-tutorial/test](apps/cube-tutorial/test)                 | —                       | The same core exercised with no view at all, beside the two apps that render it. See its [README](apps/cube-tutorial/test/README.md).                                                                                           |
+| Path                                                                         | Package                   | What it is                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [libs/cube](libs/cube)                                                       | `wdc-cube`                | The framework core: `Place`, `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Scope`, `FlipIntent`, `CubeBuilder`, `PageHistoryManager`, plus utilities. No view technology in it. See its [README](libs/cube/README.md). |
+| [libs/cube-react](libs/cube-react)                                           | `wdc-cube-react`          | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `classToFComponent` and `bindUpdate` to connect a scope to a component. See its [README](libs/cube-react/README.md).                                   |
+| [libs/cube-angular](libs/cube-angular)                                       | `wdc-cube-angular`        | Angular bindings: `bindScope` to answer `scope.forceUpdate()`, `ViewFactory` and the `*cubeViewSlot` directive to resolve a scope to a component.                                                                               |
+| [libs/cube-webc](libs/cube-webc)                                             | `wdc-cube-webc`           | Custom-element bindings: `CubeElement` is the view and the element at once, `Dom` declares a tree by nesting, `ViewFactory` maps a scope to a tag. No framework underneath. See its [README](libs/cube-webc/README.md).         |
+| [libs/cube-test](libs/cube-test)                                             | `wdc-cube-test`           | Test helpers for driving a presentation layer with no view attached. See its [README](libs/cube-test/README.md).                                                                                                                |
+| [apps/cube-tutorial/presentation](apps/cube-tutorial/presentation)           | `…-tutorial-presentation` | The example, minus anything that draws: places, keys, presenters, scopes and services. Depends on `wdc-cube` only, so a renderer in any technology can drive it. See its [README](apps/cube-tutorial/presentation/README.md).   |
+| [apps/cube-tutorial/presentation-test](apps/cube-tutorial/presentation-test) | `…-presentation-test`     | That presentation layer exercised with nothing drawing it, beside the three projects that render it. See its [README](apps/cube-tutorial/presentation-test/README.md).                                                          |
+| [apps/cube-tutorial/renderer-react](apps/cube-tutorial/renderer-react)       | `…-renderer-react`        | The same presentation drawn by React and MUI, and a runnable app. See its [README](apps/cube-tutorial/renderer-react/README.md).                                                                                                |
+| [apps/cube-tutorial/renderer-angular](apps/cube-tutorial/renderer-angular)   | `…-renderer-angular`      | The same presentation drawn by Angular and Angular Material, so the two differ only in the binding. See its [README](apps/cube-tutorial/renderer-angular/README.md).                                                            |
+| [apps/cube-tutorial/renderer-webc](apps/cube-tutorial/renderer-webc)         | `…-renderer-webc`         | The same presentation drawn by custom elements and Spectrum Web Components — no framework underneath.                                                                                                                           |
+
+The tutorial packages are all prefixed `wdc-cube-tutorial-`, elided as `…` above.
+The five libraries are published; the tutorial projects are private.
 
 ## Requirements
 
@@ -82,10 +85,10 @@ libs/cube-webc/src/                 custom-element bindings
 libs/cube-test/src/                 test helpers, for a presentation layer with no view
 apps/cube-tutorial/                 one example, one folder per project
     presentation/                   places, keys, presenters, scopes, services
-    react/                          the same presentation, drawn by React
-    angular/                        the same presentation, drawn by Angular
-    webc/                           the same presentation, drawn by the platform alone
-    test/                           the same presentation, drawn by nothing
+    presentation-test/              the same presentation, drawn by nothing
+    renderer-react/                 the same presentation, drawn by React
+    renderer-angular/               the same presentation, drawn by Angular
+    renderer-webc/                  the same presentation, drawn by the platform alone
 eslint.config.mjs                   one flat config for the whole workspace
 .prettierrc.json                    one formatting config for the whole workspace
 tsconfig.json                       shared compiler options
@@ -96,10 +99,11 @@ The libraries compile to `lib/` and declare `exports`, `files` and
 `sideEffects`, so they are publishable as-is. Build output is not tracked in git.
 
 The example is split so that the framework's own separation is visible in the
-file tree. `presentation/` holds the places, presenters and scopes and imports no
-view technology at all; `react/`, `angular/` and `webc/` hold only views and a
-bootstrap, with no `view/` level inside them since each package is entirely the
-view layer; `test/` drives the same presentation with nothing drawing it.
+file tree, and the names sort by layer. `presentation/` holds the places,
+presenters and scopes and imports no view technology at all; `presentation-test/`
+drives it with nothing attached; the three `renderer-*/` projects hold only views
+and a bootstrap, with no `view/` level inside them since each package is entirely
+the view layer.
 
 Adding the second renderer, and the third, needed no change to the presentation
 layer — which is the claim the example exists to demonstrate. It is consumed as

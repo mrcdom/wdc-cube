@@ -39,7 +39,36 @@ importers:
         specifier: 8.69.0
         version: 8.69.0(eslint@10.9.1)(typescript@6.0.3)
 
-  apps/cube-tutorial/angular:
+  apps/cube-tutorial/presentation:
+    dependencies:
+      wdc-cube:
+        specifier: workspace:*
+        version: link:../../../libs/cube
+    devDependencies:
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  apps/cube-tutorial/presentation-test:
+    dependencies:
+      wdc-cube:
+        specifier: workspace:*
+        version: link:../../../libs/cube
+      wdc-cube-test:
+        specifier: workspace:*
+        version: link:../../../libs/cube-test
+      wdc-cube-tutorial-presentation:
+        specifier: workspace:*
+        version: link:../presentation
+    devDependencies:
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
+
+  apps/cube-tutorial/renderer-angular:
     dependencies:
       '@angular/cdk':
         specifier: ^22.1.5
@@ -77,7 +106,7 @@ importers:
       wdc-cube-angular:
         specifier: workspace:*
         version: link:../../../libs/cube-angular
-      wdc-cube-tutorial-app:
+      wdc-cube-tutorial-presentation:
         specifier: workspace:*
         version: link:../presentation
     devDependencies:
@@ -106,17 +135,7 @@ importers:
         specifier: ~0.16.0
         version: 0.16.3
 
-  apps/cube-tutorial/presentation:
-    dependencies:
-      wdc-cube:
-        specifier: workspace:*
-        version: link:../../../libs/cube
-    devDependencies:
-      typescript:
-        specifier: 6.0.3
-        version: 6.0.3
-
-  apps/cube-tutorial/react:
+  apps/cube-tutorial/renderer-react:
     dependencies:
       '@emotion/react':
         specifier: ^11.14.0
@@ -145,7 +164,7 @@ importers:
       wdc-cube-react:
         specifier: workspace:*
         version: link:../../../libs/cube-react
-      wdc-cube-tutorial-app:
+      wdc-cube-tutorial-presentation:
         specifier: workspace:*
         version: link:../presentation
     devDependencies:
@@ -174,26 +193,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
 
-  apps/cube-tutorial/test:
-    dependencies:
-      wdc-cube:
-        specifier: workspace:*
-        version: link:../../../libs/cube
-      wdc-cube-test:
-        specifier: workspace:*
-        version: link:../../../libs/cube-test
-      wdc-cube-tutorial-app:
-        specifier: workspace:*
-        version: link:../presentation
-    devDependencies:
-      reflect-metadata:
-        specifier: ^0.2.2
-        version: 0.2.2
-      vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
-
-  apps/cube-tutorial/webc:
+  apps/cube-tutorial/renderer-webc:
     dependencies:
       '@spectrum-web-components/alert-dialog':
         specifier: ^1.12.2
@@ -240,7 +240,7 @@ importers:
       wdc-cube:
         specifier: workspace:*
         version: link:../../../libs/cube
-      wdc-cube-tutorial-app:
+      wdc-cube-tutorial-presentation:
         specifier: workspace:*
         version: link:../presentation
       wdc-cube-webc:

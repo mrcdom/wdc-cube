@@ -1,6 +1,6 @@
 /**
  * Cross-cutting entry points. Everything tied to one module lives behind its own
- * subpath — `wdc-cube-tutorial-app/todo-mvc`, and so on — because scope names
+ * subpath — `wdc-cube-tutorial-presentation/todo-mvc`, and so on — because scope names
  * repeat across modules (`MainScope` exists in both main and todo-mvc) and a
  * single flat barrel could not carry them.
  */

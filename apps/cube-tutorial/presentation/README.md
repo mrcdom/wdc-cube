@@ -1,6 +1,6 @@
 # cube-tutorial/presentation
 
-The half of the [tutorial](../react/README.md) that does not draw
+The half of the [tutorial](../renderer-react/README.md) that does not draw
 anything: places, keys, presenters, scopes and services.
 
 The concepts it is built from — places, presenters, scopes, intents, slots and
@@ -39,9 +39,9 @@ Each module has its own subpath, because scope names repeat across modules —
 not carry them both:
 
 ```ts
-import { initializeRoutes, registerServices } from 'wdc-cube-tutorial-app'
-import { MainPresenter, MainScope } from 'wdc-cube-tutorial-app/main'
-import { TodoMvcScope, ShowingOptions } from 'wdc-cube-tutorial-app/todo-mvc'
+import { initializeRoutes, registerServices } from 'wdc-cube-tutorial-presentation'
+import { MainPresenter, MainScope } from 'wdc-cube-tutorial-presentation/main'
+import { TodoMvcScope, ShowingOptions } from 'wdc-cube-tutorial-presentation/todo-mvc'
 ```
 
 `MainPresenter` takes a `HistoryManager`, which is an abstraction from `wdc-cube`.

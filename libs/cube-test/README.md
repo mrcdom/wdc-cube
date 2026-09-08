@@ -80,4 +80,4 @@ An action swallows what it throws: it reports through `IPresenter#unexpected`
 and returns. A test that does not watch for that reads a scope which quietly
 never changed, and passes. Every presenter routes `unexpected` up to the
 application, so wrapping it once at the top is enough to make those loud — see
-`startTutorial` in `apps/cube-tutorial/test` for the shape.
+`startTutorial` in `apps/cube-tutorial/presentation-test` for the shape.
