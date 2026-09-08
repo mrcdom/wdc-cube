@@ -84,9 +84,6 @@ importers:
         specifier: workspace:*
         version: link:../../../libs/cube-solid
     devDependencies:
-      jsdom:
-        specifier: ^30.0.1
-        version: 30.0.1
       msw:
         specifier: ^2.15.0
         version: 2.15.0(@types/node@26.4.1)(typescript@6.0.3)
@@ -102,9 +99,6 @@ importers:
       vite-plugin-solid:
         specifier: ^2.11.14
         version: 2.11.14(solid-js@1.9.15)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
-      vitest:
-        specifier: ^5.0.0
-        version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(msw@2.15.0(@types/node@26.4.1)(typescript@6.0.3))(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
 
   apps/cube-tutorial/presentation:
     dependencies:

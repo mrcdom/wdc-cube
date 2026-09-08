@@ -9,9 +9,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^3.1.0",
@@ -24,13 +22,11 @@
     "wdc-cube-solid": "workspace:*"
   },
   "devDependencies": {
-    "jsdom": "^30.0.1",
     "msw": "^2.15.0",
     "sass": "^1.104.0",
     "typescript": "6.0.3",
     "vite": "^8.2.2",
-    "vite-plugin-solid": "^2.11.14",
-    "vitest": "^5.0.0"
+    "vite-plugin-solid": "^2.11.14"
   },
   "msw": {
     "workerDirectory": [
