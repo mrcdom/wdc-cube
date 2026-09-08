@@ -81,6 +81,52 @@ after what each one draws, in a way a component tree in a devtools panel is not.
 Everything but the shell gets `display: contents`, so they cost nothing in
 layout.
 
+## Testing it
+
+41 view tests, in the same shape as the other three renderers: a scope built by
+hand, the view rendered, the DOM read back. Nothing boots a presenter — that is
+settled in [presentation-test](../presentation-test/README.md), and repeating it
+here would only make these fail for reasons that are not the view's. No mocks
+beyond `vi.fn` on the scope's actions.
+
+There is no rendering library to leave out. A view *is* an element, so the
+harness asks the browser for it by the tag it was registered under — which makes
+every test a test of that registration too:
+
+```ts
+ui = renderView('v-todo-item', anItem({ title: 'Write the tests' }))
+expect(ui.text('label')).toEqual('Write the tests')
+```
+
+Some of them are particular to this renderer, because they assert what declaring
+once actually buys:
+
+- **the tree is written over, not rebuilt** — after a redraw the `li`, the
+  `label` and the checkbox are the same nodes, carrying new values;
+- **`setVisible` hides rather than removes** — the clear button exists from the
+  first draw and only its `hidden` moves;
+- **`SyncedRows` matches by key** — a row whose site is still in the list keeps
+  its node even when the service hands back a fresh object for it;
+- **`AppAlertDialog` really adds a variant** — `success` maps to `success`, which
+  is the half of the mapping Spectrum does not have;
+- **`setValue` does not write when the scope already agrees** — the guard that
+  keeps a redraw from moving the caret out from under somebody typing.
+
+Every one of them was checked against an injected defect rather than trusted for
+passing. Five defects, eight failures, and one that nothing caught: removing the
+`setValue` guard changed no assertion, because the presenter mirrors what was
+typed and writing the same value back looks identical. The test that pins it now
+counts writes, because jsdom does not model the caret moving — measured, not
+assumed.
+
+jsdom has no layout, so `vitest.setup.ts` supplies the observers Spectrum's Lit
+components reach for. They never report anything, and nothing here depends on
+them doing so.
+
+```bash
+pnpm --filter wdc-cube-tutorial-renderer-webc test
+```
+
 ## Running it
 
 ```bash

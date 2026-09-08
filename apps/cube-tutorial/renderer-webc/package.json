@@ -9,7 +9,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@spectrum-web-components/alert-dialog": "^1.12.2",
@@ -31,8 +33,10 @@
     "wdc-cube-webc": "workspace:*"
   },
   "devDependencies": {
+    "jsdom": "^30.0.1",
     "sass": "^1.104.0",
     "typescript": "6.0.3",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
   }
 }
