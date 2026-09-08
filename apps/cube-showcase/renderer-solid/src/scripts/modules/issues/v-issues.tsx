@@ -1,9 +1,11 @@
 import { DropdownMenu } from '@kobalte/core/dropdown-menu'
-import { For, Show, type JSX } from 'solid-js'
+import { For, Match, Show, Switch, type JSX } from 'solid-js'
 import type { ViewProps } from 'wdc-cube-solid'
 import { STATE_LABELS, type IssuePriority, type IssueState } from 'wdc-cube-showcase-presentation/domain'
 import { BoardColumnScope, FilterScope, IssueRowScope, IssuesScope } from 'wdc-cube-showcase-presentation/issues'
 
+import { useDraggableCard, useDropColumn } from './dnd'
+import { IssuesTableView } from './v-issues-table'
 import Css from './issues.module.scss'
 
 /**
@@ -32,9 +34,14 @@ export function IssuesView(props: ViewProps<IssuesScope>): JSX.Element {
                         when={props.scope.rows.length > 0}
                         fallback={<p class={Css.empty}>Nothing matches those filters.</p>}
                     >
-                        <Show when={props.scope.view === 'board'} fallback={<IssueList scope={props.scope} />}>
-                            <Board scope={props.scope} />
-                        </Show>
+                        <Switch fallback={<IssueList scope={props.scope} />}>
+                            <Match when={props.scope.view === 'board'}>
+                                <Board scope={props.scope} />
+                            </Match>
+                            <Match when={props.scope.view === 'table'}>
+                                <IssuesTableView scope={props.scope} />
+                            </Match>
+                        </Switch>
                     </Show>
                 </Show>
             </div>
@@ -64,6 +71,12 @@ function Toolbar(props: { scope: IssuesScope }): JSX.Element {
                     onClick={() => props.scope.onShowBoard()}
                 >
                     <Glyph name="board" /> Board
+                </button>
+                <button
+                    classList={{ [Css.viewButton]: true, [Css.viewButtonCurrent]: props.scope.view === 'table' }}
+                    onClick={() => props.scope.onShowTable()}
+                >
+                    <Glyph name="table" /> Table
                 </button>
             </div>
 
@@ -158,33 +171,50 @@ function Board(props: { scope: IssuesScope }): JSX.Element {
 }
 
 function Column(props: { scope: BoardColumnScope }): JSX.Element {
+    const drop = useDropColumn((issueId) => props.scope.onReceive(issueId))
+
     return (
-        <section class={Css.column}>
+        <section
+            ref={(element) => drop.attach(element)}
+            classList={{ [Css.column]: true, [Css.columnOver]: drop.over() }}
+        >
             <header class={Css.columnHead}>
                 <span class={Css.stateDot} style={{ background: stateColour(props.scope.state) }} />
                 {props.scope.label}
                 <span class={Css.columnCount}>{props.scope.issues.length}</span>
             </header>
 
-            <Show when={props.scope.issues.length > 0} fallback={<p class={Css.columnEmpty}>Empty</p>}>
-                <For each={props.scope.issues}>
-                    {(issue) => (
-                        <button class={Css.card} onClick={() => issue.onOpen()}>
-                            <span class={Css.cardTop}>
-                                <PriorityMark priority={issue.priority} />
-                                {issue.reference}
-                            </span>
-                            <span class={Css.cardTitle}>{issue.title}</span>
-                            <span class={Css.cardFoot}>
-                                <For each={issue.labels}>{(label) => <span class={Css.label}>{label}</span>}</For>
-                                <span style={{ 'flex-grow': 1 }} />
-                                <Avatar scope={issue} />
-                            </span>
-                        </button>
-                    )}
-                </For>
+            <Show when={props.scope.issues.length > 0} fallback={<p class={Css.columnEmpty}>Drop an issue here</p>}>
+                <For each={props.scope.issues}>{(issue) => <Card scope={issue} />}</For>
             </Show>
         </section>
+    )
+}
+
+function Card(props: { scope: IssueRowScope }): JSX.Element {
+    const drag = useDraggableCard(() => props.scope.issueId)
+
+    return (
+        <button
+            ref={(element) => drag.attach(element)}
+            classList={{
+                [Css.card]: true,
+                [Css.cardDragging]: drag.dragging(),
+                [Css.cardMoving]: props.scope.moving
+            }}
+            onClick={() => props.scope.onOpen()}
+        >
+            <span class={Css.cardTop}>
+                <PriorityMark priority={props.scope.priority} />
+                {props.scope.reference}
+            </span>
+            <span class={Css.cardTitle}>{props.scope.title}</span>
+            <span class={Css.cardFoot}>
+                <For each={props.scope.labels}>{(label) => <span class={Css.label}>{label}</span>}</For>
+                <span style={{ 'flex-grow': 1 }} />
+                <Avatar scope={props.scope} />
+            </span>
+        </button>
     )
 }
 
@@ -288,6 +318,7 @@ function shortDate(value: string): string {
 const GLYPHS: Record<string, string> = {
     list: 'M3 5h12M3 10h12M3 15h8',
     board: 'M3 3h4v12H3zM8 3h4v8H8zM13 3h2v5h-2z',
+    table: 'M2 4h14M2 9h14M2 14h14M7 4v10M12 4v10',
     search: 'M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12ZM16 16l-3.5-3.5',
     chevron: 'M4 7l4 4 4-4',
     check: 'M3 8.5 6.5 12 13 4'

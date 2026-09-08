@@ -12,7 +12,7 @@ export const ParamIds = {
     ProjectId: 'project',
     IssueId: 'issue',
 
-    /** Which drawing of the same issue list: `list` or `board`. */
+    /** Which drawing of the same issue list: `list`, `board` or `table`. */
     View: 'view',
 
     State: 'state',
@@ -20,6 +20,7 @@ export const ParamIds = {
     AssigneeId: 'assignee',
     CycleId: 'cycle',
     Search: 'q',
+    Sort: 'sort',
     Page: 'page'
 }
 

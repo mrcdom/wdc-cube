@@ -282,6 +282,15 @@
     gap: 8px;
     width: 268px;
     flex: none;
+    padding: 6px;
+    margin: -6px;
+    border-radius: var(--radius-lg);
+    transition: background 120ms ease;
+}
+
+// Dropping is what the whole column takes, so the whole column says so.
+.columnOver {
+    background: var(--accent-soft);
 }
 
 .columnHead {
@@ -308,11 +317,35 @@
     border-radius: var(--radius);
     background: var(--surface);
     text-align: left;
-    cursor: pointer;
+    cursor: grab;
+    transition: opacity 120ms ease;
 
     &:hover {
         border-color: var(--border-strong);
         box-shadow: var(--shadow-sm);
+    }
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.cardDragging {
+    opacity: 0.4;
+}
+
+// While the move is in flight. The card is already where it was dropped; this
+// only says the server has not agreed yet.
+.cardMoving {
+    border-style: dashed;
+    border-color: var(--accent);
+}
+
+.columnOver {
+    .columnEmpty {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
     }
 }
 

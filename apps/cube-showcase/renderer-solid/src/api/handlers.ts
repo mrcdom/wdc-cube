@@ -30,6 +30,44 @@ const data = buildDataset()
  * visitor cannot wreck the demo for themselves with no way back.
  */
 const SESSION_KEY = 'cube-showcase:session'
+const CHANGES_KEY = 'cube-showcase:changes'
+
+/**
+ * What the reader has changed, over the seed.
+ *
+ * The seed is rebuilt on every load, which was the right call for the data as a
+ * whole — a visitor who cannot get back to a clean demo is a visitor who breaks
+ * it once and leaves. But a card dragged to another column that snaps back on
+ * reload is not a demo of anything, so edits are kept beside the session: this
+ * tab remembers, a new tab starts clean.
+ */
+type Changes = Record<string, Partial<Issue>>
+
+function readChanges(): Changes {
+    try {
+        return JSON.parse(sessionStorage.getItem(CHANGES_KEY) ?? '{}') as Changes
+    } catch {
+        return {}
+    }
+}
+
+function rememberChange(issueId: string, change: Partial<Issue>): void {
+    try {
+        const changes = readChanges()
+        changes[issueId] = { ...changes[issueId], ...change }
+        sessionStorage.setItem(CHANGES_KEY, JSON.stringify(changes))
+    } catch {
+        // The change still holds for this page, which is the most a tab with
+        // storage blocked can offer.
+    }
+}
+
+for (const [issueId, change] of Object.entries(readChanges())) {
+    const issue = data.issues.find((candidate) => candidate.id === issueId)
+    if (issue) {
+        Object.assign(issue, change)
+    }
+}
 
 function readSession(): { member: Member } | undefined {
     try {
@@ -125,6 +163,35 @@ export const handlers = [
             return true
         })
 
+        // Ordering is the server's, as it would be against a database: the page
+        // the reader asked for is a page of the whole ordered set, not of
+        // whatever happened to be fetched.
+        const sort = read('sort')
+        if (sort) {
+            const descending = sort.startsWith('-')
+            const field = descending ? sort.slice(1) : sort
+            const rank: Record<string, number> = {
+                urgent: 0,
+                high: 1,
+                medium: 2,
+                low: 3,
+                none: 4,
+                backlog: 0,
+                todo: 1,
+                'in-progress': 2,
+                done: 3,
+                cancelled: 4
+            }
+            const key = (issue: Issue) => {
+                if (field === 'reference') {
+                    return String(issue.reference.split('-')[1]).padStart(6, '0')
+                }
+                const value = issue[field as keyof Issue]
+                return typeof value === 'string' && value in rank ? String(rank[value]) : String(value ?? '')
+            }
+            matching.sort((a, b) => key(a).localeCompare(key(b)) * (descending ? -1 : 1))
+        }
+
         const perPage = Number(read('perPage') ?? 25)
         const page = Number(read('page') ?? 1)
         const from = (page - 1) * perPage
@@ -151,7 +218,9 @@ export const handlers = [
             return new HttpResponse(null, { status: 404 })
         }
 
-        Object.assign(issue, await request.json(), { updatedAt: new Date().toISOString() })
+        const change = { ...((await request.json()) as Partial<Issue>), updatedAt: new Date().toISOString() }
+        Object.assign(issue, change)
+        rememberChange(issue.id, change)
         return HttpResponse.json(issue)
     })
 ]

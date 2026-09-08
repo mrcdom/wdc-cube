@@ -55,6 +55,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         assigneeId: undefined as Id | undefined,
         cycleId: undefined as Id | undefined,
         search: undefined as string | undefined,
+        sort: undefined as string | undefined,
         page: 1
     }
 
@@ -109,6 +110,8 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     private bindActions() {
         this.scope.onShowList = this.action(this.onShowView.bind(this, 'list'))
         this.scope.onShowBoard = this.action(this.onShowView.bind(this, 'board'))
+        this.scope.onShowTable = this.action(this.onShowView.bind(this, 'table'))
+        this.scope.onSort = this.action(this.onSort) as unknown as (field: string) => void
         this.scope.onSearchChanged = this.handleSearchChanged.bind(this)
         this.scope.onSearchSubmitted = this.action(this.onSearchSubmitted)
         this.scope.onClearFilters = this.action(this.onClearFilters)
@@ -150,10 +153,13 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             assigneeId: keys.assigneeId,
             cycleId: keys.cycleId,
             search: keys.search,
+            sort: keys.sort,
             page: keys.page
         }
 
         this.scope.view = this.at.view
+        this.scope.sortField = (this.at.sort ?? '').replace('-', '')
+        this.scope.sortDescending = (this.at.sort ?? '').startsWith('-')
         this.scope.search = this.at.search ?? ''
         this.buildFilters(keys)
 
@@ -163,6 +169,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             assigneeId: this.at.assigneeId,
             cycleId: this.at.cycleId,
             search: this.at.search,
+            sort: this.at.sort,
             page: this.at.page,
             perPage: this.scope.perPage
         }
@@ -201,6 +208,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         const scope = new IssueRowScope()
         // The issue's own id, so a row survives a reload of the same page.
         scope.identity = issue.id
+        scope.issueId = issue.id
         scope.reference = issue.reference
         scope.title = issue.title
         scope.state = issue.state
@@ -229,6 +237,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             column.state = state
             column.label = STATE_LABELS[state]
             column.issues = rows.filter((row) => row.state === state)
+            column.onReceive = this.action(this.onMoveIssue.bind(this, state)) as unknown as (id: string) => void
             column.update = this.update
             return column
         })
@@ -320,6 +329,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         target.assigneeId = this.at.assigneeId
         target.cycleId = this.at.cycleId
         target.search = this.at.search
+        target.sort = this.at.sort
         target.page = this.at.page
         return target
     }
@@ -341,6 +351,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         keys.assigneeId = this.at.assigneeId
         keys.cycleId = this.at.cycleId
         keys.search = this.at.search
+        keys.sort = this.at.sort
         keys.page = this.at.page
     }
 
@@ -379,6 +390,51 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         }
         const target = this.here()
         target.page = page
+        await target.flip()
+    }
+
+    /**
+     * An issue dropped on a column.
+     *
+     * The row moves before the request is answered and moves back if it fails.
+     * That is not decoration: the board is the one screen where the reader's
+     * hand is already committed, and a card that hangs where it was until the
+     * network agrees reads as a bug.
+     */
+    protected async onMoveIssue(state: IssueState, issueId: string) {
+        const row = this.scope.rows.find((candidate) => candidate.issueId === issueId)
+        if (!row || row.state === state) {
+            return
+        }
+
+        const previous = row.state
+        row.state = state
+        row.moving = true
+        this.scope.columns = this.buildColumns(this.scope.rows)
+
+        try {
+            await service.updateIssue(issueId, { state })
+        } catch (caught) {
+            row.state = previous
+            this.scope.columns = this.buildColumns(this.scope.rows)
+            this.app.unexpected('Moving the issue', caught)
+        } finally {
+            row.moving = false
+        }
+    }
+
+    /**
+     * Ordering, which is a navigation like every other decision here.
+     *
+     * The table below is a third-party library that would happily keep this
+     * state itself. It is told not to: the sort is a parameter of the place, so
+     * a sorted table is a link, survives a reload, and Back undoes it.
+     */
+    protected async onSort(field: string) {
+        const current = this.at.sort
+        const target = this.here()
+        target.sort = current === field ? `-${field}` : current === `-${field}` ? undefined : field
+        target.page = 1
         await target.flip()
     }
 

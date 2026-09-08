@@ -3,7 +3,7 @@ import { MainKeys } from '../main/main.key'
 import { ParamIds, Places } from '../RouteConsts'
 
 /** Which drawing of the same list of issues. */
-export type IssueView = 'list' | 'board'
+export type IssueView = 'list' | 'board' | 'table'
 
 /**
  * Everything the issue list can be looking at.
@@ -33,13 +33,30 @@ export class IssuesKeys extends MainKeys {
     // :: view
 
     public get view(): IssueView {
-        return this._intent.getParameterAsString(ParamIds.View) === 'board' ? 'board' : 'list'
+        const value = this._intent.getParameterAsString(ParamIds.View)
+        return value === 'board' || value === 'table' ? value : 'list'
     }
 
     public set view(value: IssueView) {
         // The default is absent rather than spelled out: a plain list should have
         // a plain URL, and `?view=list` is noise a reader would have to ignore.
-        this._intent.setParameter(ParamIds.View, value === 'board' ? 'board' : undefined)
+        this._intent.setParameter(ParamIds.View, value === 'list' ? undefined : value)
+    }
+
+    // :: sort
+
+    /**
+     * The ordering, as one string: `priority` ascending, `-priority` descending.
+     *
+     * One parameter rather than two because it is one decision, and because a
+     * link should read as a sentence rather than as a form submission.
+     */
+    public get sort(): string | undefined {
+        return this._intent.getParameterAsString(ParamIds.Sort)
+    }
+
+    public set sort(value: string | undefined) {
+        this._intent.setParameter(ParamIds.Sort, value ? value : undefined)
     }
 
     // :: filters

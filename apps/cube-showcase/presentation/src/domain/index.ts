@@ -61,8 +61,21 @@ export type Session = {
     member: Member
 }
 
+/** What a list can be ordered by. A minus in the URL means descending. */
+export const ISSUE_SORTS = ['reference', 'title', 'state', 'priority', 'updatedAt'] as const
+export type IssueSort = (typeof ISSUE_SORTS)[number]
+
+export const SORT_LABELS: Record<IssueSort, string> = {
+    reference: 'ID',
+    title: 'Title',
+    state: 'Status',
+    priority: 'Priority',
+    updatedAt: 'Updated'
+}
+
 /** What a list request asks for, and what every one of these is in the URL. */
 export type IssueQuery = {
+    sort?: string
     state?: IssueState
     priority?: IssuePriority
     assigneeId?: Id

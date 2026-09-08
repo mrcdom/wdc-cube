@@ -16,6 +16,12 @@ export class IssueRowScope extends Scope {
     @observe() labels: string[] = []
     @observe() updatedAt = ''
 
+    /** Which issue this row stands for, so a drop can name it. */
+    @observe() issueId = ''
+
+    /** True while its move is in flight, so the card can say so. */
+    @observe() moving = false
+
     onOpen = Scope.ASYNC_ACTION
 }
 
@@ -25,6 +31,15 @@ export class BoardColumnScope extends Scope {
     @observe() state: IssueState = 'backlog'
     @observe() label = ''
     @observe() issues: IssueRowScope[] = []
+
+    /**
+     * Takes an issue dropped on this column.
+     *
+     * The identity of a row, not the row itself: what crosses the boundary
+     * between a view and a presenter is a fact about the data, never a scope the
+     * view happens to be holding.
+     */
+    onReceive = Scope.SYNC_ACTION_STRING
 }
 
 /** One choice a filter offers, and whether it is the one in force. */
@@ -69,8 +84,14 @@ export class IssuesScope extends Scope {
     @observe() perPage = 25
     @observe() total = 0
 
+    /** Which column orders the table, and whether it is reversed. */
+    @observe() sortField = ''
+    @observe() sortDescending = false
+
     onShowList = Scope.ASYNC_ACTION
     onShowBoard = Scope.ASYNC_ACTION
+    onShowTable = Scope.ASYNC_ACTION
+    onSort = Scope.SYNC_ACTION_STRING
     onSearchChanged = Scope.SYNC_ACTION_STRING
     onSearchSubmitted = Scope.ASYNC_ACTION
     onClearFilters = Scope.ASYNC_ACTION
