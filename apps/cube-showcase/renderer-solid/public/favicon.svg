@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Cube Showcase">
+    <!--
+        The same mark the sidebar draws: the accent (#4f46e5) with white on it,
+        and the corner radius kept in proportion (7 of 26).
+
+        The C is an arc rather than a letter. A text element would be drawn in
+        whatever font the renderer happens to have, and a favicon is rendered by
+        browsers, extensions and bookmark managers that agree on very little.
+    -->
+    <rect width="32" height="32" rx="8.6" fill="#4f46e5" />
+    <path d="M20.5 10.6A7 7 0 1 0 20.5 21.4" fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" />
+</svg>
