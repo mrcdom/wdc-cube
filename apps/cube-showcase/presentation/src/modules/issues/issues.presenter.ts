@@ -164,7 +164,6 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
 
         this.scope.loading = true
         this.scope.error = undefined
-        this.update()
 
         try {
             const [, page] = await Promise.all([

@@ -78,7 +78,6 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             this.scope.site = this.item?.site
             this.scope.email = ''
             this.email = ''
-            this.update()
         }
 
         this.dialogSlot(this.scope)

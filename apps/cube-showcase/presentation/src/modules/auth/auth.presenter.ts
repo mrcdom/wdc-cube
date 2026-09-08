@@ -55,7 +55,6 @@ export class SignInPresenter extends CubePresenter<MainPresenter, SignInScope> {
 
         this.scope.busy = true
         this.scope.error = undefined
-        this.update()
 
         try {
             const session = await service.signIn(name)

@@ -124,7 +124,6 @@ export class IssueDetailPresenter extends CubePresenter<MainPresenter, IssueDeta
         }
 
         this.scope.saving = true
-        this.update()
 
         try {
             this.apply(await service.updateIssue(this.issue.id, changes))
