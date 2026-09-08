@@ -1,19 +1,16 @@
-import { SubscriptionsDetailScope } from 'wdc-cube-tutorial-core/subscriptions'
+import type { Textfield } from '@spectrum-web-components/textfield'
 
-import '@spectrum-web-components/button-group/sp-button-group.js'
-import '@spectrum-web-components/dialog/sp-dialog.js'
-import '@spectrum-web-components/field-label/sp-field-label.js'
-import '@spectrum-web-components/textfield/sp-textfield.js'
+import { SubscriptionsDetailScope } from 'wdc-cube-tutorial-core/subscriptions'
 
 import { AppElement, type AppDom } from '../../widgets'
 import Css from './subscriptions.module.scss'
 
 export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope> {
     private blurb!: HTMLParagraphElement
-    private field!: HTMLElementTagNameMap['sp-textfield']
+    private field!: Textfield
 
     protected declare(dom: AppDom): void {
-        dom.element('sp-dialog', (dialog) => {
+        dom.spDialog((dialog) => {
             dialog.size = 's'
 
             dom.h2((heading) => {
@@ -26,19 +23,19 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
             dom.div((group) => {
                 group.className = Css.emailField
 
-                dom.element('sp-field-label', (label) => {
+                dom.spFieldLabel((label) => {
                     label.setAttribute('for', 'subscribe-email')
                     label.textContent = 'Email Address'
                 })
 
-                this.field = dom.element('sp-textfield', (field) => {
+                this.field = dom.spTextfield((field) => {
                     field.id = 'subscribe-email'
                     field.type = 'email'
                     field.addEventListener('input', () => this.scope.onEmailChanged(this.field.value))
                 })
             })
 
-            dom.element('sp-button-group', (buttons) => {
+            dom.spButtonGroup((buttons) => {
                 buttons.slot = 'button'
 
                 dom.actionButton((button) => {

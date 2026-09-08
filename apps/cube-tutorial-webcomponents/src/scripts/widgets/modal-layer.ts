@@ -1,6 +1,6 @@
-import { CubeViewSlot, Dom, safeAction } from 'wdc-cube-webcomponents'
+import { CubeViewSlot, safeAction } from 'wdc-cube-webcomponents'
 
-import '@spectrum-web-components/underlay/sp-underlay.js'
+import { SpectrumDom } from './SpectrumDom'
 
 import styles from './modal-layer.scss?inline'
 
@@ -34,8 +34,8 @@ export class AppModalLayer extends HTMLElement {
         const root = this.attachShadow({ mode: 'open' })
         root.adoptedStyleSheets = [SHEET]
 
-        Dom.render(root, (dom) => {
-            dom.element('sp-underlay', (underlay) => (underlay.open = true))
+        SpectrumDom.render(root, (dom) => {
+            dom.spUnderlay((underlay) => (underlay.open = true))
 
             dom.div((surface) => {
                 surface.className = 'surface'

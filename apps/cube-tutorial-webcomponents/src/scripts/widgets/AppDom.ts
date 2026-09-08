@@ -1,14 +1,15 @@
-import { CubeElement, Dom, type Configure, type DomRoot } from 'wdc-cube-webcomponents'
+import { CubeElement, type Configure, type DomRoot } from 'wdc-cube-webcomponents'
 import type { Scope } from 'wdc-cube'
 
+import { SpectrumDom } from './SpectrumDom'
 import { AppActionButton } from './action-button'
 import { AppAlertDialog } from './alert-dialog'
 import { AppModalLayer } from './modal-layer'
 import { AppPanel } from './panel'
 
 /**
- * The `Dom` this application declares into: the framework's, plus a factory for
- * each of its own widgets.
+ * The `Dom` this application declares into: the framework's, plus the Spectrum
+ * elements, plus a factory for each of this application's own widgets.
  *
  * `dom.actionButton(...)` beside `dom.div(...)` — one way of saying "put this
  * here", and the widgets show up under `dom.` when you go looking. It is how the
@@ -20,7 +21,7 @@ import { AppPanel } from './panel'
  * lives here, which is what keeps this a way to reach the components rather than
  * a second place to look for them.
  */
-export class AppDom extends Dom {
+export class AppDom extends SpectrumDom {
     public constructor(root: DomRoot) {
         super(root)
     }

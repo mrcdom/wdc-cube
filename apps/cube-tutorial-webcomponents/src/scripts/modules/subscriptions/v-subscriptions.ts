@@ -1,13 +1,9 @@
 import { SyncedRows } from 'wdc-cube-webcomponents'
+import type { SideNav, SideNavItem } from '@spectrum-web-components/sidenav'
+
 import { SubscriptionsScope, type SiteItemType } from 'wdc-cube-tutorial-core/subscriptions'
 
-import '@spectrum-web-components/sidenav/sp-sidenav.js'
-import '@spectrum-web-components/sidenav/sp-sidenav-item.js'
-
 import { AppDom, AppElement } from '../../widgets'
-
-type SideNav = HTMLElementTagNameMap['sp-sidenav']
-type SideNavItem = HTMLElementTagNameMap['sp-sidenav-item']
 
 export class SubscriptionsView extends AppElement<SubscriptionsScope> {
     private list!: SideNav
@@ -33,9 +29,7 @@ export class SubscriptionsView extends AppElement<SubscriptionsScope> {
         dom.panel(() => {
             dom.h1((heading) => (heading.textContent = 'Sites you can subscribe to...'))
 
-            this.list = dom.element('sp-sidenav', (list) =>
-                list.setAttribute('aria-label', 'Sites you can subscribe to')
-            )
+            this.list = dom.spSidenav((list) => list.setAttribute('aria-label', 'Sites you can subscribe to'))
         })
     }
 
@@ -51,7 +45,7 @@ export class SubscriptionsView extends AppElement<SubscriptionsScope> {
         let row!: SideNavItem
 
         AppDom.render(this.list, (dom) => {
-            row = dom.element('sp-sidenav-item')
+            row = dom.spSidenavItem()
 
             // Per item rather than on the sidenav's `change`: opening the same
             // site twice in a row is an ordinary thing to do, and `change` only

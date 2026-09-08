@@ -2,9 +2,6 @@ import { CubeViewSlot } from 'wdc-cube-webcomponents'
 import { MainScope } from 'wdc-cube-tutorial-core/main'
 
 import { AppElement, type AppDom, type AppModalLayer } from '../../widgets'
-import '@spectrum-web-components/top-nav/sp-top-nav.js'
-import '@spectrum-web-components/top-nav/sp-top-nav-item.js'
-
 import Css from './main.module.scss'
 
 /** The application shell: a bar, a body slot, and the two modal layers. */
@@ -29,7 +26,7 @@ export class MainView extends AppElement<MainScope> {
                 // sp-top-nav marks the current item itself, from `selects` and
                 // the value of the item that was clicked; the presenter is what
                 // decides where the click goes.
-                dom.element('sp-top-nav', (nav) => {
+                dom.spTopNav((nav) => {
                     nav.quiet = true
                     this.navItem(dom, 'Home', () => this.scope.onHome())
                     this.navItem(dom, 'Todos', () => this.scope.onOpenTodos())
@@ -55,7 +52,7 @@ export class MainView extends AppElement<MainScope> {
     }
 
     private navItem(dom: AppDom, label: string, action: () => unknown): void {
-        dom.element('sp-top-nav-item', (item) => {
+        dom.spTopNavItem((item) => {
             item.textContent = label
             // No href: this is not a link, it is an action the presenter answers.
             item.addEventListener('click', () => this.safeAction(`nav:${label}`, action))
