@@ -31,7 +31,12 @@ const prepare = CubeBuilder.lazyBuild({
     project: {
         presenter: Place.creator(ProjectPresenter, Places, 'project'),
 
-        projects: {
+        // The word in the URL says what the screen does rather than what it
+        // lists: `#/project/switch?project=p2` reads as being in one project and
+        // going to change it, which is exactly what happens — the project stays
+        // selected until a card is picked. Naming the segment after the module
+        // gave `#/project/projects`, which reads as nothing at all.
+        switch: {
             presenter: Place.creator(ProjectsPresenter, Places, 'projects')
         },
 
