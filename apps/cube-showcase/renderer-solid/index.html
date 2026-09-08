@@ -3,6 +3,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!--
+            `%BASE_URL%`, not `/`. A leading slash is left exactly as written —
+            Vite rewrites the assets it bundles, and a file in `public/` is not
+            one of them — so on GitHub Pages the tab would ask the origin's root
+            for a file that lives under `/wdc-cube/`. This token is substituted
+            at build time: `/wdc-cube/favicon.svg` there, `/favicon.svg` here.
+        -->
+        <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
         <title>Cube Showcase</title>
     </head>
     <body>
