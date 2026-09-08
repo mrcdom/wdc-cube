@@ -20,3 +20,6 @@ yarn.lock
 .eslintcache
 .vite
 .angular
+
+# Copied into each package by scripts/sync-license.mjs when it is packed.
+libs/*/LICENSE

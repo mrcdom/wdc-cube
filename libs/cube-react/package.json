@@ -21,9 +21,11 @@
   },
   "files": [
     "lib",
+    "LICENSE",
     "README.md"
   ],
   "scripts": {
+    "prepack": "node ../../scripts/sync-license.mjs",
     "compile": "tsc -b",
     "build": "tsc -b",
     "test": "vitest run",

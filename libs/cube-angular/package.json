@@ -18,9 +18,11 @@
   },
   "files": [
     "src",
+    "LICENSE",
     "README.md"
   ],
   "scripts": {
+    "prepack": "node ../../scripts/sync-license.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
