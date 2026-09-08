@@ -40,7 +40,7 @@ export const ViewFactory = {
  * as if `props.scope` were plain data: it reads `props.scope.title` and Solid
  * subscribes to that field alone. No view in the application mentions a signal.
  */
-export function ViewSlot(props: { scope?: Scope; fallback?: JSX.Element }): JSX.Element {
+export function ViewSlot(props: { scope?: Scope | null; fallback?: JSX.Element }): JSX.Element {
     const current = createMemo(() => {
         const scope = props.scope
         if (!scope) {

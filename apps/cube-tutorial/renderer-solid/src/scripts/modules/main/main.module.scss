@@ -1,0 +1,151 @@
+.mainView {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.appBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 56px;
+    background: #005cbb;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    // Above the page so the shadow falls on it; the modal layers stack higher.
+    position: relative;
+    z-index: 1;
+}
+
+.appBarTitle {
+    flex-grow: 1;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.navButton {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+}
+
+// A single-cell grid, so whatever the body slot renders fills it on both axes.
+.body {
+    display: grid;
+    flex-grow: 1;
+    align-self: stretch;
+    min-height: 0;
+    margin: 16px;
+}
+
+.panel {
+    align-content: start;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.panelHeading {
+    margin: 0 0 12px;
+}
+
+.buttonPane {
+    display: flex;
+    gap: 8px;
+}
+
+.button {
+    padding: 8px 16px;
+    border: 1px solid #c7c7c7;
+    border-radius: 20px;
+    background: #fff;
+    color: #0b57d0;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        background: #f3f6fc;
+    }
+}
+
+.modalLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.32);
+}
+
+// An alert can be raised from inside a dialog, so its scrim stacks above it —
+// otherwise the dialog underneath is never dimmed and the two read as one layer.
+.alertLayer {
+    z-index: 4;
+}
+
+.modalSurface {
+    min-width: 320px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 20px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialogHeading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.dialogText {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: #49454f;
+}
+
+.dialogActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.severityIcon {
+    width: 24px;
+    height: 24px;
+    flex: none;
+}
+
+.alertInfo {
+    color: #0b57d0;
+}
+.alertSuccess {
+    color: #146c2e;
+}
+.alertWarning {
+    color: #8f5000;
+}
+.alertError {
+    color: #b3261e;
+}

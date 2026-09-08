@@ -193,6 +193,34 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
 
+  apps/cube-tutorial/renderer-solid:
+    dependencies:
+      solid-js:
+        specifier: ^1.9.15
+        version: 1.9.15
+      wdc-cube:
+        specifier: workspace:*
+        version: link:../../../libs/cube
+      wdc-cube-solid:
+        specifier: workspace:*
+        version: link:../../../libs/cube-solid
+      wdc-cube-tutorial-presentation:
+        specifier: workspace:*
+        version: link:../presentation
+    devDependencies:
+      sass:
+        specifier: ^1.104.0
+        version: 1.104.0
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.2.2
+        version: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0)
+      vite-plugin-solid:
+        specifier: ^2.11.14
+        version: 2.11.14(solid-js@1.9.15)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
+
   apps/cube-tutorial/renderer-webc:
     dependencies:
       '@spectrum-web-components/alert-dialog':

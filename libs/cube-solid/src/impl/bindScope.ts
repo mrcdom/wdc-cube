@@ -67,7 +67,20 @@ function install(scope: ScopeInternals): Bound {
             get: value,
             set: (next: unknown) => setValue(() => next)
         })
-        lists.push(() => setValue(() => list))
+
+        // `forceUpdate` fires for anything that moves in the scope, and most of
+        // it has nothing to do with this list — a clock ticking beside a
+        // thousand rows would otherwise rebuild all thousand every second. So
+        // the refresh compares before it reports. The comparison is by
+        // reference, one element at a time, which is what the reader downstream
+        // would have done anyway, only without building the rows first.
+        let snapshot = [...list]
+        lists.push(() => {
+            if (!same(snapshot, list)) {
+                snapshot = [...list]
+                setValue(() => list)
+            }
+        })
     }
 
     // One Cube update, one Solid flush, however many lists moved inside it.
@@ -75,4 +88,15 @@ function install(scope: ScopeInternals): Bound {
 
     Object.defineProperty(scope, BOUND, { value: bound, enumerable: false })
     return bound
+}
+
+function same(snapshot: readonly unknown[], list: Iterable<unknown>): boolean {
+    let index = 0
+    for (const item of list) {
+        if (index >= snapshot.length || snapshot[index] !== item) {
+            return false
+        }
+        index++
+    }
+    return index === snapshot.length
 }
