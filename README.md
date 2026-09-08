@@ -168,4 +168,4 @@ from the props, so views do not redeclare it.
 
 ## License
 
-MIT © WeDoCode Consultoria e Soluções Avançadas LTDA
+MIT © WeDoCode Consultoria e Soluções Avançadas LTDA. See [LICENSE](LICENSE).
