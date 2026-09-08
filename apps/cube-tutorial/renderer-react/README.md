@@ -201,8 +201,9 @@ view layer, so module names line up on both sides of the split —
 
 ## The patterns worth copying
 
-The patterns that shape presenters, scopes and keys belong to the core and are
-described in [its README](../presentation/README.md#the-patterns-worth-copying).
+The patterns that shape presenters, scopes and keys belong to the presentation
+layer and are described in
+[its README](../presentation/README.md#the-patterns-worth-copying).
 What is specific to this package:
 
 **Views resolve through the catalog.** `ViewFactory.register(SomeScope, SomeView)`

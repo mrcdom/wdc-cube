@@ -4,8 +4,9 @@ Test helpers for driving a [Cube](../../docs/architecture.md) presentation layer
 with no view attached.
 
 The architecture states the view boundary as two obligations — answer
-`scope.forceUpdate()`, and resolve a scope to a view. `wdc-cube-react` and
-`wdc-cube-angular` each implement both. This package implements **neither**, on
+`scope.forceUpdate()`, and resolve a scope to a view. `wdc-cube-react`,
+`wdc-cube-angular`, `wdc-cube-webc` and `wdc-cube-solid` each implement both.
+This package implements **neither**, on
 purpose.
 
 That is the whole idea. A presenter is written not to know what draws it, so the

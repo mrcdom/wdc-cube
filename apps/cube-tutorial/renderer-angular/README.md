@@ -6,12 +6,12 @@ manual test bed for `wdc-cube-angular`.
 
 It renders the very same presenters, scopes and services as
 [cube-tutorial/renderer-react](../renderer-react/README.md), taken unchanged from
-[cube-tutorial/presentation](../presentation/README.md). Reading the two apps side
-by side shows what a view technology actually has to supply, because that is the
-only thing that differs between them.
+[cube-tutorial/presentation](../presentation/README.md). Reading this app and the
+React one side by side shows what a view technology actually has to supply,
+because that is the only thing that differs between them.
 
 The shell, the alerts and the subscriptions screens use Angular Material, which
-is the counterpart to the React app's MUI — the two apps then differ in their
+is the counterpart to the React app's MUI — the two then differ in their
 Cube binding rather than in whether they have a component library at all. The
 todo-mvc module stays plain HTML and SCSS in both, so at least one screen shows
 the binding with nothing else in the way.

@@ -42,11 +42,14 @@ export class ItemView extends CubeElement<ItemScope> {
 }
 ```
 
-The split is the whole idea, and it is the one React and Angular do not make:
-**`declare` runs once and says what exists; `onUpdate` runs on every redraw and
-says what changed.** A view builds its tree a single time and afterwards only
-writes over it, so there is no diff, no reconciliation and no second
-representation of the DOM in memory.
+The split is the whole idea: **`declare` runs once and says what exists;
+`onUpdate` runs on every redraw and says what changed.** A view builds its tree a
+single time and afterwards only writes over it, so there is no diff, no
+reconciliation and no second representation of the DOM in memory.
+
+React and Angular do not make that split — they re-run and then work out the
+difference. [`wdc-cube-solid`](../cube-solid/README.md) does, and gets a compiler
+to write it: the same targeted updates, from declarative source.
 
 Assigning `element.scope` is what binds the two — it points the scope's
 `forceUpdate` at the element and redraws it. `CubeViewSlot` does that for you.
