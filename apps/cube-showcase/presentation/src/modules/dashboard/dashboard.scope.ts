@@ -11,13 +11,19 @@ export class StatScope extends Scope {
     @observe() tone: 'plain' | 'good' | 'warn' = 'plain'
 }
 
-/** One bar, already measured as a share of the largest. */
+/**
+ * One bar, already measured as a share of the largest.
+ *
+ * The share is arithmetic and belongs here; the status is a concept and belongs
+ * here. What colour a status is drawn in belongs to whoever draws it, which is
+ * why this says `done` and not `#16a34a`.
+ */
 @Observable
 export class BarScope extends Scope {
+    @observe() state: IssueState = 'backlog'
     @observe() label = ''
     @observe() value = 0
     @observe() share = 0
-    @observe() colour = ''
 
     /** Opens the issue list filtered to whatever this bar counts. */
     onOpen = Scope.ASYNC_ACTION
@@ -32,10 +38,10 @@ export class BarScope extends Scope {
  */
 @Observable
 export class SliceScope extends Scope {
+    @observe() priority: IssuePriority = 'none'
     @observe() label = ''
     @observe() value = 0
     @observe() share = 0
-    @observe() colour = ''
     @observe() offset = 0
 
     onOpen = Scope.ASYNC_ACTION

@@ -4,6 +4,7 @@ import type { ViewProps } from 'wdc-cube-solid'
 import { STATE_LABELS, type IssuePriority, type IssueState } from 'wdc-cube-showcase-presentation/domain'
 import { BoardColumnScope, FilterScope, IssueRowScope, IssuesScope } from 'wdc-cube-showcase-presentation/issues'
 
+import { PRIORITY_EMPTY, priorityColour, stateColour } from '../../palette'
 import { useDraggableCard, useDropColumn } from './dnd'
 import { IssuesTableView } from './v-issues-table'
 import Css from './issues.module.scss'
@@ -274,21 +275,9 @@ export function StatePill(props: { state: IssueState }): JSX.Element {
     )
 }
 
-export function stateColour(state: IssueState): string {
-    return {
-        backlog: '#9a9aa6',
-        todo: '#6b7280',
-        'in-progress': '#d97706',
-        done: '#16a34a',
-        cancelled: '#c026d3'
-    }[state]
-}
-
 /** Priority as four bars, the way a tracker draws it: shape before colour. */
 export function PriorityMark(props: { priority: IssuePriority }): JSX.Element {
     const filled = () => ({ urgent: 3, high: 3, medium: 2, low: 1, none: 0 })[props.priority]
-    const colour = () =>
-        ({ urgent: '#dc2626', high: '#ea580c', medium: '#ca8a04', low: '#0891b2', none: '#c9c9d2' })[props.priority]
 
     return (
         <svg class={Css.priority} viewBox="0 0 14 14" aria-label={props.priority}>
@@ -300,7 +289,7 @@ export function PriorityMark(props: { priority: IssuePriority }): JSX.Element {
                         width="3.4"
                         height={4 + index * 4}
                         rx="1"
-                        fill={index < filled() ? colour() : '#e4e4ea'}
+                        fill={index < filled() ? priorityColour(props.priority) : PRIORITY_EMPTY}
                     />
                 )}
             </For>

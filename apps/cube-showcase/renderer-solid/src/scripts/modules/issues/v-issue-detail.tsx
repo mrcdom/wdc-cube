@@ -5,7 +5,8 @@ import type { ViewProps } from 'wdc-cube-solid'
 import { ISSUE_PRIORITIES, ISSUE_STATES, PRIORITY_LABELS, STATE_LABELS } from 'wdc-cube-showcase-presentation/domain'
 import { IssueDetailScope } from 'wdc-cube-showcase-presentation/issues'
 
-import { PriorityMark, stateColour } from './v-issues'
+import { stateColour } from '../../palette'
+import { PriorityMark } from './v-issues'
 import Css from './detail.module.scss'
 
 /**

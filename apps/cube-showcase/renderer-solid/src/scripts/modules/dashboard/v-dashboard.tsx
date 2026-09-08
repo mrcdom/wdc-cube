@@ -8,6 +8,7 @@ import {
     StatScope
 } from 'wdc-cube-showcase-presentation/dashboard'
 
+import { priorityColour, stateColour } from '../../palette'
 import Css from './dashboard.module.scss'
 
 /**
@@ -22,6 +23,9 @@ import Css from './dashboard.module.scss'
  * Every arc, share and length arrives already computed. A view that works out a
  * geometry is a view holding a rule about the data, and the next renderer would
  * have to work it out again.
+ *
+ * The colours are the opposite case and are decided here. A bar arrives saying
+ * it counts `done`, not saying it is green.
  */
 export function DashboardView(props: ViewProps<DashboardScope>): JSX.Element {
     return (
@@ -94,7 +98,10 @@ function Bar(props: { scope: BarScope }): JSX.Element {
         <button class={Css.bar} onClick={() => props.scope.onOpen()}>
             <span class={Css.barLabel}>{props.scope.label}</span>
             <span class={Css.barTrack}>
-                <span class={Css.barFill} style={{ width: `${props.scope.share}%`, background: props.scope.colour }} />
+                <span
+                    class={Css.barFill}
+                    style={{ width: `${props.scope.share}%`, background: stateColour(props.scope.state) }}
+                />
             </span>
             <span class={Css.barValue}>{props.scope.value}</span>
         </button>
@@ -123,7 +130,7 @@ function Ring(props: { scope: DashboardScope }): JSX.Element {
                                 cy="66"
                                 r={RADIUS}
                                 fill="none"
-                                stroke={slice.colour}
+                                stroke={priorityColour(slice.priority)}
                                 stroke-width="18"
                                 stroke-dasharray={`${(slice.share / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
                                 stroke-dashoffset={-(slice.offset / 100) * CIRCUMFERENCE}
@@ -147,7 +154,7 @@ function Ring(props: { scope: DashboardScope }): JSX.Element {
 function Legend(props: { scope: SliceScope }): JSX.Element {
     return (
         <button class={Css.legendRow} onClick={() => props.scope.onOpen()}>
-            <span class={Css.swatch} style={{ background: props.scope.colour }} />
+            <span class={Css.swatch} style={{ background: priorityColour(props.scope.priority) }} />
             <span class={Css.legendLabel}>{props.scope.label}</span>
             <span class={Css.legendValue}>{props.scope.value}</span>
         </button>

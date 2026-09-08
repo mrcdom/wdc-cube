@@ -23,22 +23,6 @@ const LOG = Logger.get('Showcase.DashboardPresenter')
 // @Inject
 const service = ShowcaseService.INSTANCE
 
-const STATE_COLOURS: Record<IssueState, string> = {
-    backlog: '#9a9aa6',
-    todo: '#6b7280',
-    'in-progress': '#d97706',
-    done: '#16a34a',
-    cancelled: '#c026d3'
-}
-
-const PRIORITY_COLOURS: Record<IssuePriority, string> = {
-    urgent: '#dc2626',
-    high: '#ea580c',
-    medium: '#ca8a04',
-    low: '#0891b2',
-    none: '#c9c9d2'
-}
-
 /**
  * A project at a glance.
  *
@@ -47,6 +31,11 @@ const PRIORITY_COLOURS: Record<IssuePriority, string> = {
  * than as five numbers a view would have to turn into one. A chart that a view
  * computes is a rule about the data living in the drawing, and the next renderer
  * would have to work it out again.
+ *
+ * The line runs the other way for appearance. A bar says it counts `done` and a
+ * slice says it counts `urgent`; what colour those are is not a fact about the
+ * project, and a renderer that wanted a different palette — or none, in print —
+ * could not have one if this file had already chosen.
  *
  * Every figure is also a link. Clicking a bar opens the issue list filtered to
  * exactly what the bar counts, which is only possible because that filter is a
@@ -149,10 +138,10 @@ export class DashboardPresenter extends CubePresenter<MainPresenter, DashboardSc
         this.scope.byState = byState.map((entry) => {
             const scope = new BarScope()
             scope.identity = entry.state
+            scope.state = entry.state
             scope.label = STATE_LABELS[entry.state]
             scope.value = entry.value
             scope.share = Math.round((entry.value / tallest) * 100)
-            scope.colour = STATE_COLOURS[entry.state]
             scope.onOpen = this.action(this.openIssues.bind(this, { state: entry.state }))
             scope.update = this.update
             return scope
@@ -169,10 +158,10 @@ export class DashboardPresenter extends CubePresenter<MainPresenter, DashboardSc
 
             const scope = new SliceScope()
             scope.identity = priority
+            scope.priority = priority
             scope.label = PRIORITY_LABELS[priority]
             scope.value = value
             scope.share = share
-            scope.colour = PRIORITY_COLOURS[priority]
             // Where this slice starts, so the view draws an arc and works nothing out.
             scope.offset = offset
             scope.onOpen = this.action(this.openIssues.bind(this, { priority }))
