@@ -68,9 +68,16 @@ back on close, Escape and a click outside arriving at the same `onOpenChange` so
 the presenter hears one thing, the page behind marked `aria-hidden`, and a label
 tied to its input without an id invented in the view and kept in step by hand.
 
-One thing it cannot do from here: restore focus to whatever opened the dialog. A
-Kobalte dialog learns that from its own `Dialog.Trigger`, and these open because
-a presenter put a scope in a slot — there is no trigger to remember.
+A Kobalte dialog gives focus back to its own `Dialog.Trigger`, and these have
+none — they open because a presenter put a scope in a slot. `onOpenAutoFocus` is
+the way round it: it fires just before the dialog takes the focus, which is the
+one moment when `document.activeElement` is still whoever had it. The layer reads
+it there and puts it back in `onCloseAutoFocus`.
+
+Remembered per layer rather than per application, which is what makes stacking
+work: an alert raised from inside a dialog remembers the control in that dialog,
+so closing it puts the reader back where they were and not on the page two layers
+down.
 
 ## What it costs
 
@@ -96,7 +103,7 @@ browser's work rather than the renderer's. The difference is in the deciding.
 
 ## Testing it
 
-39 view tests, in the same shape as the React and Angular ones: a scope built by
+44 view tests, in the same shape as the React and Angular ones: a scope built by
 hand, the view rendered, the DOM read back. Nothing boots a presenter — that is
 settled in [presentation-test](../presentation-test/README.md), and repeating it
 here would only make these fail for reasons that are not the view's. No mocks
@@ -114,10 +121,11 @@ expect(ui.get('label')).toBe(label)          // the same node, re-texted
 expect(ui.get('input.toggle')).toBe(toggle)  // untouched
 ```
 
-Which is the claim of the whole renderer, made checkable. All 39 were verified
-against injected defects — a filter mark that stops following the scope, a caret
-that stops going to the end, and a heading rebuilt on every change — and each
-turned red for the right reason.
+Which is the claim of the whole renderer, made checkable. They were verified
+against injected defects rather than trusted for passing — a filter mark that
+stops following the scope, a caret that stops going to the end, a heading rebuilt
+on every change, and the focus restore taken back out — and each turned red for
+the right reason.
 
 ```bash
 pnpm --filter wdc-cube-tutorial-renderer-solid test
