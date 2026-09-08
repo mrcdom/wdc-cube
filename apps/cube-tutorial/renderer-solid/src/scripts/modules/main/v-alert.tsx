@@ -28,24 +28,26 @@ export function AlertView(props: ViewProps<AlertScope>): JSX.Element {
     const severity = () => SEVERITIES[props.scope.severity] ?? SEVERITIES.info
 
     return (
-        <>
+        // The severity is one colour, set here and read by everything it tints,
+        // rather than four rules that have to be kept in step.
+        <div classList={{ [Css.alert]: true, [severity().colour]: true }}>
             {/* Title and Description rather than h2 and p: the dialog around
                 this points its `aria-labelledby` and `aria-describedby` at
                 whatever fills them, and it is the dialog that has to say so. */}
-            <Dialog.Title class={Css.dialogHeading}>
-                <svg class={`${Css.severityIcon} ${severity().colour}`} viewBox="0 0 24 24" aria-hidden="true">
+            <Dialog.Title class={Css.alertHeading}>
+                <svg class={Css.alertIcon} viewBox="0 0 24 24" aria-hidden="true">
                     <path fill="currentColor" d={severity().path} />
                 </svg>
                 {props.scope.title}
             </Dialog.Title>
 
-            <Dialog.Description class={Css.dialogText}>{props.scope.message}</Dialog.Description>
+            <Dialog.Description class={Css.alertMessage}>{props.scope.message}</Dialog.Description>
 
-            <div class={Css.dialogActions}>
-                <Button class={Css.button} onClick={() => props.scope.onClose()}>
+            <div class={Css.alertActions}>
+                <Button class={Css.buttonQuiet} onClick={() => props.scope.onClose()}>
                     Close
                 </Button>
             </div>
-        </>
+        </div>
     )
 }
