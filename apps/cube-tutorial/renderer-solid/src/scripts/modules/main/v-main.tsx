@@ -64,6 +64,20 @@ function ModalLayer(props: {
     class?: string
     children: JSX.Element
 }): JSX.Element {
+    // Where the focus was when this layer opened.
+    //
+    // A Kobalte dialog restores focus to its own `Dialog.Trigger`, and these have
+    // none: they open because a presenter put a scope in a slot. `onOpenAutoFocus`
+    // fires just before the dialog takes the focus, which is the one moment when
+    // `document.activeElement` is still whoever had it — so the answer is read
+    // there rather than reconstructed later.
+    //
+    // Per layer, not per application, and that is what makes stacking work: an
+    // alert raised from inside a dialog remembers the control in that dialog, and
+    // closing it puts the reader back where they were rather than on the page two
+    // layers down.
+    let openedFrom: Element | null = null
+
     return (
         <Dialog
             open={props.open}
@@ -76,7 +90,22 @@ function ModalLayer(props: {
             <Dialog.Portal>
                 <Dialog.Overlay classList={{ [Css.modalOverlay]: true, [props.class ?? '']: !!props.class }} />
                 <div classList={{ [Css.modalLayer]: true, [props.class ?? '']: !!props.class }}>
-                    <Dialog.Content class={Css.modalSurface}>{props.children}</Dialog.Content>
+                    <Dialog.Content
+                        class={Css.modalSurface}
+                        onOpenAutoFocus={() => (openedFrom = document.activeElement)}
+                        onCloseAutoFocus={(event) => {
+                            // Closing a dialog often navigates, and what opened it
+                            // may be gone by now — `isConnected` is the difference
+                            // between restoring focus and throwing it away.
+                            if (!(openedFrom instanceof HTMLElement) || !openedFrom.isConnected) {
+                                return
+                            }
+                            event.preventDefault()
+                            openedFrom.focus()
+                        }}
+                    >
+                        {props.children}
+                    </Dialog.Content>
                 </div>
             </Dialog.Portal>
         </Dialog>
