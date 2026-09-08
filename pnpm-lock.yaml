@@ -211,6 +211,9 @@ importers:
         specifier: workspace:*
         version: link:../presentation
     devDependencies:
+      jsdom:
+        specifier: ^30.0.1
+        version: 30.0.1
       sass:
         specifier: ^1.104.0
         version: 1.104.0
@@ -223,6 +226,9 @@ importers:
       vite-plugin-solid:
         specifier: ^2.11.14
         version: 2.11.14(solid-js@1.9.15)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
 
   apps/cube-tutorial/renderer-webc:
     dependencies:

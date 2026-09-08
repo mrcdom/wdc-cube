@@ -94,6 +94,35 @@ Total task time is far closer between the four — around 5 ms per toggle
 everywhere — because event dispatch, style and layout dominate, and those are the
 browser's work rather than the renderer's. The difference is in the deciding.
 
+## Testing it
+
+39 view tests, in the same shape as the React and Angular ones: a scope built by
+hand, the view rendered, the DOM read back. Nothing boots a presenter — that is
+settled in [presentation-test](../presentation-test/README.md), and repeating it
+here would only make these fail for reasons that are not the view's. No mocks
+beyond `vi.fn` on the scope's actions, and no rendering library: plain
+`solid-js/web`, because one more layer between the assertion and the markup is
+one more thing that can be right when the view is wrong.
+
+Two of them are particular to this renderer, and assert node **identity** rather
+than content:
+
+```ts
+ui.act(() => (scope.title = 'Another title'))
+
+expect(ui.get('label')).toBe(label)          // the same node, re-texted
+expect(ui.get('input.toggle')).toBe(toggle)  // untouched
+```
+
+Which is the claim of the whole renderer, made checkable. All 39 were verified
+against injected defects — a filter mark that stops following the scope, a caret
+that stops going to the end, and a heading rebuilt on every change — and each
+turned red for the right reason.
+
+```bash
+pnpm --filter wdc-cube-tutorial-renderer-solid test
+```
+
 ## Running it
 
 ```bash
