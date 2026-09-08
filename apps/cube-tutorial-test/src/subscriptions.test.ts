@@ -37,7 +37,16 @@ describe('subscriptions', () => {
 
         expect(harness.scope.body).toBeInstanceOf(SubscriptionsScope)
         expect(dialogOf(harness)).toBeInstanceOf(SubscriptionsDetailScope)
-        expect(dialogOf(harness)?.email).toEqual('gettr.com')
+        expect(dialogOf(harness)?.site).toEqual('gettr.com')
+    })
+
+    // Regression. The site name used to be published as `email`, which every
+    // view read for its message and one of them also bound to the field — so the
+    // dialog opened holding a domain name that its own validation then rejected.
+    it('opens with the e-mail field empty', async () => {
+        harness = await startTutorial('/subscriptions/detail?site-id=3')
+
+        expect(dialogOf(harness)?.email).toBeFalsy()
     })
 
     describe('closing', () => {

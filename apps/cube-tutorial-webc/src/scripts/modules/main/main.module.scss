@@ -1,0 +1,69 @@
+.mainView {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.appBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 56px;
+    background: #005cbb;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    // Above the page so the shadow falls on it; the modal layers stack higher.
+    position: relative;
+    z-index: 1;
+
+    // sp-top-nav is built on tabs, and tabs expect a light ground. `--mod-tabs-*`
+    // are the hooks Spectrum publishes for exactly this: the component keeps its
+    // shape and only the colours move onto the brand bar the three view layers
+    // share.
+    --mod-tabs-color: rgba(255, 255, 255, 0.8);
+    --mod-tabs-color-hover: #fff;
+    --mod-tabs-color-selected: #fff;
+    --mod-tabs-color-key-focus: #fff;
+    --mod-tabs-focus-indicator-color: #fff;
+    --mod-tabs-divider-size: 0;
+
+    // No indicator: `MainScope` says which places exist, not which one is
+    // current, so an underline here would sit under Home whatever the user is
+    // looking at. React and Angular mark nothing either.
+    --mod-tabs-selection-indicator-color: transparent;
+}
+
+.appBarTitle {
+    flex-grow: 1;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+// A single-cell grid, so whatever the body slot renders fills it on both axes.
+.body {
+    display: grid;
+    flex-grow: 1;
+    align-self: stretch;
+    min-height: 0;
+    margin: var(--spectrum-spacing-300);
+}
+
+
+.buttonPane {
+    display: flex;
+    gap: 8px;
+}
+
+
+
+
+// An alert can be raised from inside a dialog, so its scrim stacks above it —
+// otherwise the dialog underneath is never dimmed and the two read as one layer.
+.alertLayer {
+    z-index: 4;
+}
+
+

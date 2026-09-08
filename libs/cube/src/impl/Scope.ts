@@ -23,6 +23,7 @@ export type ScopeConstructor = new () => Scope
 
 export interface IScope {
     forceUpdate: () => void
+    identity?: unknown
     update: (scope?: Scope) => void
 }
 
@@ -90,4 +91,22 @@ export abstract class Scope implements IScope {
     public forceUpdate: () => void = NOOP_VOID
 
     public update: (scope?: Scope) => void = NOOP_VOID
+
+    /**
+     * What this scope is, for a view that draws a list of them.
+     *
+     * Deliberately not observed: an identity does not change, so assigning it
+     * must not mark the scope dirty.
+     *
+     * A view reconciling a list has to decide which row already stood for which
+     * item, and only the presenter knows the answer — whether the instance is
+     * stable, or whether the same thing may arrive as a new object. Left to the
+     * views, that judgement is made once per view and drifts: this repository
+     * had React keying on `todo.id`, Angular tracking `todo.id`, and a third
+     * binding keying on the instance.
+     *
+     * Set it to whatever identifies the data, and leave it alone otherwise; a
+     * scope that never appears in a list never needs one.
+     */
+    public identity?: unknown
 }

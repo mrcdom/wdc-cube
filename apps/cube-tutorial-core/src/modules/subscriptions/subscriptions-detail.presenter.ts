@@ -66,12 +66,18 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             }
 
             this.item = siteItem
-            this.scope.email = this.item?.site
+            // The site is what the dialog names; the e-mail field starts empty.
+            // Both used to be `email`, which every view read for the message and
+            // one of them also bound to the field — so the field opened holding a
+            // domain name that its own validation then rejected.
+            this.scope.site = this.item?.site
 
             LOG.info('Initialized')
         } else if (this.item?.id !== paramSiteId) {
             this.item = await tutorialService.fetchSiteItem(paramSiteId)
-            this.scope.email = this.item?.site
+            this.scope.site = this.item?.site
+            this.scope.email = ''
+            this.email = ''
             this.update()
         }
 

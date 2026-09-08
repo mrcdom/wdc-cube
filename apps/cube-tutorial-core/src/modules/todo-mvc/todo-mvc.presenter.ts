@@ -154,6 +154,9 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
         for (const todo of todos) {
             const todoScope = new ItemScope()
+            // What the row stands for, so a view reconciling the list matches on
+            // the todo rather than on this particular object.
+            todoScope.identity = todo.id
             todoScope.id = todo.id
             todoScope.title = todo.title
             todoScope.completed = todo.completed
@@ -204,6 +207,7 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
         const lastUid = this.itemScopes.reduce((accum, todo) => Math.max(todo.id, accum), 0)
 
         const todoScope = new ItemScope()
+        todoScope.identity = lastUid + 1
         todoScope.id = lastUid + 1
         todoScope.title = value
         todoScope.completed = false

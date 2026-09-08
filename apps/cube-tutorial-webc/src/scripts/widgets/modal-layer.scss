@@ -1,0 +1,33 @@
+// The layer centres what it holds over a scrim. It draws neither: the dimming is
+// sp-underlay's, and the panel is whatever was put inside.
+:host {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:host([hidden]) {
+    display: none;
+}
+
+// sp-underlay is fixed to the viewport, so it is beneath this without being
+// behind it in the tree; the stacking is what puts the panel on top.
+//
+// sp-dialog carries the layout of a dialog and not its surface — in Spectrum the
+// background, the rounding and the shadow belong to sp-dialog-base, which also
+// brings an overlay and a focus trap this layer already provides. So the surface
+// is stated here, out of the same tokens sp-dialog-base reads.
+.surface {
+    position: relative;
+    z-index: 1;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    background: var(--spectrum-background-layer-2-color);
+    border-radius: var(--spectrum-corner-radius-large-default);
+    box-shadow: var(--spectrum-drop-shadow-emphasized-default-x) var(--spectrum-drop-shadow-emphasized-default-y)
+        var(--spectrum-drop-shadow-emphasized-default-blur) var(--spectrum-drop-shadow-emphasized-default-color);
+}

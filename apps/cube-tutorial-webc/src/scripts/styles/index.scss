@@ -1,0 +1,82 @@
+// Only what is genuinely common lives here. Everything that belongs to one
+// module lives beside it as a `*.module.scss`, where the build hashes the class
+// names — so two modules can both call something `.body` without ever meeting.
+//
+// What stays global is what cannot be scoped: rules on element names, and rules
+// about the document itself.
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+        'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow-y: auto;
+    display: flex;
+}
+
+#root {
+    display: flex;
+    align-self: stretch;
+    flex-grow: 1;
+}
+
+// `hidden` is only `display: none` from the browser's own stylesheet, so any
+// explicit display beats it — which is how a hidden backdrop stayed on screen
+// with an empty dialog inside it. Saying it once here covers every element.
+[hidden] {
+    display: none !important;
+}
+
+// sp-theme exists to put Spectrum's design tokens in scope, not to lay anything
+// out — and it renders as a block, so as a flex child of #root it sized itself
+// to its content and left the app in the left half of the window. The tokens are
+// custom properties, which inherit through the DOM rather than through the box
+// tree, so taking its box away costs nothing.
+//
+// This is the difference worth noticing: a wrapper that was never meant to be a
+// box needs this, while <sp-button> below is a component whose host *is* the
+// box and needs nothing.
+sp-theme {
+    display: contents;
+}
+
+// Custom elements are `display: inline` until told otherwise. This is the same
+// lesson the Angular app taught with its host elements, and the platform is
+// blunter about it: an element that lays out as inline text will not be a flex
+// child, and its children inherit the confusion.
+//
+// These are element selectors, so a CSS module would not scope them anyway —
+// and the tags are the one naming space that is already global by design.
+// The shell is the one that lays out: it is the flex column inside #root.
+v-main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    align-self: stretch;
+}
+
+// Every other view is transparent to layout, so its own root becomes the child
+// of whatever the slot sits in. That is what lets a view seated in the body fill
+// the body — the body is a single-cell grid, and a grid item stretches — without
+// each view having to ask.
+v-body,
+v-todo-mvc,
+v-subscriptions,
+v-restricted,
+v-todo-header,
+v-todo-main,
+v-todo-footer,
+v-todo-clock,
+v-todo-item,
+v-alert,
+v-subscriptions-detail {
+    display: contents;
+}
