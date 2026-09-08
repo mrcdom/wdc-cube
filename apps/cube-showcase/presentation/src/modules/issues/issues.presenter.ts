@@ -90,9 +90,10 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             this.bindActions()
         }
 
-        if (this.at.projectId !== keys.projectId) {
+        const movedProject = this.at.projectId !== keys.projectId
+        if (movedProject) {
             this.at.projectId = keys.projectId
-            await this.loadProject()
+            this.scope.loading = true
         }
 
         this.showNavigation('issues')
@@ -102,9 +103,21 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             this.dialogSlot(undefined)
         }
 
+        // The slot first, and the requests after. Awaiting them before handing
+        // the scope over leaves the previous page frozen for as long as the
+        // network takes, which is what makes a fast application feel slow: the
+        // `loading` flag exists so a view can be drawn before its data, and
+        // filling the slot last is what made it unreachable.
+        this.parentSlot(this.scope)
+
+        if (movedProject) {
+            await this.loadProject()
+            // Said again, because the project's name only exists now.
+            this.showNavigation('issues')
+        }
+
         await this.applyQuery(keys)
 
-        this.parentSlot(this.scope)
         return true
     }
 

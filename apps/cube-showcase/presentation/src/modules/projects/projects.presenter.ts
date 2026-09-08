@@ -32,18 +32,20 @@ export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScop
         if (initialization) {
             this.parentSlot = keys.parentSlot
             this.app.setNavigation(undefined, [])
-            await this.load()
             LOG.info('Initialized')
         }
 
+        // The slot first, so the cards' skeleton is on screen while they load.
         this.parentSlot(this.scope)
+
+        if (initialization) {
+            await this.load()
+        }
+
         return true
     }
 
     private async load() {
-        this.scope.loading = true
-        this.update()
-
         try {
             const [projects, members] = await Promise.all([service.fetchProjects(), service.fetchMembers()])
             const leadName = new Map(members.map((member) => [member.id, member.name]))

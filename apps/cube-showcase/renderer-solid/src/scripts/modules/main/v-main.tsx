@@ -28,8 +28,11 @@ export function MainView(props: ViewProps<MainScope>): JSX.Element {
                         Projects
                     </button>
 
-                    <Show when={props.scope.projectName}>
-                        <div class={Css.sectionLabel}>{props.scope.projectName}</div>
+                    {/* Keyed on the items, not on the name: the name arrives with
+                        the project and the items do not wait for it, so keying on
+                        the name would make the whole sidebar flicker. */}
+                    <Show when={props.scope.navigation.length > 0}>
+                        <div class={Css.sectionLabel}>{props.scope.projectName ?? ''}</div>
                         <For each={props.scope.navigation}>{(item) => <NavItem scope={item} />}</For>
                     </Show>
 

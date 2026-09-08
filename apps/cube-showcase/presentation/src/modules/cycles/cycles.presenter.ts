@@ -34,13 +34,21 @@ export class CyclesPresenter extends CubePresenter<MainPresenter, CyclesScope> {
             LOG.info('Initialized')
         }
 
-        if (this.projectId !== keys.projectId) {
+        const moved = this.projectId !== keys.projectId
+        if (moved) {
             this.projectId = keys.projectId
-            await this.load()
+            this.scope.loading = true
         }
 
         this.showNavigation()
+        // The slot first, so the skeleton is on screen while the request runs.
         this.parentSlot(this.scope)
+
+        if (moved) {
+            await this.load()
+            this.showNavigation()
+        }
+
         return true
     }
 
@@ -67,9 +75,6 @@ export class CyclesPresenter extends CubePresenter<MainPresenter, CyclesScope> {
     }
 
     private async load() {
-        this.scope.loading = true
-        this.update()
-
         try {
             const [project, cycles, page] = await Promise.all([
                 service.fetchProject(this.projectId!),
