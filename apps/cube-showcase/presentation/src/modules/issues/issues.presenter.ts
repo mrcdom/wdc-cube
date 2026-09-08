@@ -273,8 +273,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         ]
 
         this.scope.filters = filters
-        this.scope.anyFilterActive =
-            filters.some((filter) => filter.active) || !!keys.search || keys.page > 1 || !!keys.cycleId
+        this.scope.anyFilterActive = keys.anyFilterActive
     }
 
     private buildFilter<T extends string>(
@@ -365,9 +364,13 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     }
 
     protected async onClearFilters() {
-        const target = new IssuesKeys(this.app)
-        target.projectId = this.at.projectId
-        target.view = this.at.view
+        // From where this presenter stands, minus the filters. Building a fresh
+        // `IssuesKeys` instead looked like it started from nothing and did not:
+        // `newFlipIntent` asks every live presenter to publish onto it, this one
+        // included, so the intent came back holding the very filters the button
+        // exists to drop — and the flip landed on the place it was already on.
+        const target = this.here()
+        target.clearFilters()
         await target.flip()
     }
 

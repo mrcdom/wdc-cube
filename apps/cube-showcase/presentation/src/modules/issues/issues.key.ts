@@ -100,4 +100,40 @@ export class IssuesKeys extends ProjectKeys {
     public set page(value: number) {
         this._intent.setParameter(ParamIds.Page, value > 1 ? value : undefined)
     }
+
+    // :: filters, as one decision
+
+    /**
+     * Whether the reader is looking at less than everything.
+     *
+     * What counts as a filter is declared here, next to the parameters
+     * themselves, and read by both the presenter — which offers a Clear when
+     * this is true — and {@link clearFilters}, which undoes exactly this. The
+     * two used to enumerate the list separately, and only one of them was
+     * right.
+     */
+    public get anyFilterActive(): boolean {
+        return !!(this.state || this.priority || this.assigneeId || this.cycleId || this.search) || this.page > 1
+    }
+
+    /**
+     * Puts every filter back to absent.
+     *
+     * Said rather than omitted, because a new intent is not empty: it is
+     * published onto by every presenter that is currently alive, this list's own
+     * included, so it arrives already carrying the filters it is being asked to
+     * drop. Leaving a parameter out asks to keep it; only writing `undefined`
+     * removes it.
+     *
+     * The sort survives, which matches the button: an ordering is not a filter,
+     * and nothing is hidden by it.
+     */
+    public clearFilters(): void {
+        this.state = undefined
+        this.priority = undefined
+        this.assigneeId = undefined
+        this.cycleId = undefined
+        this.search = undefined
+        this.page = 1
+    }
 }
