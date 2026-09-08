@@ -1,0 +1,36 @@
+{
+  "name": "wdc-cube-showcase-renderer-solid",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SolidJS view layer for the showcase.",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@atlaskit/pragmatic-drag-and-drop": "^3.1.0",
+    "@kobalte/core": "^0.13.13",
+    "@tanstack/solid-table": "^9.2.4",
+    "solid-js": "^1.9.15",
+    "wdc-cube": "workspace:*",
+    "wdc-cube-showcase-api": "workspace:*",
+    "wdc-cube-showcase-presentation": "workspace:*",
+    "wdc-cube-solid": "workspace:*"
+  },
+  "devDependencies": {
+    "msw": "^2.15.0",
+    "sass": "^1.104.0",
+    "typescript": "6.0.3",
+    "vite": "^8.2.2",
+    "vite-plugin-solid": "^2.11.14"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

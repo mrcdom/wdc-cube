@@ -1,0 +1,114 @@
+.page {
+    align-content: start;
+    padding: 28px 32px;
+    max-width: 1100px;
+    width: 100%;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+}
+
+.subtitle {
+    margin-top: 4px;
+    color: var(--text-muted);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color 120ms ease,
+        box-shadow 120ms ease,
+        transform 120ms ease;
+
+    &:hover {
+        border-color: var(--border-strong);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+    }
+}
+
+.cardTop {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.cardName {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.cardDescription {
+    color: var(--text-muted);
+    font-size: 13px;
+    min-height: 38px;
+}
+
+.cardFoot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: 12px;
+}
+
+.skeleton {
+    height: 148px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(90deg, var(--surface-sunken) 25%, #ededf2 37%, var(--surface-sunken) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.3s ease infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+.error {
+    padding: 16px;
+    border: 1px solid #f3c4c4;
+    border-radius: var(--radius);
+    background: #fef5f5;
+    color: #b91c1c;
+}

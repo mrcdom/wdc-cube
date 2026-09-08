@@ -18,6 +18,9 @@ allowBuilds:
   # Optional native dependency of `sass`, used only by its CLI --watch mode.
   # Vite is what watches files here, so there is no reason to build it.
   '@parcel/watcher': false
+  # Its install step is what copies the service worker the showcase's fake API
+  # is served from. Without it there is no worker and no API.
+  msw: true
 
 peerDependencyRules:
   allowedVersions:

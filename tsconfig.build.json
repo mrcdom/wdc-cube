@@ -18,6 +18,12 @@
     },
     {
       "path": "apps/cube-tutorial/presentation"
+    },
+    {
+      "path": "apps/cube-showcase/presentation"
+    },
+    {
+      "path": "apps/cube-showcase/api"
     }
   ]
 }

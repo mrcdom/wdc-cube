@@ -50,7 +50,7 @@ export default tseslint.config(
         // attributes are the DOM's: `class`, not `className`. The React plugin
         // reads the same syntax and reaches the opposite conclusion, and there
         // is no React in these packages for it to be right about.
-        files: ['libs/cube-solid/**/*.{ts,tsx}', 'apps/cube-tutorial/renderer-solid/**/*.{ts,tsx}'],
+        files: ['libs/cube-solid/**/*.{ts,tsx}', 'apps/*/renderer-solid/**/*.{ts,tsx}'],
         rules: {
             'react/no-unknown-property': 'off'
         }

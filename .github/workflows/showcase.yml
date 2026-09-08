@@ -1,0 +1,59 @@
+# Publishes the showcase to GitHub Pages.
+#
+# The whole example is static: it routes on the hash, so no server rewrites are
+# needed, and its API is a service worker, so there is no server at all. That is
+# what makes a link to a filtered board something anyone can open.
+name: Showcase
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and a newer push wins.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # The version is pinned in `packageManager`, so this is the whole install.
+      - run: corepack enable pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # The libraries and the presentation layer, which the renderer typechecks
+      # against before Vite builds it.
+      - run: pnpm compile
+
+      - run: pnpm --filter wdc-cube-showcase-renderer-solid run build
+        env:
+          # A project site lives under the repository's name.
+          PUBLIC_BASE_PATH: /wdc-cube/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/cube-showcase/renderer-solid/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

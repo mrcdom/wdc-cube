@@ -1,0 +1,24 @@
+{
+  "name": "wdc-cube-showcase-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The showcase's API: the data it runs on and the endpoints that answer for it, as a worker rather than a server.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "scripts": {
+    "compile": "tsc -b",
+    "build": "tsc -b",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "msw": "^2.15.0",
+    "wdc-cube-showcase-presentation": "workspace:*"
+  }
+}

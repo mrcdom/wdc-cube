@@ -1,0 +1,302 @@
+.page {
+    align-content: start;
+    padding: 28px 32px;
+    max-width: 1100px;
+    width: 100%;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+}
+
+.subtitle {
+    margin-top: 4px;
+    margin-bottom: 22px;
+    color: var(--text-muted);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.stat {
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+
+.statLabel {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.statValue {
+    margin-top: 4px;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.statGood .statValue {
+    color: #15803d;
+}
+.statWarn .statValue {
+    color: #b45309;
+}
+
+.statHint {
+    margin-top: 2px;
+    color: var(--text-faint);
+    font-size: 12px;
+}
+
+.panels {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 14px;
+}
+
+.panel {
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+
+.panelTitle {
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.panelHint {
+    margin-bottom: 16px;
+    color: var(--text-faint);
+    font-size: 12px;
+}
+
+// ========== BARS ==========
+
+.bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bar {
+    display: grid;
+    grid-template-columns: 92px 1fr 34px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 3px 4px;
+    border: none;
+    border-radius: var(--radius);
+    background: none;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--surface-sunken);
+    }
+}
+
+.barLabel {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.barTrack {
+    // A span is inline, and an inline box ignores width and height. Every
+    // measured element here has to say it is a block or it draws nothing.
+    display: block;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--surface-sunken);
+    overflow: hidden;
+}
+
+.barFill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 220ms ease;
+}
+
+.barValue {
+    text-align: right;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+// ========== RING ==========
+
+.ringRow {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.ring {
+    flex: none;
+    transform: rotate(-90deg);
+}
+
+.ringCentre {
+    position: relative;
+}
+
+.ringHole {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+}
+
+.ringValue {
+    font-size: 20px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.ringLabel {
+    color: var(--text-faint);
+    font-size: 11px;
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+}
+
+.legendRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 3px 6px;
+    border: none;
+    border-radius: var(--radius);
+    background: none;
+    text-align: left;
+    font-size: 13px;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--surface-sunken);
+    }
+}
+
+.swatch {
+    display: block;
+    width: 9px;
+    height: 9px;
+    flex: none;
+    border-radius: 3px;
+}
+
+.legendLabel {
+    flex-grow: 1;
+    color: var(--text-muted);
+}
+
+.legendValue {
+    font-variant-numeric: tabular-nums;
+}
+
+// ========== WORKLOAD ==========
+
+.people {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+}
+
+.person {
+    display: grid;
+    grid-template-columns: 26px 1fr 30px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 5px 6px;
+    border: none;
+    border-radius: var(--radius);
+    background: none;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--surface-sunken);
+    }
+}
+
+.avatar {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.personName {
+    font-size: 13px;
+}
+
+.personTrack {
+    display: block;
+    height: 5px;
+    margin-top: 4px;
+    border-radius: 999px;
+    background: var(--surface-sunken);
+    overflow: hidden;
+}
+
+.personFill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+}
+
+.wide {
+    grid-column: 1 / -1;
+}
+
+.skeleton {
+    height: 92px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(90deg, var(--surface-sunken) 25%, #ededf2 37%, var(--surface-sunken) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.3s ease infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+.error {
+    padding: 16px;
+    border: 1px solid #f3c4c4;
+    border-radius: var(--radius);
+    background: #fef5f5;
+    color: #b91c1c;
+}

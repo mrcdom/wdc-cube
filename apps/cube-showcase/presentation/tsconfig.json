@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    // Scopes are the reason. `@observe()` puts an accessor on the prototype, and
+    // a native class field would shadow it with an own property on every
+    // instance — which `@Observable` then has to delete, and deleting an own
+    // property is what drops an object into V8's dictionary mode. Assignment
+    // semantics let the initialiser reach the accessor instead: measured at
+    // 298ns to 98ns per scope built, and fast properties kept.
+    "useDefineForClassFields": false,
+    "lib": [
+      "ES2024",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": [],
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": false,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rootDir": "src",
+    "outDir": "lib",
+    "incremental": true
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../../libs/cube"
+    }
+  ]
+}

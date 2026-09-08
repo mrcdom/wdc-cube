@@ -16,7 +16,8 @@
     "start:solid": "pnpm --filter wdc-cube-tutorial-renderer-solid run start",
     "format": "prettier --write \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/**/src/**/*.{ts,tsx,yml}\"",
     "format:check": "prettier --check \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/**/src/**/*.{ts,tsx,yml}\"",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "start:showcase": "pnpm --filter wdc-cube-showcase-renderer-solid run start"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

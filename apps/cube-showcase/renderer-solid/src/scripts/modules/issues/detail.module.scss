@@ -1,0 +1,149 @@
+.detail {
+    display: flex;
+    flex-direction: column;
+    width: min(720px, 92vw);
+    max-height: 88vh;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.reference {
+    color: var(--text-faint);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.close {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--radius);
+    background: none;
+    color: var(--text-faint);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--surface-sunken);
+        color: var(--text);
+    }
+}
+
+.body {
+    padding: 20px;
+    overflow: auto;
+}
+
+.title {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+}
+
+.description {
+    margin-top: 12px;
+    color: var(--text-muted);
+    line-height: 1.65;
+}
+
+.labels {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.label {
+    padding: 2px 9px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.properties {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+}
+
+.propertyLabel {
+    color: var(--text-faint);
+    font-size: 13px;
+}
+
+.select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: 13px;
+    cursor: pointer;
+
+    &:hover {
+        border-color: var(--border-strong);
+    }
+}
+
+.menu {
+    z-index: 40;
+    min-width: 180px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-md);
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+
+    &[data-highlighted] {
+        background: var(--surface-sunken);
+    }
+}
+
+.saving {
+    color: var(--text-faint);
+    font-size: 12px;
+}
+
+.plain {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.loading,
+.error {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-faint);
+}
+
+.error {
+    color: #b91c1c;
+}
