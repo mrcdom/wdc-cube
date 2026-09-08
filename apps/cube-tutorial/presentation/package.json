@@ -1,0 +1,43 @@
+{
+  "name": "wdc-cube-tutorial-app",
+  "version": "1.1.0",
+  "description": "View-agnostic half of the tutorial: places, keys, presenters, scopes and services. Depends on wdc-cube only.",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./main": {
+      "types": "./lib/modules/main/index.d.ts",
+      "default": "./lib/modules/main/index.js"
+    },
+    "./todo-mvc": {
+      "types": "./lib/modules/todo-mvc/index.d.ts",
+      "default": "./lib/modules/todo-mvc/index.js"
+    },
+    "./subscriptions": {
+      "types": "./lib/modules/subscriptions/index.d.ts",
+      "default": "./lib/modules/subscriptions/index.js"
+    },
+    "./restricted": {
+      "types": "./lib/modules/restricted/index.d.ts",
+      "default": "./lib/modules/restricted/index.js"
+    }
+  },
+  "scripts": {
+    "compile": "tsc -b",
+    "build": "tsc -b",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "wdc-cube": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}
