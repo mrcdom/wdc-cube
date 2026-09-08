@@ -9,6 +9,14 @@ export class HeaderView extends AppElement<HeaderScope> {
     private toggleLabel!: HTMLLabelElement
     private field!: HTMLInputElement
 
+    private readonly onToggleAll = this.action('onToggleAll', () => this.scope.actions.onToggleAll())
+    private readonly onInputChange = this.action('onSyncInputChange', () =>
+        this.scope.actions.onSyncInputChange(this.field.value)
+    )
+    private readonly onInputKeyDown = this.action('onSyncInputKeyDown', (event: KeyboardEvent) =>
+        this.scope.actions.onSyncInputKeyDown(event)
+    )
+
     protected declare(dom: AppDom): void {
         dom.header((header) => {
             header.className = Css.headerInputPane
@@ -19,9 +27,7 @@ export class HeaderView extends AppElement<HeaderScope> {
                 input.id = id
                 input.className = Css.toggleAll
                 input.type = 'checkbox'
-                input.addEventListener('change', () =>
-                    this.safeAction('onToggleAll', () => this.scope.actions.onToggleAll())
-                )
+                input.addEventListener('change', this.onToggleAll)
             })
 
             this.toggleLabel = dom.label((label) => {
@@ -33,12 +39,8 @@ export class HeaderView extends AppElement<HeaderScope> {
                 input.className = Css.newTodo
                 input.placeholder = 'What needs to be done?'
                 input.autofocus = true
-                input.addEventListener('input', () =>
-                    this.safeAction('onSyncInputChange', () => this.scope.actions.onSyncInputChange(input.value))
-                )
-                input.addEventListener('keydown', (event) =>
-                    this.safeAction('onSyncInputKeyDown', () => this.scope.actions.onSyncInputKeyDown(event))
-                )
+                input.addEventListener('input', this.onInputChange)
+                input.addEventListener('keydown', this.onInputKeyDown)
             })
         })
     }

@@ -9,6 +9,10 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
     private blurb!: HTMLParagraphElement
     private field!: Textfield
 
+    private readonly onEmailChanged = this.action('onEmailChanged', () => this.scope.onEmailChanged(this.field.value))
+    private readonly onClose = this.action('onClose', () => this.scope.onClose())
+    private readonly onSubscribe = this.action('onSubscribe', () => this.scope.onSubscribe())
+
     protected declare(dom: AppDom): void {
         dom.spDialog((dialog) => {
             dialog.size = 's'
@@ -31,7 +35,7 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
                 this.field = dom.spTextfield((field) => {
                     field.id = 'subscribe-email'
                     field.type = 'email'
-                    field.addEventListener('input', () => this.scope.onEmailChanged(this.field.value))
+                    field.addEventListener('input', this.onEmailChanged)
                 })
             })
 
@@ -40,15 +44,13 @@ export class SubscriptionsDetailView extends AppElement<SubscriptionsDetailScope
 
                 dom.actionButton((button) => {
                     button.textContent = 'Cancel'
-                    button.context = 'onClose'
-                    button.action = () => this.scope.onClose()
+                    button.addEventListener('click', this.onClose)
                 })
 
                 dom.actionButton((button) => {
                     button.textContent = 'Subscribe'
-                    button.context = 'onSubscribe'
                     button.variant = 'accent'
-                    button.action = () => this.scope.onSubscribe()
+                    button.addEventListener('click', this.onSubscribe)
                 })
             })
         })

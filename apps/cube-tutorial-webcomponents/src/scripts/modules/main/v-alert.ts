@@ -23,6 +23,8 @@ export class AlertView extends AppElement<AlertScope> {
     private headline!: HTMLHeadingElement
     private supportingText!: HTMLParagraphElement
 
+    private readonly onClose = this.action('onClose', () => this.scope.onClose())
+
     protected declare(dom: AppDom): void {
         this.dialog = dom.alertDialog(() => {
             this.headline = dom.h2((heading) => (heading.slot = 'heading'))
@@ -32,8 +34,7 @@ export class AlertView extends AppElement<AlertScope> {
             dom.actionButton((button) => {
                 button.slot = 'button'
                 button.textContent = 'Close'
-                button.context = 'onClose'
-                button.action = () => this.scope.onClose()
+                button.addEventListener('click', this.onClose)
             })
         })
     }

@@ -186,6 +186,32 @@ export abstract class CubeElement<S extends Scope = Scope, D extends Dom = Dom> 
 
     // ========== CONVENIENCES ==========
 
+    /**
+     * A listener that runs a scope action through the guard.
+     *
+     * Declared once as a field and referenced wherever it is wired:
+     *
+     * ```ts
+     * private readonly onToggle = this.action('onToggle', () => this.scope.actions.onToggle())
+     * // ...
+     * input.addEventListener('change', this.onToggle)
+     * ```
+     *
+     * The point is not brevity. A handler written inline at the listener is a
+     * new function on every declaration and says what it does in the middle of
+     * saying where it goes; declared as a field, a view's actions are a list you
+     * can read at the top of the class, each with the name it reports under. And
+     * because this is the only ergonomic way to build one, the guard stops being
+     * something to remember.
+     *
+     * For an action that needs something the declaration knows — the row it was
+     * put on, say — the field becomes a factory that takes it and hands back the
+     * listener.
+     */
+    protected action<E extends Event = Event>(context: string, run: (event: E) => unknown): (event: E) => void {
+        return (event) => safeAction(context, () => run(event))
+    }
+
     /** See the module-level {@link safeAction}; every listener goes through it. */
     protected safeAction(context: string, action: () => unknown): void {
         safeAction(context, action)

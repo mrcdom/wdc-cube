@@ -69,14 +69,36 @@ the value means serialising it; comparing the token that decided it does not.
 Over 200 000 unchanged writes of a 1 320-character value, by token is 1.6 ms
 against 103.5 ms.
 
-### Actions must be guarded
+### Actions are declared, and guarded
 
-`safeAction(context, action)` is not a convenience. A DOM listener is not called
-by the framework, so a throw inside one — or a rejected promise from an async
-action — lands on `window`, where nothing reports it and the user sees a control
-that silently did nothing. `CubeElement` exposes it as a method; the module-level
-`safeAction` is the same thing, for a widget that owns its own listener.
-`onActionError(handler)` decides what a failure does.
+A view declares its actions as fields and references them where they are wired:
+
+```ts
+private readonly onToggle = this.action('onToggle', () => this.scope.actions.onToggle())
+// ...
+input.addEventListener('change', this.onToggle)
+```
+
+`action(context, run)` hands back a listener that runs `run` through the guard.
+The guard is not a convenience: a DOM listener is not called by the framework, so
+a throw inside one — or a rejected promise from an async action — lands on
+`window`, where nothing reports it and the user sees a control that silently did
+nothing. Because `action` is the only ergonomic way to build a listener, the
+guard stops being something to remember, and a view's actions become a list you
+can read at the top of the class, each with the name it reports under.
+
+For an action that needs something only the declaration knows — the row it was
+put on — the field becomes a factory that takes it:
+
+```ts
+private readonly onItemClicked = (row: SideNavItem) =>
+    this.action('onItemClicked', () => this.scope.onItemClicked(this.siteOf(row)))
+// ...
+row.addEventListener('click', this.onItemClicked(row))
+```
+
+`safeAction` is the same guard as a free function, for a widget that owns a
+listener of its own; `onActionError(handler)` decides what a failure does.
 
 ## Declaring a tree
 

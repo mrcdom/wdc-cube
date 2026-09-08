@@ -11,6 +11,14 @@ export class MainView extends AppElement<MainScope> {
     private dialogLayer!: AppModalLayer
     private alertLayer!: AppModalLayer
 
+    private readonly onHome = this.action('onHome', () => this.scope.onHome())
+    private readonly onOpenTodos = this.action('onOpenTodos', () => this.scope.onOpenTodos())
+    private readonly onOpenSubscriptions = this.action('onOpenSuscriptions', () => this.scope.onOpenSuscriptions())
+    private readonly onLogin = this.action('onLogin', () => this.scope.onLogin())
+
+    private readonly onCloseDialog = this.action('closeDialog', () => this.scope.dialog?.onClose())
+    private readonly onCloseAlert = this.action('closeAlert', () => this.scope.alert?.onClose())
+
     protected declare(dom: AppDom): void {
         dom.div((view) => {
             view.className = Css.mainView
@@ -28,34 +36,32 @@ export class MainView extends AppElement<MainScope> {
                 // decides where the click goes.
                 dom.spTopNav((nav) => {
                     nav.quiet = true
-                    this.navItem(dom, 'Home', () => this.scope.onHome())
-                    this.navItem(dom, 'Todos', () => this.scope.onOpenTodos())
-                    this.navItem(dom, 'Subscriptions', () => this.scope.onOpenSuscriptions())
-                    this.navItem(dom, 'Login', () => this.scope.onLogin())
+                    this.navItem(dom, 'Home', this.onHome)
+                    this.navItem(dom, 'Todos', this.onOpenTodos)
+                    this.navItem(dom, 'Subscriptions', this.onOpenSubscriptions)
+                    this.navItem(dom, 'Login', this.onLogin)
                 })
             })
 
             this.bodySlot = new CubeViewSlot(dom.div((body) => (body.className = Css.body)))
 
             this.dialogLayer = dom.modalLayer((layer) => {
-                layer.context = 'closeDialog'
-                layer.onDismiss = () => this.scope.dialog?.onClose()
+                layer.addEventListener('dismiss', this.onCloseDialog)
             })
 
             // Above the dialog, so an alert raised from inside one dims it.
             this.alertLayer = dom.modalLayer((layer) => {
                 layer.className = Css.alertLayer
-                layer.context = 'closeAlert'
-                layer.onDismiss = () => this.scope.alert?.onClose()
+                layer.addEventListener('dismiss', this.onCloseAlert)
             })
         })
     }
 
-    private navItem(dom: AppDom, label: string, action: () => unknown): void {
+    private navItem(dom: AppDom, label: string, onSelect: (event: Event) => void): void {
         dom.spTopNavItem((item) => {
             item.textContent = label
             // No href: this is not a link, it is an action the presenter answers.
-            item.addEventListener('click', () => this.safeAction(`nav:${label}`, action))
+            item.addEventListener('click', onSelect)
         })
     }
 

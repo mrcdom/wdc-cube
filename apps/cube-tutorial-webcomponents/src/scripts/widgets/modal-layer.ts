@@ -1,4 +1,4 @@
-import { CubeViewSlot, safeAction } from 'wdc-cube-webcomponents'
+import { CubeViewSlot } from 'wdc-cube-webcomponents'
 
 import { SpectrumDom } from './SpectrumDom'
 
@@ -17,16 +17,14 @@ SHEET.replaceSync(styles)
  * Whatever the slot draws stays in the light DOM — a view is only slotted into
  * the surface, never moved inside this shadow root, so the application's own
  * stylesheets go on reaching it.
+ *
+ * Clicking beside the panel is reported as a `dismiss` event rather than run
+ * through a callback the layer holds: what to do about it is the shell's, and
+ * the shell already has a guarded listener to hand.
  */
 export class AppModalLayer extends HTMLElement {
     /** What draws whatever scope is in the layer. */
     public readonly viewSlot: CubeViewSlot
-
-    /** Names the dismissal in a failure report. */
-    public context = 'dismiss'
-
-    /** What clicking outside the panel does. */
-    public onDismiss: () => unknown = () => undefined
 
     public constructor() {
         super()
@@ -47,7 +45,7 @@ export class AppModalLayer extends HTMLElement {
             })
         })
 
-        this.addEventListener('click', () => safeAction(this.context, () => this.onDismiss()))
+        this.addEventListener('click', () => this.dispatchEvent(new CustomEvent('dismiss')))
 
         this.viewSlot = new CubeViewSlot(this)
 

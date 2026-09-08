@@ -1,34 +1,18 @@
 import { Button } from '@spectrum-web-components/button'
 import type { PropertyValues } from '@spectrum-web-components/base'
-import { safeAction } from 'wdc-cube-webcomponents'
 
 /**
- * A button that runs an action.
+ * The application's button.
  *
  * `sp-button` extended rather than configured: the app pairs with a component
  * library the way the React and Angular ones do, and this is where that choice
  * is made — the views ask for a button and do not learn what it is made of.
  *
- * The listener is the reason this is a component and not four lines repeated at
- * each call site. It goes through `safeAction`, which is the part that must not
- * be forgettable: a throw inside a DOM event otherwise lands on `window`, where
- * nothing reports it.
+ * It runs no action of its own. A button already reports being pressed, and a
+ * view already declares its actions as guarded listeners, so wiring one is
+ * `addEventListener('click', this.onClose)` like anywhere else.
  */
 export class AppActionButton extends Button {
-    /** What the button does. Assigned by whoever declares it. */
-    public action: () => unknown = () => undefined
-
-    /** Names the action in a failure report, when the label is not enough. */
-    public context?: string
-
-    public constructor() {
-        super()
-
-        this.addEventListener('click', () =>
-            safeAction(this.context ?? this.textContent?.trim() ?? 'action', () => this.action())
-        )
-    }
-
     public override connectedCallback(): void {
         super.connectedCallback()
 

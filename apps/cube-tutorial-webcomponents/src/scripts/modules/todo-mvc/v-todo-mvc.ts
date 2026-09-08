@@ -12,6 +12,8 @@ export class TodoMvcView extends AppElement<TodoMvcScope> {
     private mainSlot!: CubeViewSlot
     private footerSlot!: CubeViewSlot
 
+    private readonly onToggleStress = this.action('onToggleStress', () => this.scope.actions.onToggleStress())
+
     protected declare(dom: AppDom): void {
         dom.div((view) => {
             view.className = Css.todoMvcView
@@ -33,8 +35,7 @@ export class TodoMvcView extends AppElement<TodoMvcScope> {
                     this.note = dom.p()
                     this.stressButton = dom.actionButton((button) => {
                         button.className = Css.stressToggle
-                        button.context = 'onToggleStress'
-                        button.action = () => this.scope.actions.onToggleStress()
+                        button.addEventListener('click', this.onToggleStress)
                     })
                 })
             })

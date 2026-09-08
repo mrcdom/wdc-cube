@@ -25,6 +25,21 @@ export class SubscriptionsView extends AppElement<SubscriptionsScope> {
         }
     })
 
+    /**
+     * A factory rather than a field: the action needs the row it was put on.
+     *
+     * The row, not the site — `assign` hands the same row a different site as
+     * the list changes, so what the listener reads has to be read when it runs.
+     */
+    private readonly onItemClicked = (row: SideNavItem) =>
+        this.action('onItemClicked', () => {
+            const id = Number(row.value)
+            const site = this.scope.sites.find((candidate) => candidate.id === id)
+            if (site) {
+                this.scope.onItemClicked(site)
+            }
+        })
+
     protected declare(dom: AppDom): void {
         dom.panel(() => {
             dom.h1((heading) => (heading.textContent = 'Sites you can subscribe to...'))
@@ -50,15 +65,7 @@ export class SubscriptionsView extends AppElement<SubscriptionsScope> {
             // Per item rather than on the sidenav's `change`: opening the same
             // site twice in a row is an ordinary thing to do, and `change` only
             // fires when the selection actually moves.
-            row.addEventListener('click', () =>
-                this.safeAction('onItemClicked', () => {
-                    const id = Number(row.value)
-                    const site = this.scope.sites.find((candidate) => candidate.id === id)
-                    if (site) {
-                        this.scope.onItemClicked(site)
-                    }
-                })
-            )
+            row.addEventListener('click', this.onItemClicked(row))
         })
 
         return row

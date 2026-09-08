@@ -11,6 +11,14 @@ export class ItemView extends AppElement<ItemScope> {
     private titleLabel!: HTMLLabelElement
     private editor!: HTMLInputElement
 
+    private readonly onToggle = this.action('onToggle', () => this.scope.actions.onToggle())
+    private readonly onEdit = this.action('onEdit', () => this.scope.actions.onEdit())
+    private readonly onDestroy = this.action('onDestroy', () => this.scope.actions.onDestroy())
+    private readonly onBlur = this.action('onBlur', () => this.scope.actions.onBlur(() => this.editor.value))
+    private readonly onKeyDown = this.action('onKeyDown', (event: KeyboardEvent) =>
+        this.scope.actions.onKeyDown(() => this.editor.value, event)
+    )
+
     protected declare(dom: AppDom): void {
         this.row = dom.li((li) => {
             li.className = Css.view
@@ -18,28 +26,22 @@ export class ItemView extends AppElement<ItemScope> {
             this.toggle = dom.input((input) => {
                 input.className = Css.toggle
                 input.type = 'checkbox'
-                input.addEventListener('change', () => this.safeAction('onToggle', () => this.scope.actions.onToggle()))
+                input.addEventListener('change', this.onToggle)
             })
 
             this.titleLabel = dom.label((label) => {
-                label.addEventListener('dblclick', () => this.safeAction('onEdit', () => this.scope.actions.onEdit()))
+                label.addEventListener('dblclick', this.onEdit)
             })
 
             dom.button((button) => {
                 button.className = Css.destroy
-                button.addEventListener('click', () =>
-                    this.safeAction('onDestroy', () => this.scope.actions.onDestroy())
-                )
+                button.addEventListener('click', this.onDestroy)
             })
 
             this.editor = dom.input((input) => {
                 input.className = Css.edit
-                input.addEventListener('blur', () =>
-                    this.safeAction('onBlur', () => this.scope.actions.onBlur(() => input.value))
-                )
-                input.addEventListener('keydown', (event) =>
-                    this.safeAction('onKeyDown', () => this.scope.actions.onKeyDown(() => input.value, event))
-                )
+                input.addEventListener('blur', this.onBlur)
+                input.addEventListener('keydown', this.onKeyDown)
             })
         })
     }

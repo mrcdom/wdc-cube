@@ -10,6 +10,11 @@ export class FooterView extends AppElement<FooterScope> {
     private clear!: HTMLButtonElement
     private readonly filters = new Map<ShowingOptions, HTMLAnchorElement>()
 
+    private readonly onShowAll = this.action('onShowAll', () => this.scope.actions.onShowAll())
+    private readonly onShowActives = this.action('onShowActives', () => this.scope.actions.onShowActives())
+    private readonly onShowCompleteds = this.action('onShowCompleteds', () => this.scope.actions.onShowCompleteds())
+    private readonly onClearCompleted = this.action('onClearCompleted', () => this.scope.actions.onClearCompleted())
+
     protected declare(dom: AppDom): void {
         dom.footer((footer) => {
             footer.className = Css.footer
@@ -22,26 +27,24 @@ export class FooterView extends AppElement<FooterScope> {
 
             dom.ul((list) => {
                 list.className = Css.filters
-                this.filter(dom, ShowingOptions.ALL, 'All', () => this.scope.actions.onShowAll())
-                this.filter(dom, ShowingOptions.ACTIVE, 'Active', () => this.scope.actions.onShowActives())
-                this.filter(dom, ShowingOptions.COMPLETED, 'Completed', () => this.scope.actions.onShowCompleteds())
+                this.filter(dom, ShowingOptions.ALL, 'All', this.onShowAll)
+                this.filter(dom, ShowingOptions.ACTIVE, 'Active', this.onShowActives)
+                this.filter(dom, ShowingOptions.COMPLETED, 'Completed', this.onShowCompleteds)
             })
 
             this.clear = dom.button((button) => {
                 button.className = Css.clearCompleted
                 button.textContent = 'Clear completed'
-                button.addEventListener('click', () =>
-                    this.safeAction('onClearCompleted', () => this.scope.actions.onClearCompleted())
-                )
+                button.addEventListener('click', this.onClearCompleted)
             })
         })
     }
 
-    private filter(dom: AppDom, showing: ShowingOptions, label: string, action: () => unknown): void {
+    private filter(dom: AppDom, showing: ShowingOptions, label: string, onShow: (event: Event) => void): void {
         dom.li(() => {
             const link = dom.element('a', (anchor) => {
                 anchor.textContent = label
-                anchor.addEventListener('click', () => this.safeAction(`onShow:${label}`, action))
+                anchor.addEventListener('click', onShow)
             })
             this.filters.set(showing, link)
         })
