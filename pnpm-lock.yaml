@@ -39,6 +39,15 @@ importers:
         specifier: 8.69.0
         version: 8.69.0(eslint@10.9.1)(typescript@6.0.3)
 
+  apps/cube-showcase/api:
+    dependencies:
+      msw:
+        specifier: ^2.15.0
+        version: 2.15.0(@types/node@26.4.1)(typescript@6.0.3)
+      wdc-cube-showcase-presentation:
+        specifier: workspace:*
+        version: link:../presentation
+
   apps/cube-showcase/presentation:
     dependencies:
       reflect-metadata:
@@ -65,6 +74,9 @@ importers:
       wdc-cube:
         specifier: workspace:*
         version: link:../../../libs/cube
+      wdc-cube-showcase-api:
+        specifier: workspace:*
+        version: link:../api
       wdc-cube-showcase-presentation:
         specifier: workspace:*
         version: link:../presentation

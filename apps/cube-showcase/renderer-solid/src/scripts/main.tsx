@@ -6,10 +6,10 @@ import { onCleanup } from 'solid-js'
 import { render } from 'solid-js/web'
 import { PageHistoryManager } from 'wdc-cube'
 import { bindScope } from 'wdc-cube-solid'
+import { startFakeApi } from 'wdc-cube-showcase-api'
 import { initializeRoutes, registerServices } from 'wdc-cube-showcase-presentation'
 import { MainPresenter } from 'wdc-cube-showcase-presentation/main'
 
-import { startFakeApi } from '../api/start'
 import { MainView } from './modules/main'
 import { registerAllViews } from './modules/ViewCatalog'
 
@@ -26,7 +26,9 @@ function App() {
 
 async function boot() {
     // Before the application: the first thing it does is ask who is signed in.
-    await startFakeApi()
+    // The worker script has to be served from this application's own origin, so
+    // the path is this renderer's to give.
+    await startFakeApi(`${import.meta.env.BASE_URL}mockServiceWorker.js`)
 
     registerServices()
     registerAllViews()

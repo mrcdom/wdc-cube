@@ -19,6 +19,7 @@
     "@tanstack/solid-table": "^9.2.4",
     "solid-js": "^1.9.15",
     "wdc-cube": "workspace:*",
+    "wdc-cube-showcase-api": "workspace:*",
     "wdc-cube-showcase-presentation": "workspace:*",
     "wdc-cube-solid": "workspace:*"
   },
