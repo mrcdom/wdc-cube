@@ -19,8 +19,9 @@
       "default": "./lib/index.js"
     }
   },
-  "files": ["lib", "README.md"],
+  "files": ["lib", "LICENSE", "README.md"],
   "scripts": {
+    "prepack": "node ../../scripts/sync-license.mjs",
     "compile": "tsc -b",
     "build": "tsc -b",
     "typecheck": "tsc -b"
