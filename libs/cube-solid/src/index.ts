@@ -6,6 +6,6 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-export { action } from './action.method-decorator'
-export { Observable, type FieldMetadata, type ObservedPropertyProvider } from './Observable.class-decorator'
-export { observe } from './observe.field-decorator'
+export { bindScope } from './impl/bindScope'
+export { solidObservedProperty, useSolidScopes } from './impl/observedProperty'
+export { ViewFactory, ViewSlot, type ViewComponent, type ViewProps } from './impl/ViewFactory'

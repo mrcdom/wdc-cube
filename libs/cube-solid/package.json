@@ -1,0 +1,47 @@
+{
+  "name": "wdc-cube-solid",
+  "version": "1.1.0",
+  "description": "SolidJS bindings for the Cube architecture: one signal per observed field",
+  "author": "Marcelo Domingos <mrcdom@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrcdom/wdc-cube.git",
+    "directory": "libs/cube-solid"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "prepack": "node ../../scripts/sync-license.mjs",
+    "compile": "tsc -b",
+    "build": "tsc -b",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "wdc-cube": "workspace:*"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.9.0"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1",
+    "solid-js": "^1.9.15",
+    "vite-plugin-solid": "^2.11.14",
+    "vitest": "^5.0.0"
+  }
+}

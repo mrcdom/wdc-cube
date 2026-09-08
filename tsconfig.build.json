@@ -14,6 +14,9 @@
       "path": "libs/cube-webc"
     },
     {
+      "path": "libs/cube-solid"
+    },
+    {
       "path": "apps/cube-tutorial/presentation"
     }
   ]

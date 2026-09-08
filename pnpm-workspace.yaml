@@ -4,6 +4,7 @@ packages:
   - libs/cube-angular
   - libs/cube-test
   - libs/cube-webc
+  - libs/cube-solid
   # One folder per example, and one package per project inside it.
   - apps/*/*
 
