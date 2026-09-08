@@ -92,6 +92,14 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     /** The last query answered, so an identical re-entry does not refetch. */
     private lastQuery?: string
 
+    /**
+     * Which request is still allowed to speak.
+     *
+     * Incremented by every fetch, so an answer that has been overtaken can tell
+     * that it has and keep quiet.
+     */
+    private pending = 0
+
     public constructor(app: MainPresenter) {
         super(app, new IssuesScope())
     }
@@ -115,9 +123,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             this.bindActions()
         }
 
-        const movedProject = this.at.projectId !== keys.projectId
-        if (movedProject) {
-            this.at.projectId = keys.projectId
+        if (this.at.projectId !== keys.projectId) {
             this.scope.loading = true
         }
 
@@ -133,7 +139,9 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         // filling the slot last is what made it unreachable.
         this.parentSlot(this.scope)
 
-        this.at = {
+        // Arriving by URL. The flip writes the address itself once the whole
+        // path has run, so this does not ask for it.
+        await this.moveTo({
             projectId: keys.projectId,
             view: keys.view,
             state: keys.state,
@@ -143,8 +151,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             search: keys.search,
             sort: keys.sort,
             page: keys.page
-        }
-        await this.refresh()
+        })
 
         return true
     }
@@ -152,13 +159,12 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     /**
      * A change to what this presenter is showing, which is not a journey.
      *
-     * The address is written first and the rows are fetched after: where the
-     * reader is is already true, and does not wait on the server to say so.
+     * The address is written from {@link at} — so it is written when `at`
+     * becomes the target, which is when the rows for it are in hand.
      */
     private async go(change: Partial<Where>) {
-        this.at = { ...this.at, ...change }
+        await this.moveTo({ ...this.at, ...change })
         this.updateHistory()
-        await this.refresh()
     }
 
     private bindActions() {
@@ -178,33 +184,47 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         return this.owner?.members ?? []
     }
 
-    /** What being at {@link at} means, however the reader got there. */
-    private async refresh() {
-        this.scope.view = this.at.view
-        this.scope.sortField = (this.at.sort ?? '').replace('-', '')
-        this.scope.sortDescending = (this.at.sort ?? '').startsWith('-')
-        this.scope.search = this.at.search ?? ''
-        this.buildFilters()
+    /**
+     * Show `target`, and become it once the rows for it are in hand.
+     *
+     * `at` is where the rows are, not where the reader is heading, and the
+     * difference is the whole of this method. Everything that describes the
+     * request moves at once — the drawing, the search box, the chips, the
+     * skeleton — because the reader pressed something and deserves to see it
+     * register. What waits is `at` itself, and with it the address, which is
+     * derived from it.
+     *
+     * Two answers can be in the air at once, and the second one asked for is
+     * not always the second one back. The token is which request is still
+     * allowed to speak: an answer that has been overtaken says nothing at all,
+     * rather than writing rows the reader has already moved on from. Without
+     * it, picking `Done` and then `Todo` on a slow connection left thirteen
+     * `Done` rows under an address and a chip both reading `todo`.
+     */
+    private async moveTo(target: Where) {
+        this.showRequest(target)
 
         const query = {
-            state: this.at.state,
-            priority: this.at.priority,
-            assigneeId: this.at.assigneeId,
-            cycleId: this.at.cycleId,
-            search: this.at.search,
-            sort: this.at.sort,
-            page: this.at.page,
+            state: target.state,
+            priority: target.priority,
+            assigneeId: target.assigneeId,
+            cycleId: target.cycleId,
+            search: target.search,
+            sort: target.sort,
+            page: target.page,
             perPage: this.scope.perPage
         }
 
-        const signature = JSON.stringify([this.at.projectId, query])
+        const signature = JSON.stringify([target.projectId, query])
         if (signature === this.lastQuery) {
-            // Only the drawing changed, and the rows are already here. Refetching
-            // to switch between a list and a board would be work the reader can
-            // see and did not ask for.
+            // The rows already answer for this. Switching between a list and a
+            // board is a rearrangement of what is here, so there is nothing to
+            // wait for and nothing to fetch.
+            this.at = target
             return
         }
-        this.lastQuery = signature
+
+        const token = ++this.pending
 
         this.scope.loading = true
         this.scope.error = undefined
@@ -215,24 +235,49 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
                 // assignee filter. They are already in flight, asked for by the
                 // place this one stands inside, so this joins that request.
                 this.owner?.whenLoaded(),
-                service.fetchIssues(this.at.projectId!, query)
+                service.fetchIssues(target.projectId!, query)
             ])
+
+            if (token !== this.pending) {
+                return
+            }
+
+            // Recorded only now. Kept before the request, a failure would leave
+            // this claiming rows that were never fetched, and coming back to the
+            // same filter would skip the retry and show an empty list.
+            this.lastQuery = signature
+            this.at = target
 
             // Said again now that the people are here: the assignee filter has
             // names to offer, and the rows have someone to name.
-            this.buildFilters()
+            this.showRequest(target)
 
             this.scope.rows = page.items.map((issue) => this.buildRow(issue))
             this.scope.columns = this.buildColumns(this.scope.rows)
             this.scope.page = page.page
             this.scope.total = page.total
         } catch (caught) {
+            if (token !== this.pending) {
+                return
+            }
             this.scope.error = caught instanceof Error ? caught.message : 'Could not load the issues.'
-            this.scope.rows = []
-            this.scope.columns = []
+            // Back to describing the rows that are actually here. The filter was
+            // not applied, so nothing on screen should claim it was.
+            this.showRequest(this.at)
         } finally {
-            this.scope.loading = false
+            if (token === this.pending) {
+                this.scope.loading = false
+            }
         }
+    }
+
+    /** What the reader asked for, on screen before the answer arrives. */
+    private showRequest(target: Where) {
+        this.scope.view = target.view
+        this.scope.sortField = (target.sort ?? '').replace('-', '')
+        this.scope.sortDescending = (target.sort ?? '').startsWith('-')
+        this.scope.search = target.search ?? ''
+        this.buildFilters(target)
     }
 
     private buildRow(issue: Issue): IssueRowScope {
@@ -276,11 +321,11 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         })
     }
 
-    private buildFilters() {
+    private buildFilters(target: Where) {
         const filters = [
             this.buildFilter(
                 'Status',
-                this.at.state,
+                target.state,
                 ISSUE_STATES,
                 (value) => STATE_LABELS[value],
                 (next) => ({
@@ -290,14 +335,14 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             ),
             this.buildFilter(
                 'Priority',
-                this.at.priority,
+                target.priority,
                 ISSUE_PRIORITIES,
                 (value) => PRIORITY_LABELS[value],
                 (next) => ({ priority: next as IssuePriority | undefined, page: 1 })
             ),
             this.buildFilter(
                 'Assignee',
-                this.at.assigneeId,
+                target.assigneeId,
                 this.members.map((member) => member.id),
                 (value) => this.members.find((member) => member.id === value)?.name ?? value,
                 (next) => ({ assigneeId: next, page: 1 })
@@ -305,12 +350,9 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         ]
 
         this.scope.filters = filters
-        this.scope.anyFilterActive = this.anyFilterActive
-    }
-
-    /** Whether the reader is looking at less than everything. */
-    private get anyFilterActive(): boolean {
-        return (Object.keys(UNFILTERED) as (keyof Where)[]).some((key) => this.at[key] !== UNFILTERED[key])
+        this.scope.anyFilterActive = (Object.keys(UNFILTERED) as (keyof Where)[]).some(
+            (key) => target[key] !== UNFILTERED[key]
+        )
     }
 
     private buildFilter<T extends string>(
