@@ -7,7 +7,7 @@ import { render } from 'solid-js/web'
 import { PageHistoryManager } from 'wdc-cube'
 import { bindScope } from 'wdc-cube-solid'
 import { startFakeApi } from 'wdc-cube-showcase-api'
-import { initializeRoutes, registerServices } from 'wdc-cube-showcase-presentation'
+import { initializeRoutes, registerServices, ShowcaseService } from 'wdc-cube-showcase-presentation'
 import { MainPresenter } from 'wdc-cube-showcase-presentation/main'
 
 import { MainView } from './modules/main'
@@ -25,10 +25,16 @@ function App() {
 }
 
 async function boot() {
+    // Where this application was deployed. At the root in development, under
+    // the repository's name on GitHub Pages — and both sides of the boundary
+    // need to know: the service so its calls land inside the deployment, the
+    // worker so it answers them there.
+    const base = import.meta.env.BASE_URL
+
+    ShowcaseService.INSTANCE.baseUrl = `${base}api`
+
     // Before the application: the first thing it does is ask who is signed in.
-    // The worker script has to be served from this application's own origin, so
-    // the path is this renderer's to give.
-    await startFakeApi(`${import.meta.env.BASE_URL}mockServiceWorker.js`)
+    await startFakeApi(base)
 
     registerServices()
     registerAllViews()

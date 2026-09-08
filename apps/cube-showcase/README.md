@@ -5,6 +5,11 @@ cards across, a table — built to answer one question: does the Cube architectu
 hold up on something with real screens, a real backend and real latency, or only
 on a tutorial?
 
+**Live: <https://mrcdom.github.io/wdc-cube/>** — published from `master` by
+[`.github/workflows/showcase.yml`](../../.github/workflows/showcase.yml).
+
+Or locally:
+
 ```bash
 pnpm install
 pnpm compile
@@ -138,4 +143,9 @@ suite — one presentation-layer suite and one per renderer. The showcase is a
 demonstration, and changes to it are verified in a browser.
 
 **A server.** Pointing `ShowcaseService.baseUrl` at one is the whole of the
-change if there is ever a reason to.
+change if there is ever a reason to. The bootstrap already does exactly that,
+for a smaller reason: a project site lives under `/wdc-cube/`, so both the
+service and the worker are rooted at `import.meta.env.BASE_URL` rather than at
+`/`. Absolute paths were what broke the first Pages build — the page asked for
+`/wdc-cube/api/session`, a handler written as `/api/session` never fired, and
+what came back was the page's own HTML.

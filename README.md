@@ -20,7 +20,8 @@ forwards user events back to it.
 
 This repository holds the framework and two applications that exercise it: a
 tutorial drawn four times over by four view technologies, and a showcase — an
-issue tracker with a backend, latency and screens the size of real ones.
+issue tracker with a backend, latency and screens the size of real ones, which
+is [live here](https://mrcdom.github.io/wdc-cube/).
 
 ## Packages
 
@@ -64,6 +65,11 @@ pnpm start:webc       # runs the custom-element tutorial at http://localhost:300
 pnpm start:solid      # runs the SolidJS tutorial at http://localhost:3003
 pnpm start:showcase   # runs the showcase at http://localhost:3004
 ```
+
+The showcase is also published at <https://mrcdom.github.io/wdc-cube/>, which is
+possible because it is static all the way down: it routes on the hash, so no
+server rewrites are needed, and its API is a service worker, so there is no
+server at all.
 
 ## Commands
 

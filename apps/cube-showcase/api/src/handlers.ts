@@ -100,127 +100,140 @@ let session = readSession()
 
 const jitter = () => delay(120 + Math.random() * 220)
 
-export const handlers = [
-    http.get('/api/session', async () => {
-        await jitter()
-        return session ? HttpResponse.json(session) : new HttpResponse(null, { status: 401 })
-    }),
+/**
+ * The endpoints, rooted wherever the application was deployed.
+ *
+ * A path written as `/api/session` is absolute, and absolute is wrong as soon as
+ * the application does not live at the root: served from `/wdc-cube/`, the page
+ * asks for `/wdc-cube/api/session` and a handler matching `/api/session` never
+ * fires — the request goes to the network and comes back as the page's own HTML.
+ * Which is exactly what happened the first time this was built for GitHub Pages.
+ */
+export function buildHandlers(baseUrl = '/api') {
+    const at = (path: string) => `${baseUrl}${path}`
 
-    http.post('/api/session', async ({ request }) => {
-        await jitter()
-        const { name } = (await request.json()) as { name: string }
-        const member = data.members.find((candidate) => candidate.name === name)
-        if (!member) {
-            return HttpResponse.text(`Nobody here is called ${name}.`, { status: 400 })
-        }
-        session = { member }
-        writeSession(member)
-        return HttpResponse.json(session)
-    }),
+    return [
+        http.get(at('/session'), async () => {
+            await jitter()
+            return session ? HttpResponse.json(session) : new HttpResponse(null, { status: 401 })
+        }),
 
-    http.delete('/api/session', async () => {
-        await jitter()
-        session = undefined
-        writeSession(undefined)
-        return new HttpResponse(null, { status: 204 })
-    }),
-
-    http.get('/api/members', async () => {
-        await jitter()
-        return HttpResponse.json(data.members)
-    }),
-
-    http.get('/api/projects', async () => {
-        await jitter()
-        return HttpResponse.json(data.projects)
-    }),
-
-    http.get('/api/projects/:projectId', async ({ params }) => {
-        await jitter()
-        const project = data.projects.find((candidate) => candidate.id === params.projectId)
-        return project ? HttpResponse.json(project) : new HttpResponse(null, { status: 404 })
-    }),
-
-    http.get('/api/projects/:projectId/cycles', async ({ params }) => {
-        await jitter()
-        return HttpResponse.json(data.cycles.filter((cycle) => cycle.projectId === params.projectId))
-    }),
-
-    http.get('/api/projects/:projectId/issues', async ({ params, request }) => {
-        await jitter()
-
-        const url = new URL(request.url)
-        const read = (name: string) => url.searchParams.get(name) ?? undefined
-        const search = read('search')?.toLowerCase()
-
-        const matching = data.issues.filter((issue) => {
-            if (issue.projectId !== params.projectId) return false
-            if (read('state') && issue.state !== read('state')) return false
-            if (read('priority') && issue.priority !== read('priority')) return false
-            if (read('assigneeId') && issue.assigneeId !== read('assigneeId')) return false
-            if (read('cycleId') && issue.cycleId !== read('cycleId')) return false
-            if (search && !`${issue.reference} ${issue.title}`.toLowerCase().includes(search)) return false
-            return true
-        })
-
-        // Ordering is the server's, as it would be against a database: the page
-        // the reader asked for is a page of the whole ordered set, not of
-        // whatever happened to be fetched.
-        const sort = read('sort')
-        if (sort) {
-            const descending = sort.startsWith('-')
-            const field = descending ? sort.slice(1) : sort
-            const rank: Record<string, number> = {
-                urgent: 0,
-                high: 1,
-                medium: 2,
-                low: 3,
-                none: 4,
-                backlog: 0,
-                todo: 1,
-                'in-progress': 2,
-                done: 3,
-                cancelled: 4
+        http.post(at('/session'), async ({ request }) => {
+            await jitter()
+            const { name } = (await request.json()) as { name: string }
+            const member = data.members.find((candidate) => candidate.name === name)
+            if (!member) {
+                return HttpResponse.text(`Nobody here is called ${name}.`, { status: 400 })
             }
-            const key = (issue: Issue) => {
-                if (field === 'reference') {
-                    return String(issue.reference.split('-')[1]).padStart(6, '0')
+            session = { member }
+            writeSession(member)
+            return HttpResponse.json(session)
+        }),
+
+        http.delete(at('/session'), async () => {
+            await jitter()
+            session = undefined
+            writeSession(undefined)
+            return new HttpResponse(null, { status: 204 })
+        }),
+
+        http.get(at('/members'), async () => {
+            await jitter()
+            return HttpResponse.json(data.members)
+        }),
+
+        http.get(at('/projects'), async () => {
+            await jitter()
+            return HttpResponse.json(data.projects)
+        }),
+
+        http.get(at('/projects/:projectId'), async ({ params }) => {
+            await jitter()
+            const project = data.projects.find((candidate) => candidate.id === params.projectId)
+            return project ? HttpResponse.json(project) : new HttpResponse(null, { status: 404 })
+        }),
+
+        http.get(at('/projects/:projectId/cycles'), async ({ params }) => {
+            await jitter()
+            return HttpResponse.json(data.cycles.filter((cycle) => cycle.projectId === params.projectId))
+        }),
+
+        http.get(at('/projects/:projectId/issues'), async ({ params, request }) => {
+            await jitter()
+
+            const url = new URL(request.url)
+            const read = (name: string) => url.searchParams.get(name) ?? undefined
+            const search = read('search')?.toLowerCase()
+
+            const matching = data.issues.filter((issue) => {
+                if (issue.projectId !== params.projectId) return false
+                if (read('state') && issue.state !== read('state')) return false
+                if (read('priority') && issue.priority !== read('priority')) return false
+                if (read('assigneeId') && issue.assigneeId !== read('assigneeId')) return false
+                if (read('cycleId') && issue.cycleId !== read('cycleId')) return false
+                if (search && !`${issue.reference} ${issue.title}`.toLowerCase().includes(search)) return false
+                return true
+            })
+
+            // Ordering is the server's, as it would be against a database: the page
+            // the reader asked for is a page of the whole ordered set, not of
+            // whatever happened to be fetched.
+            const sort = read('sort')
+            if (sort) {
+                const descending = sort.startsWith('-')
+                const field = descending ? sort.slice(1) : sort
+                const rank: Record<string, number> = {
+                    urgent: 0,
+                    high: 1,
+                    medium: 2,
+                    low: 3,
+                    none: 4,
+                    backlog: 0,
+                    todo: 1,
+                    'in-progress': 2,
+                    done: 3,
+                    cancelled: 4
                 }
-                const value = issue[field as keyof Issue]
-                return typeof value === 'string' && value in rank ? String(rank[value]) : String(value ?? '')
+                const key = (issue: Issue) => {
+                    if (field === 'reference') {
+                        return String(issue.reference.split('-')[1]).padStart(6, '0')
+                    }
+                    const value = issue[field as keyof Issue]
+                    return typeof value === 'string' && value in rank ? String(rank[value]) : String(value ?? '')
+                }
+                matching.sort((a, b) => key(a).localeCompare(key(b)) * (descending ? -1 : 1))
             }
-            matching.sort((a, b) => key(a).localeCompare(key(b)) * (descending ? -1 : 1))
-        }
 
-        const perPage = Number(read('perPage') ?? 25)
-        const page = Number(read('page') ?? 1)
-        const from = (page - 1) * perPage
+            const perPage = Number(read('perPage') ?? 25)
+            const page = Number(read('page') ?? 1)
+            const from = (page - 1) * perPage
 
-        const answer: Page<Issue> = {
-            items: matching.slice(from, from + perPage),
-            page,
-            perPage,
-            total: matching.length
-        }
-        return HttpResponse.json(answer)
-    }),
+            const answer: Page<Issue> = {
+                items: matching.slice(from, from + perPage),
+                page,
+                perPage,
+                total: matching.length
+            }
+            return HttpResponse.json(answer)
+        }),
 
-    http.get('/api/issues/:issueId', async ({ params }) => {
-        await jitter()
-        const issue = data.issues.find((candidate) => candidate.id === params.issueId)
-        return issue ? HttpResponse.json(issue) : new HttpResponse(null, { status: 404 })
-    }),
+        http.get(at('/issues/:issueId'), async ({ params }) => {
+            await jitter()
+            const issue = data.issues.find((candidate) => candidate.id === params.issueId)
+            return issue ? HttpResponse.json(issue) : new HttpResponse(null, { status: 404 })
+        }),
 
-    http.patch('/api/issues/:issueId', async ({ params, request }) => {
-        await jitter()
-        const issue = data.issues.find((candidate) => candidate.id === params.issueId)
-        if (!issue) {
-            return new HttpResponse(null, { status: 404 })
-        }
+        http.patch(at('/issues/:issueId'), async ({ params, request }) => {
+            await jitter()
+            const issue = data.issues.find((candidate) => candidate.id === params.issueId)
+            if (!issue) {
+                return new HttpResponse(null, { status: 404 })
+            }
 
-        const change = { ...((await request.json()) as Partial<Issue>), updatedAt: new Date().toISOString() }
-        Object.assign(issue, change)
-        rememberChange(issue.id, change)
-        return HttpResponse.json(issue)
-    })
-]
+            const change = { ...((await request.json()) as Partial<Issue>), updatedAt: new Date().toISOString() }
+            Object.assign(issue, change)
+            rememberChange(issue.id, change)
+            return HttpResponse.json(issue)
+        })
+    ]
+}

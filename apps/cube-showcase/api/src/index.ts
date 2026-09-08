@@ -17,5 +17,5 @@
  */
 
 export { startFakeApi } from './start'
-export { handlers } from './handlers'
+export { buildHandlers } from './handlers'
 export { buildDataset, MEMBERS, type Dataset } from './seed'

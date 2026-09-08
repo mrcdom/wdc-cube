@@ -1,6 +1,6 @@
 import { setupWorker } from 'msw/browser'
 
-import { handlers } from './handlers'
+import { buildHandlers } from './handlers'
 
 /**
  * Starts the worker that answers the application's requests.
@@ -9,18 +9,21 @@ import { handlers } from './handlers'
  * `fetch` calls; a worker happens to answer them, which is what lets the
  * showcase be a static deployment whose link works for anyone who opens it.
  *
- * Where the worker script is served from is the caller's to say: it has to come
- * from the application's own origin, so it is a file in each renderer's public
- * directory and each renderer knows its own base path. That one string is the
- * whole of what a renderer contributes to having a backend.
+ * The base path is the caller's to give, and it is the only thing a renderer
+ * contributes to having a backend. Everything here follows from it: the worker
+ * script has to come from the application's own origin, and the endpoints have
+ * to be rooted where the application is. Deployed under `/wdc-cube/`, a handler
+ * written as `/api/session` never fires — the page asks for
+ * `/wdc-cube/api/session`, the request goes to the network, and what comes back
+ * is the page's own HTML.
  */
-export async function startFakeApi(serviceWorkerUrl: string): Promise<void> {
-    const worker = setupWorker(...handlers)
+export async function startFakeApi(base = '/'): Promise<void> {
+    const worker = setupWorker(...buildHandlers(`${base}api`))
     await worker.start({
         // Anything the application did not ask for — the page, its modules, a
         // font — is none of the worker's business.
         onUnhandledRequest: 'bypass',
         quiet: true,
-        serviceWorker: { url: serviceWorkerUrl }
+        serviceWorker: { url: `${base}mockServiceWorker.js` }
     })
 }
