@@ -16,10 +16,15 @@ const service = ShowcaseService.INSTANCE
 /**
  * Choosing which project to be in.
  *
- * The one place inside `project` that has no project: the parent sees no id,
- * clears the sidebar and loads nothing about a project — which is also what
- * makes arriving here from a dashboard a deselection rather than a screen with
- * a stale project still named beside it.
+ * The one place inside `project` that does not need one — and, coming from a
+ * project, the one that keeps it anyway. A new intent starts from wherever the
+ * application already is, so arriving here from a dashboard carries the
+ * selection along: the sidebar still names the project, `Dashboard` still leads
+ * back to it, and the URL still says which one. Looking at what else there is
+ * has not changed anything yet, and only picking a card does.
+ *
+ * Arriving with nothing selected — straight after signing in, or by link — is
+ * the other half of the same rule, and there the sidebar is bare.
  */
 export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScope> {
     private parentSlot: ScopeSlot = NOOP_VOID
