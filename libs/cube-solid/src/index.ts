@@ -7,5 +7,5 @@
  */
 
 export { bindScope } from './impl/bindScope'
-export { solidObservedProperty, useSolidScopes } from './impl/observedProperty'
+export { solidInstrumentation, useSolidScopes } from './impl/instrumentation'
 export { ViewFactory, ViewSlot, type ViewComponent, type ViewProps } from './impl/ViewFactory'

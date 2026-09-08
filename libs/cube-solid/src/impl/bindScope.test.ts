@@ -3,7 +3,7 @@ import { Observable, ObservableArray, observe, Scope } from 'wdc-cube'
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import { bindScope } from './bindScope'
-import { useSolidScopes } from './observedProperty'
+import { useSolidScopes } from './instrumentation'
 
 // Before any scope exists, which is the contract the core enforces.
 beforeAll(() => useSolidScopes())
@@ -25,7 +25,7 @@ function inRoot(body: () => void): void {
     createRoot(() => body())
 }
 
-describe('the provider', () => {
+describe('the instrumentation', () => {
     it('re-runs only the expressions that read the field that moved', () => {
         const scope = new PersonScope()
         const runs = { name: 0, age: 0 }

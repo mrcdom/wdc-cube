@@ -20,26 +20,49 @@ export type FieldMetadata = {
 const COPY_INITIAL_VALUES_ACTION: symbol = Symbol('wdc-cube:initializeValues')
 
 /**
- * Builds the accessor an `@observe()` field gets.
+ * Makes a scope class report its changes: given the fields `@observe()`
+ * catalogued, install whatever accessors that reporting needs.
  *
- * `base` is the one this module would have installed: it compares, stores, and
- * tells the scope it changed. A provider is expected to wrap it rather than
- * replace it, so that what a change *means* stays defined in one place and only
- * what a change *notifies* is the provider's business.
+ * This is the whole of what `@Observable` does to a class, and a view
+ * technology can take it over. What comes back through those accessors is then
+ * that technology's business — a scope-wide notification, as the default does,
+ * or a signal per field, as SolidJS wants.
  */
-export type ObservedPropertyProvider = (field: FieldMetadata, base: PropertyDescriptor) => PropertyDescriptor
+export type ScopeInstrumentation = (prototype: GenericObject, fields: FieldMetadata[]) => void
 
-let provider: ObservedPropertyProvider | undefined
+/**
+ * The accessor the framework installs for one field: it compares, stores, and
+ * tells the scope it changed.
+ *
+ * Exported so an instrumentation can wrap it instead of restating it. What a
+ * change *means* is worth keeping in one place even when what it *notifies* is
+ * not.
+ */
+export function observedProperty(key: string): PropertyDescriptor {
+    return buildObservedProperty(key)
+}
+
+/** What the framework does when nothing takes over. */
+export const defaultInstrumentation: ScopeInstrumentation = (prototype, fields) => {
+    for (const field of fields) {
+        Reflect.defineProperty(prototype, field.key, observedProperty(field.key))
+    }
+}
+
+let instrumentation: ScopeInstrumentation = defaultInstrumentation
 let instrumented = false
 
 export function Observable<T extends { new (...args: any[]): object }>(ctor: T) {
     let init = (prototype: GenericObject, fields: FieldMetadata[]) => {
+        instrumentation(prototype, fields)
+        instrumented = true
+
+        // Independent of who instrumented: a field initialised in the
+        // constructor landed as an own property, so it is read back, removed,
+        // and written again through whatever accessor was just installed.
         const actions: string[] = []
         for (let index = 0; index < fields.length; index++) {
             const field = fields[index]
-            const base = buildObservedProperty(field.key)
-            Reflect.defineProperty(prototype, field.key, provider ? provider(field, base) : base)
-            instrumented = true
             actions.push(`const v${index} = this.${field.key};`)
             actions.push(`Reflect.deleteProperty(this, '${field.key}');`)
             actions.push(`this.${field.key} = v${index};`)
@@ -76,27 +99,28 @@ export function Observable<T extends { new (...args: any[]): object }>(ctor: T) 
 Observable.PROPERTY_OBSERVERS_METADATA = Symbol('wdc-cube:scope_observers')
 
 /**
- * Decides how an observed field notifies, for every scope in the application.
+ * Hands the instrumentation of every scope in the application to someone else.
  *
- * The default is the accessor below: a comparison, a write, and a call to
- * `scope.update`, which is what every binding built on `forceUpdate` needs. A
- * view technology with a finer idea of a change — SolidJS, whose whole point is
- * that one field moving should wake one expression — supplies its own here and
- * takes over the instrumentation instead of layering a second one on top of it.
+ * The default reports at the scope: a field changes, `scope.update` is called,
+ * and a binding redraws from `forceUpdate`. That is what React, Angular and the
+ * custom elements all want. A view technology with a finer idea of a change —
+ * SolidJS, whose whole point is that one field moving should wake one
+ * expression — installs its own accessors here rather than layering a second
+ * set on top of these.
  *
  * It has to be set before the first scope is constructed, because the accessors
  * are installed on a class the first time one of its instances exists. Setting
  * it after that throws rather than leaving half an application reactive and the
  * other half not.
  */
-Observable.setProvider = (next?: ObservedPropertyProvider): void => {
+Observable.setInstrumentation = (next: ScopeInstrumentation = defaultInstrumentation): void => {
     if (instrumented) {
         throw new Error(
-            'Observable.setProvider must be called before the first scope is constructed: ' +
+            'Observable.setInstrumentation must be called before the first scope is constructed: ' +
                 'by now some scope classes already carry the previous accessors.'
         )
     }
-    provider = next
+    instrumentation = next
 }
 
 function buildObservedProperty(key: string): PropertyDescriptor {
