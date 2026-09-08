@@ -61,7 +61,7 @@ export class ProjectPresenter extends CubePresenter<MainPresenter, ProjectScope>
         // The door, once, for everything inside a project. A place below this
         // one does not get to run and then discover it should not have.
         if (!this.app.authenticated) {
-            await this.app.demandSignIn()
+            await this.app.demandSignIn(intent)
             return false
         }
 

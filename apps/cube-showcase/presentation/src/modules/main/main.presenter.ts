@@ -128,9 +128,22 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         return this.member
     }
 
-    /** Sends the reader to the door, remembering nothing: the URL already has it. */
-    public async demandSignIn(): Promise<void> {
-        await new SignInKeys(this).flip()
+    /**
+     * Sends the reader to the door, carrying where they were going.
+     *
+     * The showcase's claim is that a link to an issue opens that issue. A link
+     * to an issue in a signed-out browser has to open the door first, and the
+     * claim then depends on the door knowing what the link asked for — so the
+     * intent that was refused travels with it, and the door goes back to it.
+     *
+     * Called without one — signing out — there is nothing to go back to.
+     */
+    public async demandSignIn(refused?: FlipIntent): Promise<void> {
+        const keys = new SignInKeys(this)
+        if (refused && refused.place !== Places.signIn) {
+            keys.next = refused.toString()
+        }
+        await keys.flip()
     }
 
     public applySession(member?: Member) {

@@ -12,6 +12,9 @@ export const ParamIds = {
     ProjectId: 'project',
     IssueId: 'issue',
 
+    /** Where the reader was going when the door stopped them. */
+    Next: 'next',
+
     /** Which drawing of the same issue list: `list`, `board` or `table`. */
     View: 'view',
 

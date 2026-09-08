@@ -14,13 +14,21 @@ const service = ShowcaseService.INSTANCE
 export class SignInPresenter extends CubePresenter<MainPresenter, SignInScope> {
     private parentSlot: ScopeSlot = NOOP_VOID
 
+    /** Where to go once the reader is through, when they were sent here. */
+    private next?: string
+
     public constructor(app: MainPresenter) {
         super(app, new SignInScope())
     }
 
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
+        const keys = new SignInKeys(this.app, intent)
+
+        // Read on every arrival, not only the first: a reader who is bounced
+        // here twice was going somewhere different the second time.
+        this.next = keys.next
+
         if (initialization) {
-            const keys = new SignInKeys(this.app, intent)
             this.parentSlot = keys.parentSlot
 
             // The door has no sidebar to offer.
@@ -38,6 +46,19 @@ export class SignInPresenter extends CubePresenter<MainPresenter, SignInScope> {
 
         this.parentSlot(this.scope)
         return true
+    }
+
+    /**
+     * What the address bar says while the door is open.
+     *
+     * The destination is written back out because the address is derived rather
+     * than kept: a presenter that does not publish a parameter watches it
+     * disappear from the URL on the next write, and a reload at the door would
+     * then forget where the reader was sent.
+     */
+    public override publishParameters(intent: FlipIntent): void {
+        const keys = new SignInKeys(this.app, intent)
+        keys.next = this.next
     }
 
     protected handleNameChanged(name: string) {
@@ -59,6 +80,12 @@ export class SignInPresenter extends CubePresenter<MainPresenter, SignInScope> {
         try {
             const session = await service.signIn(name)
             this.app.applySession(session.member)
+
+            if (this.next) {
+                await this.app.flipToIntentString(this.next)
+                return
+            }
+
             await new ProjectsKeys(this.app).flip()
         } catch (caught) {
             this.scope.error = caught instanceof Error ? caught.message : 'Could not sign in.'
