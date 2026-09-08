@@ -1,4 +1,6 @@
-import { Show, type JSX } from 'solid-js'
+import { Button } from '@kobalte/core/button'
+import { Dialog } from '@kobalte/core/dialog'
+import { type JSX } from 'solid-js'
 import { ViewSlot, type ViewProps } from 'wdc-cube-solid'
 import { MainScope } from 'wdc-cube-tutorial-presentation/main'
 
@@ -9,56 +11,74 @@ import Css from './main.module.scss'
  *
  * This function body runs once, for the life of the application. Everything
  * that can change later is an expression Solid left behind — `scope.dialog` is
- * read inside `<Show>`, so opening a dialog wakes that one place and nothing
- * else here is touched, not even re-examined.
+ * read inside the dialog's `open`, so opening one wakes that one place and
+ * nothing else here is touched, not even re-examined.
  */
 export function MainView(props: ViewProps<MainScope>): JSX.Element {
     return (
         <div class={Css.mainView}>
             <div class={Css.appBar}>
                 <span class={Css.appBarTitle}>Cube Framework (Tutorial Example)</span>
-                <button class={Css.navButton} onClick={() => props.scope.onHome()}>
+                <Button class={Css.navButton} onClick={() => props.scope.onHome()}>
                     Home
-                </button>
-                <button class={Css.navButton} onClick={() => props.scope.onOpenTodos()}>
+                </Button>
+                <Button class={Css.navButton} onClick={() => props.scope.onOpenTodos()}>
                     Todos
-                </button>
-                <button class={Css.navButton} onClick={() => props.scope.onOpenSuscriptions()}>
+                </Button>
+                <Button class={Css.navButton} onClick={() => props.scope.onOpenSuscriptions()}>
                     Subscriptions
-                </button>
-                <button class={Css.navButton} onClick={() => props.scope.onLogin()}>
+                </Button>
+                <Button class={Css.navButton} onClick={() => props.scope.onLogin()}>
                     Login
-                </button>
+                </Button>
             </div>
 
             <div class={Css.body}>
                 <ViewSlot scope={props.scope.body} />
             </div>
 
-            <Show when={props.scope.dialog}>
-                <ModalLayer onDismiss={() => props.scope.dialog?.onClose()}>
-                    <ViewSlot scope={props.scope.dialog} />
-                </ModalLayer>
-            </Show>
+            {/* Kobalte is what a dialog needs and a div does not: focus trapped
+                while it is open and given back when it closes, Escape and a
+                click outside both routed to the same place, and the page behind
+                it hidden from assistive technology. `onOpenChange` is where all
+                of those arrive, so the presenter hears them as one thing. */}
+            <ModalLayer open={!!props.scope.dialog} onDismiss={() => props.scope.dialog?.onClose()}>
+                <ViewSlot scope={props.scope.dialog} />
+            </ModalLayer>
 
             {/* Above the dialog, so an alert raised from inside one dims it. */}
-            <Show when={props.scope.alert}>
-                <ModalLayer class={Css.alertLayer} onDismiss={() => props.scope.alert?.onClose()}>
-                    <ViewSlot scope={props.scope.alert} />
-                </ModalLayer>
-            </Show>
+            <ModalLayer
+                open={!!props.scope.alert}
+                onDismiss={() => props.scope.alert?.onClose()}
+                class={Css.alertLayer}
+            >
+                <ViewSlot scope={props.scope.alert} />
+            </ModalLayer>
         </div>
     )
 }
 
-function ModalLayer(props: { class?: string; onDismiss: () => void; children: JSX.Element }): JSX.Element {
+function ModalLayer(props: {
+    open: boolean
+    onDismiss: () => void
+    class?: string
+    children: JSX.Element
+}): JSX.Element {
     return (
-        <div classList={{ [Css.modalLayer]: true, [props.class ?? '']: !!props.class }} onClick={props.onDismiss}>
-            {/* Without this a click on the panel reaches the scrim behind and
-                dismisses the very thing being clicked. */}
-            <div class={Css.modalSurface} onClick={(event) => event.stopPropagation()}>
-                {props.children}
-            </div>
-        </div>
+        <Dialog
+            open={props.open}
+            onOpenChange={(open) => {
+                if (!open) {
+                    props.onDismiss()
+                }
+            }}
+        >
+            <Dialog.Portal>
+                <Dialog.Overlay classList={{ [Css.modalOverlay]: true, [props.class ?? '']: !!props.class }} />
+                <div classList={{ [Css.modalLayer]: true, [props.class ?? '']: !!props.class }}>
+                    <Dialog.Content class={Css.modalSurface}>{props.children}</Dialog.Content>
+                </div>
+            </Dialog.Portal>
+        </Dialog>
     )
 }

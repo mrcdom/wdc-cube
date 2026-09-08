@@ -1,3 +1,5 @@
+import { Button } from '@kobalte/core/button'
+import { Dialog } from '@kobalte/core/dialog'
 import { type JSX } from 'solid-js'
 import type { AlertSeverity } from 'wdc-cube'
 import type { ViewProps } from 'wdc-cube-solid'
@@ -27,17 +29,22 @@ export function AlertView(props: ViewProps<AlertScope>): JSX.Element {
 
     return (
         <>
-            <h2 class={Css.dialogHeading}>
+            {/* Title and Description rather than h2 and p: the dialog around
+                this points its `aria-labelledby` and `aria-describedby` at
+                whatever fills them, and it is the dialog that has to say so. */}
+            <Dialog.Title class={Css.dialogHeading}>
                 <svg class={`${Css.severityIcon} ${severity().colour}`} viewBox="0 0 24 24" aria-hidden="true">
                     <path fill="currentColor" d={severity().path} />
                 </svg>
                 {props.scope.title}
-            </h2>
-            <p class={Css.dialogText}>{props.scope.message}</p>
+            </Dialog.Title>
+
+            <Dialog.Description class={Css.dialogText}>{props.scope.message}</Dialog.Description>
+
             <div class={Css.dialogActions}>
-                <button class={Css.button} onClick={() => props.scope.onClose()}>
+                <Button class={Css.button} onClick={() => props.scope.onClose()}>
                     Close
-                </button>
+                </Button>
             </div>
         </>
     )

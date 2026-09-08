@@ -1,3 +1,4 @@
+import { Button } from '@kobalte/core/button'
 import { For, type JSX } from 'solid-js'
 import type { AlertSeverity } from 'wdc-cube'
 import type { ViewProps } from 'wdc-cube-solid'
@@ -14,9 +15,9 @@ export function BodyView(props: ViewProps<BodyScope>): JSX.Element {
             <div class={Css.buttonPane}>
                 <For each={SEVERITIES}>
                     {(severity) => (
-                        <button class={Css.button} onClick={() => props.scope.onOpenAlert(severity)}>
+                        <Button class={Css.button} onClick={() => props.scope.onOpenAlert(severity)}>
                             {severity}
-                        </button>
+                        </Button>
                     )}
                 </For>
             </div>

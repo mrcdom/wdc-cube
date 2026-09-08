@@ -79,20 +79,37 @@
     }
 }
 
-.modalLayer {
+.modalOverlay {
     position: fixed;
     inset: 0;
     z-index: 2;
+    background: rgba(0, 0, 0, 0.32);
+}
+
+// Separate from the scrim, and above it: the dialog is centred on the layer
+// while the overlay stays a plain sheet of colour with nothing in it.
+.modalLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.32);
+    pointer-events: none;
+}
+
+.modalLayer > * {
+    pointer-events: auto;
 }
 
 // An alert can be raised from inside a dialog, so its scrim stacks above it —
 // otherwise the dialog underneath is never dimmed and the two read as one layer.
 .alertLayer {
     z-index: 4;
+
+    &.modalLayer {
+        z-index: 5;
+    }
 }
 
 .modalSurface {

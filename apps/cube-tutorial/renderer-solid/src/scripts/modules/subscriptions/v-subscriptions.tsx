@@ -1,3 +1,4 @@
+import { Button } from '@kobalte/core/button'
 import { For, type JSX } from 'solid-js'
 import type { ViewProps } from 'wdc-cube-solid'
 import { SubscriptionsScope } from 'wdc-cube-tutorial-presentation/subscriptions'
@@ -14,9 +15,9 @@ export function SubscriptionsView(props: ViewProps<SubscriptionsScope>): JSX.Ele
                 <For each={props.scope.sites}>
                     {(site) => (
                         <li>
-                            <button class={Css.siteButton} onClick={() => props.scope.onItemClicked(site)}>
+                            <Button class={Css.siteButton} onClick={() => props.scope.onItemClicked(site)}>
                                 {site.site}
-                            </button>
+                            </Button>
                         </li>
                     )}
                 </For>

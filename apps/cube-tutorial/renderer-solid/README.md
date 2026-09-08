@@ -49,6 +49,29 @@ The only thing the views do differently is `[...scope.items]` when reading an
 `ObservableArray`, and even that is only because it is not an `@observe()` field —
 the reason is in the library's README.
 
+## The widgets
+
+[Kobalte](https://kobalte.dev) rather than a Material port. Solid's own
+ecosystem answers with headless primitives, and the one live option among them
+is written *in* Solid, on signals — where Ark UI keeps widget state in
+framework-agnostic machines that sit beside the reactivity rather than in it. In
+a project whose subject is that reactivity, that difference decides.
+
+`@suid/material` would have matched the React app's look, and was the obvious
+candidate for it. It was last published in June 2025 and targets MUI v5 while
+`renderer-react` runs v9 — so it would not have matched anyway.
+
+Headless means the styling here is this app's own, and it does not look like
+Material. What the library brings is behaviour, and it is behaviour the
+hand-written version did not have: focus trapped inside an open dialog and given
+back on close, Escape and a click outside arriving at the same `onOpenChange` so
+the presenter hears one thing, the page behind marked `aria-hidden`, and a label
+tied to its input without an id invented in the view and kept in step by hand.
+
+One thing it cannot do from here: restore focus to whatever opened the dialog. A
+Kobalte dialog learns that from its own `Dialog.Trigger`, and these open because
+a presenter put a scope in a slot — there is no trigger to remember.
+
 ## What it costs
 
 Stress mode builds 1000 items and a clock. Toggling one of those items, 40 times,
