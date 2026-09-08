@@ -9,7 +9,7 @@ import { Logger, NOOP_VOID, type Scope } from 'wdc-cube'
 
 import { Dom } from './Dom'
 
-const LOG = Logger.get('WC.CubeElement')
+const LOG = Logger.get('WebC.CubeElement')
 
 /**
  * What `setAttrByToken` last wrote, per element and attribute. Weak on the

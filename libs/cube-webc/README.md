@@ -1,4 +1,4 @@
-# wdc-cube-webcomponents
+# wdc-cube-webc
 
 Custom-element bindings for the [Cube architecture](../../docs/architecture.md),
 with no framework underneath.

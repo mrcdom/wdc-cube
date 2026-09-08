@@ -8,7 +8,7 @@ import '@spectrum-web-components/theme/spectrum-two/theme-light.js'
 import '@spectrum-web-components/theme/spectrum-two/scale-medium.js'
 
 import { PageHistoryManager } from 'wdc-cube'
-import { onActionError, ViewFactory } from 'wdc-cube-webcomponents'
+import { onActionError, ViewFactory } from 'wdc-cube-webc'
 import { initializeRoutes, Places, registerServices } from 'wdc-cube-tutorial-core'
 import { MainPresenter } from 'wdc-cube-tutorial-core/main'
 

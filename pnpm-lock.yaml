@@ -193,7 +193,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(sass@1.104.0))
 
-  apps/cube-tutorial-webcomponents:
+  apps/cube-tutorial-webc:
     dependencies:
       '@spectrum-web-components/alert-dialog':
         specifier: ^1.12.2
@@ -243,9 +243,9 @@ importers:
       wdc-cube-tutorial-core:
         specifier: workspace:*
         version: link:../cube-tutorial-core
-      wdc-cube-webcomponents:
+      wdc-cube-webc:
         specifier: workspace:*
-        version: link:../../libs/cube-webcomponents
+        version: link:../../libs/cube-webc
     devDependencies:
       sass:
         specifier: ^1.104.0
@@ -332,7 +332,7 @@ importers:
         specifier: workspace:*
         version: link:../cube
 
-  libs/cube-webcomponents:
+  libs/cube-webc:
     dependencies:
       wdc-cube:
         specifier: workspace:*
@@ -4710,7 +4710,7 @@ snapshots:
   '@floating-ui/dom@1.7.4':
     dependencies:
       '@floating-ui/core': 1.8.0
-      '@floating-ui/utils': 0.2.10
+      '@floating-ui/utils': 0.2.12
 
   '@floating-ui/utils@0.2.10': {}
 

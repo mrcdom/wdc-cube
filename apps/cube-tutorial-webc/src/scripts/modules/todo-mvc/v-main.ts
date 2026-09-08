@@ -1,4 +1,4 @@
-import { CubeViewSlot, SyncedRows } from 'wdc-cube-webcomponents'
+import { CubeViewSlot, SyncedRows } from 'wdc-cube-webc'
 import { ItemScope, MainScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
 import { AppElement, type AppDom } from '../../widgets'

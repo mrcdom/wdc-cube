@@ -1,4 +1,4 @@
-import { CubeViewSlot } from 'wdc-cube-webcomponents'
+import { CubeViewSlot } from 'wdc-cube-webc'
 import { RestrictedScope } from 'wdc-cube-tutorial-core/restricted'
 
 import { AppElement, type AppDom } from '../../widgets'

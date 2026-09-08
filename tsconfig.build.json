@@ -11,7 +11,7 @@
       "path": "libs/cube-test"
     },
     {
-      "path": "libs/cube-webcomponents"
+      "path": "libs/cube-webc"
     },
     {
       "path": "apps/cube-tutorial-core"

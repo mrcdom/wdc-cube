@@ -22,18 +22,18 @@ This repository holds the framework and a tutorial application that exercises it
 
 ## Packages
 
-| Path                                                                 | Package                  | What it is                                                                                                                                                                                                                      |
-| -------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [libs/cube](libs/cube)                                               | `wdc-cube`               | The framework core: `Place`, `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Scope`, `FlipIntent`, `CubeBuilder`, `PageHistoryManager`, plus utilities. No view technology in it. See its [README](libs/cube/README.md). |
-| [libs/cube-react](libs/cube-react)                                   | `wdc-cube-react`         | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `classToFComponent` and `bindUpdate` to connect a scope to a component. See its [README](libs/cube-react/README.md).                                   |
-| [apps/cube-tutorial-core](apps/cube-tutorial-core)                   | `wdc-cube-tutorial-core` | The view-agnostic half of the example: places, keys, presenters, scopes and services. Depends on `wdc-cube` only, so a view written in any technology can drive it.                                                             |
-| [apps/cube-tutorial-react](apps/cube-tutorial-react)                 | —                        | The React view layer over that core, and the runnable app. See its [README](apps/cube-tutorial-react/README.md).                                                                                                                |
-| [libs/cube-angular](libs/cube-angular)                               | `wdc-cube-angular`       | Angular bindings: `bindScope` to answer `scope.forceUpdate()`, `ViewFactory` and the `*cubeViewSlot` directive to resolve a scope to a component.                                                                               |
-| [apps/cube-tutorial-angular](apps/cube-tutorial-angular)             | —                        | The same core driven by Angular instead, so the two apps differ only in the binding. See its [README](apps/cube-tutorial-angular/README.md).                                                                                    |
-| [libs/cube-webcomponents](libs/cube-webcomponents)                   | `wdc-cube-webcomponents` | Custom-element bindings: `CubeElement` is the view and the element at once, `Dom` declares a tree by nesting, `ViewFactory` maps a scope to a tag. No framework underneath.                                                     |
-| [libs/cube-test](libs/cube-test)                                     | `wdc-cube-test`          | Test helpers for driving a presentation layer with no view attached. See its [README](libs/cube-test/README.md).                                                                                                                |
-| [apps/cube-tutorial-webcomponents](apps/cube-tutorial-webcomponents) | —                        | The same core drawn by the platform alone, on port 3003.                                                                                                                                                                        |
-| [apps/cube-tutorial-test](apps/cube-tutorial-test)                   | —                        | The same core exercised with no view at all, beside the two apps that render it. See its [README](apps/cube-tutorial-test/README.md).                                                                                           |
+| Path                                                     | Package                  | What it is                                                                                                                                                                                                                      |
+| -------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [libs/cube](libs/cube)                                   | `wdc-cube`               | The framework core: `Place`, `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Scope`, `FlipIntent`, `CubeBuilder`, `PageHistoryManager`, plus utilities. No view technology in it. See its [README](libs/cube/README.md). |
+| [libs/cube-react](libs/cube-react)                       | `wdc-cube-react`         | React bindings: `ViewFactory`/`ViewSlot` to resolve a scope to its view, `classToFComponent` and `bindUpdate` to connect a scope to a component. See its [README](libs/cube-react/README.md).                                   |
+| [apps/cube-tutorial-core](apps/cube-tutorial-core)       | `wdc-cube-tutorial-core` | The view-agnostic half of the example: places, keys, presenters, scopes and services. Depends on `wdc-cube` only, so a view written in any technology can drive it.                                                             |
+| [apps/cube-tutorial-react](apps/cube-tutorial-react)     | —                        | The React view layer over that core, and the runnable app. See its [README](apps/cube-tutorial-react/README.md).                                                                                                                |
+| [libs/cube-angular](libs/cube-angular)                   | `wdc-cube-angular`       | Angular bindings: `bindScope` to answer `scope.forceUpdate()`, `ViewFactory` and the `*cubeViewSlot` directive to resolve a scope to a component.                                                                               |
+| [apps/cube-tutorial-angular](apps/cube-tutorial-angular) | —                        | The same core driven by Angular instead, so the two apps differ only in the binding. See its [README](apps/cube-tutorial-angular/README.md).                                                                                    |
+| [libs/cube-webc](libs/cube-webc)                         | `wdc-cube-webc`          | Custom-element bindings: `CubeElement` is the view and the element at once, `Dom` declares a tree by nesting, `ViewFactory` maps a scope to a tag. No framework underneath. See its [README](libs/cube-webc/README.md).         |
+| [libs/cube-test](libs/cube-test)                         | `wdc-cube-test`          | Test helpers for driving a presentation layer with no view attached. See its [README](libs/cube-test/README.md).                                                                                                                |
+| [apps/cube-tutorial-webc](apps/cube-tutorial-webc)       | —                        | The same core drawn by the platform alone, on port 3003.                                                                                                                                                                        |
+| [apps/cube-tutorial-test](apps/cube-tutorial-test)       | —                        | The same core exercised with no view at all, beside the two apps that render it. See its [README](apps/cube-tutorial-test/README.md).                                                                                           |
 
 ## Requirements
 
@@ -49,7 +49,7 @@ pnpm install
 pnpm compile             # builds the libraries and the tutorial core
 pnpm start               # runs the React tutorial at http://localhost:3000
 pnpm start:angular       # runs the Angular tutorial at http://localhost:3001
-pnpm start:webcomponents # runs the custom-element tutorial at http://localhost:3003
+pnpm start:webc # runs the custom-element tutorial at http://localhost:3003
 ```
 
 ## Commands
@@ -65,7 +65,7 @@ pnpm format         # prettier --write
 pnpm format:check   # prettier --check
 pnpm start          # dev server for the React tutorial (port 3000)
 pnpm start:angular  # dev server for the Angular tutorial (port 3001)
-pnpm start:webcomponents # dev server for the custom-element tutorial (port 3003)
+pnpm start:webc # dev server for the custom-element tutorial (port 3003)
 pnpm clean          # removes lib/, dist/, build/, coverage/, *.tsbuildinfo
 ```
 

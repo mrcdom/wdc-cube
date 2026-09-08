@@ -1,4 +1,4 @@
-import type { ViewFactory } from 'wdc-cube-webcomponents'
+import type { ViewFactory } from 'wdc-cube-webc'
 import { RestrictedScope } from 'wdc-cube-tutorial-core/restricted'
 
 import { RestrictedView } from './v-restricted'

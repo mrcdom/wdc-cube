@@ -1,4 +1,4 @@
-import type { ViewFactory } from 'wdc-cube-webcomponents'
+import type { ViewFactory } from 'wdc-cube-webc'
 import { SubscriptionsDetailScope, SubscriptionsScope } from 'wdc-cube-tutorial-core/subscriptions'
 
 import { SubscriptionsDetailView } from './v-subscriptions-detail'

@@ -1,4 +1,4 @@
-import { ViewFactory } from 'wdc-cube-webcomponents'
+import { ViewFactory } from 'wdc-cube-webc'
 
 import { registerViews as registerMain } from './main'
 import { registerViews as registerRestricted } from './restricted'

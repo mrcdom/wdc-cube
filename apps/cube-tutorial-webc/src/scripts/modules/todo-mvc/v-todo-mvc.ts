@@ -1,4 +1,4 @@
-import { CubeViewSlot } from 'wdc-cube-webcomponents'
+import { CubeViewSlot } from 'wdc-cube-webc'
 import { TodoMvcScope } from 'wdc-cube-tutorial-core/todo-mvc'
 
 import { AppElement, type AppDom } from '../../widgets'

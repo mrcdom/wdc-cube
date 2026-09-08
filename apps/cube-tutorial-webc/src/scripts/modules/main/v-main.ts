@@ -1,4 +1,4 @@
-import { CubeViewSlot } from 'wdc-cube-webcomponents'
+import { CubeViewSlot } from 'wdc-cube-webc'
 import { MainScope } from 'wdc-cube-tutorial-core/main'
 
 import { AppElement, type AppDom, type AppModalLayer } from '../../widgets'

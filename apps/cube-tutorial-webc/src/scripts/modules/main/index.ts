@@ -1,4 +1,4 @@
-import type { ViewFactory } from 'wdc-cube-webcomponents'
+import type { ViewFactory } from 'wdc-cube-webc'
 import { AlertScope, BodyScope, MainScope } from 'wdc-cube-tutorial-core/main'
 
 import { AlertView } from './v-alert'

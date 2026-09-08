@@ -1,4 +1,4 @@
-import { CubeViewSlot } from 'wdc-cube-webcomponents'
+import { CubeViewSlot } from 'wdc-cube-webc'
 
 import { SpectrumDom } from './SpectrumDom'
 

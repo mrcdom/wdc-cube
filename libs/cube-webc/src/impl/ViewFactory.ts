@@ -9,13 +9,13 @@ import { createViewRegistry, Logger, type Scope, type ScopeConstructor } from 'w
 
 import type { CubeElement } from './CubeElement'
 
-const LOG = Logger.get('WC.ViewFactory')
+const LOG = Logger.get('WebC.ViewFactory')
 
 /** A view class, which is also a custom element class. */
 export type ViewConstructor<S extends Scope = Scope> = CustomElementConstructor & { new (): CubeElement<S> }
 
 /** What the registry stores: the tag the browser knows this view by. */
-const registry = createViewRegistry<string>('wdc-cube-webcomponents:view')
+const registry = createViewRegistry<string>('wdc-cube-webc:view')
 
 export const ViewFactory = {
     /**

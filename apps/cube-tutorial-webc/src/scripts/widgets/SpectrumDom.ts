@@ -1,4 +1,4 @@
-import { Dom, type Configure, type DomRoot } from 'wdc-cube-webcomponents'
+import { Dom, type Configure, type DomRoot } from 'wdc-cube-webc'
 
 import { ButtonGroup } from '@spectrum-web-components/button-group'
 import { Dialog } from '@spectrum-web-components/dialog'

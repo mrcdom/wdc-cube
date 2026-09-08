@@ -1,4 +1,4 @@
-import { CubeElement, type Configure, type DomRoot } from 'wdc-cube-webcomponents'
+import { CubeElement, type Configure, type DomRoot } from 'wdc-cube-webc'
 import type { Scope } from 'wdc-cube'
 
 import { SpectrumDom } from './SpectrumDom'

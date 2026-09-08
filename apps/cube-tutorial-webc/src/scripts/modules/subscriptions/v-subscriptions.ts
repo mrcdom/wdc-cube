@@ -1,4 +1,4 @@
-import { SyncedRows } from 'wdc-cube-webcomponents'
+import { SyncedRows } from 'wdc-cube-webc'
 import type { SideNav, SideNavItem } from '@spectrum-web-components/sidenav'
 
 import { SubscriptionsScope, type SiteItemType } from 'wdc-cube-tutorial-core/subscriptions'
