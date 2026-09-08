@@ -12,9 +12,9 @@ import {
     type Member
 } from '../../domain'
 import { ShowcaseService } from '../../services'
-import { CyclesKeys } from '../cycles/cycles.key'
 import { IssuesKeys } from '../issues/issues.key'
 import type { MainPresenter } from '../main/main.presenter'
+import type { ProjectPresenter } from '../project/project.presenter'
 import { DashboardKeys } from './dashboard.key'
 import { BarScope, DashboardScope, PersonLoadScope, SliceScope, StatScope } from './dashboard.scope'
 
@@ -55,6 +55,7 @@ const PRIORITY_COLOURS: Record<IssuePriority, string> = {
  */
 export class DashboardPresenter extends CubePresenter<MainPresenter, DashboardScope> {
     private parentSlot: ScopeSlot = NOOP_VOID
+    private owner?: ProjectPresenter
     private projectId?: Id
 
     public constructor(app: MainPresenter) {
@@ -62,15 +63,11 @@ export class DashboardPresenter extends CubePresenter<MainPresenter, DashboardSc
     }
 
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
-        if (!this.app.authenticated) {
-            await this.app.demandSignIn()
-            return false
-        }
-
         const keys = new DashboardKeys(this.app, intent)
 
         if (initialization) {
             this.parentSlot = keys.parentSlot
+            this.owner = keys.owner
             LOG.info('Initialized')
         }
 
@@ -79,8 +76,6 @@ export class DashboardPresenter extends CubePresenter<MainPresenter, DashboardSc
             this.projectId = keys.projectId
             this.scope.loading = true
         }
-
-        this.showNavigation()
 
         // The slot first, and the request after.
         //
@@ -93,47 +88,26 @@ export class DashboardPresenter extends CubePresenter<MainPresenter, DashboardSc
 
         if (moved) {
             await this.load()
-            // Said again, because the project's name only exists now and it is
-            // what labels the group.
-            this.showNavigation()
         }
 
         return true
     }
 
-    public override publishParameters(intent: FlipIntent): void {
-        const keys = new DashboardKeys(this.app, intent)
-        keys.projectId = this.projectId
-    }
-
-    private showNavigation() {
-        const projectId = this.projectId
-        const go =
-            <K extends { projectId: Id | undefined; flip: () => Promise<void> }>(keys: K) =>
-            async () => {
-                keys.projectId = projectId
-                await keys.flip()
-            }
-
-        this.app.setNavigation(this.scope.projectName, [
-            this.app.buildNavItem('Dashboard', 'dashboard', true, async () => undefined),
-            this.app.buildNavItem('Issues', 'issues', false, go(new IssuesKeys(this.app))),
-            this.app.buildNavItem('Cycles', 'cycles', false, go(new CyclesKeys(this.app)))
-        ])
-    }
-
     private async load() {
         try {
-            const [project, members, page] = await Promise.all([
-                service.fetchProject(this.projectId!),
-                service.fetchMembers(),
+            const [, page] = await Promise.all([
+                // The project and its people are already in flight, asked for by
+                // the place this one stands inside. Joining that request here
+                // rather than waiting for it above is what keeps it alongside
+                // this one instead of in front of it.
+                this.owner?.whenLoaded(),
                 // Everything, because these are figures about the project and not
                 // about a page of it.
                 service.fetchIssues(this.projectId!, { perPage: 1000 })
             ])
 
-            this.scope.projectName = project?.name ?? ''
-            this.build(page.items, members)
+            this.scope.projectName = this.owner?.project?.name ?? ''
+            this.build(page.items, this.owner?.members ?? [])
             this.scope.error = undefined
         } catch (caught) {
             this.scope.error = caught instanceof Error ? caught.message : 'Could not load the dashboard.'

@@ -19,6 +19,10 @@
       "types": "./lib/modules/auth/index.d.ts",
       "default": "./lib/modules/auth/index.js"
     },
+    "./project": {
+      "types": "./lib/modules/project/index.d.ts",
+      "default": "./lib/modules/project/index.js"
+    },
     "./projects": {
       "types": "./lib/modules/projects/index.d.ts",
       "default": "./lib/modules/projects/index.js"

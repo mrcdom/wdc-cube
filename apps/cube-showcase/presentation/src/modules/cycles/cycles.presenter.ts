@@ -2,7 +2,6 @@ import { CubePresenter, FlipIntent, Logger, NOOP_VOID, ScopeSlot } from 'wdc-cub
 
 import type { Cycle, Id } from '../../domain'
 import { ShowcaseService } from '../../services'
-import { DashboardKeys } from '../dashboard/dashboard.key'
 import { IssuesKeys } from '../issues/issues.key'
 import type { MainPresenter } from '../main/main.presenter'
 import { CyclesKeys } from './cycles.key'
@@ -22,11 +21,6 @@ export class CyclesPresenter extends CubePresenter<MainPresenter, CyclesScope> {
     }
 
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
-        if (!this.app.authenticated) {
-            await this.app.demandSignIn()
-            return false
-        }
-
         const keys = new CyclesKeys(this.app, intent)
 
         if (initialization) {
@@ -40,49 +34,23 @@ export class CyclesPresenter extends CubePresenter<MainPresenter, CyclesScope> {
             this.scope.loading = true
         }
 
-        this.showNavigation()
         // The slot first, so the skeleton is on screen while the request runs.
         this.parentSlot(this.scope)
 
         if (moved) {
             await this.load()
-            this.showNavigation()
         }
 
         return true
     }
 
-    public override publishParameters(intent: FlipIntent): void {
-        const keys = new CyclesKeys(this.app, intent)
-        keys.projectId = this.projectId
-    }
-
-    private showNavigation() {
-        const projectId = this.projectId
-        this.app.setNavigation(this.scope.projectName, [
-            this.app.buildNavItem('Dashboard', 'dashboard', false, async () => {
-                const keys = new DashboardKeys(this.app)
-                keys.projectId = projectId
-                await keys.flip()
-            }),
-            this.app.buildNavItem('Issues', 'issues', false, async () => {
-                const keys = new IssuesKeys(this.app)
-                keys.projectId = projectId
-                await keys.flip()
-            }),
-            this.app.buildNavItem('Cycles', 'cycles', true, async () => undefined)
-        ])
-    }
-
     private async load() {
         try {
-            const [project, cycles, page] = await Promise.all([
-                service.fetchProject(this.projectId!),
+            const [cycles, page] = await Promise.all([
                 service.fetchCycles(this.projectId!),
                 service.fetchIssues(this.projectId!, { perPage: 500 })
             ])
 
-            this.scope.projectName = project?.name ?? ''
             const now = Date.now()
 
             this.scope.cycles = cycles.map((cycle) => {

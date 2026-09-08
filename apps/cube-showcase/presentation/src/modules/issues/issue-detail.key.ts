@@ -1,18 +1,10 @@
 import type { Id, Issue } from '../../domain'
-import { MainKeys } from '../main/main.key'
+import { ProjectKeys } from '../project/project.key'
 import { AttrIds, ParamIds, Places } from '../RouteConsts'
 
-export class IssueDetailKeys extends MainKeys {
+export class IssueDetailKeys extends ProjectKeys {
     public override get place() {
         return Places.issueDetail
-    }
-
-    public get projectId(): Id | undefined {
-        return this._intent.getParameterAsString(ParamIds.ProjectId)
-    }
-
-    public set projectId(value: Id | undefined) {
-        this._intent.setParameter(ParamIds.ProjectId, value)
     }
 
     public get issueId(): Id | undefined {

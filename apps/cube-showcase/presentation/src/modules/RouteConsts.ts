@@ -28,13 +28,26 @@ export const AttrIds = {
     parentSlot: 'parent-slot',
     dialogSlot: 'dialog-slot',
 
+    /** The presenter of the project a place is standing inside. */
+    project_owner: '0001',
+
     /** A record already in hand, so opening it does not fetch it again. */
-    issueDetail_issue: '0001'
+    issueDetail_issue: '0002'
 }
 
 export const Places = {
     main: Place.ROOT,
     signIn: Place.UNKNOWN,
+
+    /**
+     * The selected project — what the dashboard, the issues and the cycles are
+     * all about, and where the session is checked once on behalf of all three.
+     *
+     * `projects` sits inside it rather than above it: choosing a different
+     * project is a decision about which project is selected, so it belongs to
+     * the place that owns that decision.
+     */
+    project: Place.UNKNOWN,
     projects: Place.UNKNOWN,
     issues: Place.UNKNOWN,
     issueDetail: Place.UNKNOWN,

@@ -31,11 +31,6 @@ export class IssueDetailPresenter extends CubePresenter<MainPresenter, IssueDeta
     }
 
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
-        if (!this.app.authenticated) {
-            await this.app.demandSignIn()
-            return false
-        }
-
         const keys = new IssueDetailKeys(this.app, intent)
 
         if (initialization) {
@@ -66,12 +61,12 @@ export class IssueDetailPresenter extends CubePresenter<MainPresenter, IssueDeta
     /**
      * What the address bar says while this dialog is open.
      *
-     * The list beneath publishes its own filters and page at the same moment, so
-     * the URL carries both: the issue that is open, and the list it is open over.
+     * Only the issue: the list beneath publishes its own filters and page at the
+     * same moment, and the project comes from the place both stand inside. The
+     * URL carries all three without any of them being written twice.
      */
     public override publishParameters(intent: FlipIntent): void {
         const keys = new IssueDetailKeys(this.app, intent)
-        keys.projectId = this.projectId
         keys.issueId = this.issue?.id
     }
 

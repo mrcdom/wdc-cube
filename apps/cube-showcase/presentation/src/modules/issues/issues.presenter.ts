@@ -9,13 +9,11 @@ import {
     type Issue,
     type IssuePriority,
     type IssueState,
-    type Member,
-    type Project
+    type Member
 } from '../../domain'
 import { ShowcaseService } from '../../services'
-import { CyclesKeys } from '../cycles/cycles.key'
-import { DashboardKeys } from '../dashboard/dashboard.key'
 import type { MainPresenter } from '../main/main.presenter'
+import type { ProjectPresenter } from '../project/project.presenter'
 import { IssueDetailKeys } from './issue-detail.key'
 import { IssuesKeys, type IssueView } from './issues.key'
 import { BoardColumnScope, FilterOptionScope, FilterScope, IssueRowScope, IssuesScope } from './issues.scope'
@@ -38,8 +36,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
     private parentSlot: ScopeSlot = NOOP_VOID
     private dialogSlot: ScopeSlot = NOOP_VOID
 
-    private project?: Project
-    private members: Member[] = []
+    private owner?: ProjectPresenter
 
     /**
      * Where this presenter currently is.
@@ -72,11 +69,6 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         initialization: boolean,
         last?: boolean
     ): Promise<boolean> {
-        if (!this.app.authenticated) {
-            await this.app.demandSignIn()
-            return false
-        }
-
         const keys = new IssuesKeys(this.app, intent)
 
         if (!keys.projectId) {
@@ -87,6 +79,7 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         if (initialization) {
             this.parentSlot = keys.parentSlot
             this.dialogSlot = keys.dialogSlot
+            this.owner = keys.owner
             this.bindActions()
         }
 
@@ -95,8 +88,6 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
             this.at.projectId = keys.projectId
             this.scope.loading = true
         }
-
-        this.showNavigation('issues')
 
         if (last) {
             // Nothing deeper is open, so whatever the dialog held is gone.
@@ -109,12 +100,6 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         // `loading` flag exists so a view can be drawn before its data, and
         // filling the slot last is what made it unreachable.
         this.parentSlot(this.scope)
-
-        if (movedProject) {
-            await this.loadProject()
-            // Said again, because the project's name only exists now.
-            this.showNavigation('issues')
-        }
 
         await this.applyQuery(keys)
 
@@ -133,34 +118,9 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         this.scope.onNextPage = this.action(this.onMovePage.bind(this, 1))
     }
 
-    private async loadProject() {
-        const [project, members] = await Promise.all([service.fetchProject(this.at.projectId!), service.fetchMembers()])
-        this.project = project
-        this.members = members
-        this.scope.projectName = project?.name ?? ''
-        this.scope.projectKey = project?.key ?? ''
-    }
-
-    /** What the shell shows while this module is the one on screen. */
-    private showNavigation(current: 'issues' | 'cycles') {
-        const projectId = this.at.projectId!
-        this.app.setNavigation(this.project?.name, [
-            this.app.buildNavItem('Dashboard', 'dashboard', false, async () => {
-                const keys = new DashboardKeys(this.app)
-                keys.projectId = projectId
-                await keys.flip()
-            }),
-            this.app.buildNavItem('Issues', 'issues', current === 'issues', async () => {
-                const keys = new IssuesKeys(this.app)
-                keys.projectId = projectId
-                await keys.flip()
-            }),
-            this.app.buildNavItem('Cycles', 'cycles', current === 'cycles', async () => {
-                const keys = new CyclesKeys(this.app)
-                keys.projectId = projectId
-                await keys.flip()
-            })
-        ])
+    /** Everyone an issue can be assigned to, which `project` already asked for. */
+    private get members(): Member[] {
+        return this.owner?.members ?? []
     }
 
     private async applyQuery(keys: IssuesKeys) {
@@ -207,7 +167,18 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
         this.update()
 
         try {
-            const page = await service.fetchIssues(this.at.projectId!, query)
+            const [, page] = await Promise.all([
+                // The people name the assignees on every row and fill the
+                // assignee filter. They are already in flight, asked for by the
+                // place this one stands inside, so this joins that request.
+                this.owner?.whenLoaded(),
+                service.fetchIssues(this.at.projectId!, query)
+            ])
+
+            // Said again now that the people are here: the assignee filter has
+            // names to offer, and the rows have someone to name.
+            this.buildFilters(keys)
+
             this.scope.rows = page.items.map((issue) => this.buildRow(issue))
             this.scope.columns = this.buildColumns(this.scope.rows)
             this.scope.page = page.page
@@ -363,7 +334,6 @@ export class IssuesPresenter extends CubePresenter<MainPresenter, IssuesScope> {
      */
     public override publishParameters(intent: FlipIntent): void {
         const keys = new IssuesKeys(this.app, intent)
-        keys.projectId = this.at.projectId
         keys.view = this.at.view
         keys.state = this.at.state
         keys.priority = this.at.priority

@@ -65,9 +65,6 @@ export class IssuesScope extends Scope {
     @observe() loading = true
     @observe() error?: string
 
-    @observe() projectName = ''
-    @observe() projectKey = ''
-
     /**
      * Which drawing is on screen. Both are built from the same rows: the list
      * and the board differ in arrangement, not in what they are arranging.

@@ -22,7 +22,6 @@ export class CycleCardScope extends Scope {
 export class CyclesScope extends Scope {
     @observe() loading = true
     @observe() error?: string
-    @observe() projectName = ''
     @observe() cycles: CycleCardScope[] = []
 }
 

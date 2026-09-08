@@ -1,9 +1,10 @@
 import { CubePresenter, FlipIntent, Logger, NOOP_VOID, ScopeSlot } from 'wdc-cube'
 
-import type { Project } from '../../domain'
+import type { Member, Project } from '../../domain'
 import { ShowcaseService } from '../../services'
 import { DashboardKeys } from '../dashboard/dashboard.key'
 import type { MainPresenter } from '../main/main.presenter'
+import type { ProjectPresenter } from '../project/project.presenter'
 import { ProjectsKeys } from './projects.key'
 import { ProjectCardScope, ProjectsScope } from './projects.scope'
 
@@ -12,51 +13,31 @@ const LOG = Logger.get('Showcase.ProjectsPresenter')
 // @Inject
 const service = ShowcaseService.INSTANCE
 
+/**
+ * Choosing which project to be in.
+ *
+ * The one place inside `project` that has no project: the parent sees no id,
+ * clears the sidebar and loads nothing about a project — which is also what
+ * makes arriving here from a dashboard a deselection rather than a screen with
+ * a stale project still named beside it.
+ */
 export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScope> {
     private parentSlot: ScopeSlot = NOOP_VOID
+    private owner?: ProjectPresenter
     private loaded = false
 
     public constructor(app: MainPresenter) {
         super(app, new ProjectsScope())
     }
 
-    public override async applyParameters(
-        intent: FlipIntent,
-        initialization: boolean,
-        last?: boolean
-    ): Promise<boolean> {
-        // The door first. A place behind it does not get to run and then
-        // discover it should not have.
-        if (!this.app.authenticated) {
-            await this.app.demandSignIn()
-            return false
-        }
-
+    public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
         const keys = new ProjectsKeys(this.app, intent)
 
         if (initialization) {
             this.parentSlot = keys.parentSlot
+            this.owner = keys.owner
             LOG.info('Initialized')
         }
-
-        // `projects` is a segment on the way to a dashboard, an issue list or a
-        // set of cycles, and on those journeys this screen is not shown at all.
-        //
-        // A place that is only being passed through has nothing to put on screen
-        // and nothing to fetch. Filling the slot anyway put the project list up
-        // for the instant before the deeper place replaced it, and fetching
-        // anyway spent two requests on a page nobody was going to see — one of
-        // them for members the deeper place then asked for again.
-        //
-        // The list of issues does the opposite, and rightly: it *is* the backdrop
-        // its detail dialog opens over, so it fills its slot whether or not it is
-        // last. The difference is whether the deeper place stands on this one or
-        // merely came through it.
-        if (!last) {
-            return true
-        }
-
-        this.app.setNavigation(undefined, [])
 
         // The slot first, so the cards' skeleton is on screen while they load.
         this.parentSlot(this.scope)
@@ -71,7 +52,9 @@ export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScop
 
     private async load() {
         try {
-            const [projects, members] = await Promise.all([service.fetchProjects(), service.fetchMembers()])
+            // The people are already on their way down from `project`, so this
+            // joins that request rather than making a second one.
+            const [projects, members] = await Promise.all([service.fetchProjects(), this.members()])
             const leadName = new Map(members.map((member) => [member.id, member.name]))
 
             this.scope.projects = projects.map((project) => this.buildCard(project, leadName.get(project.leadId) ?? ''))
@@ -81,6 +64,11 @@ export class ProjectsPresenter extends CubePresenter<MainPresenter, ProjectsScop
         } finally {
             this.scope.loading = false
         }
+    }
+
+    private async members(): Promise<Member[]> {
+        await this.owner?.whenLoaded()
+        return this.owner?.members ?? []
     }
 
     private buildCard(project: Project, leadName: string): ProjectCardScope {

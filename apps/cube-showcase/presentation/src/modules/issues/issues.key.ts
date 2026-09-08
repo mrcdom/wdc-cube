@@ -1,5 +1,5 @@
 import type { Id, IssuePriority, IssueState } from '../../domain'
-import { MainKeys } from '../main/main.key'
+import { ProjectKeys } from '../project/project.key'
 import { ParamIds, Places } from '../RouteConsts'
 
 /** Which drawing of the same list of issues. */
@@ -15,19 +15,9 @@ export type IssueView = 'list' | 'board' | 'table'
  * this, and no code was written to keep the URL in step — the URL *is* the
  * state, read through here.
  */
-export class IssuesKeys extends MainKeys {
+export class IssuesKeys extends ProjectKeys {
     public override get place() {
         return Places.issues
-    }
-
-    // :: projectId
-
-    public get projectId(): Id | undefined {
-        return this._intent.getParameterAsString(ParamIds.ProjectId)
-    }
-
-    public set projectId(value: Id | undefined) {
-        this._intent.setParameter(ParamIds.ProjectId, value)
     }
 
     // :: view
