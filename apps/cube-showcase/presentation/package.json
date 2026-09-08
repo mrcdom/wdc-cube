@@ -1,0 +1,27 @@
+{
+  "name": "wdc-cube-showcase-presentation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The showcase, minus anything that draws: places, keys, presenters, scopes and services.",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": { "types": "./lib/index.d.ts", "default": "./lib/index.js" },
+    "./main": { "types": "./lib/modules/main/index.d.ts", "default": "./lib/modules/main/index.js" },
+    "./auth": { "types": "./lib/modules/auth/index.d.ts", "default": "./lib/modules/auth/index.js" },
+    "./projects": { "types": "./lib/modules/projects/index.d.ts", "default": "./lib/modules/projects/index.js" },
+    "./issues": { "types": "./lib/modules/issues/index.d.ts", "default": "./lib/modules/issues/index.js" },
+    "./cycles": { "types": "./lib/modules/cycles/index.d.ts", "default": "./lib/modules/cycles/index.js" },
+    "./domain": { "types": "./lib/domain/index.d.ts", "default": "./lib/domain/index.js" }
+  },
+  "scripts": {
+    "compile": "tsc -b",
+    "build": "tsc -b",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "wdc-cube": "workspace:*"
+  }
+}
