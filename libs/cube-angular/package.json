@@ -1,6 +1,6 @@
 {
   "name": "wdc-cube-angular",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Angular bindings for the Cube architecture",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",

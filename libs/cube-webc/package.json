@@ -1,6 +1,6 @@
 {
   "name": "wdc-cube-webc",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Custom-element bindings for the Cube architecture, with no framework underneath",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",
