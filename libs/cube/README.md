@@ -1,14 +1,14 @@
 # wdc-cube
 
-The core of the [Cube architecture](../../docs/architecture.md): places,
+The core of the [Cube architecture](https://github.com/mrcdom/wdc-cube/blob/master/docs/architecture.md): places,
 intents, presenters, scopes, actions and the update pipeline.
 
 It has no view technology in it, and no dependency on one. A binding package
-supplies that — [`wdc-cube-react`](../cube-react/README.md),
-[`wdc-cube-angular`](../cube-angular/README.md),
-[`wdc-cube-webc`](../cube-webc/README.md),
-[`wdc-cube-solid`](../cube-solid/README.md), or none at all when a test
-drives the presenters directly with [`wdc-cube-test`](../cube-test/README.md).
+supplies that — [`wdc-cube-react`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-react#readme),
+[`wdc-cube-angular`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-angular#readme),
+[`wdc-cube-webc`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-webc#readme),
+[`wdc-cube-solid`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-solid#readme), or none at all when a test
+drives the presenters directly with [`wdc-cube-test`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-test#readme).
 
 The architecture document explains how the pieces fit and is the place to start.
 This one is about the package: what it exports, and the few things worth knowing
@@ -113,3 +113,28 @@ worked example in the repository, and reads as one.
 pnpm compile        # from the workspace root; builds this and everything downstream
 pnpm test
 ```
+
+## The code, and something to look at
+
+This is the core of the Cube architecture, and everything above is about using it. The argument it belongs to is easier to see than to read about.
+
+**[Open the showcase](https://mrcdom.github.io/wdc-cube/)** — an issue tracker where every filter, page,
+sorted column and open dialog is a place. Change one and watch the address bar:
+Back undoes it, a reload lands on it, and the link you copy opens the same thing
+for someone else. Nothing in it writes that URL — each presenter says what it is
+showing, and the address is assembled from all of them.
+
+**[Read the source](https://github.com/mrcdom/wdc-cube)** — one presentation layer, drawn by four view
+technologies: React, Angular, SolidJS and custom elements. Adding the second, the
+third and the fourth needed no change to the presenters, which is the claim the
+repository exists to demonstrate, kept honest by having to hold four times over.
+
+| | |
+| --- | --- |
+| This package's source | [`libs/cube`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube) |
+| How the pieces fit | [The Cube architecture](https://github.com/mrcdom/wdc-cube/blob/master/docs/architecture.md) |
+| The showcase | [live](https://mrcdom.github.io/wdc-cube/) · [source](https://github.com/mrcdom/wdc-cube/tree/master/apps/cube-showcase#readme) |
+| The tutorial, drawn four ways | [source](https://github.com/mrcdom/wdc-cube/tree/master/apps/cube-tutorial) |
+| Issues and discussion | [github.com/mrcdom/wdc-cube/issues](https://github.com/mrcdom/wdc-cube/issues) |
+
+MIT © WeDoCode Consultoria e Soluções Avançadas LTDA.

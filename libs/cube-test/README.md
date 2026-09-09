@@ -1,6 +1,6 @@
 # wdc-cube-test
 
-Test helpers for driving a [Cube](../../docs/architecture.md) presentation layer
+Test helpers for driving a [Cube](https://github.com/mrcdom/wdc-cube/blob/master/docs/architecture.md) presentation layer
 with no view attached.
 
 The architecture states the view boundary as two obligations — answer
@@ -82,3 +82,28 @@ and returns. A test that does not watch for that reads a scope which quietly
 never changed, and passes. Every presenter routes `unexpected` up to the
 application, so wrapping it once at the top is enough to make those loud — see
 `startTutorial` in `apps/cube-tutorial/presentation-test` for the shape.
+
+## The code, and something to look at
+
+This drives a Cube presentation layer with nothing attached to draw it. The argument it belongs to is easier to see than to read about.
+
+**[Open the showcase](https://mrcdom.github.io/wdc-cube/)** — an issue tracker where every filter, page,
+sorted column and open dialog is a place. Change one and watch the address bar:
+Back undoes it, a reload lands on it, and the link you copy opens the same thing
+for someone else. Nothing in it writes that URL — each presenter says what it is
+showing, and the address is assembled from all of them.
+
+**[Read the source](https://github.com/mrcdom/wdc-cube)** — one presentation layer, drawn by four view
+technologies: React, Angular, SolidJS and custom elements. Adding the second, the
+third and the fourth needed no change to the presenters, which is the claim the
+repository exists to demonstrate, kept honest by having to hold four times over.
+
+| | |
+| --- | --- |
+| This package's source | [`libs/cube-test`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-test) |
+| How the pieces fit | [The Cube architecture](https://github.com/mrcdom/wdc-cube/blob/master/docs/architecture.md) |
+| The showcase | [live](https://mrcdom.github.io/wdc-cube/) · [source](https://github.com/mrcdom/wdc-cube/tree/master/apps/cube-showcase#readme) |
+| The tutorial, drawn four ways | [source](https://github.com/mrcdom/wdc-cube/tree/master/apps/cube-tutorial) |
+| Issues and discussion | [github.com/mrcdom/wdc-cube/issues](https://github.com/mrcdom/wdc-cube/issues) |
+
+MIT © WeDoCode Consultoria e Soluções Avançadas LTDA.
