@@ -1,6 +1,6 @@
 # wdc-cube-solid
 
-SolidJS bindings for the [Cube architecture](../../docs/architecture.md).
+SolidJS bindings for the [Cube architecture](https://github.com/mrcdom/wdc-cube/blob/master/docs/architecture.md).
 
 The architecture document states the view boundary as two obligations. This
 package is those two, and one thing none of the other bindings needed:
@@ -12,7 +12,7 @@ package is those two, and one thing none of the other bindings needed:
 | Decide what a change wakes | `useSolidScopes()` |
 
 Everything above that line — places, intents, presenters, scopes, actions,
-services — comes from [`wdc-cube`](../cube/README.md) and is shared with any
+services — comes from [`wdc-cube`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube#readme) and is shared with any
 other view technology.
 
 ## Why there is a third row
@@ -137,7 +137,7 @@ One machine and a tutorial, so read the ordering rather than the digits. React
 re-runs the component and diffs a thousand rows to discover which one moved;
 Solid was told by the signal that moved. The full numbers, and why total task
 time is far closer than this, are in
-[renderer-solid](../../apps/cube-tutorial/renderer-solid/README.md).
+[renderer-solid](https://github.com/mrcdom/wdc-cube/tree/master/apps/cube-tutorial/renderer-solid#readme).
 
 ## Building it
 
@@ -145,3 +145,28 @@ time is far closer than this, are in
 pnpm compile        # from the workspace root
 pnpm test
 ```
+
+## The code, and something to look at
+
+This binds a Cube presentation layer to SolidJS, and the presenters it draws know nothing about SolidJS. The argument it belongs to is easier to see than to read about.
+
+**[Open the showcase](https://mrcdom.github.io/wdc-cube/)** — an issue tracker where every filter, page,
+sorted column and open dialog is a place. Change one and watch the address bar:
+Back undoes it, a reload lands on it, and the link you copy opens the same thing
+for someone else. Nothing in it writes that URL — each presenter says what it is
+showing, and the address is assembled from all of them.
+
+**[Read the source](https://github.com/mrcdom/wdc-cube)** — one presentation layer, drawn by four view
+technologies: React, Angular, SolidJS and custom elements. Adding the second, the
+third and the fourth needed no change to the presenters, which is the claim the
+repository exists to demonstrate, kept honest by having to hold four times over.
+
+| | |
+| --- | --- |
+| This package's source | [`libs/cube-solid`](https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-solid) |
+| How the pieces fit | [The Cube architecture](https://github.com/mrcdom/wdc-cube/blob/master/docs/architecture.md) |
+| The showcase | [live](https://mrcdom.github.io/wdc-cube/) · [source](https://github.com/mrcdom/wdc-cube/tree/master/apps/cube-showcase#readme) |
+| The tutorial, drawn four ways | [source](https://github.com/mrcdom/wdc-cube/tree/master/apps/cube-tutorial) |
+| Issues and discussion | [github.com/mrcdom/wdc-cube/issues](https://github.com/mrcdom/wdc-cube/issues) |
+
+MIT © WeDoCode Consultoria e Soluções Avançadas LTDA.

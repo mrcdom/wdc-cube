@@ -1,0 +1,52 @@
+# Publishes the six libraries to npmjs.com.
+#
+# No token. npm's trusted publishing exchanges GitHub's OIDC identity for a
+# short-lived credential, so what authorises a release is this workflow in this
+# repository rather than a secret somebody has to hold. Each package names it on
+# npmjs.com under Trusted Publisher, by repository and by this file's name — so
+# renaming this file breaks publishing until the six are updated.
+#
+# Provenance comes with it: npm attests, and shows on the package page, which
+# commit and which workflow built the tarball. That is automatic for a public
+# package from a public repository, so there is no `--provenance` flag here.
+name: Publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # The whole point: without this there is no OIDC token to exchange.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # `pnpm publish` delegates to the npm CLI, so the npm on PATH is what has
+      # to understand OIDC — 11.5.1 or later. The one bundled with Node is
+      # older, and that is where this quietly falls back to asking for a token.
+      - run: npm install --global npm@latest
+
+      - run: corepack enable pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Not because publishing needs it — `prepack` builds each package — but
+      # because a release should not be the first time anything is checked.
+      - run: pnpm compile
+      - run: pnpm lint
+      - run: pnpm test
+
+      # `-r` walks the workspace; the nine projects under `apps/` are private
+      # and skipped. `--no-git-checks` because the tag is the ref, so the
+      # working tree is detached by definition.
+      - run: pnpm publish -r --access public --no-git-checks

@@ -1,12 +1,12 @@
 {
   "name": "wdc-cube",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Cube architecture core - presenter/scope/place navigation framework",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mrcdom/wdc-cube.git",
+    "url": "git+https://github.com/mrcdom/wdc-cube.git",
     "directory": "libs/cube"
   },
   "type": "module",
@@ -25,11 +25,12 @@
     "README.md"
   ],
   "scripts": {
-    "prepack": "node ../../scripts/sync-license.mjs",
+    "prepack": "tsc -b && node ../../scripts/sync-license.mjs",
     "compile": "tsc -b",
     "build": "tsc -b",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "node ../../scripts/require-pnpm.mjs"
   },
   "dependencies": {
     "history": "^5.3.0",
@@ -37,5 +38,21 @@
   },
   "devDependencies": {
     "vitest": "^5.0.0"
+  },
+  "homepage": "https://github.com/mrcdom/wdc-cube/tree/master/libs/cube#readme",
+  "bugs": {
+    "url": "https://github.com/mrcdom/wdc-cube/issues"
+  },
+  "keywords": [
+    "cube",
+    "architecture",
+    "presenter",
+    "mvp",
+    "routing",
+    "spa",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
   }
 }
