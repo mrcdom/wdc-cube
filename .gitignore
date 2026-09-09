@@ -26,3 +26,6 @@ libs/*/LICENSE
 
 # ng-packagr output for the Angular library
 libs/*/dist
+
+# Scratch consumers, rebuilt on every run
+verify/.work

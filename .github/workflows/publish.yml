@@ -51,6 +51,13 @@ jobs:
       # `-r` walks the workspace; the nine projects under `apps/` are private
       # and skipped. `--no-git-checks` because the tag is the ref, so the
       # working tree is detached by definition.
+      # Before publishing, not after: install what would be published into
+      # projects that are not this one. Everything else here resolves the
+      # libraries through the workspace, which is how 1.2.0 shipped code Node
+      # could not import and 1.2.1 shipped an Angular library Angular could not
+      # read. Both were green until someone installed them.
+      - run: node verify/run.mjs
+
       - run: pnpm publish -r --access public --no-git-checks
 
       # A green publish step is not a release. `pnpm publish -r` has twice
