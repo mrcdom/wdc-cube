@@ -6,6 +6,6 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-export { bindScope } from './impl/bindScope'
-export { solidInstrumentation, useSolidScopes } from './impl/instrumentation'
-export { ViewFactory, ViewSlot, type ViewComponent, type ViewProps } from './impl/ViewFactory'
+export { bindScope } from './impl/bindScope.js'
+export { solidInstrumentation, useSolidScopes } from './impl/instrumentation.js'
+export { ViewFactory, ViewSlot, type ViewComponent, type ViewProps } from './impl/ViewFactory.js'

@@ -8,7 +8,7 @@
 
 import React from 'react'
 import { Scope, NOOP_VOID } from 'wdc-cube'
-import { ReactComponent } from './ReactComponent'
+import { ReactComponent } from './ReactComponent.js'
 
 export type CubeComponentProps<S extends Scope> = {
     key?: React.Key

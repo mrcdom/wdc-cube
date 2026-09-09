@@ -6,10 +6,10 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { isFunction } from './utils/TypeGuards'
-import { NOOP_PROMISE_VOID } from './utils/EmptyFunctions'
-import { Logger } from './utils/Logger'
-import { Scope } from './Scope'
+import { isFunction } from './utils/TypeGuards.js'
+import { NOOP_PROMISE_VOID } from './utils/EmptyFunctions.js'
+import { Logger } from './utils/Logger.js'
+import { Scope } from './Scope.js'
 
 const LOG = Logger.get('ScopeUtils')
 

@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import type { Scope } from './Scope'
+import type { Scope } from './Scope.js'
 
 export interface ScopeSlot {
     (scope: Scope | undefined | null): void

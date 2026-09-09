@@ -7,9 +7,9 @@
  */
 
 import { History, createBrowserHistory, createHashHistory, Path } from 'history'
-import { Application } from './Application'
-import { Place } from './Place'
-import { HistoryManager } from './HistoryManager'
+import { Application } from './Application.js'
+import { Place } from './Place.js'
+import { HistoryManager } from './HistoryManager.js'
 
 export class PageHistoryManager extends HistoryManager {
     private __debounceHandler?: number

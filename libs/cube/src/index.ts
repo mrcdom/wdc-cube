@@ -7,16 +7,16 @@
  */
 
 // :: Utils
-export { Logger, type ILogger } from './impl/utils/Logger'
-export { NOOP_VOID, NOOP_FALSE, NOOP_STRING, NOOP_PROMISE_VOID } from './impl/utils/EmptyFunctions'
-export { ReflectionUtils } from './impl/utils/ReflectionUtils'
-export { SingletonServices, type ServiceLike } from './impl/utils/SingletonServices'
+export { Logger, type ILogger } from './impl/utils/Logger.js'
+export { NOOP_VOID, NOOP_FALSE, NOOP_STRING, NOOP_PROMISE_VOID } from './impl/utils/EmptyFunctions.js'
+export { ReflectionUtils } from './impl/utils/ReflectionUtils.js'
+export { SingletonServices, type ServiceLike } from './impl/utils/SingletonServices.js'
 
 // :: Cube
-export { Place, type PlaceCreator } from './impl/Place'
-export { FlipIntent } from './impl/FlipIntent'
-export { HistoryManager } from './impl/HistoryManager'
-export { PageHistoryManager } from './impl/PageHistoryManager'
+export { Place, type PlaceCreator } from './impl/Place.js'
+export { FlipIntent } from './impl/FlipIntent.js'
+export { HistoryManager } from './impl/HistoryManager.js'
+export { PageHistoryManager } from './impl/PageHistoryManager.js'
 export {
     action,
     defaultInstrumentation,
@@ -26,21 +26,21 @@ export {
     type FieldMetadata,
     type GenericObject,
     type ScopeInstrumentation
-} from './impl/decorators'
-export { Application } from './impl/Application'
-export { Presenter } from './impl/Presenter'
-export { CubePresenter } from './impl/CubePresenter'
-export { ApplicationPresenter } from './impl/ApplicationPresenter'
-export { Scope, type ScopeConstructor, type IScope } from './impl/Scope'
-export { ScopeUtils } from './impl/ScopeUtils'
-export { CubeBuilder, type CubeTree } from './impl/CubeBuilder'
-export { createViewRegistry, type ViewRegistry } from './impl/ViewRegistry'
-export { ObservableArray } from './impl/ObservableArray'
-export { CallbackManager } from './impl/CallbackManager'
-export { ScopeUpdateManager } from './impl/Presenter'
+} from './impl/decorators/index.js'
+export { Application } from './impl/Application.js'
+export { Presenter } from './impl/Presenter.js'
+export { CubePresenter } from './impl/CubePresenter.js'
+export { ApplicationPresenter } from './impl/ApplicationPresenter.js'
+export { Scope, type ScopeConstructor, type IScope } from './impl/Scope.js'
+export { ScopeUtils } from './impl/ScopeUtils.js'
+export { CubeBuilder, type CubeTree } from './impl/CubeBuilder.js'
+export { createViewRegistry, type ViewRegistry } from './impl/ViewRegistry.js'
+export { ObservableArray } from './impl/ObservableArray.js'
+export { CallbackManager } from './impl/CallbackManager.js'
+export { ScopeUpdateManager } from './impl/Presenter.js'
 
-export type { ScopeSlot } from './impl/ScopeSlot'
-export type { IPresenter, ICubePresenter, IPresenterOwner, IUpdateManager, AlertSeverity } from './impl/IPresenter'
+export type { ScopeSlot } from './impl/ScopeSlot.js'
+export type { IPresenter, ICubePresenter, IPresenterOwner, IUpdateManager, AlertSeverity } from './impl/IPresenter.js'
 
 // :: Conveniencias
-export * as events from './events-react-compatible'
+export * as events from './events-react-compatible.js'

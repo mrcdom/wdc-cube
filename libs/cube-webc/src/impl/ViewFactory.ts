@@ -8,7 +8,7 @@
 
 import { createViewRegistry, Logger, type Scope, type ScopeConstructor } from 'wdc-cube'
 
-import type { CubeElement } from './CubeElement'
+import type { CubeElement } from './CubeElement.js'
 
 const LOG = Logger.get('WebC.ViewFactory')
 

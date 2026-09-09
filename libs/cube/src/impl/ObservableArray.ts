@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Scope } from './Scope'
+import { Scope } from './Scope.js'
 
 export class ObservableArray<T> implements Iterable<T> {
     #scope: Scope

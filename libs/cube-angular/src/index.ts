@@ -6,6 +6,6 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-export { bindScope } from './impl/bindScope'
-export { CubeViewSlot } from './impl/CubeViewSlot'
-export { ViewFactory, type CubeViewType } from './impl/ViewFactory'
+export { bindScope } from './impl/bindScope.js'
+export { CubeViewSlot } from './impl/CubeViewSlot.js'
+export { ViewFactory, type CubeViewType } from './impl/ViewFactory.js'

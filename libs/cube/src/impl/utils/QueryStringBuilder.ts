@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { ReflectionUtils } from './ReflectionUtils'
+import { ReflectionUtils } from './ReflectionUtils.js'
 
 export class QueryStringBuilder extends Object {
     private query: Array<string> = []

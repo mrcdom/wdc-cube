@@ -7,7 +7,7 @@
  */
 
 import 'reflect-metadata'
-import { FieldMetadata, Observable } from './Observable.class-decorator'
+import { FieldMetadata, Observable } from './Observable.class-decorator.js'
 
 export function observe(): PropertyDecorator {
     return (target: object, key: string | symbol) => {

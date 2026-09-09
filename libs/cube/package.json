@@ -1,6 +1,6 @@
 {
   "name": "wdc-cube",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Cube architecture core - presenter/scope/place navigation framework",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",

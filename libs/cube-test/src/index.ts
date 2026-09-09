@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-export { TestHistoryManager } from './impl/TestHistoryManager'
-export { settle, type SettleOptions } from './impl/settle'
-export { presenterOf, hasPresenterAt } from './impl/presenters'
-export { ScopeUpdateRecorder } from './impl/ScopeUpdateRecorder'
+export { TestHistoryManager } from './impl/TestHistoryManager.js'
+export { settle, type SettleOptions } from './impl/settle.js'
+export { presenterOf, hasPresenterAt } from './impl/presenters.js'
+export { ScopeUpdateRecorder } from './impl/ScopeUpdateRecorder.js'

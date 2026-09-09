@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Scope } from 'wdc-cube'
 
-import { ViewFactory } from './ViewFactory'
+import { ViewFactory } from './ViewFactory.js'
 
 class AlphaScope extends Scope {}
 class BetaScope extends Scope {}

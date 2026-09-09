@@ -6,9 +6,9 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Place } from './Place'
-import { FlipIntent, ValidParamTypes } from './FlipIntent'
-import { Scope, ScopeConstructor } from './Scope'
+import { Place } from './Place.js'
+import { FlipIntent, ValidParamTypes } from './FlipIntent.js'
+import { Scope, ScopeConstructor } from './Scope.js'
 
 export type AlertSeverity = 'error' | 'success' | 'info' | 'warning'
 

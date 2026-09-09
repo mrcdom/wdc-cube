@@ -6,9 +6,9 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Logger } from './utils/Logger'
-import { NOOP_VOID } from './utils/EmptyFunctions'
-import { ScopeUpdateManager } from './Presenter'
+import { Logger } from './utils/Logger.js'
+import { NOOP_VOID } from './utils/EmptyFunctions.js'
+import { ScopeUpdateManager } from './Presenter.js'
 
 const LOG = Logger.get('Scope')
 
