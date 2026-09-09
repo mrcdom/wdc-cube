@@ -14,6 +14,35 @@ The architecture document explains how the pieces fit and is the place to start.
 This one is about the package: what it exports, and the few things worth knowing
 before reaching for them.
 
+## What your tsconfig needs
+
+Two settings, and they carry different weight.
+
+```jsonc
+{
+  "compilerOptions": {
+    // Required. `@observe()` and `@Observable` are legacy decorators; without
+    // this they are read as the current proposal and fail to compile.
+    "experimentalDecorators": true,
+
+    // Recommended. `@observe()` installs an accessor on the prototype, and a
+    // native class field defines an own property on every instance that shadows
+    // it. The framework handles that — it reads the value back, deletes the
+    // property and writes it through the accessor — but `delete` is what drops
+    // an object into V8's dictionary mode. Measured in this repository: 298ns
+    // per scope built against 98ns, and fast properties kept.
+    "useDefineForClassFields": false
+  }
+}
+```
+
+Only the first is a requirement: with native class fields everything still
+works, and every scope your application builds costs more than it needs to.
+
+A renderer usually needs neither. In a Cube application the scopes live in the
+presentation layer, compiled by `tsc`, and the views that draw them hold no
+decorator at all — which is why the SolidJS example configures no Babel
+decorator plugin, and why it would break if it had to.
 ## The shape of an application
 
 ```ts

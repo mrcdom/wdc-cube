@@ -184,6 +184,27 @@ The `@action()` decorator does the same thing and still works, but the form abov
 makes it visible at the binding site which handlers are guarded and which are
 deliberately not.
 
+## What a consuming application needs
+
+Two compiler settings, carrying different weight. Each package's README says the
+same thing, because that is the page npm shows.
+
+```jsonc
+{
+  "compilerOptions": {
+    // Required: `@observe()` and `@Observable` are legacy decorators.
+    "experimentalDecorators": true,
+    // Recommended: a native class field shadows the accessor `@observe()`
+    // installs, and undoing that costs a `delete` per scope built.
+    "useDefineForClassFields": false
+  }
+}
+```
+
+A renderer needs neither. Scopes live in the presentation layer, compiled by
+`tsc`, and a view holds no decorator — which is why the SolidJS example
+configures no Babel decorator plugin.
+
 ## Conventions
 
 These are recommendations, not lint rules. Where the code already disagrees,
