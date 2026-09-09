@@ -65,6 +65,88 @@ function project(name, files) {
     return dir
 }
 
+/**
+ * A bundler consumer: Vite builds it, and jsdom runs what Vite produced.
+ *
+ * Building alone is not enough. `wdc-cube-solid` emitted preserved JSX until
+ * 1.2.1 — a file a bundler may or may not transform depending on how it is
+ * configured, and which no amount of type checking notices. What settles it is
+ * whether the thing draws.
+ *
+ * The bundle is written as a single IIFE so jsdom can simply run it: jsdom does
+ * not load ES modules from a script tag.
+ */
+function bundled({ name, deps, files, plugin }) {
+    const dir = project(name, {
+        'package.json': JSON.stringify({ name: `verify-${name}`, private: true, type: 'module' }, null, 2),
+        'index.html': `<!doctype html><html><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>`,
+        // What a consumer has to configure, and nothing more. Both of these are
+        // requirements of the library rather than of this test: `@observe()`
+        // is a legacy decorator, and a native class field would shadow the
+        // accessor it installs.
+        'tsconfig.json': JSON.stringify(
+            {
+                compilerOptions: {
+                    target: 'ES2024',
+                    module: 'ESNext',
+                    moduleResolution: 'Bundler',
+                    lib: ['ES2024', 'DOM', 'DOM.Iterable'],
+                    experimentalDecorators: true,
+                    useDefineForClassFields: false,
+                    strict: true,
+                    skipLibCheck: true,
+                    ...(plugin?.tsconfig ?? {})
+                },
+                include: ['src']
+            },
+            null,
+            2
+        ),
+        'vite.config.js': `
+${plugin ? `import plugin from '${plugin.module}'` : ''}
+export default {
+    ${plugin ? `plugins: [plugin(${plugin.options ?? ''})],` : ''}
+    logLevel: 'error',
+    build: {
+        rollupOptions: { output: { format: 'iife', inlineDynamicImports: true, entryFileNames: 'app.js' } }
+    }
+}
+`,
+        ...files
+    })
+
+    run('npm', ['install', '--silent', ...deps], dir)
+    run('npx', ['vite', 'build'], dir)
+
+    // Run it, and ask the DOM whether the view drew.
+    writeFileSync(
+        join(dir, 'render.mjs'),
+        `
+import { readFileSync } from 'node:fs'
+import { JSDOM } from 'jsdom'
+
+const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
+    runScripts: 'dangerously',
+    pretendToBeVisual: true
+})
+globalThis.window = dom.window
+const script = dom.window.document.createElement('script')
+script.textContent = readFileSync('dist/app.js', 'utf8')
+dom.window.document.body.appendChild(script)
+
+await new Promise((resolve) => setTimeout(resolve, 300))
+
+const drawn = dom.window.document.querySelector('#drawn')
+if (!drawn || !drawn.textContent.includes('drawn from the package')) {
+    console.error('  nothing drawn; body was: ' + dom.window.document.body.innerHTML.slice(0, 300))
+    process.exit(1)
+}
+`
+    )
+    run('npm', ['install', '--silent', 'jsdom'], dir)
+    run('node', ['render.mjs'], dir)
+}
+
 // ========== THE CONSUMERS ==========
 
 const consumers = {
@@ -110,6 +192,135 @@ if (typeof Logger.get('probe').info !== 'function') fail('logger')
         const wanted = ['wdc-cube', 'wdc-cube-react', 'wdc-cube-solid', 'wdc-cube-webc', 'wdc-cube-test']
         run('npm', ['install', '--silent', ...wanted.map((n) => tarballs[n]), ...peersOf('wdc-cube-solid')], dir)
         run('node', ['check.mjs'], dir)
+    },
+
+
+    /** React, drawn through the binding's own ViewFactory. */
+    react(tarballs) {
+        bundled({
+            name: 'react',
+            plugin: { module: '@vitejs/plugin-react', tsconfig: { jsx: 'react-jsx' } },
+            deps: [
+                tarballs['wdc-cube'],
+                tarballs['wdc-cube-react'],
+                ...peersOf('wdc-cube-react'),
+                'vite@^8.0.0',
+                '@vitejs/plugin-react@^6.0.0',
+                'typescript@^6.0.0'
+            ],
+            files: {
+                'src/main.tsx': `
+import { createRoot } from 'react-dom/client'
+import { Scope, Observable, observe } from 'wdc-cube'
+import { ViewFactory, ViewSlot } from 'wdc-cube-react'
+
+@Observable
+class DemoScope extends Scope {
+    @observe() title = 'drawn from the package'
+}
+
+function DemoView({ scope }: { scope: DemoScope }) {
+    return <p id="drawn">{scope.title}</p>
+}
+
+ViewFactory.register(DemoScope, DemoView)
+createRoot(document.getElementById('root')!).render(<ViewSlot scope={new DemoScope()} />)
+`
+            }
+        })
+    },
+
+    /**
+     * SolidJS.
+     *
+     * The consumer that matters most for this binding: `wdc-cube-solid` emitted
+     * preserved JSX until 1.2.1, a file a bundler may or may not transform. Only
+     * drawing settles it.
+     */
+    solid(tarballs) {
+        bundled({
+            name: 'solid',
+            plugin: {
+                module: 'vite-plugin-solid',
+                tsconfig: { jsx: 'preserve', jsxImportSource: 'solid-js' }
+            },
+            deps: [
+                tarballs['wdc-cube'],
+                tarballs['wdc-cube-solid'],
+                ...peersOf('wdc-cube-solid'),
+                'vite@^8.0.0',
+                'vite-plugin-solid@^2.11.0',
+                'typescript@^6.0.0'
+            ],
+            files: {
+                'src/main.tsx': `
+import { render } from 'solid-js/web'
+import { Scope, Observable, observe } from 'wdc-cube'
+import { useSolidScopes, ViewFactory, ViewSlot } from 'wdc-cube-solid'
+
+// Before any scope exists: it decides how every one of them reports a change.
+useSolidScopes()
+
+// Written as calls rather than as \`@Observable\` / \`@observe()\`, and that is
+// faithful rather than convenient: in a Cube application the scopes live in the
+// presentation layer, compiled by \`tsc\`, and a renderer never contains a
+// decorator. The tutorial's SolidJS app configures no Babel decorator plugin
+// for exactly that reason.
+class Demo extends Scope {
+    title = 'drawn from the package'
+}
+observe()(Demo.prototype, 'title')
+const DemoScope = Observable(Demo)
+
+function DemoView(props: { scope: Demo }) {
+    return <p id="drawn">{props.scope.title}</p>
+}
+
+ViewFactory.register(DemoScope, DemoView)
+render(() => <ViewSlot scope={new DemoScope()} />, document.getElementById('root')!)
+`
+            }
+        })
+    },
+
+    /** Custom elements, with no framework underneath. */
+    webc(tarballs) {
+        bundled({
+            name: 'webc',
+            deps: [tarballs['wdc-cube'], tarballs['wdc-cube-webc'], 'vite@^8.0.0', 'typescript@^6.0.0'],
+            files: {
+                'src/main.tsx': `
+import { Scope, Observable, observe } from 'wdc-cube'
+import { CubeElement, CubeViewSlot, ViewFactory, type Dom } from 'wdc-cube-webc'
+
+// See the note in the SolidJS consumer: a renderer holds no decorators.
+class Demo extends Scope {
+    title = 'drawn from the package'
+}
+observe()(Demo.prototype, 'title')
+const DemoScope = Observable(Demo)
+
+class DemoView extends CubeElement<Demo> {
+    private paragraph!: HTMLParagraphElement
+
+    protected declare(dom: Dom): void {
+        this.paragraph = dom.p((element) => {
+            element.id = 'drawn'
+        })
+    }
+
+    protected override onUpdate(): void {
+        this.paragraph.textContent = this.scope.title
+    }
+}
+
+ViewFactory.define('demo-view', DemoScope, DemoView)
+
+const slot = new CubeViewSlot(document.getElementById('root')!)
+slot.setScope(new DemoScope())
+`
+            }
+        })
     },
 
     /**
