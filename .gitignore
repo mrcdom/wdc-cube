@@ -23,3 +23,6 @@ yarn.lock
 
 # Copied into each package by scripts/sync-license.mjs when it is packed.
 libs/*/LICENSE
+
+# ng-packagr output for the Angular library
+libs/*/dist

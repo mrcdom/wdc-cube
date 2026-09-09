@@ -1,6 +1,6 @@
 {
   "name": "wdc-cube-test",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Test helpers for driving a Cube presentation layer with no view attached",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",
@@ -31,9 +31,6 @@
     "typecheck": "tsc -b",
     "prepublishOnly": "node ../../scripts/require-pnpm.mjs"
   },
-  "dependencies": {
-    "wdc-cube": "workspace:*"
-  },
   "homepage": "https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-test#readme",
   "bugs": {
     "url": "https://github.com/mrcdom/wdc-cube/issues"
@@ -46,5 +43,11 @@
   ],
   "engines": {
     "node": ">=20.19.0"
+  },
+  "peerDependencies": {
+    "wdc-cube": "workspace:^"
+  },
+  "devDependencies": {
+    "wdc-cube": "workspace:*"
   }
 }

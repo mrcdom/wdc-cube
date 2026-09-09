@@ -1,6 +1,6 @@
 {
   "name": "wdc-cube-react",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "React bindings for the Cube architecture",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",
@@ -33,11 +33,9 @@
     "prepublishOnly": "node ../../scripts/require-pnpm.mjs"
   },
   "peerDependencies": {
+    "wdc-cube": "workspace:^",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
-  },
-  "dependencies": {
-    "wdc-cube": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.1.13",
@@ -45,7 +43,8 @@
     "jsdom": "^30.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.0",
+    "wdc-cube": "workspace:*"
   },
   "homepage": "https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-react#readme",
   "bugs": {
