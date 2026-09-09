@@ -19,7 +19,8 @@
     "lint:fix": "eslint . --fix",
     "start:showcase": "pnpm --filter wdc-cube-showcase-renderer-solid run start",
     "check:emit": "node scripts/check-emitted-imports.mjs",
-    "check:published": "node scripts/check-published.mjs"
+    "check:published": "node scripts/check-published.mjs",
+    "verify": "node verify/run.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
