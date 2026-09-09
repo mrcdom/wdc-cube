@@ -6,9 +6,9 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { isFunction, isObject } from './utils/TypeGuards'
-import { Place, PlaceCreator } from './Place'
-import { NOOP_VOID } from './utils/EmptyFunctions'
+import { isFunction, isObject } from './utils/TypeGuards.js'
+import { Place, PlaceCreator } from './Place.js'
+import { NOOP_VOID } from './utils/EmptyFunctions.js'
 
 export type CubeTree = {
     [key: string]: CubeTree | PlaceCreator

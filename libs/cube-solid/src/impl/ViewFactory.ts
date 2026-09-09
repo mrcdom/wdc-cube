@@ -6,11 +6,11 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { createMemo, Show, type Component, type JSX } from 'solid-js'
+import { createComponent, createMemo, Show, type Component, type JSX } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
 import { createViewRegistry, Logger, type Scope, type ScopeConstructor } from 'wdc-cube'
 
-import { bindScope } from './bindScope'
+import { bindScope } from './bindScope.js'
 
 const LOG = Logger.get('Solid.ViewFactory')
 
@@ -40,6 +40,24 @@ export const ViewFactory = {
  * as if `props.scope` were plain data: it reads `props.scope.title` and Solid
  * subscribes to that field alone. No view in the application mentions a signal.
  */
+type Resolved = { component: ViewComponent; scope: Scope }
+
+/**
+ * The shape `Show` is being called with.
+ *
+ * `Show` is overloaded on `keyed`, and `createComponent` cannot pick an
+ * overload through a props object made of getters. Stating the shape here is
+ * the same contract the JSX version was compiled against — `keyed` is what
+ * makes the view be built again when the scope in the slot changes, rather
+ * than updated in place.
+ */
+type SlotProps = {
+    when: Resolved | undefined
+    keyed: true
+    fallback?: JSX.Element
+    children: (view: Resolved) => JSX.Element
+}
+
 export function ViewSlot(props: { scope?: Scope | null; fallback?: JSX.Element }): JSX.Element {
     const current = createMemo(() => {
         const scope = props.scope
@@ -56,9 +74,32 @@ export function ViewSlot(props: { scope?: Scope | null; fallback?: JSX.Element }
         return { component, scope: bindScope(scope) }
     })
 
-    return (
-        <Show when={current()} fallback={props.fallback} keyed>
-            {(view) => <Dynamic component={view.component} scope={view.scope} />}
-        </Show>
-    )
+    // Written with `createComponent` rather than as JSX, and the reason is
+    // packaging. `tsc` with `jsx: preserve` emitted `ViewFactory.jsx` — JSX that
+    // every consumer would then have to compile, with `jsxImportSource` set to
+    // SolidJS, before it could even be imported. This file is the only one in
+    // any of the six libraries that had a tag in it, for one component wrapping
+    // another, so the tag went instead of the toolchain.
+    //
+    // The getters are not decoration. JSX compiles props on a component into
+    // getters so that reading one subscribes to it; passing plain values here
+    // would read them once and never again.
+    return createComponent(Show as unknown as Component<SlotProps>, {
+        get when() {
+            return current()
+        },
+        get fallback() {
+            return props.fallback
+        },
+        keyed: true,
+        children: (view) =>
+            createComponent(Dynamic, {
+                get component() {
+                    return view.component
+                },
+                get scope() {
+                    return view.scope
+                }
+            })
+    })
 }

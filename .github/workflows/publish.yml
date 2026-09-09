@@ -42,6 +42,8 @@ jobs:
 
       # Not because publishing needs it — `prepack` builds each package — but
       # because a release should not be the first time anything is checked.
+      # `compile` ends by checking that what was emitted is importable — 1.2.0
+      # shipped six packages full of code that Node could not load.
       - run: pnpm compile
       - run: pnpm lint
       - run: pnpm test

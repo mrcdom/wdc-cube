@@ -6,8 +6,8 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { ReflectionUtils } from './ReflectionUtils'
-import { StandardCharsets, Charset } from './StandardCharsets'
+import { ReflectionUtils } from './ReflectionUtils.js'
+import { StandardCharsets, Charset } from './StandardCharsets.js'
 
 export class QueryStringParser {
     /**

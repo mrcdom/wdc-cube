@@ -6,9 +6,9 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Application } from './Application'
+import { Application } from './Application.js'
 
-import type { PresenterContructor } from './CubePresenter'
+import type { PresenterContructor } from './CubePresenter.js'
 
 const indexGenMap: Map<number, number> = new Map()
 

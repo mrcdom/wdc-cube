@@ -8,8 +8,8 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { Place } from './Place'
-import { Application } from './Application'
+import { Place } from './Place.js'
+import { Application } from './Application.js'
 
 export type HistoryChangeListener = (sender: HistoryManager) => void
 

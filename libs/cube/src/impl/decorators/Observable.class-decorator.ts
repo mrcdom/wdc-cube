@@ -8,7 +8,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Scope } from '../Scope'
+import { Scope } from '../Scope.js'
 
 export type GenericObject = Record<string | symbol, unknown>
 

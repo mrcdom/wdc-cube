@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-export { Dom, type Configure, type DomRoot } from './impl/Dom'
-export { CubeElement, safeAction, onActionError, type ActionErrorHandler } from './impl/CubeElement'
-export { ViewFactory, CubeViewSlot, type ViewConstructor } from './impl/ViewFactory'
-export { SyncedRows, type SyncedRowsOptions } from './impl/SyncedRows'
+export { Dom, type Configure, type DomRoot } from './impl/Dom.js'
+export { CubeElement, safeAction, onActionError, type ActionErrorHandler } from './impl/CubeElement.js'
+export { ViewFactory, CubeViewSlot, type ViewConstructor } from './impl/ViewFactory.js'
+export { SyncedRows, type SyncedRowsOptions } from './impl/SyncedRows.js'

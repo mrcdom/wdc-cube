@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Logger } from './Logger'
+import { Logger } from './Logger.js'
 
 const LOG = Logger.get('SingletonServices')
 

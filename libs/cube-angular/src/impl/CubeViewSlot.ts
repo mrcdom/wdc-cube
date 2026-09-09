@@ -9,7 +9,7 @@
 import { Directive, ViewContainerRef, effect, inject, input, type ComponentRef } from '@angular/core'
 import { Logger, type Scope } from 'wdc-cube'
 
-import { ViewFactory } from './ViewFactory'
+import { ViewFactory } from './ViewFactory.js'
 
 const LOG = Logger.get('Angular.CubeViewSlot')
 

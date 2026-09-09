@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Logger } from './utils/Logger'
+import { Logger } from './utils/Logger.js'
 
 const LOG = Logger.get('ChangeMonitor')
 

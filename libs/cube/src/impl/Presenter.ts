@@ -6,11 +6,11 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Logger } from './utils/Logger'
-import { NOOP_VOID } from './utils/EmptyFunctions'
-import { Scope, ScopeConstructor } from './Scope'
-import { CallbackManager } from './CallbackManager'
-import { type IPresenterOwner, type IUpdateManager, type IPresenter, AlertSeverity, mkAction } from './IPresenter'
+import { Logger } from './utils/Logger.js'
+import { NOOP_VOID } from './utils/EmptyFunctions.js'
+import { Scope, ScopeConstructor } from './Scope.js'
+import { CallbackManager } from './CallbackManager.js'
+import { type IPresenterOwner, type IUpdateManager, type IPresenter, AlertSeverity, mkAction } from './IPresenter.js'
 
 const LOG = Logger.get('Presenter')
 

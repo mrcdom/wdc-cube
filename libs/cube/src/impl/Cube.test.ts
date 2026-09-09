@@ -1,14 +1,14 @@
 import { expect, it } from 'vitest'
 
-import { NOOP_VOID } from './utils/EmptyFunctions'
-import { ReflectionUtils } from './utils/ReflectionUtils'
-import { Place } from './Place'
-import { FlipIntent } from './FlipIntent'
-import { HistoryManager } from './HistoryManager'
-import { Application } from './Application'
-import { CubePresenter } from './CubePresenter'
-import { Scope } from './Scope'
-import { ScopeSlot } from './ScopeSlot'
+import { NOOP_VOID } from './utils/EmptyFunctions.js'
+import { ReflectionUtils } from './utils/ReflectionUtils.js'
+import { Place } from './Place.js'
+import { FlipIntent } from './FlipIntent.js'
+import { HistoryManager } from './HistoryManager.js'
+import { Application } from './Application.js'
+import { CubePresenter } from './CubePresenter.js'
+import { Scope } from './Scope.js'
+import { ScopeSlot } from './ScopeSlot.js'
 
 it('CastUtils.isArray', () => {
     expect(ReflectionUtils.isArray(undefined)).toEqual(false)

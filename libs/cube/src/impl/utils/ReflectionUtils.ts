@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { isBoolean, isNumber, isString } from './TypeGuards'
+import { isBoolean, isNumber, isString } from './TypeGuards.js'
 
 export type PossibleParameterTypes = NumberConstructor | StringConstructor | BooleanConstructor
 

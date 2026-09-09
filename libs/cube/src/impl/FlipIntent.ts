@@ -6,13 +6,13 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { NOOP_VOID } from './utils/EmptyFunctions'
-import { ReflectionUtils } from './utils/ReflectionUtils'
-import { StandardCharsets } from './utils/StandardCharsets'
-import { QueryStringParser } from './utils/QueryStringParser'
-import { QueryStringBuilder } from './utils/QueryStringBuilder'
-import { Place } from './Place'
-import type { ScopeSlot } from './ScopeSlot'
+import { NOOP_VOID } from './utils/EmptyFunctions.js'
+import { ReflectionUtils } from './utils/ReflectionUtils.js'
+import { StandardCharsets } from './utils/StandardCharsets.js'
+import { QueryStringParser } from './utils/QueryStringParser.js'
+import { QueryStringBuilder } from './utils/QueryStringBuilder.js'
+import { Place } from './Place.js'
+import type { ScopeSlot } from './ScopeSlot.js'
 
 export type ValidParamTypes = string | string[] | number | number[] | boolean | boolean[] | null
 

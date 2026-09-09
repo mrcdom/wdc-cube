@@ -6,9 +6,9 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { isFunction } from '../utils/TypeGuards'
+import { isFunction } from '../utils/TypeGuards.js'
 
-import { type IPresenter, actionOnCatch, actionOnFinally, isPromiseLike } from '../IPresenter'
+import { type IPresenter, actionOnCatch, actionOnFinally, isPromiseLike } from '../IPresenter.js'
 
 /**
  * Wraps a presenter method with the action guard: error reporting, automatic

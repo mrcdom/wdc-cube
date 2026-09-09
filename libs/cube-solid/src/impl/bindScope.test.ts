@@ -2,8 +2,8 @@ import { createEffect, createRoot } from 'solid-js'
 import { Observable, ObservableArray, observe, Scope } from 'wdc-cube'
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { bindScope } from './bindScope'
-import { useSolidScopes } from './instrumentation'
+import { bindScope } from './bindScope.js'
+import { useSolidScopes } from './instrumentation.js'
 
 // Before any scope exists, which is the contract the core enforces.
 beforeAll(() => useSolidScopes())

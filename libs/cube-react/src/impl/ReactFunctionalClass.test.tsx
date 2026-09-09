@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Logger, Scope } from 'wdc-cube'
 
-import { classToFComponent, FCClass, type FCClassContext } from './ReactFunctionalClass'
+import { classToFComponent, FCClass, type FCClassContext } from './ReactFunctionalClass.js'
 
 class SampleScope extends Scope {
     label = 'initial'

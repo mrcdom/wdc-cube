@@ -8,7 +8,7 @@
 
 import { Logger, NOOP_VOID, type Scope } from 'wdc-cube'
 
-import { Dom } from './Dom'
+import { Dom } from './Dom.js'
 
 const LOG = Logger.get('WebC.CubeElement')
 

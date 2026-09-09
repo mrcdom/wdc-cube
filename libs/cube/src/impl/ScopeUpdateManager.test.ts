@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { ScopeUpdateManager } from './Presenter'
-import { Scope } from './Scope'
+import { ScopeUpdateManager } from './Presenter.js'
+import { Scope } from './Scope.js'
 
 class RootScope extends Scope {}
 class ChildScope extends Scope {}

@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-export { action } from './action.method-decorator'
+export { action } from './action.method-decorator.js'
 export {
     defaultInstrumentation,
     Observable,
@@ -14,5 +14,5 @@ export {
     type FieldMetadata,
     type GenericObject,
     type ScopeInstrumentation
-} from './Observable.class-decorator'
-export { observe } from './observe.field-decorator'
+} from './Observable.class-decorator.js'
+export { observe } from './observe.field-decorator.js'

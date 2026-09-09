@@ -6,17 +6,17 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Logger } from './utils/Logger'
-import { NOOP_VOID } from './utils/EmptyFunctions'
-import { Place } from './Place'
-import { FlipIntent } from './FlipIntent'
-import { HistoryManager } from './HistoryManager'
-import { Application } from './Application'
-import { FlipContext } from './FlipContext'
-import { Scope } from './Scope'
-import { ScopeUpdateManager } from './Presenter'
+import { Logger } from './utils/Logger.js'
+import { NOOP_VOID } from './utils/EmptyFunctions.js'
+import { Place } from './Place.js'
+import { FlipIntent } from './FlipIntent.js'
+import { HistoryManager } from './HistoryManager.js'
+import { Application } from './Application.js'
+import { FlipContext } from './FlipContext.js'
+import { Scope } from './Scope.js'
+import { ScopeUpdateManager } from './Presenter.js'
 
-import { type IUpdateManager, type ICubePresenter, type IPresenter, mkAction } from './IPresenter'
+import { type IUpdateManager, type ICubePresenter, type IPresenter, mkAction } from './IPresenter.js'
 
 const LOG = Logger.get('ApplicationPresenter')
 

@@ -5,7 +5,7 @@
   "packageManager": "pnpm@11.3.0+sha512.2c403d6594527287672b1f7056343a1f7c3634036a67ffabfcc2b3d7595d843768f8787148d1b57cf7956c90606bbd192857c363af19e96d2d0ec9ec5741d215",
   "scripts": {
     "clean": "rimraf -g \"libs/*/lib\" \"libs/*/coverage\" \"libs/*/*.tsbuildinfo\" \"apps/*/*/lib\" \"apps/*/*/dist\" \"apps/*/*/build\" \"apps/*/*/coverage\" \"apps/*/*/.angular\" \"apps/*/*/*.tsbuildinfo\" \"libs/*/{junit.xml,test-report.xml}\" \"apps/*/*/{junit.xml,test-report.xml}\" \".scannerwork\"",
-    "compile": "tsc -b tsconfig.build.json",
+    "compile": "tsc -b tsconfig.build.json && node scripts/check-emitted-imports.mjs",
     "build": "pnpm run compile && pnpm -r --if-present run build",
     "test": "pnpm -r --if-present run test",
     "typecheck": "pnpm -r --if-present run typecheck",
@@ -17,7 +17,8 @@
     "format": "prettier --write \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/**/src/**/*.{ts,tsx,yml}\"",
     "format:check": "prettier --check \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/**/src/**/*.{ts,tsx,yml}\"",
     "lint:fix": "eslint . --fix",
-    "start:showcase": "pnpm --filter wdc-cube-showcase-renderer-solid run start"
+    "start:showcase": "pnpm --filter wdc-cube-showcase-renderer-solid run start",
+    "check:emit": "node scripts/check-emitted-imports.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

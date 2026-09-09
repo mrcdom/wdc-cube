@@ -6,14 +6,14 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import { Logger } from './utils/Logger'
-import { Comparators } from './utils/Comparators'
-import { Place } from './Place'
-import { FlipIntent, ValidParamTypes } from './FlipIntent'
-import { HistoryManager } from './HistoryManager'
-import { FlipContext } from './FlipContext'
+import { Logger } from './utils/Logger.js'
+import { Comparators } from './utils/Comparators.js'
+import { Place } from './Place.js'
+import { FlipIntent, ValidParamTypes } from './FlipIntent.js'
+import { HistoryManager } from './HistoryManager.js'
+import { FlipContext } from './FlipContext.js'
 
-import type { AlertSeverity, ICubePresenter, IPresenterOwner } from './IPresenter'
+import type { AlertSeverity, ICubePresenter, IPresenterOwner } from './IPresenter.js'
 
 const LOG = Logger.get('Application')
 

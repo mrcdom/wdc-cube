@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { Scope } from './Scope'
-import { createViewRegistry } from './ViewRegistry'
+import { Scope } from './Scope.js'
+import { createViewRegistry } from './ViewRegistry.js'
 
 class SampleScope extends Scope {}
 

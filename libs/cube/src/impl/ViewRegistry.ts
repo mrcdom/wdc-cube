@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-import type { Scope, ScopeConstructor } from './Scope'
+import type { Scope, ScopeConstructor } from './Scope.js'
 
 export type ViewRegistry<V> = {
     /** Pairs a scope class with the view that draws it. */
