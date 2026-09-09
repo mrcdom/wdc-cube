@@ -18,7 +18,8 @@
     "format:check": "prettier --check \"*.{ts,tsx,js,md,yml,json}\" \"libs/*/src/**/*.{ts,tsx,yml}\" \"apps/**/src/**/*.{ts,tsx,yml}\"",
     "lint:fix": "eslint . --fix",
     "start:showcase": "pnpm --filter wdc-cube-showcase-renderer-solid run start",
-    "check:emit": "node scripts/check-emitted-imports.mjs"
+    "check:emit": "node scripts/check-emitted-imports.mjs",
+    "check:published": "node scripts/check-published.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
