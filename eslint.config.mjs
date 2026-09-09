@@ -21,6 +21,14 @@ export default tseslint.config(
     js.configs.recommended,
     ...tseslint.configs.recommended,
     {
+        // The workspace's own tooling: config files and the scripts `prepack`
+        // and `prepublishOnly` run. They are Node programs, and nothing else
+        // here was giving them Node's globals — which `sync-license.mjs` only
+        // survived by never needing to print anything.
+        files: ['**/*.mjs'],
+        languageOptions: { globals: { ...globals.node } }
+    },
+    {
         files: ['**/*.{ts,tsx}'],
         languageOptions: {
             globals: { ...globals.browser, ...globals.node },

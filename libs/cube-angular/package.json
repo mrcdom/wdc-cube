@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mrcdom/wdc-cube.git",
+    "url": "git+https://github.com/mrcdom/wdc-cube.git",
     "directory": "libs/cube-angular"
   },
   "type": "module",
@@ -17,15 +17,17 @@
     ".": "./src/index.ts"
   },
   "files": [
-    "src",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "src",
+    "!src/**/*.test.ts"
   ],
   "scripts": {
-    "prepack": "node ../../scripts/sync-license.mjs",
+    "prepack": "tsc --noEmit && node ../../scripts/sync-license.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "node ../../scripts/require-pnpm.mjs"
   },
   "peerDependencies": {
     "@angular/common": "^22.0.0",
@@ -43,5 +45,19 @@
     "rxjs": "^7.8.2",
     "vitest": "^5.0.0",
     "zone.js": "~0.16.0"
+  },
+  "homepage": "https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-angular#readme",
+  "bugs": {
+    "url": "https://github.com/mrcdom/wdc-cube/issues"
+  },
+  "keywords": [
+    "cube",
+    "wdc-cube",
+    "angular",
+    "presenter",
+    "binding"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
   }
 }
