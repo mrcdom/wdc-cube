@@ -52,3 +52,9 @@ jobs:
       # and skipped. `--no-git-checks` because the tag is the ref, so the
       # working tree is detached by definition.
       - run: pnpm publish -r --access public --no-git-checks
+
+      # A green publish step is not a release. `pnpm publish -r` has twice
+      # reported success while two of the six were not on the registry — both
+      # times propagation, both times invisible from here. This asks the
+      # registry, and keeps asking, because that delay is real.
+      - run: node scripts/check-published.mjs
