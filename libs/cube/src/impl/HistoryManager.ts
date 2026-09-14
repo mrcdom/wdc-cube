@@ -8,9 +8,12 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+import { Logger } from './utils/Logger.js'
 import { Place } from './Place.js'
 import { Application } from './Application.js'
 import type { HistoryCodec } from './HistoryCodec.js'
+
+const LOG = Logger.get('HistoryManager')
 
 export type HistoryChangeListener = (sender: HistoryManager) => void
 
@@ -68,10 +71,16 @@ export class HistoryManager {
      * what lets a bookmark saved before the codec existed still open, and what
      * makes adopting one an address-at-a-time affair rather than a migration.
      *
-     * A failure to decode yields an empty query — the place opens in its default
-     * state, which is the least surprising thing for a link that has aged past
-     * its key. Telling the application *why* it failed is what the policy in
-     * phase 3 is for.
+     * A failure to decode is reported and the parameters are discarded: the
+     * place opens in its default state, which is the least surprising thing for
+     * a link that has aged past its key.
+     *
+     * Reported rather than handed to the application, and without a reason.
+     * `decode` answers `undefined` whether the key was wrong, the address was
+     * altered, or the version is one this build no longer reads — and the
+     * envelope's format is deliberately opaque here, so the framework could not
+     * tell them apart even if it wanted to. The codec knows; the log is where
+     * an operator finds out.
      */
     protected decodeQuery(queryString: string): string {
         if (!this.codec || !queryString) {
@@ -83,7 +92,13 @@ export class HistoryManager {
             return queryString
         }
 
-        return this.codec.decode(payload) ?? ''
+        const decoded = this.codec.decode(payload)
+        if (decoded === undefined) {
+            LOG.error(`Could not read the address; its parameters were discarded. envelope=${payload}`)
+            return ''
+        }
+
+        return decoded
     }
 
     public update(app: Application, place: Place): void {

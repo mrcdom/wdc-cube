@@ -74,6 +74,12 @@ describe('HistoryManager with a codec', () => {
     it('opens in the default state when the payload cannot be read', () => {
         const probe = new Probe()
         probe.codec = { ...reversing, decode: () => undefined }
+
+        // Discarded, and reported through `Logger` on the way out — which this
+        // does not assert, because the logger binds `console.error` when its
+        // module loads and a stub set afterwards never sees the call. Checked by
+        // hand instead: "[HistoryManager] Could not read the address; its
+        // parameters were discarded."
         expect(probe.decode('_e=whatever')).toBe('')
     })
 
