@@ -73,6 +73,18 @@ a shared link. That is the state where nothing has been visited yet, and the one
 most likely to be wrong. Every token published is kept, so a test can assert
 what the address bar would have shown at each step.
 
+**A codec does not make assertions unreadable.** Set `codec` and `token` and
+`tokens` stay plain, because that is what a test is asserting about — where the
+application went. `encodedToken` and `encodedTokens` expose what actually
+travelled, which is where a codec's one claim can be tested:
+
+```ts
+history.codec = myCodec
+// ...
+expect(history.token).toBe('todos?state=todo')
+expect(history.encodedToken).not.toContain('state=todo')
+```
+
 **`settle()`** — waits until the presentation layer stops moving. A presenter
 does not redraw on the spot: it marks scopes and lets `CallbackManager` batch
 them onto the next frame, sixteen milliseconds away. A test that asserts

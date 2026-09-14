@@ -103,6 +103,37 @@ an instance introspects as `ObservableTodoScope` rather than `TodoScope` —
 for any it cannot find. It is the bulk alternative to assigning each action in
 `applyParameters`.
 
+**What travels in the address can be changed, once.** `HistoryManager.codec`
+takes a `HistoryCodec` — three members: a parameter name, `encode`, `decode` —
+and the whole query leaves as that one parameter. The path is never touched: a
+place has to be resolved before any key exists, because a guard needs to know
+where the reader was going in order to send them to the door and back.
+
+```ts
+historyManager.codec = {
+    envelope: '_e',
+    encode: (query) => seal(query),   // undefined to publish plain text
+    decode: (payload) => open(payload) // undefined if it cannot be read
+}
+```
+
+Nothing above the history manager knows it exists. `FlipIntent`, `Application`,
+every presenter and every keys class are untouched, and `location` always reads
+back plain text — which is a rule rather than a convenience, because the
+framework decides *"did the address change?"* by comparing strings, and a codec
+is allowed to produce a different envelope for the same state every time.
+
+A query without the envelope parameter is handed back as it came, so adoption is
+an address at a time rather than a migration and an old bookmark still opens. A
+payload that cannot be read is reported through `Logger` and discarded, and the
+place opens in its default state — the least surprising thing for a link that has
+aged past its key.
+
+There is no codec in this package, on purpose: the choice of cipher and the
+question of where the key comes from belong to the application. A worked one —
+AES-SIV, conditional deflate, a versioned envelope — is in the showcase, with a
+switch that turns it on and off while the application runs.
+
 **Registries do not collide.** `createViewRegistry(name)` builds a store keyed by
 a private symbol, so `wdc-cube-react`, `wdc-cube-angular`, `wdc-cube-webc` and
 `wdc-cube-solid` can each register a
@@ -113,7 +144,7 @@ set of presenters drive two applications at once.
 
 | Group | What |
 | --- | --- |
-| Navigation | `Place`, `FlipIntent`, `CubeBuilder` (`build`, `lazyBuild`), `HistoryManager`, `PageHistoryManager` |
+| Navigation | `Place`, `FlipIntent`, `CubeBuilder` (`build`, `lazyBuild`), `HistoryManager`, `PageHistoryManager`, `HistoryCodec` |
 | Presenters | `Presenter`, `CubePresenter`, `ApplicationPresenter`, `Application` |
 | Scopes | `Scope`, `ObservableArray`, `ScopeUtils`, `@Observable`, `@observe` |
 | Updates | `CallbackManager`, `ScopeUpdateManager` |
