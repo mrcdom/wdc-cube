@@ -165,6 +165,106 @@ that are not methods of the class at all.
 `postConstruct` on start, `preDestroy` on shutdown. Presenters take them as
 plain references, so a test can register a stub instead.
 
+## The address, and changing what travels in it
+
+Everything above assumes the query string in the address bar *is* the state:
+`publishParameters` writes it, `applyParameters` reads it. For most
+applications that is the whole story, and nothing here applies.
+
+Some cannot leave it legible. An address that carries a person's identifier is
+also in the browser's history, in a screenshot, in a `Referer` header, and in a
+server log. `HistoryCodec` is an opt-in seam for changing the form the query
+travels in — encrypting it, compressing it, shortening it — and Cube implements
+none of them:
+
+```ts
+export interface HistoryCodec {
+    readonly envelope: string
+    encode(queryString: string): string | undefined
+    decode(payload: string): string | undefined
+}
+```
+
+An application installs one on its history manager and changes nothing else:
+
+```ts
+const historyManager = new PageHistoryManager(true)
+historyManager.codec = createHistoryCodec(keyFromSignIn)
+```
+
+### Only the query, and only on the wire
+
+The **path is never transformed**. A place has to be resolved before any key
+exists — a guard needs to know where the reader was going in order to send them
+to the door and back — and a readable link is half of what an addressable URL is
+for.
+
+And `historyManager.location` **always returns plain text**. That is the rule
+the whole seam turns on rather than a convenience: four places read it, and one
+of them decides *"did the address change?"* by comparing strings. A codec is
+allowed to be non-deterministic — a real AEAD with a random nonce produces a
+different envelope for the same state every time — so ciphertext there would
+compare unequal to itself and put the application in a navigation loop. The
+write path compares plain against plain for the same reason.
+
+Nothing above the history manager knows a codec exists. `FlipIntent`,
+`Application`, every presenter and every keys class are untouched.
+
+### An address without an envelope keeps working
+
+A codec names one parameter, and a query that does not carry it is handed back
+as it came. That is what makes adoption an address at a time rather than a
+migration: a bookmark saved before the codec existed still opens. A payload that
+cannot be read — wrong key, altered, a version this build no longer accepts —
+opens the place in its default state.
+
+### Testing an application that uses one
+
+`TestHistoryManager.token` stays plain, so assertions stay readable.
+`encodedToken` exposes what travelled, which is where a codec's only claim can
+be tested:
+
+```ts
+expect(history.token).toBe('todos?state=todo')
+expect(history.encodedToken).not.toContain('state=todo')
+```
+
+### The reference implementation, and why it is not turned on
+
+`apps/cube-tutorial/presentation/src/codec` holds a working one: AES-SIV over
+the query, conditional deflate, base64url on the wire, in an envelope carrying a
+version byte and a flags byte. It is *not* enabled in the tutorial, on purpose —
+turning it on would hide the very thing the tutorial exists to show, which is
+that the URL is the state. Its tests are in `presentation-test`.
+
+Three things it demonstrates that are worth knowing before writing another:
+
+**Deterministic, and not by fixing a nonce.** Two requirements get confused.
+*Durability* — an address produced today still opens in six months — needs only
+a stable key, and a random nonce satisfies it. *Stability* — the same state
+always produces the same address — is what needs determinism. Fixing the nonce
+of plain AES-GCM to get it would be catastrophic: GCM is a stream cipher, so two
+messages under one nonce give `C1 XOR C2 = P1 XOR P2`, and addresses are nearly
+identical to one another. AES-SIV derives its tag from the plaintext, which is
+what makes repetition safe. What determinism leaks is **equality**: a reader of
+the history can tell someone returned to the same state, without knowing which.
+
+**Compression usually makes it bigger.** base64url charges 33% for the trip, so
+deflate has to save more than a quarter to break even, and in the first hundred
+bytes it has nothing to refer back to. `page=2` deflates from 6 bytes to 8. The
+turning point is near 200 characters, so the codec decides per address and a
+flag says what it did.
+
+**A key in the bundle is obfuscation, not secrecy.** Whoever downloads the
+application has it. It still buys an address that is not casually readable over
+a shoulder or in a synced history, and it keeps links shareable. A real
+deployment derives a key per user on a server and hands it over at sign-in; the
+interface does not change.
+
+**And none of it replaces validating on arrival.** A legitimate link from three
+months ago can carry `page=999999` for a list that has since shrunk. Encryption
+proves an address came from the application; it does not make its contents true.
+
 ## What a view technology has to provide
 
 The surface is deliberately small. To bind Cube to a rendering library you need

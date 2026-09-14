@@ -12,6 +12,10 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
+    "./codec": {
+      "types": "./lib/codec/index.d.ts",
+      "default": "./lib/codec/index.js"
+    },
     "./main": {
       "types": "./lib/modules/main/index.d.ts",
       "default": "./lib/modules/main/index.js"
@@ -35,6 +39,8 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "@noble/ciphers": "^2.4.0",
+    "fflate": "^0.8.3",
     "wdc-cube": "workspace:*"
   },
   "devDependencies": {
