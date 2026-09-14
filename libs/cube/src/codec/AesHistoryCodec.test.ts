@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { TestHistoryManager } from 'wdc-cube-test'
 
 import { createHistoryCodec } from './AesHistoryCodec.js'
 
@@ -72,19 +71,78 @@ describe('the reference codec', () => {
     })
 })
 
-describe('the codec on a TestHistoryManager', () => {
-    it('keeps assertions readable while hiding what travelled', () => {
-        const manager = new TestHistoryManager()
-        manager.codec = codec
+describe('rotating the key', () => {
+    const v1 = new Uint8Array(32).fill(1)
+    const v2 = new Uint8Array(32).fill(2)
 
-        const place = { name: 'todos' } as never
-        const app = { newFlipIntent: () => ({ toString: () => 'todos?state=todo' }) } as never
-        manager.update(app, place)
+    const before = createHistoryCodec(v1)
+    const after = createHistoryCodec({
+        current: { version: 2, key: v2 },
+        previous: [{ version: 1, key: v1 }]
+    })
 
-        expect(manager.token).toBe('todos?state=todo')
-        expect(manager.encodedToken).toContain('todos?_e=')
-        expect(manager.encodedToken).not.toContain('state=todo')
-        expect(manager.location).toBe('todos?state=todo')
+    it('opens an address sealed under the previous key', () => {
+        const old = before.encode('state=todo&page=2')!
+        expect(after.decode(old)).toBe('state=todo&page=2')
+    })
+
+    it('seals new addresses under the current key only', () => {
+        const fresh = after.encode('state=todo&page=2')!
+        expect(before.decode(fresh)).toBeUndefined()
+        // Which is also how a link migrates: the reader's own history is
+        // rewritten the next time the application publishes that address.
+        expect(fromBase64Url(fresh)[0]).toBe(2)
+    })
+
+    it('refuses a version it no longer offers', () => {
+        // The grace period for v1 has closed.
+        const narrowed = createHistoryCodec({ current: { version: 2, key: v2 } })
+        expect(narrowed.decode(before.encode('state=todo')!)).toBeUndefined()
+    })
+
+    it('refuses a version it has never heard of', () => {
+        const future = createHistoryCodec({ current: { version: 3, key: v2 } })
+        expect(after.decode(future.encode('state=todo')!)).toBeUndefined()
+    })
+
+    it('keeps the single-key form meaning version 1', () => {
+        // What every application written against the first release passes, and
+        // what makes this change additive.
+        expect(fromBase64Url(before.encode('state=todo')!)[0]).toBe(1)
+    })
+
+    it('refuses to offer one version twice', () => {
+        expect(() =>
+            createHistoryCodec({
+                current: { version: 1, key: v2 },
+                previous: [{ version: 1, key: v1 }]
+            })
+        ).toThrowError(/offered twice/)
+    })
+
+    it('refuses a version that will not fit in the byte', () => {
+        expect(() => createHistoryCodec({ current: { version: 0, key: v1 } })).toThrowError(/1 to 255/)
+        expect(() => createHistoryCodec({ current: { version: 256, key: v1 } })).toThrowError(/1 to 255/)
+    })
+})
+
+describe('the key, as it actually arrives', () => {
+    it('accepts the 43 base64url characters a server sends', () => {
+        // The shape of `GET /auth/history_key`: 32 bytes, base64url, unpadded.
+        const text = 'WuTd8whtLEICGY9w-KN0rNK-Y-o-ozw5ojAOCzU1crU'
+        expect(text).toHaveLength(43)
+
+        const fromText = createHistoryCodec(text)
+        const fromBytes = createHistoryCodec(fromBase64Url(text))
+
+        // The same key either way, which is the point: nobody should have to
+        // write the decoder, and reaching for `atob` gets `-_` wrong.
+        expect(fromText.encode('state=todo')).toBe(fromBytes.encode('state=todo'))
+    })
+
+    it('says what is wrong with a key of the wrong length', () => {
+        expect(() => createHistoryCodec(new Uint8Array(16))).toThrowError(/32 bytes; received 16/)
+        expect(() => createHistoryCodec('c2hvcnQ')).toThrowError(/32 bytes; received 5/)
     })
 })
 

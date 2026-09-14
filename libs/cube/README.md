@@ -109,14 +109,6 @@ and the whole query leaves as that one parameter. The path is never touched: a
 place has to be resolved before any key exists, because a guard needs to know
 where the reader was going in order to send them to the door and back.
 
-```ts
-historyManager.codec = {
-    envelope: '_e',
-    encode: (query) => seal(query),   // undefined to publish plain text
-    decode: (payload) => open(payload) // undefined if it cannot be read
-}
-```
-
 Nothing above the history manager knows it exists. `FlipIntent`, `Application`,
 every presenter and every keys class are untouched, and `location` always reads
 back plain text — which is a rule rather than a convenience, because the
@@ -129,16 +121,124 @@ payload that cannot be read is reported through `Logger` and discarded, and the
 place opens in its default state — the least surprising thing for a link that has
 aged past its key.
 
-There is no codec in this package, on purpose: the choice of cipher and the
-question of where the key comes from belong to the application. A worked one —
-AES-SIV, conditional deflate, a versioned envelope — is in the showcase, with a
-switch that turns it on and off while the application runs.
-
 **Registries do not collide.** `createViewRegistry(name)` builds a store keyed by
 a private symbol, so `wdc-cube-react`, `wdc-cube-angular`, `wdc-cube-webc` and
 `wdc-cube-solid` can each register a
 view for the same scope class without seeing each other. That is what lets one
 set of presenters drive two applications at once.
+
+## Sealing the address
+
+`wdc-cube/codec` is a working implementation: AES-SIV over the query, deflate
+when deflate helps, base64url on the wire, in an envelope carrying a version
+byte and a flags byte.
+
+```bash
+pnpm add @noble/ciphers fflate
+```
+
+They are **optional peer dependencies**, which is the whole reason this is a
+subpath rather than part of the main entry point. An application that never
+seals an address never downloads a cipher — and one that does declares the two
+itself, so it controls the versions.
+
+```ts
+import { createHistoryCodec } from 'wdc-cube/codec'
+
+historyManager.codec = createHistoryCodec(keyFromServer)
+```
+
+The key is 32 bytes, as a `Uint8Array` or as the 43 base64url characters that
+carry them — the second form because that is how a key arrives, and every
+application otherwise writes the same decoder and reaches for `atob`, which
+spells two of base64url's characters differently.
+
+**This package does not produce, derive, transport or store a key.** Where it
+comes from is the application's question. A constant in the bundle is
+obfuscation rather than secrecy — whoever downloads the application has it — and
+a real deployment derives one per user on the server, handing it over at
+sign-in.
+
+### Deterministic, and why that is the point
+
+The same state gives the same address, every time, so copying a link twice gives
+the same string. That is what AES-SIV buys and a random nonce would not.
+
+It is not the same requirement as *durability* — an address produced today still
+opening in six months — which needs only a stable key. The two get confused, and
+fixing the nonce of plain AES-GCM to get determinism would be catastrophic
+rather than economical: two messages under one nonce give away their XOR, and
+also solve for the subkey that forges tags.
+
+Stability holds **within a key version**. Rotating changes every address the
+codec produces, which is inherent: a new key is a new cipher.
+
+### Rotating a key without breaking every saved link
+
+The version byte selects the key to open with, so old addresses keep working for
+as long as their key is still offered:
+
+```ts
+historyManager.codec = createHistoryCodec({
+    current: { version: 2, key: newKey },
+    previous: [{ version: 1, key: oldKey }]
+})
+```
+
+An address sealed under v1 opens, and the next time the application publishes it
+the address is resealed under v2 — so links in a reader's own history migrate as
+they are used. A link somebody copied elsewhere migrates never, which is what
+decides how long a version stays on `previous`. Drop it, and addresses under it
+fail cleanly rather than decrypting to nonsense.
+
+`createHistoryCodec(key)` is the same thing with version 1 implied.
+
+### Two regimes, and changing between them
+
+An application with a public area and a signed-in one has two: a key fixed in
+the bundle, and a key per user. Swapping is an assignment, and the address has
+to be republished under the new one:
+
+```ts
+historyManager.codec = createHistoryCodec(keyForThisUser)
+app.updateHistory()
+```
+
+`updateHistory` is what rebuilds the address from every live presenter, so the
+current one is resealed rather than left behind. The framework notices the
+change even though the state did not move — it asks whether there *is* an
+envelope, which is stable for a codec that never repeats one.
+
+Pressing Back onto an address sealed under the codec that was just replaced
+gives `undefined` from `decode`, and the place opens in its default state,
+reported once through `Logger`. That is the intended behaviour: the reader
+signed out, and the address was theirs.
+
+Removing the codec entirely is the quieter case, and worth knowing. The envelope
+name belongs to the codec, so with none installed the framework cannot tell an
+envelope from any other parameter — it hands `_e=…` through as-is, the place
+opens with its parameters absent, and nothing is logged because nothing failed.
+Whatever guards a place already has are what report it, which is an argument for
+having them.
+
+**Install the codec before the application reads the address.** `kickStart`
+reads `historyManager.location` on its first line, so a codec installed after it
+is installed too late — the sealed query arrives as one meaningless parameter.
+If the key has to survive a refresh, `sessionStorage` is where it goes;
+`localStorage` outlives the browser and, on a shared machine, hands the next
+person the key.
+
+### What sealing an address does not do
+
+It is **not authorisation, and not a substitute for validating on arrival**. A
+legitimate link from three months ago can still carry `page=999999` for a list
+that has since shrunk, or an id for a record the reader may no longer see.
+Sealing proves an address came from the application; it does not make its
+contents true, and every parameter still needs checking where it is read.
+
+What determinism does leak is **equality**: someone reading the browser history
+can tell the reader returned to the same state, without knowing which. The path
+and the timestamp are already in the clear, so the increment is small.
 
 ## Exports
 
@@ -151,6 +251,11 @@ set of presenters drive two applications at once.
 | Views | `createViewRegistry`, `ScopeSlot` |
 | Utilities | `Logger`, `SingletonServices`, `ReflectionUtils`, the `NOOP_*` constants |
 | Types | `IPresenter`, `ICubePresenter`, `IUpdateManager`, `AlertSeverity`, `IScope` |
+
+`wdc-cube/codec` is a separate entry point: `createHistoryCodec`, and the
+`HistoryKey`, `HistoryKeyVersion` and `HistoryCodecOptions` types. It is the only
+part of this package with dependencies beyond `history` and `reflect-metadata`,
+and they are optional peers.
 
 `PageHistoryManager` lives here rather than in a binding because it only needs
 `window.history` — no view technology is involved, and putting it in the React

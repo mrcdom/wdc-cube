@@ -11,10 +11,6 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
-    "./codec": {
-      "types": "./lib/codec/index.d.ts",
-      "default": "./lib/codec/index.js"
-    },
     "./main": {
       "types": "./lib/modules/main/index.d.ts",
       "default": "./lib/modules/main/index.js"
@@ -51,18 +47,12 @@
   "scripts": {
     "compile": "tsc -b",
     "build": "tsc -b",
-    "typecheck": "tsc -b",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "@noble/ciphers": "^2.4.0",
     "fflate": "^0.8.3",
     "reflect-metadata": "^0.2.2",
     "wdc-cube": "workspace:*"
-  },
-  "devDependencies": {
-    "vitest": "^5.0.0",
-    "wdc-cube-test": "workspace:*"
   }
 }

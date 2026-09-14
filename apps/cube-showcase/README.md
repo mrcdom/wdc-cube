@@ -137,33 +137,38 @@ at once and the second one asked for is not always the second one back, so every
 fetch takes a token and an overtaken answer says nothing.
 
 **Sealing the address**
-([`AesHistoryCodec.ts`](presentation/src/codec/AesHistoryCodec.ts)).
-The lock in the sidebar installs a `HistoryCodec` on the running application, and
+([`main.presenter.ts`](presentation/src/modules/main/main.presenter.ts)).
+The lock in the sidebar installs `wdc-cube/codec` on the running application, and
 the query collapses into one opaque parameter. Navigate with it on, press Back,
 turn it off: the addresses are the same addresses, and the presenters never learn
 that anything happened — a codec sits under the history manager and nothing above
 it knows.
 
-It is AES-SIV rather than AES-GCM so that the same state gives the same address
-every time. A random nonce would be just as durable and just as secret, but two
-copies of one screen would produce two different links, and the framework decides
-*"did the address change?"* by comparing strings.
+This is the only place in either application that swaps a codec while it runs,
+which is why it exists: an opt-in seam nobody can see is a seam nobody believes.
+It is also what found the two defects that shipped the seam — the address not
+being republished when only its *form* changed, and a codec installed one line
+too late to read the address it was meant to open.
 
-The key here is a constant, which is the one thing not to copy. A real one is
-derived per user and kept in `sessionStorage`, which the browser drops when it
-closes — `localStorage` outlives it and, on a shared machine, hands the next
-person the key. See [docs/architecture.md](../../docs/architecture.md) for the
-seam itself.
+The showcase declares `@noble/ciphers` and `fflate` itself, because they are
+optional peers of `wdc-cube` — the same two lines any consuming application
+adds.
+
+The key here is a constant in the bundle, which is the one thing not to copy:
+whoever downloads the application has it. A real one is derived per user on the
+server and handed over at sign-in. See [the library's README](../../libs/cube/README.md#sealing-the-address)
+for key rotation and the two-regime pattern.
 
 ## What it deliberately does not have
 
-**Tests, with one exception.** The tutorial beside it is where this repository
-holds its test suite — one presentation-layer suite and one per renderer. The
-showcase is a demonstration, and changes to it are verified in a browser.
+**Tests.** The tutorial beside it is where this repository holds its test
+suite — one presentation-layer suite and one per renderer. The showcase is a
+demonstration, and changes to it are verified in a browser.
 
-The exception is the codec. Presenters written to be read and changed are not
-worth pinning down; cryptography a reader will copy into a real application is.
-So `vitest.config.ts` here includes `src/codec/**` and nothing else.
+It briefly had one file, for the codec, back when the codec lived here. The
+codec ships in `wdc-cube/codec` now and its tests went with it, which is the
+better answer to the same worry: cryptography a reader might copy is
+cryptography a reader should install.
 
 **A server.** Pointing `ShowcaseService.baseUrl` at one is the whole of the
 change if there is ever a reason to. The bootstrap already does exactly that,

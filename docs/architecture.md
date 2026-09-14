@@ -231,16 +231,23 @@ expect(history.encodedToken).not.toContain('state=todo')
 
 ### The reference implementation, and where to press it
 
-`apps/cube-showcase/presentation/src/codec` holds a working one: AES-SIV over
-the query, conditional deflate, base64url on the wire, in an envelope carrying a
-version byte and a flags byte.
+`wdc-cube/codec` is a working one: AES-SIV over the query, conditional deflate,
+base64url on the wire, in an envelope carrying a version byte and a flags byte.
 
-It lives in the showcase rather than the tutorial for two reasons. The showcase
-has a sign-in, which is where a per-user key would come from; and the tutorial
-exists to show that the URL *is* the state, which sealing it would hide. Its
-tests sit beside it, and are the only tests in the showcase — presenters written
-to be read and changed are not worth pinning down, but cryptography somebody
-will copy is.
+It is a **subpath with optional peer dependencies** rather than part of the main
+entry point, and that shape is the whole argument. The seam and an
+implementation of it are different things: an application that never seals an
+address should not download a cipher to prove it. So `@noble/ciphers` and
+`fflate` are declared optional and the application that wants them declares them
+itself — which also means it picks the versions.
+
+It shipped this way rather than as a file to copy because a copied file is a
+silent fork: a fix to the envelope packing does not reach it, its tests protect
+only the copy they came with, and the next application writes the same thing
+slightly differently. That is the argument `verify/run.mjs` already makes about
+packaging, applied to content.
+
+The showcase is where it is **pressed** rather than where it lives.
 
 And it is not merely installed there — there is a switch for it in the sidebar.
 An opt-in seam nobody can see is a seam nobody believes, so the showcase lets a
