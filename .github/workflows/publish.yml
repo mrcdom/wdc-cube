@@ -63,5 +63,8 @@ jobs:
       # A green publish step is not a release. `pnpm publish -r` has twice
       # reported success while two of the six were not on the registry — both
       # times propagation, both times invisible from here. This asks the
-      # registry, and keeps asking, because that delay is real.
+      # registry, and keeps asking, because that delay is real: on 1.4.0 the
+      # last package took thirteen minutes to become visible. The budget is
+      # twenty, and a name the registry has never heard of fails at once
+      # instead of spending it.
       - run: node scripts/check-published.mjs
