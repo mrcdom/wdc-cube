@@ -38,6 +38,8 @@ export function MainView(props: ViewProps<MainScope>): JSX.Element {
 
                     <div class={Css.navSpacer} />
 
+                    <SealSwitch scope={props.scope} />
+
                     <Show when={props.scope.member}>
                         {(member) => (
                             <div class={Css.account}>
@@ -98,6 +100,28 @@ function Modals(props: { scope: MainScope }): JSX.Element {
                 <ViewSlot scope={props.scope.alert} />
             </ModalLayer>
         </>
+    )
+}
+
+/**
+ * Seals the address, or stops, and shows which it is.
+ *
+ * The one control here that is about the framework rather than about issues.
+ * An opt-in seam nobody can see is a seam nobody believes, so this puts it
+ * where it can be pressed: turn it on and the query in the address bar becomes
+ * one opaque parameter, turn it off and it reads again, and Back walks through
+ * both either way.
+ */
+function SealSwitch(props: { scope: MainScope }): JSX.Element {
+    return (
+        <button
+            classList={{ [Css.seal]: true, [Css.sealOn]: props.scope.addressSealed }}
+            onClick={() => props.scope.onToggleAddressSealed()}
+            title="Encrypt the query string in the address bar. The key is in the page, so this is obfuscation, not secrecy."
+        >
+            <Glyph name={props.scope.addressSealed ? 'lock' : 'unlock'} />
+            <span>{props.scope.addressSealed ? 'Address sealed' : 'Seal the address'}</span>
+        </button>
     )
 }
 
@@ -162,7 +186,9 @@ const GLYPHS: Record<string, string> = {
     dashboard: 'M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z',
     issues: 'M4 6h16M4 12h16M4 18h10',
     cycles: 'M21 12a9 9 0 1 1-3-6.7M21 3v6h-6',
-    'sign-out': 'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3'
+    'sign-out': 'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3',
+    lock: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
+    unlock: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 7.5-2'
 }
 
 function Glyph(props: { name: string }): JSX.Element {

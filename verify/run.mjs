@@ -22,14 +22,27 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { argv, exit, stdout } from 'node:process'
+import { argv, env, exit, stdout } from 'node:process'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const work = join(root, 'verify', '.work')
 const packed = join(work, 'packages')
 
 const run = (command, args, cwd) =>
-    execFileSync(command, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
+    execFileSync(command, args, {
+        cwd,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: {
+            ...env,
+            // These consumers install with npm on purpose — the point is to be a
+            // project that is not this one. Corepack sees the repository's
+            // `packageManager` field from any directory under it and refuses to
+            // run anything else, so the scratch projects say they are not part
+            // of that arrangement.
+            COREPACK_ENABLE_STRICT: '0'
+        }
+    })
 
 const manifests = readdirSync(join(root, 'libs'))
     .map((name) => JSON.parse(readFileSync(join(root, 'libs', name, 'package.json'), 'utf8')))

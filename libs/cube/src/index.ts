@@ -17,6 +17,7 @@ export { Place, type PlaceCreator } from './impl/Place.js'
 export { FlipIntent } from './impl/FlipIntent.js'
 export { HistoryManager } from './impl/HistoryManager.js'
 export { PageHistoryManager } from './impl/PageHistoryManager.js'
+export type { HistoryCodec } from './impl/HistoryCodec.js'
 export {
     action,
     defaultInstrumentation,
