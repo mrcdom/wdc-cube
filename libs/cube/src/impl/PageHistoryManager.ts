@@ -22,9 +22,16 @@ export class PageHistoryManager extends HistoryManager {
         this.__history.listen(this.emitOnChanged.bind(this))
     }
 
+    /**
+     * The address in the form the framework reads it, always plain.
+     *
+     * The path comes through untouched; only the query is handed to the codec,
+     * and a query that is not an envelope comes back as it went in.
+     */
     public get location() {
         const location = this.__history.location
-        return location.pathname + location.search
+        const query = this.decodeQuery(location.search.replace(/^\?/, ''))
+        return location.pathname + (query ? '?' + query : '')
     }
 
     public override update(app: Application, place: Place): void {
@@ -41,17 +48,29 @@ export class PageHistoryManager extends HistoryManager {
 
     private doUpdate(app: Application, place: Place): void {
         const currentUri = app.newFlipIntent(place)
-
         const oldLocation = this.__history.location
 
-        const qs = currentUri.getQueryString()
+        const query = currentUri.getQueryString()
+        const encoded = this.encodeQuery(query)
+
         const newLocation: Partial<Path> = {
             pathname: place.name,
-            search: qs ? '?' + currentUri.getQueryString() : '',
+            search: encoded ? '?' + encoded : '',
             hash: ''
         }
 
-        if (newLocation.pathname !== oldLocation.pathname || newLocation.search !== oldLocation.search) {
+        // Compared as plain text on both sides, and that is not a detail: a
+        // codec may legitimately produce a different envelope for the same
+        // state, and comparing envelope with envelope would push a history
+        // entry on every scope update, forever.
+        //
+        // The one on screen is decoded rather than remembered, because a
+        // remembered value goes stale — Back, Forward and an address edited by
+        // hand all change it without passing through here. One decode costs
+        // microseconds against the 16ms this call is already debounced by.
+        const wasQuery = this.decodeQuery(oldLocation.search.replace(/^\?/, ''))
+
+        if (newLocation.pathname !== oldLocation.pathname || query !== wasQuery) {
             this.__history.push(newLocation)
         }
     }
