@@ -37,6 +37,17 @@ export class MainScope extends Scope {
     @observe() dialog?: IDialogScope
     @observe() alert?: AlertScope
 
+    /**
+     * Whether the address is currently being sealed.
+     *
+     * A showcase's job is to be looked at, and an opt-in seam nobody can see is
+     * a seam nobody believes. Turning this on and off republishes the address
+     * under the new form, which is also the one thing in the whole feature that
+     * no test reaches: swapping a codec while an application is running.
+     */
+    @observe() addressSealed = false
+
     onSignOut = Scope.ASYNC_ACTION
     onOpenProjects = Scope.ASYNC_ACTION
+    onToggleAddressSealed = Scope.ASYNC_ACTION
 }

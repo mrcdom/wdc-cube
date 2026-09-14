@@ -229,13 +229,42 @@ expect(history.token).toBe('todos?state=todo')
 expect(history.encodedToken).not.toContain('state=todo')
 ```
 
-### The reference implementation, and why it is not turned on
+### The reference implementation, and where to press it
 
-`apps/cube-tutorial/presentation/src/codec` holds a working one: AES-SIV over
+`apps/cube-showcase/presentation/src/codec` holds a working one: AES-SIV over
 the query, conditional deflate, base64url on the wire, in an envelope carrying a
-version byte and a flags byte. It is *not* enabled in the tutorial, on purpose —
-turning it on would hide the very thing the tutorial exists to show, which is
-that the URL is the state. Its tests are in `presentation-test`.
+version byte and a flags byte.
+
+It lives in the showcase rather than the tutorial for two reasons. The showcase
+has a sign-in, which is where a per-user key would come from; and the tutorial
+exists to show that the URL *is* the state, which sealing it would hide. Its
+tests sit beside it, and are the only tests in the showcase — presenters written
+to be read and changed are not worth pinning down, but cryptography somebody
+will copy is.
+
+And it is not merely installed there — there is a switch for it in the sidebar.
+An opt-in seam nobody can see is a seam nobody believes, so the showcase lets a
+reader turn it on, watch the query become one opaque parameter, navigate, press
+Back, and turn it off again. That switch is also the only thing that exercises
+swapping a codec on a running application.
+
+Two things that switch taught, both of which needed a browser rather than a
+test:
+
+**Changing the codec has to republish the address**, and the framework has to
+notice that the *form* changed even when the state did not. It cannot do that by
+comparing one envelope with another — a codec may seal the same state
+differently every time — so it asks whether there *is* an envelope, which is
+stable either way.
+
+**The key has to be in place before the address is read.** `kickStart` reads
+`historyManager.location` on its first line, so a codec installed later is
+installed too late: a sealed address arrives as one meaningless parameter and
+the place opens with nothing, which is exactly what a link whose key has since
+rotated looks like. The showcase mirrors its switch in `sessionStorage` and
+installs the codec in the presenter's constructor. A real application does the
+same with the key itself — `sessionStorage`, never `localStorage`, which
+outlives the browser and on a shared machine hands the next person the key.
 
 Three things it demonstrates that are worth knowing before writing another:
 

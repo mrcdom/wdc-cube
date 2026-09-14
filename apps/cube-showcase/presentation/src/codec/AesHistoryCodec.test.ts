@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { TestHistoryManager } from 'wdc-cube-test'
-import { createHistoryCodec } from 'wdc-cube-tutorial-presentation/codec'
+
+import { createHistoryCodec } from './AesHistoryCodec.js'
 
 /** A demo key. Real ones are derived per user, on a server. */
 const key = new Uint8Array(32).fill(7)
@@ -40,6 +41,13 @@ describe('the reference codec', () => {
     it('refuses a payload that is not an envelope at all', () => {
         expect(codec.decode('not-base64url!!')).toBeUndefined()
         expect(codec.decode('')).toBeUndefined()
+    })
+
+    it('produces a payload the framework can carry as one parameter', () => {
+        // The contract `HistoryCodec.encode` states: an `&` in here would be
+        // read as the start of a second parameter, and `_e=a&b` is ambiguous.
+        const envelope = codec.encode('state=todo&priority=high&page=2')!
+        expect(envelope).toMatch(/^[A-Za-z0-9_-]+$/)
     })
 
     it('leaves short addresses uncompressed, because deflate would grow them', () => {

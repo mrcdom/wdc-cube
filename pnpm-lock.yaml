@@ -50,12 +50,25 @@ importers:
 
   apps/cube-showcase/presentation:
     dependencies:
+      '@noble/ciphers':
+        specifier: ^2.4.0
+        version: 2.4.0
+      fflate:
+        specifier: ^0.8.3
+        version: 0.8.3
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
       wdc-cube:
         specifier: workspace:*
         version: link:../../../libs/cube
+    devDependencies:
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(msw@2.15.0(@types/node@26.4.1)(typescript@6.0.3))(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(less@4.9.1)(sass@1.104.0))
+      wdc-cube-test:
+        specifier: workspace:*
+        version: link:../../../libs/cube-test
 
   apps/cube-showcase/renderer-solid:
     dependencies:
@@ -102,12 +115,6 @@ importers:
 
   apps/cube-tutorial/presentation:
     dependencies:
-      '@noble/ciphers':
-        specifier: ^2.4.0
-        version: 2.4.0
-      fflate:
-        specifier: ^0.8.3
-        version: 0.8.3
       wdc-cube:
         specifier: workspace:*
         version: link:../../../libs/cube

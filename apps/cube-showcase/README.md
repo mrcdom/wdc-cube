@@ -136,11 +136,34 @@ new state only once that state's rows are in hand. Two answers can be in the air
 at once and the second one asked for is not always the second one back, so every
 fetch takes a token and an overtaken answer says nothing.
 
+**Sealing the address**
+([`AesHistoryCodec.ts`](presentation/src/codec/AesHistoryCodec.ts)).
+The lock in the sidebar installs a `HistoryCodec` on the running application, and
+the query collapses into one opaque parameter. Navigate with it on, press Back,
+turn it off: the addresses are the same addresses, and the presenters never learn
+that anything happened — a codec sits under the history manager and nothing above
+it knows.
+
+It is AES-SIV rather than AES-GCM so that the same state gives the same address
+every time. A random nonce would be just as durable and just as secret, but two
+copies of one screen would produce two different links, and the framework decides
+*"did the address change?"* by comparing strings.
+
+The key here is a constant, which is the one thing not to copy. A real one is
+derived per user and kept in `sessionStorage`, which the browser drops when it
+closes — `localStorage` outlives it and, on a shared machine, hands the next
+person the key. See [docs/architecture.md](../../docs/architecture.md) for the
+seam itself.
+
 ## What it deliberately does not have
 
-**Tests.** The tutorial beside it is where this repository holds its test
-suite — one presentation-layer suite and one per renderer. The showcase is a
-demonstration, and changes to it are verified in a browser.
+**Tests, with one exception.** The tutorial beside it is where this repository
+holds its test suite — one presentation-layer suite and one per renderer. The
+showcase is a demonstration, and changes to it are verified in a browser.
+
+The exception is the codec. Presenters written to be read and changed are not
+worth pinning down; cryptography a reader will copy into a real application is.
+So `vitest.config.ts` here includes `src/codec/**` and nothing else.
 
 **A server.** Pointing `ShowcaseService.baseUrl` at one is the whole of the
 change if there is ever a reason to. The bootstrap already does exactly that,

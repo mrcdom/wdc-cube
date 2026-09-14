@@ -10,6 +10,7 @@ import {
 } from 'wdc-cube'
 
 import type { Member } from '../../domain'
+import { createHistoryCodec } from '../../codec'
 import { ShowcaseService } from '../../services'
 import { ProjectsKeys } from '../projects/projects.key'
 import { Places } from '../RouteConsts'
@@ -21,6 +22,47 @@ const LOG = Logger.get('Showcase.MainPresenter')
 
 // @Inject
 const service = ShowcaseService.INSTANCE
+
+/**
+ * The key the demonstration seals with.
+ *
+ * A constant in the bundle, and therefore obfuscation rather than secrecy: it
+ * keeps an address from being read over a shoulder or out of a synced history,
+ * and it keeps links shareable. It is not a secret and the page says so.
+ */
+const DEMO_KEY = new Uint8Array(32).fill(7)
+
+/**
+ * Where the switch remembers itself.
+ *
+ * `sessionStorage`, and the choice is the plan's rather than a convenience: a
+ * key lives in memory and is mirrored here so that a reload does not lose it,
+ * and never in `localStorage`, which outlives the browser and on a shared
+ * machine would hand the next person the key.
+ *
+ * It has to be read *before* the application reads the address. `kickStart`
+ * reads `historyManager.location` on its first line, so a sealed address with
+ * no codec installed arrives as one meaningless parameter: the place opens with
+ * nothing, which is what a link whose key has rotated looks like.
+ */
+const SEALED_KEY = 'cube-showcase:address-sealed'
+
+function readSealed(): boolean {
+    try {
+        return sessionStorage.getItem(SEALED_KEY) === 'yes'
+    } catch {
+        return false
+    }
+}
+
+function rememberSealed(sealed: boolean): void {
+    try {
+        sessionStorage.setItem(SEALED_KEY, sealed ? 'yes' : 'no')
+    } catch {
+        // A private window with storage blocked. The switch still works; it
+        // just will not survive a reload.
+    }
+}
 
 /**
  * The shell, and the only presenter that knows there is a session.
@@ -41,6 +83,13 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
     public constructor(historyManager: HistoryManager) {
         super(historyManager, new MainScope())
         this.setPlaces(Places)
+
+        // Before anything reads the address, which `kickStart` does on its
+        // first line.
+        if (readSealed()) {
+            historyManager.codec = createHistoryCodec(DEMO_KEY)
+            this.scope.addressSealed = true
+        }
     }
 
     public initialize() {
@@ -110,6 +159,7 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
 
         this.scope.onSignOut = this.action(this.onSignOut)
         this.scope.onOpenProjects = this.action(this.onOpenProjects)
+        this.scope.onToggleAddressSealed = this.action(this.onToggleAddressSealed)
 
         const session = await service.fetchSession()
         this.applySession(session?.member)
@@ -218,6 +268,26 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         if (onClose) {
             await onClose()
         }
+    }
+
+    /**
+     * Seals the address, or stops.
+     *
+     * The key is a constant here, which is obfuscation rather than secrecy:
+     * whoever opens this page has it. A real deployment derives one per user on
+     * a server and hands it over at sign-in — the interface does not change,
+     * only where the bytes come from.
+     *
+     * `updateHistory` is what republishes the address in the new form. Without
+     * it the seam would only take effect on the next navigation, and the reader
+     * would not see what they just asked for.
+     */
+    protected async onToggleAddressSealed() {
+        const sealed = !this.scope.addressSealed
+        this.historyManager.codec = sealed ? createHistoryCodec(DEMO_KEY) : undefined
+        this.scope.addressSealed = sealed
+        rememberSealed(sealed)
+        this.updateHistory()
     }
 
     protected async onOpenProjects() {
