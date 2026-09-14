@@ -68,9 +68,20 @@ export class PageHistoryManager extends HistoryManager {
         // remembered value goes stale — Back, Forward and an address edited by
         // hand all change it without passing through here. One decode costs
         // microseconds against the 16ms this call is already debounced by.
-        const wasQuery = this.decodeQuery(oldLocation.search.replace(/^\?/, ''))
+        const wasSearch = oldLocation.search.replace(/^\?/, '')
+        const wasQuery = this.decodeQuery(wasSearch)
 
-        if (newLocation.pathname !== oldLocation.pathname || query !== wasQuery) {
+        // The state, and separately the form it is in. An application may
+        // install or drop a codec while running — signing in and out are the
+        // obvious moments — and then the state is the same while what should
+        // travel is not. Asking *whether* there is an envelope stays stable for
+        // a codec that never repeats one; asking which envelope would not.
+        const changed =
+            newLocation.pathname !== oldLocation.pathname ||
+            query !== wasQuery ||
+            this.isEnvelope(wasSearch) !== this.isEnvelope(encoded)
+
+        if (changed) {
             this.__history.push(newLocation)
         }
     }

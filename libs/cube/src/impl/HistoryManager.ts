@@ -65,6 +65,18 @@ export class HistoryManager {
     }
 
     /**
+     * Whether this query is already an envelope.
+     *
+     * Asked instead of comparing one envelope with another, which is the thing
+     * the whole seam avoids: a codec may seal the same state differently every
+     * time, so envelope-against-envelope always says "it changed". Whether
+     * there *is* one is stable either way.
+     */
+    protected isEnvelope(queryString: string): boolean {
+        return this.codec !== undefined && readEnvelope(queryString, this.codec.envelope) !== undefined
+    }
+
+    /**
      * The inverse, and the reason a plain address keeps working.
      *
      * A query without the envelope parameter is handed back as it came: that is

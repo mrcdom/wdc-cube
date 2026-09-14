@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { PageHistoryManager } from './PageHistoryManager.js'
 import type { HistoryCodec } from './HistoryCodec.js'
+import type { Application } from './Application.js'
+import type { Place } from './Place.js'
 
 const toBase64Url = (text: string) =>
     Buffer.from(text, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
@@ -72,5 +74,66 @@ describe('PageHistoryManager', () => {
         // these two different states and navigate in circles.
         expect(twice.location).toBe(readFirst)
         expect(twice.location).toBe('/todos?state=todo')
+    })
+})
+
+/**
+ * Turning a codec on and off while the application runs.
+ *
+ * Found in a browser rather than here, which is why it is here now: the switch
+ * in the showcase changed nothing in the address, because the state had not
+ * moved and that was all the comparison looked at.
+ */
+describe('PageHistoryManager when the codec changes under it', () => {
+    const place = { name: '/todos' } as Place
+    const app = {
+        newFlipIntent: () => ({ getQueryString: () => 'state=todo' })
+    } as unknown as Application
+
+    /** `update` is debounced by 16ms; this is how a test gets past that. */
+    function updateNow(manager: PageHistoryManager) {
+        vi.useFakeTimers()
+        try {
+            manager.update(app, place)
+            vi.advanceTimersByTime(20)
+        } finally {
+            vi.useRealTimers()
+        }
+    }
+
+    it('republishes the address when a codec is installed', () => {
+        window.history.replaceState(null, '', '/todos?state=todo')
+        const manager = new PageHistoryManager()
+
+        manager.codec = reversing
+        updateNow(manager)
+
+        // The state is the same state. What travels is not, and the address on
+        // screen has to say so.
+        expect(window.location.search).toBe(`?_e=${toBase64Url('odot=etats')}`)
+        expect(manager.location).toBe('/todos?state=todo')
+    })
+
+    it('republishes the address when a codec is dropped', () => {
+        window.history.replaceState(null, '', `/todos?_e=${toBase64Url('odot=etats')}`)
+        const manager = new PageHistoryManager()
+        manager.codec = reversing
+
+        manager.codec = undefined
+        updateNow(manager)
+
+        expect(window.location.search).toBe('?state=todo')
+    })
+
+    it('still says nothing happened when neither the state nor the form moved', () => {
+        window.history.replaceState(null, '', '/todos?state=todo')
+        const manager = new PageHistoryManager()
+        const before = window.history.length
+
+        updateNow(manager)
+
+        // The guard the whole comparison exists for: a scope update that
+        // changes nothing must not push a history entry.
+        expect(window.history.length).toBe(before)
     })
 })
