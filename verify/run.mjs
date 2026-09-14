@@ -19,7 +19,7 @@
  *     node verify/run.mjs node       just one
  */
 import { execFileSync } from 'node:child_process'
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { argv, env, exit, stdout } from 'node:process'
@@ -204,6 +204,72 @@ if (typeof Logger.get('probe').info !== 'function') fail('logger')
 
         const wanted = ['wdc-cube', 'wdc-cube-react', 'wdc-cube-solid', 'wdc-cube-webc', 'wdc-cube-test']
         run('npm', ['install', '--silent', ...wanted.map((n) => tarballs[n]), ...peersOf('wdc-cube-solid')], dir)
+        run('node', ['check.mjs'], dir)
+
+        // The other half of the optional-peer claim, and the half that is easy
+        // to believe without checking: nobody asked for the cipher here, so it
+        // must not have been installed. If these ever turn up, `wdc-cube` has
+        // started charging every application for a feature most never use.
+        for (const unwanted of ['@noble/ciphers', 'fflate']) {
+            if (existsSync(join(dir, 'node_modules', ...unwanted.split('/')))) {
+                // Thrown rather than recorded: every other check here runs in a
+                // child process, where a non-zero exit is what marks the
+                // consumer failed. This one runs in the runner, so setting
+                // `exitCode` would print the reason and still say "ok".
+                throw new Error(`${unwanted} was installed by a consumer that never asked for it`)
+            }
+        }
+    },
+
+    /**
+     * The codec subpath, `wdc-cube/codec`.
+     *
+     * An `exports` map can be right in the workspace and unreachable from a
+     * tarball, and an optional peer can be declared and still not resolve — two
+     * failure modes the other consumers cannot see, because none of them import
+     * this path.
+     */
+    codec(tarballs) {
+        const dir = project('codec', {
+            'package.json': JSON.stringify({ name: 'verify-codec', private: true, type: 'module' }, null, 2),
+            'check.mjs': `
+import { createHistoryCodec } from 'wdc-cube/codec'
+import { TestHistoryManager } from 'wdc-cube-test'
+
+const fail = (what) => { console.error('  FAILED ' + what); process.exitCode = 1 }
+
+const v1 = new Uint8Array(32).fill(1)
+const v2 = new Uint8Array(32).fill(2)
+
+const one = createHistoryCodec(v1)
+if (one.decode(one.encode('state=todo&page=2')) !== 'state=todo&page=2') fail('round trip')
+if (one.encode('state=todo') !== one.encode('state=todo')) fail('determinism')
+
+// A key as the server sends it: 32 bytes, base64url, unpadded.
+const text = createHistoryCodec('WuTd8whtLEICGY9w-KN0rNK-Y-o-ozw5ojAOCzU1crU')
+if (text.decode(text.encode('state=todo')) !== 'state=todo') fail('base64url key')
+
+// Rotation: seal with v2, still open v1, refuse a version not offered.
+const rotated = createHistoryCodec({ current: { version: 2, key: v2 }, previous: [{ version: 1, key: v1 }] })
+if (rotated.decode(one.encode('state=todo')) !== 'state=todo') fail('previous key')
+if (one.decode(rotated.encode('state=todo')) !== undefined) fail('a retired key opened a new address')
+const narrowed = createHistoryCodec({ current: { version: 2, key: v2 } })
+if (narrowed.decode(one.encode('state=todo')) !== undefined) fail('a closed grace period still opened')
+
+// And that it reaches the seam it exists for.
+const history = new TestHistoryManager()
+history.codec = rotated
+history.update({ newFlipIntent: () => ({ toString: () => 'todos?state=todo' }) }, { name: 'todos' })
+if (history.token !== 'todos?state=todo') fail('token stayed plain')
+if (history.encodedToken.includes('state=todo')) fail('the address travelled in the clear')
+`
+        })
+
+        run(
+            'npm',
+            ['install', '--silent', tarballs['wdc-cube'], tarballs['wdc-cube-test'], ...peersOf('wdc-cube')],
+            dir
+        )
         run('node', ['check.mjs'], dir)
     },
 

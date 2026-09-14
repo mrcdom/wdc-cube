@@ -10,7 +10,7 @@ import {
 } from 'wdc-cube'
 
 import type { Member } from '../../domain'
-import { createHistoryCodec } from '../../codec'
+import { createHistoryCodec } from 'wdc-cube/codec'
 import { ShowcaseService } from '../../services'
 import { ProjectsKeys } from '../projects/projects.key'
 import { Places } from '../RouteConsts'

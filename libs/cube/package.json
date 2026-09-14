@@ -17,6 +17,10 @@
     ".": {
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
+    },
+    "./codec": {
+      "types": "./lib/codec/index.d.ts",
+      "default": "./lib/codec/index.js"
     }
   },
   "files": [
@@ -37,6 +41,8 @@
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@noble/ciphers": "^2.4.0",
+    "fflate": "^0.8.3",
     "jsdom": "^30.0.1",
     "vitest": "^5.0.0"
   },
@@ -55,5 +61,17 @@
   ],
   "engines": {
     "node": ">=20.19.0"
+  },
+  "peerDependencies": {
+    "@noble/ciphers": "^2.4.0",
+    "fflate": "^0.8.3"
+  },
+  "peerDependenciesMeta": {
+    "@noble/ciphers": {
+      "optional": true
+    },
+    "fflate": {
+      "optional": true
+    }
   }
 }
