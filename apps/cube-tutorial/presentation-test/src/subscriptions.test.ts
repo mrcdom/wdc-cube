@@ -29,11 +29,11 @@ describe('subscriptions', () => {
         await harness.settle()
 
         expect(dialogOf(harness)).toBeInstanceOf(SubscriptionsDetailScope)
-        expect(harness.history.token).toEqual('/subscriptions/detail?site-id=2')
+        expect(harness.history.token).toEqual('/subscriptions/detail?sd-site=2')
     })
 
     it('rebuilds the dialog from the address alone', async () => {
-        harness = await startTutorial('/subscriptions/detail?site-id=3')
+        harness = await startTutorial('/subscriptions/detail?sd-site=3')
 
         expect(harness.scope.body).toBeInstanceOf(SubscriptionsScope)
         expect(dialogOf(harness)).toBeInstanceOf(SubscriptionsDetailScope)
@@ -44,7 +44,7 @@ describe('subscriptions', () => {
     // view read for its message and one of them also bound to the field — so the
     // dialog opened holding a domain name that its own validation then rejected.
     it('opens with the e-mail field empty', async () => {
-        harness = await startTutorial('/subscriptions/detail?site-id=3')
+        harness = await startTutorial('/subscriptions/detail?sd-site=3')
 
         expect(dialogOf(harness)?.email).toBeFalsy()
     })
@@ -66,7 +66,7 @@ describe('subscriptions', () => {
         // presenter used to read lastPlace — which falls back to the root place —
         // as somewhere the user had been, so Cancel left the module for Home.
         it('returns to the list when the dialog was opened by address', async () => {
-            harness = await startTutorial('/subscriptions/detail?site-id=2')
+            harness = await startTutorial('/subscriptions/detail?sd-site=2')
 
             await dialogOf(harness)?.onClose()
             await harness.settle()
@@ -77,7 +77,7 @@ describe('subscriptions', () => {
         })
 
         it('returns to the list after subscribing from a cold start', async () => {
-            harness = await startTutorial('/subscriptions/detail?site-id=2')
+            harness = await startTutorial('/subscriptions/detail?sd-site=2')
 
             dialogOf(harness)?.onEmailChanged('someone@example.com')
             await dialogOf(harness)?.onSubscribe()
@@ -90,7 +90,7 @@ describe('subscriptions', () => {
 
     describe('validation', () => {
         it('refuses an empty address and keeps the dialog open', async () => {
-            harness = await startTutorial('/subscriptions/detail?site-id=2')
+            harness = await startTutorial('/subscriptions/detail?sd-site=2')
 
             dialogOf(harness)?.onEmailChanged('   ')
             await dialogOf(harness)?.onSubscribe()
@@ -102,7 +102,7 @@ describe('subscriptions', () => {
         })
 
         it('refuses a malformed address and keeps the dialog open', async () => {
-            harness = await startTutorial('/subscriptions/detail?site-id=2')
+            harness = await startTutorial('/subscriptions/detail?sd-site=2')
 
             dialogOf(harness)?.onEmailChanged('not-an-address')
             await dialogOf(harness)?.onSubscribe()
@@ -113,7 +113,7 @@ describe('subscriptions', () => {
         })
 
         it('leaves the module reachable after the alert is dismissed', async () => {
-            harness = await startTutorial('/subscriptions/detail?site-id=2')
+            harness = await startTutorial('/subscriptions/detail?sd-site=2')
             dialogOf(harness)?.onEmailChanged('')
             await dialogOf(harness)?.onSubscribe()
             await harness.settle()

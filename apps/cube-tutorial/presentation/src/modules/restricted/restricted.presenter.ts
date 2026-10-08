@@ -28,8 +28,11 @@ export class RestrictedPresenter extends CubePresenter<MainPresenter, Restricted
     ): Promise<boolean> {
         const keys = new RestrictedKeys(this.app, intent)
 
+        // Attributes come from the level above, which may change its mind between
+        // flips: read them on every call, not only on initialization.
+        this.parentSlot = keys.parentSlot
+
         if (initialization) {
-            this.parentSlot = keys.parentSlot
             LOG.info('Initialized')
         }
 

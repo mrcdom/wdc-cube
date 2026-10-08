@@ -138,7 +138,7 @@ describe('todo-mvc', () => {
             await harness.settle()
             expect(titles(harness)).toEqual(['Walk the dog', 'Go to school'])
             expect(todos(harness).footer?.showing).toEqual(ShowingOptions.ACTIVE)
-            expect(harness.history.token).toEqual('/todos?todo-showing=1')
+            expect(harness.history.token).toEqual('/todos?tm-showing=1')
 
             await todos(harness).footer!.actions.onShowCompleteds()
             await harness.settle()
@@ -150,7 +150,7 @@ describe('todo-mvc', () => {
         })
 
         it('is restored from the address', async () => {
-            harness = await startTutorial('/todos?todo-showing=2')
+            harness = await startTutorial('/todos?tm-showing=2')
 
             expect(todos(harness).footer?.showing).toEqual(ShowingOptions.COMPLETED)
             expect(titles(harness)).toEqual(['Write an app', 'Watch Michael Reeves', 'Add automatic deployment'])
@@ -209,7 +209,7 @@ describe('todo-mvc', () => {
         // on the assumption that redrawing a root redraws everything under it.
         // That holds in React and not in a view told only what changed.
         it('marks the clock without marking every item', async () => {
-            harness = await startTutorial('/todos?todo-uid=-1')
+            harness = await startTutorial('/todos?tm-uid=-1')
             const main = todos(harness).main!
             const clock = main.clock!
 

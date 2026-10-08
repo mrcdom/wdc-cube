@@ -30,10 +30,12 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
     ): Promise<boolean> {
         const keys = new SubstriptionsKeys(this.app, intent)
 
-        if (initialization) {
-            this.parentSlot = keys.parentSlot
-            this.dialogSlot = keys.dialogSlot
+        // Attributes come from the level above, which may change its mind between
+        // flips: read them on every call, not only on initialization.
+        this.parentSlot = keys.parentSlot
+        this.dialogSlot = keys.dialogSlot
 
+        if (initialization) {
             this.scope.onItemClicked = this.action(this.onItemClicked)
             this.scope.sites = await tutorialService.fetchSubscribleSites()
 

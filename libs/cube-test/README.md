@@ -46,7 +46,7 @@ decorator plugin, and why it would break if it had to.
 ## What a test looks like
 
 ```ts
-const history = new TestHistoryManager('/subscriptions/detail?site-id=2')
+const history = new TestHistoryManager('/subscriptions/detail?sd-site=2')
 const app = new MainPresenter(history)
 
 await app.kickStart(Places.main)

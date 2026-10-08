@@ -28,7 +28,7 @@ there is no back end to run.
 The **Run the stress test** button under the todo list swaps the sample data for
 1000 generated items and a clock ticking every second, which is what exercises
 the update debouncing and the `hint()` given to the update manager. It navigates
-rather than mutating state, so the mode lands in the URL (`?todo-uid=-1`) and
+rather than mutating state, so the mode lands in the URL (`?tm-uid=-1`) and
 survives a reload.
 
 ## What React brings
@@ -151,8 +151,8 @@ The modules below are split across the two packages: the presenter and scope in
 | Module | What to look at |
 | --- | --- |
 | [main](../presentation/src/modules/main) | The application shell. `MainPresenter` extends `ApplicationPresenter`: it owns the root scope, the body and dialog slots, and the global `alert()` used by every other presenter. |
-| [todo-mvc](../presentation/src/modules/todo-mvc) | The busiest module. Nested scopes (header, main, footer, per-item), `ObservableArray` for the item list, `onBeforeScopeUpdate()` computing derived state in one pass, update hints for debouncing, and filters and the stress toggle round-tripping through the URL (`?todo-showing=1`, `?todo-uid=-1`). |
-| [subscriptions](../presentation/src/modules/subscriptions) | Two places, one nested in the other. The detail place renders into the shell's *dialog* slot instead of the body, and carries a parameter (`?site-id=1`) so the dialog survives a reload. |
+| [todo-mvc](../presentation/src/modules/todo-mvc) | The busiest module. Nested scopes (header, main, footer, per-item), `ObservableArray` for the item list, `onBeforeScopeUpdate()` computing derived state in one pass, update hints for debouncing, and filters and the stress toggle round-tripping through the URL (`?tm-showing=1`, `?tm-uid=-1`). |
+| [subscriptions](../presentation/src/modules/subscriptions) | Two places, one nested in the other. The detail place renders into the shell's *dialog* slot instead of the body, and carries a parameter (`?sd-site=1`) so the dialog survives a reload. |
 | [restricted](../presentation/src/modules/restricted) | The smallest presenter, showing slot chaining: it receives a parent slot and offers its own to whatever is deeper in the tree. Nothing is nested under it yet, so `#/restricted` renders the empty case. |
 
 ## Tests

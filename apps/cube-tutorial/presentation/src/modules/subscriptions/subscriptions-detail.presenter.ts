@@ -37,6 +37,12 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
 
         const paramSiteId = keys.siteId ?? this.item?.id ?? -1
 
+        // Attributes come from the level above, which may change its mind between
+        // flips: read them on every call, not only on initialization.
+        this.dialogSlot = keys.dialogSlot
+        // The row already in hand, when the flip came from a click on the list.
+        const arrived = keys.item
+
         if (initialization) {
             // Only somewhere the user has actually been. On a cold start straight
             // into this dialog — a reload, or a shared link — nothing has been
@@ -58,9 +64,7 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             // value, without triggering an update or a history entry
             this.scope.onEmailChanged = this.handleEmailChanged.bind(this)
 
-            this.dialogSlot = keys.dialogSlot
-
-            let siteItem = keys.item
+            let siteItem = arrived
             if (!siteItem) {
                 siteItem = await tutorialService.fetchSiteItem(paramSiteId)
             }
@@ -74,7 +78,7 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
 
             LOG.info('Initialized')
         } else if (this.item?.id !== paramSiteId) {
-            this.item = await tutorialService.fetchSiteItem(paramSiteId)
+            this.item = arrived?.id === paramSiteId ? arrived : await tutorialService.fetchSiteItem(paramSiteId)
             this.scope.site = this.item?.site
             this.scope.email = ''
             this.email = ''

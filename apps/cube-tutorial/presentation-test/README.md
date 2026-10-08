@@ -30,7 +30,7 @@ view boundary. It has caught exactly that once — see below.
 ## The shape of a test
 
 ```ts
-harness = await startTutorial('/subscriptions/detail?site-id=2')
+harness = await startTutorial('/subscriptions/detail?sd-site=2')
 
 await harness.scope.dialog?.onClose()
 await harness.settle()
