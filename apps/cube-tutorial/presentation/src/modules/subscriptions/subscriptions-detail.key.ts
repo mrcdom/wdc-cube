@@ -22,8 +22,10 @@ export class SubstriptionsDetailKeys extends MainKeys {
 
     // :: siteId
 
-    get siteId() {
-        return this._intent.getParameterAsNumber(P.SiteId)
+    /** A positive integer, or `undefined` when the address carries none it can use. */
+    get siteId(): number | undefined {
+        const value = this._intent.getParameterAsNumber(P.SiteId)
+        return value !== undefined && Number.isSafeInteger(value) && value > 0 ? value : undefined
     }
 
     set siteId(siteId: number | undefined) {

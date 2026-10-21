@@ -86,3 +86,50 @@ export async function startTutorial(location = ''): Promise<Harness> {
         release: () => app.release()
     }
 }
+
+export type HeldCall = {
+    readonly args: unknown[]
+    /** Lets this one call through to the real method. */
+    release: () => void
+}
+
+export type HeldMethod = {
+    /** Every call made since `holdCalls`, in order, each waiting for its release. */
+    readonly calls: HeldCall[]
+    releaseAll: () => void
+    /** Puts the real method back; calls still held keep waiting for their release. */
+    restore: () => void
+}
+
+/**
+ * Holds every call to an async method until the test releases it, then hands it to
+ * the real one. This is how a test sees what is on screen while a request is still
+ * out — the tutorial's service answers at once, so otherwise there is no "meanwhile".
+ */
+export function holdCalls<T extends object>(target: T, method: keyof T & string): HeldMethod {
+    const slots = target as Record<string, unknown>
+    const wasOwn = Object.prototype.hasOwnProperty.call(target, method)
+    const original = slots[method] as (...args: unknown[]) => Promise<unknown>
+    const calls: HeldCall[] = []
+
+    slots[method] = (...args: unknown[]) => {
+        let release = () => {}
+        const gate = new Promise<void>((resolve) => {
+            release = resolve
+        })
+        calls.push({ args, release })
+        return gate.then(() => original.apply(target, args))
+    }
+
+    return {
+        calls,
+        releaseAll: () => calls.forEach((call) => call.release()),
+        restore: () => {
+            if (wasOwn) {
+                slots[method] = original
+            } else {
+                delete slots[method]
+            }
+        }
+    }
+}

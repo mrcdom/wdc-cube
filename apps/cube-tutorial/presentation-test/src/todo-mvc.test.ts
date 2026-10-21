@@ -1,9 +1,11 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ScopeUpdateRecorder } from 'wdc-cube-test'
-import { ShowingOptions, type TodoMvcScope } from 'wdc-cube-tutorial-presentation/todo-mvc'
+import { TutorialService } from 'wdc-cube-tutorial-presentation'
+import { MainPresenter } from 'wdc-cube-tutorial-presentation/main'
+import { ShowingOptions, TodoMvcScope } from 'wdc-cube-tutorial-presentation/todo-mvc'
 
-import { startTutorial, type Harness } from './harness'
+import { holdCalls, startTutorial, type Harness } from './harness'
 
 let harness: Harness | undefined
 
@@ -227,6 +229,87 @@ describe('todo-mvc', () => {
                 expect(recorder.updated).toEqual([clock])
             } finally {
                 recorder.release()
+            }
+        })
+    })
+
+    describe('the address', () => {
+        // The address is outside input. The keys hand back only usable values, and
+        // since the same keys publish, whatever was refused drops out of the address.
+        it('ignores a filter it does not know', async () => {
+            harness = await startTutorial('/todos?tm-showing=99')
+
+            expect(todos(harness).footer?.showing).toEqual(ShowingOptions.ALL)
+            expect(titles(harness).length).toEqual(5)
+            expect(harness.history.token).toEqual('/todos')
+        })
+
+        it('ignores a list id it cannot read', async () => {
+            harness = await startTutorial('/todos?tm-uid=abc')
+
+            expect(titles(harness).length).toEqual(5)
+            expect(harness.history.token).toEqual('/todos')
+        })
+    })
+
+    describe('while the list loads', () => {
+        // The screen goes up before the request, so the previous one does not stay
+        // frozen in front while it is out.
+        it('is already on screen', async () => {
+            harness = await startTutorial()
+            const held = holdCalls(TutorialService.INSTANCE, 'fetchTodos')
+
+            try {
+                const opening = harness.scope.onOpenTodos()
+                await vi.waitFor(() => expect(harness?.scope.body).toBeInstanceOf(TodoMvcScope))
+                expect(held.calls.length).toEqual(1)
+
+                held.releaseAll()
+                await opening
+                await harness.settle()
+                expect(titles(harness).length).toEqual(5)
+            } finally {
+                held.restore()
+            }
+        })
+    })
+
+    describe('stress mode, on the place already on screen', () => {
+        // Switching mode changes this screen's own state and republishes the address.
+        // Flipping to the place already on screen would redo the composition for nothing.
+        it('switches without flipping to itself', async () => {
+            harness = await startTutorial('/todos')
+            const flips = vi.spyOn(MainPresenter.prototype, 'flipToIntent')
+
+            try {
+                await todos(harness).actions.onToggleStress()
+                await harness.settle()
+
+                expect(flips).not.toHaveBeenCalled()
+                expect(todos(harness).main?.items.length).toEqual(1000)
+                expect(harness.history.token).toEqual('/todos?tm-uid=-1')
+            } finally {
+                flips.mockRestore()
+            }
+        })
+
+        // Regression. Leaving stress mode stopped the clock but kept its handle, so
+        // coming back in found a handle and never started it again.
+        it('restarts the clock on the way back in', async () => {
+            harness = await startTutorial('/todos')
+            const timers = vi.spyOn(globalThis, 'setInterval')
+
+            try {
+                await todos(harness).actions.onToggleStress()
+                await harness.settle()
+                await todos(harness).actions.onToggleStress()
+                await harness.settle()
+                await todos(harness).actions.onToggleStress()
+                await harness.settle()
+
+                expect(timers).toHaveBeenCalledTimes(2)
+            } finally {
+                timers.mockRestore()
             }
         })
     })

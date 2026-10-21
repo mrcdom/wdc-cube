@@ -16,9 +16,15 @@ const eMailRegExp =
 export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, SubscriptionsDetailScope> {
     private dialogSlot: ScopeSlot = NOOP_VOID
 
+    /** The site this dialog is about. Known from the address before its data arrives. */
+    private siteId?: number
+
     private item?: SiteItemType
 
     private email?: string
+
+    /** Bumped on every load: a response that is no longer the latest stays silent. */
+    private pending = 0
 
     private previousIntent?: FlipIntent
 
@@ -35,13 +41,19 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
         const keys = new SubstriptionsDetailKeys(this.app, intent)
 
-        const paramSiteId = keys.siteId ?? this.item?.id ?? -1
-
         // Attributes come from the level above, which may change its mind between
         // flips: read them on every call, not only on initialization.
         this.dialogSlot = keys.dialogSlot
         // The row already in hand, when the flip came from a click on the list.
         const arrived = keys.item
+
+        // The keys only hand back a usable id. With none, there is no dialog to show:
+        // redirect to the list with the intent in transit, mid-flip.
+        const siteId = keys.siteId
+        if (siteId === undefined) {
+            await this.app.flipToIntent(intent.redirect(Places.subscriptions))
+            return false
+        }
 
         if (initialization) {
             // Only somewhere the user has actually been. On a cold start straight
@@ -53,10 +65,6 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
                 this.previousIntent = this.app.newFlipIntent(this.app.lastPlace)
             }
 
-            if (paramSiteId <= 0) {
-                throw new Error('No site id provided')
-            }
-
             this.scope.onClose = this.action(this.onClose)
             this.scope.onSubscribe = this.action(this.onSubscribe)
 
@@ -64,34 +72,59 @@ export class SubscriptionsDetailPresenter extends CubePresenter<MainPresenter, S
             // value, without triggering an update or a history entry
             this.scope.onEmailChanged = this.handleEmailChanged.bind(this)
 
-            let siteItem = arrived
-            if (!siteItem) {
-                siteItem = await tutorialService.fetchSiteItem(paramSiteId)
-            }
-
-            this.item = siteItem
-            // The site is what the dialog names; the e-mail field starts empty.
-            // Both used to be `email`, which every view read for the message and
-            // one of them also bound to the field — so the field opened holding a
-            // domain name that its own validation then rejected.
-            this.scope.site = this.item?.site
-
             LOG.info('Initialized')
-        } else if (this.item?.id !== paramSiteId) {
-            this.item = arrived?.id === paramSiteId ? arrived : await tutorialService.fetchSiteItem(paramSiteId)
-            this.scope.site = this.item?.site
-            this.scope.email = ''
-            this.email = ''
         }
 
+        // The dialog goes up before its data: the previous screen does not stay frozen
+        // in front while the site loads.
         this.dialogSlot(this.scope)
+
+        if (siteId !== this.siteId) {
+            // In parallel, so the flip ends here.
+            this.showSite(siteId, arrived).catch((caught) => this.app.unexpected('Loading the site', caught))
+        }
 
         return true
     }
 
     public override publishParameters(intent: FlipIntent): void {
         const keys = new SubstriptionsDetailKeys(this.app, intent)
-        keys.siteId = this.item?.id
+        keys.siteId = this.siteId
+    }
+
+    private async showSite(siteId: number, arrived?: SiteItemType) {
+        const token = ++this.pending
+
+        this.siteId = siteId
+        this.item = undefined
+        // The site is what the dialog names; the e-mail field starts empty.
+        // Both used to be `email`, which every view read for the message and
+        // one of them also bound to the field — so the field opened holding a
+        // domain name that its own validation then rejected.
+        this.scope.site = undefined
+        this.scope.email = ''
+        this.email = ''
+
+        let item: SiteItemType | undefined
+        try {
+            item = arrived?.id === siteId ? arrived : await tutorialService.fetchSiteItem(siteId)
+        } catch (caught) {
+            if (token !== this.pending) {
+                return
+            }
+            // A well-formed id the service does not know, from an old or edited link.
+            LOG.warn(`No site under id=${siteId}`, caught)
+            this.alert('warning', 'Unknown site', `There is no site with id ${siteId} to subscribe to.`)
+            await this.close()
+            return
+        }
+
+        if (token !== this.pending) {
+            return
+        }
+
+        this.item = item
+        this.scope.site = item?.site
     }
 
     protected async onClose() {
