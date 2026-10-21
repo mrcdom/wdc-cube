@@ -41,6 +41,9 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
 
     private userId = 0
 
+    /** Bumped on every load: a response that is no longer the latest stays silent. */
+    private pending = 0
+
     // ReturnType<typeof setInterval> rather than number or NodeJS.Timeout: this
     // package is consumed as source, so whoever compiles it decides which global
     // types are in scope — and those two spellings disagree between DOM and Node.
@@ -92,63 +95,61 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     public override async applyParameters(intent: FlipIntent, initialization: boolean): Promise<boolean> {
         const keys = new TodoMvcKeys(this.app, intent)
 
-        if (initialization) {
-            await this.initializeState(keys)
-        } else {
-            await this.synchronizeState(keys)
+        // Every call, not only the first: the level above decides where this screen goes,
+        // and a presenter that survives a flip cannot know whether it decided differently.
+        this.parentSlot = keys.parentSlot
+
+        // The screen goes up before anything is fetched, so the previous one does not
+        // stay frozen in front while the list loads.
+        this.parentSlot(this.scope)
+
+        this.footerScope.showing = keys.showing
+
+        // Loaded in parallel: nothing below this place needs the list, and waiting here
+        // would hold the flip open, so a click meanwhile would publish the old address.
+        if (initialization || keys.userId !== this.userId) {
+            this.showUser(keys.userId).catch((caught) => this.app.unexpected('Loading the to-do list', caught))
         }
 
-        this.parentSlot(this.scope)
+        if (initialization) {
+            LOG.debug('Initialized')
+        }
 
         return true
     }
 
     public override publishParameters(intent: FlipIntent): void {
         const keys = new TodoMvcKeys(this.app, intent)
-
-        if (this.footerScope.showing !== ShowingOptions.ALL) {
-            keys.showing = this.footerScope.showing
-        }
-
-        if (this.userId !== 0) {
-            keys.userId = this.userId
-        }
+        keys.showing = this.footerScope.showing
+        keys.userId = this.userId
     }
 
-    private async initializeState(keys: TodoMvcKeys) {
-        this.parentSlot = keys.parentSlot
-        await this.synchronizeState(keys, true)
-        LOG.debug('Initialized')
-    }
+    private async showUser(userId: number) {
+        this.userId = userId
+        this.scope.stressMode = userId < 0
 
-    private async synchronizeState(keys: TodoMvcKeys, force = false) {
-        const uriUserId = keys.userId ?? this.userId
-        const uriShowing = keys.showing ?? this.footerScope.showing
-
-        this.footerScope.showing = uriShowing
-
-        if (force || uriUserId !== this.userId) {
-            this.userId = uriUserId
-            this.scope.stressMode = this.userId < 0
-
-            if (this.userId < 0) {
-                this.mainScope.clock = this.clockScope
-                if (!this.clockUpdateHandler) {
-                    this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
-                }
-            } else {
-                this.mainScope.clock = undefined
-                if (this.clockUpdateHandler) {
-                    clearInterval(this.clockUpdateHandler)
-                }
+        if (userId < 0) {
+            this.mainScope.clock = this.clockScope
+            if (!this.clockUpdateHandler) {
+                this.clockUpdateHandler = setInterval(this.handleClockUpdate.bind(this), 1000)
             }
-
-            await this.loadData()
+        } else {
+            this.mainScope.clock = undefined
+            if (this.clockUpdateHandler) {
+                clearInterval(this.clockUpdateHandler)
+                this.clockUpdateHandler = undefined
+            }
         }
+
+        await this.loadData()
     }
 
     private async loadData() {
+        const token = ++this.pending
         const todos = await tutorialService.fetchTodos(this.userId)
+        if (token !== this.pending) {
+            return
+        }
 
         this.itemScopes.length = 0
 
@@ -216,15 +217,13 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     /**
-     * Switches between the sample list and the 1000-item generator. It navigates
-     * through an intent rather than mutating state directly, so the mode lands in
-     * the URL and reloading the page keeps you where you were.
+     * Switches between the sample list and the 1000-item generator. This is the place
+     * already on screen, so it changes its own state and republishes the address rather
+     * than flipping to itself: the mode still lands in the URL, and a reload keeps it.
      */
     protected async onToggleStress() {
-        const keys = new TodoMvcKeys(this.app)
-        keys.userId = this.userId < 0 ? 0 : -1
-        keys.showing = this.footerScope.showing
-        await keys.flip()
+        await this.showUser(this.userId < 0 ? 0 : -1)
+        this.updateHistory()
     }
 
     protected async onToggleAll() {

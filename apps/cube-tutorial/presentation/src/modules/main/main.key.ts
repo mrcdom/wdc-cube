@@ -1,5 +1,18 @@
 import { Application, FlipIntent, ScopeSlot, NOOP_VOID } from 'wdc-cube'
-import { Places, AttrIds } from '../RouteConsts'
+import { Places } from '../RouteConsts'
+
+/** This file's name prefix - unique in the application. */
+const PREFIX = 'mn'
+
+/**
+ * The composition slots: the one deliberate reuse of a name. Each level of the path
+ * takes over visual parenthood and rewrites the SAME entry for the next level to fit
+ * where it decides - which is why a presenter reads its slot on every call.
+ */
+const A = {
+    parentSlot: `${PREFIX}-parent-slot`,
+    dialogSlot: `${PREFIX}-dialog-slot`
+} as const
 
 export class MainKeys {
     protected _intent: FlipIntent
@@ -30,20 +43,20 @@ export class MainKeys {
     // :: parentSlot
 
     public get parentSlot() {
-        return this._intent.getScopeSlot(AttrIds.parentSlot) ?? NOOP_VOID
+        return this._intent.getScopeSlot(A.parentSlot) ?? NOOP_VOID
     }
 
     public set parentSlot(value: ScopeSlot) {
-        this._intent.setScopeSlot(AttrIds.parentSlot, value)
+        this._intent.setScopeSlot(A.parentSlot, value)
     }
 
     // :: parentSlot
 
     public get dialogSlot() {
-        return this._intent.getScopeSlot(AttrIds.dialogSlot) ?? NOOP_VOID
+        return this._intent.getScopeSlot(A.dialogSlot) ?? NOOP_VOID
     }
 
     public set dialogSlot(value: ScopeSlot) {
-        this._intent.setScopeSlot(AttrIds.dialogSlot, value)
+        this._intent.setScopeSlot(A.dialogSlot, value)
     }
 }

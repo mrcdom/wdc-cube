@@ -30,7 +30,7 @@ view boundary. It has caught exactly that once — see below.
 ## The shape of a test
 
 ```ts
-harness = await startTutorial('/subscriptions/detail?site-id=2')
+harness = await startTutorial('/subscriptions/detail?sd-site=2')
 
 await harness.scope.dialog?.onClose()
 await harness.settle()
@@ -44,6 +44,15 @@ interesting cases turned out to be. `settle()` waits for the update batch and
 then **fails if the presentation layer reported an error**, because an action
 swallows what it throws: without that check a test reads a scope that quietly
 never changed and passes.
+
+## Key names
+
+`key-names.test.ts` is the one test that boots nothing. It reads every `*.key.ts`
+in the presentation as text and fails if two files share a prefix, if a file
+repeats a local code, or if a keys class hands the intent a name that is not from
+its `P`/`A` tables. Names must be unique across the whole application, because a
+flip passes the same intent through every presenter on the path. The prefix turns
+that into a per-file decision, and this test keeps it from relying on memory.
 
 ## What it found
 

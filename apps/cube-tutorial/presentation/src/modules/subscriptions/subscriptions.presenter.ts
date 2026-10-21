@@ -30,12 +30,20 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
     ): Promise<boolean> {
         const keys = new SubstriptionsKeys(this.app, intent)
 
-        if (initialization) {
-            this.parentSlot = keys.parentSlot
-            this.dialogSlot = keys.dialogSlot
+        // Attributes come from the level above, which may change its mind between
+        // flips: read them on every call, not only on initialization.
+        this.parentSlot = keys.parentSlot
+        this.dialogSlot = keys.dialogSlot
 
+        // The screen goes up before anything is fetched.
+        this.parentSlot(this.scope)
+
+        if (initialization) {
             this.scope.onItemClicked = this.action(this.onItemClicked)
-            this.scope.sites = await tutorialService.fetchSubscribleSites()
+
+            // Loaded in parallel. The dialog below this place does not need the list, and
+            // waiting here would leave a cold start into it with an empty body meanwhile.
+            this.loadSites().catch((caught) => this.app.unexpected('Loading the sites', caught))
 
             LOG.info('Initialized')
         }
@@ -44,9 +52,11 @@ export class SubscriptionsPresenter extends CubePresenter<MainPresenter, Subscri
             this.dialogSlot(undefined)
         }
 
-        this.parentSlot(this.scope)
-
         return true
+    }
+
+    private async loadSites() {
+        this.scope.sites = await tutorialService.fetchSubscribleSites()
     }
 
     protected async onItemClicked(item: SiteItemType) {

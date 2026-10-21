@@ -5,7 +5,7 @@
  * single flat barrel could not carry them.
  */
 
-export { ParamIds, AttrIds, Places } from './modules/RouteConsts'
+export { Places } from './modules/RouteConsts'
 export { initialize as initializeRoutes } from './modules/Routes'
 export { registerServices, TutorialService } from './services'
 export type { SiteItemType, TodoType } from './services/TutorialService'

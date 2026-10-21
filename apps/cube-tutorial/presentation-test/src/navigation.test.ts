@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { BodyScope } from 'wdc-cube-tutorial-presentation/main'
+import { BodyScope, MainPresenter } from 'wdc-cube-tutorial-presentation/main'
 import { SubscriptionsScope } from 'wdc-cube-tutorial-presentation/subscriptions'
 import { TodoMvcScope } from 'wdc-cube-tutorial-presentation/todo-mvc'
 
@@ -14,6 +14,23 @@ afterEach(() => {
 })
 
 describe('navigation', () => {
+    it('a cold start on a deep address flips there once, not twice', async () => {
+        const flips = vi.spyOn(MainPresenter.prototype, 'flipToIntent')
+
+        try {
+            harness = await startTutorial('/subscriptions/detail?sd-site=2')
+
+            // `kickStart` applies the root with `last = true` and then travels to the
+            // address itself. The root used to travel there as well, on initialization,
+            // and the second flip re-applied the opening parameters over whatever the
+            // reader did while the first was loading.
+            expect(flips).toHaveBeenCalledTimes(1)
+            expect(harness.history.tokens).toEqual(['/subscriptions/detail?sd-site=2'])
+        } finally {
+            flips.mockRestore()
+        }
+    })
+
     it('lands on the home body when started with no address', async () => {
         harness = await startTutorial()
 

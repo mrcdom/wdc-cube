@@ -16,10 +16,10 @@ presenter that could not be separated from its view would not be one.
 ## Layout
 
 ```
-src/index.ts                cross-cutting exports: Places, ParamIds, AttrIds,
-                            initializeRoutes, registerServices
+src/index.ts                cross-cutting exports: Places, initializeRoutes,
+                            registerServices
 src/modules/
-    RouteConsts.ts          ParamIds, AttrIds and the Places table
+    RouteConsts.ts          the Places table (names live in each *.key.ts)
     Routes.ts               the place tree (CubeBuilder.lazyBuild)
     <module>/
         index.ts              the module's public surface
@@ -65,12 +65,15 @@ look in this code.
 
 ```ts
 const keys = new TodoMvcKeys(this.app, intent)
-keys.showing = ShowingOptions.ACTIVE   // writes ParamIds.TodoShowing
+keys.showing = ShowingOptions.ACTIVE   // writes `tm-showing`
 await keys.flip()                      // navigates
 ```
 
-Parameter names live in one place (`RouteConsts.ts`), so the short URL keys can
-change without touching presenters.
+Parameter and attribute names live in the keys class that owns them, in a local
+table, each starting with that file's two-letter prefix (`tm-showing`, `sd-site`).
+Names must be unique across the application because one intent passes through every
+`applyParameters` on the path; a prefix per file makes that a decision taken once per
+file. See "Keys" in `docs/architecture.md`.
 
 **Scopes are observable state, not components.** A scope declares `@observe()`
 fields; assigning to one schedules a view update. A scope holds no view type and

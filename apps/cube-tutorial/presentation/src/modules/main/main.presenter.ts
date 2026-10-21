@@ -67,15 +67,12 @@ export class MainPresenter extends ApplicationPresenter<MainScope> {
         if (initialization) {
             await this.intializeState(keys)
 
-            try {
-                const targetUri = this.newIntentFromString(this.historyManager.location)
-                if (targetUri.toString() !== intent.toString()) {
-                    await this.flipToIntent(targetUri)
-                    return false
-                }
-            } catch (caught) {
-                this.unexpected('Navigation from history', caught)
-            }
+            // No flip to the address here. On a cold start `kickStart` calls this with
+            // `last = true` even when the address points deeper, and travels there itself
+            // right after. Flipping from here too made TWO flips to the same address, and
+            // the second one re-applied the opening parameters over whatever the reader
+            // did while the first was still loading. The `last` branch below is harmless
+            // on that path: it only puts the default body back until the real flip lands.
         }
 
         if (last) {

@@ -41,8 +41,8 @@ CubeBuilder.lazyBuild({
 ```
 
 A place knows its full path from the root, and that path is what a URL encodes.
-`#/subscriptions/detail?site-id=1` means: walk root → `subscriptions` → `detail`,
-carrying `site-id=1`.
+`#/subscriptions/detail?sd-site=1` means: walk root → `subscriptions` → `detail`,
+carrying `sd-site=1`.
 
 Nesting is not merely cosmetic. Reaching `detail` also means `subscriptions` is
 active, so its presenter is alive and its scope is on screen. That is how a
@@ -92,9 +92,17 @@ A parent does not know which child will be rendered inside it. It passes a
 // parent, while not the deepest place
 keys.parentSlot = this.bodySlot
 
-// child, once it has its scope ready
+// child, on EVERY applyParameters - not only on initialization
+this.parentSlot = keys.parentSlot
 this.parentSlot(this.scope)
 ```
+
+The slot is the one name every level reuses on purpose. Each level fits into the
+place its parent gave it and takes over visual parenthood, rewriting the same entry
+for the level below to fit where *it* decides. A presenter that survives a flip cannot
+know whether the levels above decided differently this time, so it reads its slot on
+every call; kept from initialization only, it publishes into the slot of the previous
+composition and the screen vanishes or lands in the wrong place.
 
 The parent stores whatever scope it receives and renders it in place. This is
 what lets `subscriptions/detail` appear in a *dialog* slot while `todos` appears
@@ -107,12 +115,30 @@ Each module instead has a `*.key.ts` class that wraps one:
 
 ```ts
 const keys = new TodoMvcKeys(this.app, intent)
-keys.showing = ShowingOptions.ACTIVE   // writes ParamIds.TodoShowing
+keys.showing = ShowingOptions.ACTIVE   // writes `tm-showing`
 await keys.flip()                      // navigates
 ```
 
-Parameter names live in one table, so the short URL keys can change without
-touching a presenter.
+Only the keys class knows the parameter names. It declares them in a local table, and
+every name starts with a two-letter prefix that belongs to that file (`tm-` for the
+to-do keys, `sd-` for the subscription detail):
+
+```ts
+const PREFIX = 'tm'
+
+const P = {
+    UserId: `${PREFIX}-uid`,
+    Showing: `${PREFIX}-showing`
+} as const
+```
+
+Names have to be unique across the whole application - parameters and attributes
+alike - because an attempt to turn to a face passes the **same** intent through every
+`applyParameters` on the path, and the attempt may detour to another face or roll back
+midway. Two owners of one name overwrite each other along the way, silently. A prefix
+per keys file turns that global rule into a decision made once per file: adding a name
+only means looking at the file it goes in. The composition slots are the one deliberate
+exception (see above).
 
 ## The update pipeline
 
