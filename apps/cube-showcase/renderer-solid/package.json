@@ -25,7 +25,7 @@
     "msw": "^2.15.0",
     "sass": "^1.104.0",
     "typescript": "6.0.3",
-    "vite": "^8.2.2",
+    "vite": "^8.3.4",
     "vite-plugin-solid": "^2.11.14"
   },
   "msw": {

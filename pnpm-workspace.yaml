@@ -27,3 +27,21 @@ peerDependencyRules:
     # eslint-plugin-react still declares support only up to eslint 9.7, but it
     # works with 10 (`pnpm lint` passes). Drop this once the plugin widens its range.
     'eslint-plugin-react>eslint': '10'
+
+overrides:
+  # Security fixes for transitive dev dependencies (Dependabot, Oct 2026).
+  # The parent packages pin versions older than the fixed ones. Drop each entry
+  # once its parent ships a release that already pulls the fixed version.
+  undici@>=8 <8.10.2: ^8.10.2
+  fast-uri@<3.1.8: ^3.1.8
+  ip-address@<10.7.1: ^10.7.1
+  brace-expansion@<1.1.21: ^1.1.21
+  brace-expansion@>=5 <5.0.12: ^5.0.12
+  piscina@>=5 <5.3.2: ^5.3.2
+  seroval@<1.6.3: ^1.6.3
+  seroval-plugins@<1.6.3: ^1.6.3
+  source-map-js@<1.2.2: ^1.2.2
+  proxy-addr@<2.0.8: ^2.0.8
+  '@modelcontextprotocol/sdk@<1.32.0': ^1.32.0
+  hono@<4.13.11: ^4.13.11
+  vite@<8.3.4: ^8.3.4
