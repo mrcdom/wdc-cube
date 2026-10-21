@@ -113,6 +113,7 @@ apps/cube-showcase/                 the other example: an issue tracker
     api/                            its backend, answered by a worker
     presentation/                   places, keys, presenters, scopes, services
     renderer-solid/                 drawn by SolidJS
+skills/cube-architecture/           how to write Cube code, as a Claude Code skill
 eslint.config.mjs                   one flat config for the whole workspace
 .prettierrc.json                    one formatting config for the whole workspace
 tsconfig.json                       shared compiler options
@@ -204,6 +205,20 @@ same thing, because that is the page npm shows.
 A renderer needs neither. Scopes live in the presentation layer, compiled by
 `tsc`, and a view holds no decorator — which is why the SolidJS example
 configures no Babel decorator plugin.
+
+## A skill for coding agents
+
+[skills/cube-architecture](skills/cube-architecture/SKILL.md) is a
+[Claude Code skill](https://docs.claude.com/en/docs/claude-code/skills): the
+rules for writing, reviewing and debugging Cube code, with templates for the
+common kinds of presenter and a table that maps symptoms to causes. Most of its
+rules exist because breaking them fails silently, so it is worth reading even
+without an agent.
+
+To use it in an application that depends on `wdc-cube`, copy the folder into
+that project's `.claude/skills/` (or into `~/.claude/skills/` to have it
+everywhere). It is maintained against a production application and copied here
+by hand, so it can trail that version.
 
 ## Conventions
 
