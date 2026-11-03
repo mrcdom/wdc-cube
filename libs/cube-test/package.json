@@ -52,7 +52,7 @@
   "devDependencies": {
     "@noble/ciphers": "^2.4.0",
     "fflate": "^0.8.3",
-    "vitest": "^5.0.0",
+    "vitest": "^5.0.5",
     "wdc-cube": "workspace:*"
   }
 }

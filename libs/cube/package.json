@@ -44,7 +44,7 @@
     "@noble/ciphers": "^2.4.0",
     "fflate": "^0.8.3",
     "jsdom": "^30.0.1",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.5"
   },
   "homepage": "https://github.com/mrcdom/wdc-cube/tree/master/libs/cube#readme",
   "bugs": {

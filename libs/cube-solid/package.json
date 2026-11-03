@@ -41,7 +41,7 @@
     "jsdom": "^30.0.1",
     "solid-js": "^1.9.15",
     "vite-plugin-solid": "^2.11.14",
-    "vitest": "^5.0.0",
+    "vitest": "^5.0.5",
     "wdc-cube": "workspace:*"
   },
   "homepage": "https://github.com/mrcdom/wdc-cube/tree/master/libs/cube-solid#readme",
