@@ -51,7 +51,11 @@ export function getOrCreateApplication<S extends Scope, A extends IApplication<S
         instance = factory()
         setApp(instance)
         instance.scope.forceUpdate = doUpdate.bind(instance.scope, setValue, value)
-        instance.applyParameters(instance.newFlipIntent(instance.rootPlace), true, true)
+        // Not awaited, since a render cannot wait. It still needs a handler: a
+        // failed initialisation was an unhandled rejection, reported nowhere.
+        instance
+            .applyParameters(instance.newFlipIntent(instance.rootPlace), true, true)
+            .catch((caught) => LOG.error('Initializing the application', caught))
     }
 
     react.useEffect(() => {

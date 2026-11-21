@@ -89,7 +89,9 @@ function ILogger_caught(this: ILogger, error: unknown): void {
     if (error instanceof Error) {
         this.error(error.message, error.stack)
     } else if (error) {
-        this.error(String(error))
+        // Handed over as it is, not stringified: String() turns a plain object
+        // into "[object Object]" and loses everything that was thrown.
+        this.error('Caught a non-Error value', error)
     }
 }
 
