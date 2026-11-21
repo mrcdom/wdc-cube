@@ -161,14 +161,17 @@ export class CubePresenter<A extends Application, S extends Scope> implements IC
         place: Place,
         args?: { params?: Record<string, ValidParamTypes>; attrs?: Record<string, unknown> }
     ): Promise<void> {
-        this.__app.flip(place, args)
+        // Returned, not just called: without it the caller's `await` resolved before
+        // the navigation did, and a failure became an unhandled rejection instead of
+        // reaching the caller's try/catch.
+        return this.__app.flip(place, args)
     }
 
     public async flipToIntent(intent: FlipIntent): Promise<void> {
-        this.__app.flipToIntent(intent)
+        return this.__app.flipToIntent(intent)
     }
 
     public async flipToIntentString(sIntent: string): Promise<void> {
-        this.__app.flipToIntentString(sIntent)
+        return this.__app.flipToIntentString(sIntent)
     }
 }

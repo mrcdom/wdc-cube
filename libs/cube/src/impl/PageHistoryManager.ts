@@ -16,6 +16,8 @@ export class PageHistoryManager extends HistoryManager {
 
     private __history: History
 
+    private __publishing = false
+
     public constructor(useHash = false) {
         super()
         this.__history = useHash ? createHashHistory() : createBrowserHistory()
@@ -82,11 +84,22 @@ export class PageHistoryManager extends HistoryManager {
             this.isEnvelope(wasSearch) !== this.isEnvelope(encoded)
 
         if (changed) {
-            this.__history.push(newLocation)
+            // `history` tells its listeners about a push too, synchronously. That
+            // is the application's own address coming back, not the user moving,
+            // and while a flip runs the application would take it for a move made
+            // during the flip and travel there once the flip landed.
+            this.__publishing = true
+            try {
+                this.__history.push(newLocation)
+            } finally {
+                this.__publishing = false
+            }
         }
     }
 
     private emitOnChanged() {
-        this.notifyChanges()
+        if (!this.__publishing) {
+            this.notifyChanges()
+        }
     }
 }

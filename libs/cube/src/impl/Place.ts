@@ -10,7 +10,16 @@ import { Application } from './Application.js'
 
 import type { PresenterContructor } from './CubePresenter.js'
 
-const indexGenMap: Map<number, number> = new Map()
+/**
+ * One counter for every place, in creation order.
+ *
+ * The only thing an id has to say is "created after its parent": presenters are
+ * released in descending id order, deepest first, and a child place can only be
+ * built once its parent exists. There used to be a per-level generator here, but
+ * the level was read before the path was built and was therefore always zero, so
+ * this is what it did all along.
+ */
+let idGen = 0
 
 export type PlaceCreator = (path: string, parent: Place) => Place
 
@@ -86,13 +95,6 @@ export class Place {
     }
 
     private nextId() {
-        let idxLevelGen = indexGenMap.get(this.path.length)
-        if (idxLevelGen === undefined) {
-            idxLevelGen = this.path.length * 1000
-        } else {
-            idxLevelGen++
-        }
-        indexGenMap.set(this.path.length, idxLevelGen)
-        return idxLevelGen
+        return idGen++
     }
 }
