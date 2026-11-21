@@ -1,0 +1,72 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "react", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "settings": {
+    "react": { "version": "19.1" }
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/lib/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.angular/**",
+    "**/public/mockServiceWorker.js",
+    ".claude/**"
+  ],
+  "rules": {
+    "eslint/no-case-declarations": "error",
+    "eslint/no-empty": "error",
+    "eslint/no-fallthrough": "error",
+    "eslint/no-prototype-builtins": "error",
+    "eslint/no-regex-spaces": "error",
+    "eslint/no-unexpected-multiline": "error",
+    "eslint/no-useless-assignment": "error",
+    "eslint/preserve-caught-error": "error",
+    "eslint/no-var": "error",
+    "eslint/prefer-const": "error",
+    "eslint/prefer-rest-params": "error",
+    "eslint/prefer-spread": "error",
+
+    "typescript/ban-ts-comment": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-function-type": "error",
+
+    "react/display-name": "error",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/jsx-no-target-blank": "error",
+    "react/no-unescaped-entities": "error",
+    "react/no-unknown-property": "error",
+    "react/require-render-return": "error",
+
+    "typescript/unbound-method": "off",
+    "typescript/restrict-template-expressions": "off"
+  },
+  "overrides": [
+    {
+      "files": ["libs/cube-solid/**/*.{ts,tsx}", "apps/*/renderer-solid/**/*.{ts,tsx}"],
+      "rules": {
+        "react/no-unknown-property": "off",
+        "react/immutability": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.{ts,tsx}"],
+      "rules": {
+        "typescript/no-misused-spread": "off"
+      }
+    }
+  ]
+}

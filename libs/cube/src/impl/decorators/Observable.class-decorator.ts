@@ -6,7 +6,7 @@
  * Source: https://github.com/mrcdom/wdc-cube
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 
 import { Scope } from '../Scope.js'
 
@@ -79,6 +79,10 @@ export function Observable<T extends { new (...args: any[]): object }>(ctor: T) 
             actions.push(`  this.${field.key} = v${index};`)
             actions.push(`}`)
         }
+        // Generated once per class, from field names the class itself declared: one
+        // straight-line function the engine can inline, instead of a loop over the
+        // fields on every scope built.
+        // oxlint-disable-next-line typescript/no-implied-eval
         const copyInitialValuesAction = new Function(actions.join('\n'))
         prototype[COPY_INITIAL_VALUES_ACTION] = copyInitialValuesAction
         init = () => copyInitialValuesAction

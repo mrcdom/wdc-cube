@@ -16,7 +16,7 @@
  * linked workspace package. Eleven call sites did not justify the dependency.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export function isFunction(value: unknown): value is (...args: any[]) => any {
     return typeof value === 'function'
 }

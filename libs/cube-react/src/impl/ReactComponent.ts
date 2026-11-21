@@ -8,7 +8,7 @@
 
 import React from 'react'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export class ReactComponent<P = unknown, S = unknown, SS = any> extends React.Component<P, S, SS> {
     public override UNSAFE_componentWillMount() {
         this.attached()

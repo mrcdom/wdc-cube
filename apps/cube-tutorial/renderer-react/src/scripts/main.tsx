@@ -16,7 +16,7 @@ initializeRoutes()
 const MainPresenterFactory = () => new MainPresenter(new PageHistoryManager(true))
 
 function App() {
-    const presenter = React.useMemo(MainPresenterFactory, [])
+    const presenter = React.useMemo(() => MainPresenterFactory(), [])
 
     React.useEffect(() => {
         const handleOnComponentWillUnmount = presenter.initialize()

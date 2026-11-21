@@ -65,7 +65,9 @@ function install(scope: ScopeInternals): Bound {
             configurable: true,
             enumerable: true,
             get: value,
-            set: (next: unknown) => setValue(() => next)
+            set: (next: unknown) => {
+                setValue(() => next)
+            }
         })
 
         // `forceUpdate` fires for anything that moves in the scope, and most of
