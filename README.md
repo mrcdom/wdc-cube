@@ -79,7 +79,7 @@ Run from the workspace root:
 pnpm compile        # tsc -b: builds libs/* into their lib/ folders
 pnpm build          # compile + each workspace's own build
 pnpm test           # vitest across every package that has tests
-pnpm lint           # eslint (flat config, whole workspace)
+pnpm lint           # oxlint, type-aware (tsgolint), whole workspace
 pnpm format         # prettier --write
 pnpm format:check   # prettier --check
 pnpm start          # dev server for the React tutorial (port 3000)
@@ -114,7 +114,7 @@ apps/cube-showcase/                 the other example: an issue tracker
     presentation/                   places, keys, presenters, scopes, services
     renderer-solid/                 drawn by SolidJS
 skills/cube-architecture/           how to write Cube code, as a Claude Code skill
-eslint.config.mjs                   one flat config for the whole workspace
+.oxlintrc.json                      one lint config for the whole workspace
 .prettierrc.json                    one formatting config for the whole workspace
 tsconfig.json                       shared compiler options
 tsconfig.build.json                 project references used by `pnpm compile`
@@ -122,6 +122,13 @@ tsconfig.build.json                 project references used by `pnpm compile`
 
 The libraries compile to `lib/` and declare `exports`, `files` and
 `sideEffects`, so they are publishable as-is. Build output is not tracked in git.
+
+The workspace builds with TypeScript 7, except for the two Angular packages
+(`libs/cube-angular` and `apps/cube-tutorial/renderer-angular`). The Angular
+compiler only accepts TypeScript 6.0, so those two pin `typescript` 6.0.3 in
+their own `package.json`. pnpm resolves each package's own version, and
+`libs/cube-angular` is built by `ng-packagr` rather than by the root `tsc -b`.
+Once Angular supports TypeScript 7, remove the two pins.
 
 The example is split so that the framework's own separation is visible in the
 file tree, and the names sort by layer. `presentation/` holds the places,

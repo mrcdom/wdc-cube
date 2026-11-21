@@ -46,7 +46,7 @@ async function doBootstrap() {
 
     if (failed.length === 0) {
         runBootstrap = noopBootstrap
-        noopBootstrap()
+        void noopBootstrap()
     } else {
         LOG.warn(`Initialized but some services failed: ${failed.join('; ')}.`)
     }

@@ -36,7 +36,8 @@ export class SubscriptionsView extends AppElement<SubscriptionsScope> {
             const id = Number(row.value)
             const site = this.scope.sites.find((candidate) => candidate.id === id)
             if (site) {
-                this.scope.onItemClicked(site)
+                // A scope action: mkAction already handles its failure
+                void this.scope.onItemClicked(site)
             }
         })
 

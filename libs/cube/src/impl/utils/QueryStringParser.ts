@@ -76,7 +76,7 @@ export class QueryStringParser {
             const array = new Array<unknown>(2)
             array[0] = oldValue
             array[1] = ReflectionUtils.toUnknown(value, ReflectionUtils.getType(oldValue))
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // oxlint-disable-next-line typescript/no-explicit-any
             params.set(name, array as any)
         }
     }

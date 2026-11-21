@@ -111,7 +111,7 @@ export class Presenter<S extends Scope, OWNER extends IPresenterOwner = IPresent
 
     public readonly update = this.doUpdate.bind(this)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     public action<P extends IPresenter, T extends (...args: any[]) => any>(fn: T, owner: P | null = null): T {
         return mkAction(this, (owner ? fn.bind(owner) : fn.bind(this)) as T)
     }

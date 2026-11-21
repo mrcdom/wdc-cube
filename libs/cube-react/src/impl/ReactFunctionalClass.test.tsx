@@ -260,6 +260,8 @@ describe('classToFComponent', () => {
                 ...React,
                 useEffect: (...args: Parameters<typeof React.useEffect>) => {
                     calls++
+                    // A pass-through spy: the dependencies are the caller's, not this wrapper's
+                    // oxlint-disable-next-line react-hooks/exhaustive-deps
                     return React.useEffect(...args)
                 }
             } as unknown as typeof React

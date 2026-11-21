@@ -72,7 +72,7 @@ export interface ICubePresenter extends IPresenter {
     flipToIntentString(sIntent: string): Promise<void>
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 
 export function mkAction<T extends (...args: any[]) => any>(me: IPresenter, fn: T): T {
     const fnName = `${me.constructor.name}.${fn.name}`

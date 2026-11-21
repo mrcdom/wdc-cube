@@ -1,6 +1,6 @@
 {
   "name": "wdc-cube-angular",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Angular bindings for the Cube architecture",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",
@@ -34,6 +34,7 @@
     "jsdom": "^30.0.1",
     "ng-packagr": "^22.1.1",
     "rxjs": "^7.8.2",
+    "typescript": "6.0.3",
     "vitest": "^5.0.5",
     "wdc-cube": "workspace:*",
     "zone.js": "~0.16.0"

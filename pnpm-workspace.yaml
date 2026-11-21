@@ -22,12 +22,6 @@ allowBuilds:
   # is served from. Without it there is no worker and no API.
   msw: true
 
-peerDependencyRules:
-  allowedVersions:
-    # eslint-plugin-react still declares support only up to eslint 9.7, but it
-    # works with 10 (`pnpm lint` passes). Drop this once the plugin widens its range.
-    'eslint-plugin-react>eslint': '10'
-
 overrides:
   # Security fixes for transitive dev dependencies (Dependabot, Oct 2026).
   # The parent packages pin versions older than the fixed ones. Drop each entry

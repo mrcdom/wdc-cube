@@ -94,7 +94,8 @@ function Toolbar(props: { scope: IssuesScope }): JSX.Element {
                     onInput={(event) => props.scope.onSearchChanged(event.currentTarget.value)}
                     onKeyDown={(event) => {
                         if (event.key === 'Enter') {
-                            props.scope.onSearchSubmitted()
+                            // A scope action: mkAction already handles its failure
+                            void props.scope.onSearchSubmitted()
                         }
                     }}
                 />
