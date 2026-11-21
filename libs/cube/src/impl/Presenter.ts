@@ -273,34 +273,44 @@ export class ScopeUpdateManager implements IUpdateManager {
                 this.__cancelledScopes.clear()
             }
 
-            if (this.__baseScopeUpdateRequested || this.__dirtyScopes.size > 0) {
+            // The batch is taken out before anything is drawn. A view that redraws
+            // synchronously (a custom element, Solid) may update a scope from inside
+            // forceUpdate; that change belongs to the next round, and clearing the
+            // set afterwards used to erase it without it ever being drawn.
+            const baseRequested = this.__baseScopeUpdateRequested
+            const dirtyScopes = new Map(this.__dirtyScopes)
+            this.__dirtyScopes.clear()
+            this.__cancelledScopes.clear()
+            this.__baseScopeUpdateRequested = false
+
+            // Anything pending was this round; what is asked from here on schedules
+            // the next one.
+            callbackManager.unbind(this.__emitBeforeScopeUpdate)
+            this.__emittingOnBeforeScopeUpdate = false
+
+            if (baseRequested || dirtyScopes.size > 0) {
                 try {
-                    if (this.__baseScopeUpdateRequested) {
+                    if (baseRequested) {
                         this.__scope.forceUpdate()
                     }
 
-                    if (this.__dirtyScopes.size > 0) {
-                        this.selectiveScopeUpdate()
+                    if (dirtyScopes.size > 0) {
+                        this.selectiveScopeUpdate(dirtyScopes)
                     }
                 } catch (caught) {
                     LOG.error('Updating dirty scopes', caught)
-                } finally {
-                    this.__dirtyScopes.clear()
-                    this.__cancelledScopes.clear()
-                    this.__baseScopeUpdateRequested = false
                 }
             }
         } finally {
-            callbackManager.unbind(this.__emitBeforeScopeUpdate)
             this.__emittingOnBeforeScopeUpdate = false
         }
     }
 
-    private selectiveScopeUpdate(): number {
+    private selectiveScopeUpdate(dirtyScopes: Map<ScopeConstructor, Map<Scope, boolean>>): number {
         let updateCount = 0
         // no initialiser: the do/while body resets it before any read
         let changesCount: number
-        let sourceDirtyScopes = this.__dirtyScopes
+        let sourceDirtyScopes = dirtyScopes
         do {
             changesCount = 0
 

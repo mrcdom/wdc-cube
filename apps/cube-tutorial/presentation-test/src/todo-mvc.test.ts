@@ -314,3 +314,46 @@ describe('todo-mvc', () => {
         })
     })
 })
+
+describe('todo-mvc, rows and edits', () => {
+    // Escape ends the edit and the view takes the field away. A view that still
+    // delivers the blur of that field must not save the text that was discarded.
+    it('does not save on the blur that follows Escape', async () => {
+        harness = await startTutorial('/todos')
+        const item = todos(harness).main!.items.get(2)
+        const title = item.title
+
+        await item.actions.onEdit()
+        await harness.settle()
+        item.actions.onKeyDown(() => 'discarded', { code: 'Escape', preventDefault: () => void 0 })
+        item.actions.onBlur(() => 'discarded')
+        await harness.settle()
+
+        expect(item.editing).toEqual(false)
+        expect(item.title).toEqual(title)
+        expect(titles(harness)).not.toContain('discarded')
+    })
+
+    // A load reconciles by identity: the row of a todo already on screen is the
+    // same object afterwards, so the view keeps it instead of redrawing all rows.
+    it('keeps the row of a todo that survives a reload', async () => {
+        harness = await startTutorial('/todos')
+        const before = todos(harness).main!.items.map((item) => item)
+        const beforeTitles = titles(harness)
+
+        await todos(harness).actions.onToggleStress()
+        await harness.settle()
+        const stressed = todos(harness).main!.items.map((item) => item)
+        for (const row of before) {
+            expect(stressed.find((item) => item.identity === row.identity)).toBe(row)
+        }
+
+        await todos(harness).actions.onToggleStress()
+        await harness.settle()
+        const after = todos(harness).main!.items.map((item) => item)
+        expect(after.length).toEqual(before.length)
+        after.forEach((row, i) => expect(row).toBe(before[i]))
+        // Reused, and rewritten: the stress titles did not stick to the rows.
+        expect(titles(harness)).toEqual(beforeTitles)
+    })
+})

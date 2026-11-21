@@ -25,6 +25,8 @@ export class CallbackManager {
 
     private __errorCount = 0
 
+    private __flushing = false
+
     private constructor() {
         this.__callbackMap = new Map()
         this.__onceCallbackMap = new Map()
@@ -52,7 +54,12 @@ export class CallbackManager {
     }
 
     private launchAnimationFrame() {
-        if (!this.__animationFrameHandler && (this.__callbackMap.size > 0 || this.__onceCallbackMap.size > 0)) {
+        // While flushing, the frame is relaunched at the end if anything is left.
+        if (
+            !this.__flushing &&
+            !this.__animationFrameHandler &&
+            (this.__callbackMap.size > 0 || this.__onceCallbackMap.size > 0)
+        ) {
             this.__animationFrameHandler = setTimeout(this.onFlush.bind(this), 16)
         }
     }
@@ -86,6 +93,13 @@ export class CallbackManager {
     }
 
     private onFlush() {
+        // The once-callbacks of this frame are taken out before any of them runs.
+        // One that binds itself again while running is asking for the next frame:
+        // left in the same map it either ran again within this frame, or was
+        // erased by the clear at the end without ever running.
+        const onceCallbacks = this.__onceCallbackMap
+        this.__onceCallbackMap = new Map()
+        this.__flushing = true
         try {
             for (const callback of this.__callbackMap.keys()) {
                 try {
@@ -98,7 +112,7 @@ export class CallbackManager {
                 }
             }
 
-            for (const callback of this.__onceCallbackMap.keys()) {
+            for (const callback of onceCallbacks.keys()) {
                 try {
                     callback()
                 } catch (caught) {
@@ -109,7 +123,7 @@ export class CallbackManager {
                 }
             }
         } finally {
-            this.__onceCallbackMap.clear()
+            this.__flushing = false
             this.__animationFrameHandler = undefined
             this.launchAnimationFrame()
         }

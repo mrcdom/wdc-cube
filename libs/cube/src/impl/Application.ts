@@ -32,6 +32,13 @@ export class Application implements IPresenterOwner {
 
     private __flipContext?: FlipContext
 
+    /**
+     * An address the history moved to while a flip was running, read at the
+     * moment it moved. Only the latest is kept: it is where the user wants to
+     * be, and the ones before it were already left behind.
+     */
+    private __pendingLocation?: string
+
     private __historyChangeUnregister: () => void
 
     private __releasePhase = 0
@@ -168,13 +175,17 @@ export class Application implements IPresenterOwner {
     }
 
     public newIntentFromString(sIntent: string): FlipIntent {
-        const defaultPlace = this.__lastPlace ?? this.rootPlace
-
         let intent: FlipIntent
         if (sIntent) {
+            // An unknown name stays where the user is: a stale or mistyped link
+            // should not throw them out of what they were doing.
+            const defaultPlace = this.__lastPlace ?? this.rootPlace
             intent = FlipIntent.parse(sIntent, (name) => this.__placeMap.get(name) || defaultPlace)
         } else {
-            intent = new FlipIntent(defaultPlace)
+            // An empty address is not an unknown one: it is the root's. Resolving
+            // it to the last place made Back to the root a no-op that left the
+            // user stuck in the module they were trying to leave.
+            intent = new FlipIntent(this.rootPlace)
         }
 
         intent.populateAttributes(this.__flipContext?.targetIntent.attributes)
@@ -236,19 +247,34 @@ export class Application implements IPresenterOwner {
             await this.applyPathParameters(context, level)
         } else {
             context = new FlipContext(this, intent)
+            let committed = false
             try {
                 this.__flipContext = context
 
                 await this.applyPathParameters(context, 0)
 
                 context.commit(this.__presenterMap)
-                this.__lastPlace = context.targetIntent.place
+                this.__lastPlace = context.committedPlace
+                committed = true
             } catch (caught) {
-                context.rollback()
+                await context.rollback()
                 throw caught
             } finally {
                 this.__flipContext = undefined
-                this.updateHistory()
+
+                const pending = this.__pendingLocation
+                this.__pendingLocation = undefined
+
+                if (committed && pending !== undefined && pending !== this.currentLocation()) {
+                    // The user moved while this flip ran. Publishing this flip's
+                    // address would write over theirs and lose it, so go where they
+                    // went instead; that flip publishes when it lands.
+                    this.followHistory(pending)
+                } else {
+                    // A failed attempt drops the pending move: it was asked of a
+                    // state that never came to be.
+                    this.updateHistory()
+                }
             }
         }
     }
@@ -264,17 +290,31 @@ export class Application implements IPresenterOwner {
     }
 
     protected onHistoryChanged(sender: HistoryManager) {
+        // Read now, not later: once the running flip lands it publishes its own
+        // address, and reading then would find that one instead of the user's.
+        const location = sender.location
+
+        if (this.__flipContext) {
+            this.__pendingLocation = location
+        } else if (location !== this.currentLocation()) {
+            this.followHistory(location)
+        }
+    }
+
+    private currentLocation(): string {
+        return this.newFlipIntent(this.lastPlace).toString()
+    }
+
+    private followHistory(location: string) {
         const previousIntent = this.newFlipIntent(this.lastPlace)
 
-        if (!this.__flipContext && sender.location !== previousIntent.toString()) {
-            this.flipToIntentString(sender.location).catch((caught) => {
-                LOG.error(`Invalid history location intent=${sender.location}`, caught)
+        this.flipToIntentString(location).catch((caught) => {
+            LOG.error(`Invalid history location intent=${location}`, caught)
 
-                this.flipToIntent(previousIntent).catch((caught) => {
-                    LOG.error('Problems returning to source', caught)
-                })
+            this.flipToIntent(previousIntent).catch((caught) => {
+                LOG.error('Problems returning to source', caught)
             })
-        }
+        })
     }
 
     // :: Application helpers

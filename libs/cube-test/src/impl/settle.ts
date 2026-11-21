@@ -28,8 +28,10 @@ export type SettleOptions = {
  * `CallbackManager` batch them onto the next frame, sixteen milliseconds away.
  * A test that asserts straight after an action therefore reads the scope tree
  * mid-flight. Sleeping past the timer would work and would be a guess; this
- * drains the queue deliberately instead, and repeats, because a scope updated
- * during `onBeforeScopeUpdate` schedules another round.
+ * drains the queue deliberately instead, and repeats. A scope updated during
+ * `onBeforeScopeUpdate` joins the flush already under way; one updated while a
+ * view redraws (a synchronous `forceUpdate`) and an action resuming after an
+ * `await` each schedule another round, and that is what the loop waits out.
  */
 export async function settle(options?: SettleOptions): Promise<void> {
     const maxRounds = options?.maxRounds ?? 20

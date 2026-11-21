@@ -3,7 +3,7 @@
  */
 
 import { Logger, CubePresenter, ScopeSlot, FlipIntent, ObservableArray, NOOP_VOID } from 'wdc-cube'
-import { TutorialService } from '../../services/TutorialService'
+import { TutorialService, type TodoType } from '../../services/TutorialService'
 import { MainPresenter } from '../main/main.presenter'
 import { TodoMvcKeys } from './todo-mvc.key'
 import {
@@ -151,19 +151,33 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
             return
         }
 
-        this.itemScopes.length = 0
-
-        for (const todo of todos) {
-            const todoScope = new ItemScope()
-            // What the row stands for, so a view reconciling the list matches on
-            // the todo rather than on this particular object.
-            todoScope.identity = todo.id
-            todoScope.id = todo.id
-            todoScope.title = todo.title
-            todoScope.completed = todo.completed
-            this.bindItemScopeActions(todoScope)
-            this.itemScopes.push(todoScope)
+        // Reconciled by identity, not rebuilt: a row for a todo already on screen is
+        // the same object afterwards, so the view keeps it, and with it the focus and
+        // an edit in progress. Only the new todos get a new row; the ones that left
+        // drop out with the assignment.
+        const before = new Map<unknown, ItemScope>()
+        for (const row of this.itemScopes) {
+            before.set(row.identity, row)
         }
+
+        this.itemScopes.assign(todos.map((todo) => this.rowOf(todo, before.get(todo.id))))
+    }
+
+    private rowOf(todo: TodoType, reuse?: ItemScope): ItemScope {
+        const row = reuse ?? new ItemScope()
+        // What the row stands for, so a view reconciling the list matches on the
+        // todo rather than on this particular object.
+        row.identity = todo.id
+        // Every field of the todo, always: a reused row keeps whatever it is not
+        // told. `editing` is not the todo's - it is the reader's, and keeping it is
+        // the reason the row is reused.
+        row.id = todo.id
+        row.title = todo.title
+        row.completed = todo.completed
+        if (!reuse) {
+            this.bindItemScopeActions(row)
+        }
+        return row
     }
 
     private bindItemScopeActions(item: ItemScope) {
@@ -302,6 +316,13 @@ export class TodoMvcPresenter extends CubePresenter<MainPresenter, TodoMvcScope>
     }
 
     protected saveItem(item: ItemScope, val: string) {
+        // Not editing means the edit already ended - by Escape, typically. A view may
+        // still deliver the blur of the field it is taking away (Blazor does), and
+        // that blur must not save the text the user chose to discard.
+        if (!item.editing) {
+            return
+        }
+
         const trimVal = val ? val.trim() : ''
         if (trimVal) {
             item.title = trimVal

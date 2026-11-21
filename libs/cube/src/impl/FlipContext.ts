@@ -24,6 +24,7 @@ export class FlipContext {
     private __targetIntent: FlipIntent
     private __level: number
     private __cycleDetectionMap: Map<string, number>
+    private __acceptedPlace?: Place
 
     public constructor(app: Application, targetIntent: FlipIntent) {
         this.__app = app
@@ -51,7 +52,31 @@ export class FlipContext {
         }
 
         this.__targetIntent = intent
+        this.__acceptedPlace = undefined
         this.__cycleDetectionMap.set(intent.place.pathName, cycleCount)
+    }
+
+    /**
+     * Where this attempt actually got to: the deepest place accepted on the
+     * current level, or the target when nothing narrowed it.
+     *
+     * A presenter that returns `false` without redirecting has accepted the
+     * intent and stopped the composition there. The places below it were never
+     * built, so committing the target would name, as the current place, one with
+     * no presenter behind it.
+     */
+    public get committedPlace(): Place {
+        return this.__acceptedPlace ?? this.__targetIntent.place
+    }
+
+    /**
+     * Records `place` as reached, unless the attempt has moved on since: a
+     * redirect raises the level, and the place reached is then the redirect's.
+     */
+    public accept(place: Place, atLevel: number) {
+        if (this.__level === atLevel) {
+            this.__acceptedPlace = place
+        }
     }
 
     public get level(): number {
@@ -92,13 +117,24 @@ export class FlipContext {
 
             if (this.__level !== atLevel) {
                 result = false
+            } else {
+                this.__acceptedPlace = place
             }
         }
 
         return result
     }
 
-    public rollback(): void {
+    /**
+     * Puts the presenters of the source place back the way they were, root to
+     * leaf, and releases the ones this attempt created.
+     *
+     * Each restoration is awaited before the next one starts, so a parent has
+     * handed out its slots again before its child looks for them. A restoration
+     * that fails is reported and the others still run: this is already the
+     * error path, and the error the caller sees is the one that started it.
+     */
+    public async rollback(): Promise<void> {
         for (const place of this.__sourceIntent.place.path) {
             if (place.id !== -1) {
                 const presenter = this.__presenterMap.get(place.id)
@@ -106,7 +142,11 @@ export class FlipContext {
                 this.__presenterMap.delete(place.id)
 
                 if (presenter != null) {
-                    presenter.applyParameters(this.__sourceIntent, false, place === this.__sourceIntent.place)
+                    try {
+                        await presenter.applyParameters(this.__sourceIntent, false, place === this.__sourceIntent.place)
+                    } catch (caught) {
+                        LOG.error(`Restoring presenter for place=${place.toString()}`, caught)
+                    }
                 } else {
                     LOG.warn(`Missing presenter for ID=${place.id}`)
                 }
@@ -122,8 +162,8 @@ export class FlipContext {
     public commit(newPresenterMap: Map<number, ICubePresenter>) {
         newPresenterMap.clear()
 
-        // Keep only presenters belonging to
-        const targetPlace = this.__targetIntent.place
+        // Keep only presenters belonging to the place this attempt reached
+        const targetPlace = this.committedPlace
 
         // Avoid processing detached places
         if (targetPlace.id !== -1) {

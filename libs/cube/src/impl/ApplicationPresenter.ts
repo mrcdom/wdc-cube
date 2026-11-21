@@ -80,6 +80,8 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
         const last = intent.place.id === -1
         const ok = (await this.applyParameters(intent, false, last)) && !last
         if (!ok) {
+            // Accepted, and the composition stops here: the application is where it is.
+            context.accept(this.rootPlace, atLevel)
             return
         }
 
@@ -121,9 +123,13 @@ export class ApplicationPresenter<S extends Scope> extends Application implement
                 intent.attributes.clear()
                 await this.flipToIntent(intent)
             }
-        } catch {
-            // Redirect to a safe place
-            intent = intent.redirect(safePlace)
+        } catch (caught) {
+            LOG.error(`Opening ${intent}; going to ${safePlace} instead`, caught)
+
+            // Built from the current state, not redirected from the address: the
+            // parameters that just broke the opening would break the safe place too,
+            // and this time outside the try.
+            intent = this.newFlipIntent(safePlace)
             intent.attributes.clear()
             await this.flipToIntent(intent)
         }
