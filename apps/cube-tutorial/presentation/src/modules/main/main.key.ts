@@ -34,6 +34,11 @@ export class MainKeys {
         return this._intent.place
     }
 
+    /** The intent, so a log line names the address rather than `[object Object]`. */
+    public toString(): string {
+        return this._intent.toString()
+    }
+
     public flip(): Promise<void> {
         return this._app.flipToIntent(this._intent)
     }

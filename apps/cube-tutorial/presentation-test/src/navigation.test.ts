@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { Logger } from 'wdc-cube'
 
 import { BodyScope, MainPresenter } from 'wdc-cube-tutorial-presentation/main'
 import { SubscriptionsScope } from 'wdc-cube-tutorial-presentation/subscriptions'
@@ -113,5 +114,26 @@ describe('alerts', () => {
 
         expect(harness.scope.alert?.severity).toEqual('info')
         expect(harness.scope.body).toBeInstanceOf(BodyScope)
+    })
+})
+
+describe('main keys', () => {
+    // The root presenter logs its keys on initialisation; without a toString on
+    // the keys the line read "Initialized([object Object])".
+    it('name the address in the initialisation log', async () => {
+        const log = Logger.get('MainPresenter')
+        const previous = log.info
+        const info = vi.fn()
+        log.info = info
+
+        try {
+            harness = await startTutorial()
+        } finally {
+            log.info = previous
+        }
+
+        const line = info.mock.calls.map((args) => String(args[0])).find((text) => text.startsWith('Initialized('))
+        expect(line).toBeDefined()
+        expect(line).not.toContain('[object Object]')
     })
 })
