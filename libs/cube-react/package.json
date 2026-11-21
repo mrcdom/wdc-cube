@@ -1,6 +1,6 @@
 {
   "name": "wdc-cube-react",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "React bindings for the Cube architecture",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",

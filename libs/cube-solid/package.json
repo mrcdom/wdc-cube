@@ -1,6 +1,6 @@
 {
   "name": "wdc-cube-solid",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "SolidJS bindings for the Cube architecture: one signal per observed field",
   "author": "Marcelo Domingos <mrcdom@gmail.com>",
   "license": "MIT",
